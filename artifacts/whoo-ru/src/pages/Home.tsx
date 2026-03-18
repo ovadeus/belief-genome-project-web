@@ -76,7 +76,7 @@ export default function Home() {
             What is <span className="text-primary">WhooRU</span>?
           </h2>
           <p className="text-xl text-muted-foreground leading-relaxed">
-            WhooRU is a psychometric framework and visualization engine designed to map the 124 dimensions of your cognitive, emotional, and philosophical worldview. It is a quantified reflection of your mind, heart, and soul.
+            WhooRU is a psychometric framework and visualization engine designed to map the 124 dimensions of your cognitive, emotional, and philosophical worldview. We examine human beliefs as quantum bits (qubits) holding superpositions that change over time. It is a quantified reflection of your mind, heart, and soul.
           </p>
         </div>
       </section>
