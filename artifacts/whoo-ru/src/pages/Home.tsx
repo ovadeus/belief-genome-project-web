@@ -246,13 +246,13 @@ export default function Home() {
               href="/app"
               className="px-8 py-4 rounded-xl font-semibold text-lg bg-primary hover:bg-primary/90 text-primary-foreground transition-all"
             >
-              Download WhooRU
+              Download BGP App
             </Link>
             <Link 
               href="/book"
               className="px-8 py-4 rounded-xl font-semibold text-lg bg-transparent border-2 border-secondary text-white hover:bg-secondary/10 transition-all"
             >
-              Reserve The Book
+              Preorder the Book
             </Link>
           </div>
         </div>
