@@ -2,6 +2,7 @@ import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { ArrowRight, Brain, Compass, Users } from "lucide-react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
+import { TripleHelixCanvas } from "@/components/ui/TripleHelixCanvas";
 import { usePublicBlog } from "@/hooks/use-blog";
 import { format } from "date-fns";
 
@@ -20,6 +21,12 @@ export default function Home() {
           />
           <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-background/40" />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/30" />
+        </div>
+
+        <div className="absolute inset-0 z-[1] opacity-40 pointer-events-none flex items-center justify-center">
+          <div className="w-[600px] h-[700px]">
+            <TripleHelixCanvas />
+          </div>
         </div>
 
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10">
