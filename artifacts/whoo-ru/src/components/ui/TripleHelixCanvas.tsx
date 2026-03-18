@@ -70,8 +70,8 @@ export function TripleHelixCanvas() {
       const helixGroup = new THREE.Group();
       scene.add(helixGroup);
 
-      const sphereGeo = new THREE.SphereGeometry(0.12, 16, 16);
-      const connectorGeo = new THREE.CylinderGeometry(0.02, 0.02, 1, 6);
+      const sphereGeo = new THREE.SphereGeometry(0.06, 12, 12);
+      const connectorGeo = new THREE.CylinderGeometry(0.008, 0.008, 1, 4);
 
       for (let s = 0; s < 3; s++) {
         const color = STRAND_COLORS[s];
@@ -105,7 +105,7 @@ export function TripleHelixCanvas() {
         }
         const curve = new THREE.CatmullRomCurve3(curvePoints);
         const tube = new THREE.Mesh(
-          new THREE.TubeGeometry(curve, 200, 0.04, 8, false),
+          new THREE.TubeGeometry(curve, 200, 0.015, 6, false),
           new THREE.MeshStandardMaterial({
             color, emissive: color, emissiveIntensity: 0.3,
             transparent: true, opacity: 0.5, metalness: 0.3, roughness: 0.5,
@@ -138,13 +138,6 @@ export function TripleHelixCanvas() {
           }
         }
       }
-
-      const glow = new THREE.Mesh(
-        new THREE.SphereGeometry(0.5, 16, 16),
-        new THREE.MeshBasicMaterial({ color: PRIMARY, transparent: true, opacity: 0.08 })
-      );
-      glow.scale.set(6, 10, 6);
-      helixGroup.add(glow);
 
       const particleCount = 60;
       const particlesGeo = new THREE.BufferGeometry();
