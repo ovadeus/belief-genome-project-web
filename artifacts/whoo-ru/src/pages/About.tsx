@@ -23,10 +23,10 @@ export default function About() {
       <section className="py-20 px-6 max-w-4xl mx-auto">
         <motion.div {...fadeUp}>
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
-            About <span className="text-primary">WhooRU</span>
+            About the <span className="text-primary">Belief Genome Project</span>
           </h1>
           <p className="text-lg text-muted-foreground leading-relaxed mb-8">
-            WhooRU began with a single, startling moment — the kind most people spend their entire lives avoiding.
+            The Belief Genome Project began with a single, startling moment — the kind most people spend their entire lives avoiding.
           </p>
         </motion.div>
 
