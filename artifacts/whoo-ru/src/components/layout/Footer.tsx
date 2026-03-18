@@ -11,16 +11,13 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8">
           
           <div className="md:col-span-2 space-y-6">
-            <Link href="/" className="flex items-center gap-1 group inline-block">
-              <span className="font-display text-3xl font-bold text-foreground tracking-tight">
-                WhooRU
-              </span>
-              <span className="font-display text-3xl font-bold text-primary">
-                ?
+            <Link href="/" className="group inline-block">
+              <span className="font-display text-2xl font-light text-muted-foreground tracking-wide">
+                Belief Genome Project
               </span>
             </Link>
             <p className="text-muted-foreground text-lg max-w-md font-display leading-relaxed">
-              {settings?.tagline || "The only question that has ever really mattered."}
+              {settings?.tagline || "WhooRU? — Who Are You? The only question that has ever really mattered."}
             </p>
             <div className="flex items-center gap-4">
               {settings?.twitterUrl && (
@@ -63,7 +60,7 @@ export function Footer() {
 
         <div className="mt-16 pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} WhooRU. All rights reserved.
+            &copy; 2026 BeliefGenomeProject.org | David Edwin Meyers. All rights reserved.
           </p>
           <div className="flex gap-6 text-sm text-muted-foreground">
             <a href="#" className="hover:text-foreground transition-colors">Privacy Policy</a>
