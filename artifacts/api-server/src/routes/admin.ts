@@ -288,7 +288,7 @@ router.get("/admin/settings", async (_req, res): Promise<void> => {
   const settingsObj: Record<string, string> = {};
   settings.forEach(s => { settingsObj[s.key] = s.value || ""; });
   res.json({
-    tagline: settingsObj.tagline || "WhooRU? — The only question that has ever really mattered.",
+    tagline: settingsObj.tagline || "Who Are You? — The only question that has ever really mattered.",
     appDownloadUrl: settingsObj.appDownloadUrl || "",
     twitterUrl: settingsObj.twitterUrl || "",
     linkedinUrl: settingsObj.linkedinUrl || "",
@@ -317,7 +317,7 @@ router.patch("/admin/settings", async (req, res): Promise<void> => {
   const settingsObj: Record<string, string> = {};
   settings.forEach(s => { settingsObj[s.key] = s.value || ""; });
   res.json({
-    tagline: settingsObj.tagline || "WhooRU? — The only question that has ever really mattered.",
+    tagline: settingsObj.tagline || "Who Are You? — The only question that has ever really mattered.",
     appDownloadUrl: settingsObj.appDownloadUrl || "",
     twitterUrl: settingsObj.twitterUrl || "",
     linkedinUrl: settingsObj.linkedinUrl || "",
