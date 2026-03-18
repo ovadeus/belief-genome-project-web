@@ -39,7 +39,7 @@ export default function About() {
               <div>
                 <h2 className="text-2xl font-bold text-foreground mb-4">The Founder</h2>
                 <p className="text-muted-foreground leading-relaxed mb-4">
-                  The Belief Genome Project is spearheaded by David Edwin Meyers, a creative polymath, researcher, developer, and writer who has spent over two decades exploring the intersection of psychology, technology, and human self-understanding.
+                  The Belief Genome Project is spearheaded by David Edwin Meyers, a creative polymath, researcher, developer, and writer who has spent over two decades exploring the intersection of art, technology, psychology, and human self-understanding.
                 </p>
                 <p className="text-muted-foreground leading-relaxed">
                   After years of working across creative disciplines, a single realization crystallized: every problem we face as individuals and as a species ultimately traces back to beliefs we have never examined at a quantum level. The Belief Genome Project was born from the conviction that self-knowledge, made precise and measurable, is a missing variable in every equation we've tried to solve.
