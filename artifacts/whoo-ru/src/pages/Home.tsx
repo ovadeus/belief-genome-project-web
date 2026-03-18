@@ -101,7 +101,7 @@ export default function Home() {
               {
                 icon: Users,
                 title: "AI Alignment",
-                desc: "Train your future AI companions to intimately understand your context by giving them the precise alignment and coordinates of your worldview.",
+                desc: "Train your future AI companions to intimately understand you by giving them the precise coordinates of your worldview.",
                 color: "text-accent",
                 bg: "bg-accent/10"
               }
