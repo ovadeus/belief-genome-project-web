@@ -45,9 +45,7 @@ export default function Home() {
             </h1>
             
             <p className="text-lg sm:text-xl text-muted-foreground font-light leading-relaxed mb-12 max-w-3xl mx-auto">
-              The solutions to humanity's wicked problems will not come from data alone. 
-              They begin with a new capacity to understand belief at both micro and macro scales, 
-              and the shifting patterns that forecast into the future.
+              The solutions to humanity's wicked problems will not come from data alone. They begin with a new capacity to understand the polarized beliefs human hold at both micro and macro scales, and the shifting patterns that forecast into the future.
             </p>
             
             <div className="flex flex-col sm:flex-row justify-center gap-4">
