@@ -13,12 +13,12 @@ const features = [
 ];
 
 const faqs = [
-  { q: "What platforms does WhooRU support?", a: "WhooRU is currently available for macOS 12+ (Monterey and later), supporting both Apple Silicon and Intel processors. Windows and Linux versions are in development." },
-  { q: "Is WhooRU free?", a: "Yes. The WhooRU desktop application is free during the beta period. We believe self-knowledge should be accessible to everyone." },
+  { q: "What platforms does BGP support?", a: "BGP is currently available for macOS 12+ (Monterey and later), supporting both Apple Silicon and Intel processors. Windows and Linux versions are in development." },
+  { q: "Is BGP free?", a: "Yes. The BGP desktop application is free during the beta period. We believe self-knowledge should be accessible to everyone." },
   { q: "How long does the initial belief mapping take?", a: "The initial Belief Genome mapping takes approximately 45-60 minutes, spread across several sessions. The system learns more about you with every interaction." },
-  { q: "Is my data private?", a: "Absolutely. Your belief data is stored locally on your machine. WhooRU does not upload, share, or sell your psychological data. Your inner world belongs to you." },
-  { q: "What makes WhooRU different from personality tests?", a: "Personality tests measure traits — stable, broad categories. WhooRU maps beliefs — specific, weighted, contextual convictions that drive your actual decisions. The difference is dimensional precision." },
-  { q: "Can I export my Belief Genome data?", a: "Yes. WhooRU supports full data export in multiple formats, including JSON and CSV. Your data is yours to keep, analyze, and use however you choose." },
+  { q: "Is my data private?", a: "Absolutely. Your belief data is stored locally on your machine. BGP does not upload, share, or sell your psychological data. Your inner world belongs to you." },
+  { q: "What makes BGP different from personality tests?", a: "Personality tests measure traits — stable, broad categories. BGP maps beliefs — specific, weighted, contextual convictions that drive your actual decisions. The difference is dimensional precision." },
+  { q: "Can I export my Belief Genome data?", a: "Yes. BGP supports full data export in multiple formats, including JSON and CSV. Your data is yours to keep, analyze, and use however you choose." },
 ];
 
 const fadeUp = {
@@ -56,7 +56,7 @@ export default function AppShowcase() {
             <div className="aspect-video bg-card border border-border rounded-2xl overflow-hidden flex items-center justify-center">
               <img
                 src={`${import.meta.env.BASE_URL}images/app-mockup.png`}
-                alt="WhooRU Desktop Application"
+                alt="BGP Desktop Application"
                 className="w-full h-full object-cover"
               />
             </div>
@@ -111,7 +111,7 @@ export default function AppShowcase() {
               className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-xl font-semibold hover:brightness-110 transition-all"
             >
               <Download className="w-5 h-5" />
-              Download WhooRU — Free
+              Download BGP — Free
             </a>
           </motion.div>
         </div>
