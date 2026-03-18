@@ -22,22 +22,40 @@ router.post("/auth/login", loginLimiter, async (req, res): Promise<void> => {
   }
 
   const { username, password } = parsed.data;
-  const [user] = await db.select().from(adminUsersTable).where(eq(adminUsersTable.username, username));
 
-  if (!user) {
-    res.status(401).json({ error: "Invalid credentials" });
-    return;
+  const envUser = process.env.ADMIN_USERNAME;
+  const envPass = process.env.ADMIN_PASSWORD;
+
+  let userId: number;
+  let tokenUsername: string;
+
+  if (envUser && envPass) {
+    if (username !== envUser || password !== envPass) {
+      res.status(401).json({ error: "Invalid credentials" });
+      return;
+    }
+    userId = 1;
+    tokenUsername = envUser;
+  } else {
+    const [user] = await db.select().from(adminUsersTable).where(eq(adminUsersTable.username, username));
+
+    if (!user) {
+      res.status(401).json({ error: "Invalid credentials" });
+      return;
+    }
+
+    const valid = await bcrypt.compare(password, user.passwordHash);
+    if (!valid) {
+      res.status(401).json({ error: "Invalid credentials" });
+      return;
+    }
+
+    await db.update(adminUsersTable).set({ lastLogin: new Date() }).where(eq(adminUsersTable.id, user.id));
+    userId = user.id;
+    tokenUsername = user.username;
   }
 
-  const valid = await bcrypt.compare(password, user.passwordHash);
-  if (!valid) {
-    res.status(401).json({ error: "Invalid credentials" });
-    return;
-  }
-
-  await db.update(adminUsersTable).set({ lastLogin: new Date() }).where(eq(adminUsersTable.id, user.id));
-
-  const token = signToken({ userId: user.id, username: user.username });
+  const token = signToken({ userId, username: tokenUsername });
   res.cookie("token", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
