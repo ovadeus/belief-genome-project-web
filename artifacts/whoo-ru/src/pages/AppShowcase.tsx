@@ -37,10 +37,10 @@ export default function AppShowcase() {
         <div className="max-w-6xl mx-auto">
           <motion.div {...fadeUp} className="text-center mb-16">
             <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
-              The <span className="text-primary">WhooRU</span> App
+              The <span className="text-primary">BGP (Belief Genome Project)</span> App
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
-              A desktop application for mapping, understanding, and forecasting your belief architecture with dimensional precision.
+              A secure and local desktop application for mapping, understanding, and forecasting your belief architecture with dimensional precision.
             </p>
             <a
               href={settings?.appDownloadUrl || "#"}
