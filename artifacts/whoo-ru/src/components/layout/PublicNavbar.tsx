@@ -41,12 +41,9 @@ export function PublicNavbar() {
         )}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-1 group">
-            <span className="font-display text-2xl font-bold text-foreground tracking-tight group-hover:text-foreground/80 transition-colors">
-              WhooRU
-            </span>
-            <span className="font-display text-2xl font-bold text-primary group-hover:text-primary/80 transition-colors">
-              ?
+          <Link href="/" className="group">
+            <span className="font-display text-sm font-light text-muted-foreground tracking-wide group-hover:text-foreground/80 transition-colors">
+              Belief Genome Project
             </span>
           </Link>
 
