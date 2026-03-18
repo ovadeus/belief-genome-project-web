@@ -75,7 +75,9 @@
     "zod": "catalog:"
   },
   "dependencies": {
+    "@types/three": "^0.183.1",
     "react-markdown": "^10.1.0",
-    "react-quill": "^2.0.0"
+    "react-quill": "^2.0.0",
+    "three": "^0.183.2"
   }
 }

@@ -1,8 +1,7 @@
 import { Link } from "wouter";
 import { motion } from "framer-motion";
-import { ArrowRight, Download, Brain, Compass, Users } from "lucide-react";
+import { ArrowRight, Brain, Compass, Users } from "lucide-react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
-import { AnimatedHelixPlaceholder } from "@/components/ui/AnimatedHelixPlaceholder";
 import { usePublicBlog } from "@/hooks/use-blog";
 import { format } from "date-fns";
 
@@ -12,73 +11,61 @@ export default function Home() {
   return (
     <PublicLayout>
       {/* HERO SECTION */}
-      <section className="relative min-h-[90vh] flex items-center pt-10 pb-20 overflow-hidden">
-        {/* Background Image injected via CSS or img tag */}
+      <section className="relative min-h-[85vh] flex items-center pt-10 pb-20 overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img 
             src={`${import.meta.env.BASE_URL}images/hero-bg.png`} 
-            alt="Deep space background" 
-            className="w-full h-full object-cover opacity-60"
+            alt="" 
+            className="w-full h-full object-cover opacity-40"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-background/40" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/30" />
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10">
           <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="max-w-2xl"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, ease: "easeOut" }}
+            className="text-center"
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-8 backdrop-blur-sm">
-              <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-              <span className="text-sm font-medium text-white/80">Version 1.0 Available for macOS</span>
-            </div>
-            
-            <h1 className="text-6xl sm:text-7xl lg:text-8xl font-display font-bold tracking-tighter text-white mb-6">
-              WhooRU<span className="text-primary">?</span>
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-display font-bold tracking-tight text-white mb-8 leading-[1.1]">
+              The architecture of{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
+                human belief
+              </span>.
             </h1>
             
-            <p className="text-xl sm:text-2xl text-muted-foreground font-light leading-relaxed mb-10">
+            <p className="text-lg sm:text-xl text-muted-foreground font-light leading-relaxed mb-12 max-w-3xl mx-auto">
               The solutions to humanity's wicked problems will not come from data alone. 
-              They begin with a new capacity to understand belief at both micro and macro scales, and the shifting patterns that forecast into the future.
+              They begin with a new capacity to understand belief at both micro and macro scales, 
+              and the shifting patterns that forecast into the future.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Link 
-                href="/app"
-                className="px-8 py-4 rounded-xl font-semibold text-lg bg-primary hover:bg-primary/90 text-primary-foreground shadow-[0_0_30px_-5px] shadow-primary/50 hover:shadow-[0_0_40px_-5px] shadow-primary/60 transition-all hover:-translate-y-1 flex items-center justify-center gap-2"
+                href="/about"
+                className="px-8 py-4 rounded-xl font-semibold text-lg bg-primary hover:bg-primary/90 text-primary-foreground transition-all hover:-translate-y-0.5 flex items-center justify-center gap-2"
               >
-                <Download size={20} />
-                Download the App
+                Learn More
+                <ArrowRight size={20} />
               </Link>
               <Link 
-                href="/book"
-                className="px-8 py-4 rounded-xl font-semibold text-lg bg-card/50 backdrop-blur-sm border border-secondary/30 hover:border-secondary text-white transition-all hover:-translate-y-1 flex items-center justify-center gap-2 group"
+                href="/subscribe"
+                className="px-8 py-4 rounded-xl font-semibold text-lg bg-card/50 backdrop-blur-sm border border-white/10 hover:border-white/20 text-white transition-all hover:-translate-y-0.5 flex items-center justify-center gap-2"
               >
-                Join Early Bird List
-                <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                Follow the Research
               </Link>
             </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1, delay: 0.3 }}
-            className="hidden lg:block h-full"
-          >
-            <AnimatedHelixPlaceholder />
           </motion.div>
         </div>
       </section>
 
-      {/* WHAT IS WHOORU SECTION */}
+      {/* WHAT IS WHOORU */}
       <section className="py-24 bg-background relative border-t border-border">
         <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-4xl md:text-5xl font-display font-bold mb-8">
-            The architecture of <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">human belief</span>.
+          <h2 className="text-3xl md:text-4xl font-display font-bold mb-8">
+            What is <span className="text-primary">WhooRU</span>?
           </h2>
           <p className="text-xl text-muted-foreground leading-relaxed">
             WhooRU is a psychometric framework and visualization engine designed to map the 124 dimensions of your cognitive, emotional, and philosophical worldview. It is a mirror for the mind.
@@ -225,7 +212,7 @@ export default function Home() {
                     </p>
                     <div className="text-xs text-muted-foreground font-medium pt-4 border-t border-border">
                       {post.publishedAt ? format(new Date(post.publishedAt), 'MMM d, yyyy') : ''} 
-                      {post.readTimeMins && ` • ${post.readTimeMins} min read`}
+                      {post.readTimeMins && ` · ${post.readTimeMins} min read`}
                     </div>
                   </div>
                 </article>
@@ -251,7 +238,7 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Link 
               href="/app"
-              className="px-8 py-4 rounded-xl font-semibold text-lg bg-primary hover:bg-primary/90 text-primary-foreground transition-all shadow-[0_0_20px_-5px] shadow-primary/40"
+              className="px-8 py-4 rounded-xl font-semibold text-lg bg-primary hover:bg-primary/90 text-primary-foreground transition-all"
             >
               Download WhooRU
             </Link>
