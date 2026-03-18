@@ -60,7 +60,7 @@ export function Footer() {
 
         <div className="mt-16 pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            &copy; 2026 BeliefGenomeProject.org | David Edwin Meyers. All rights reserved.
+            &copy; 2026 BeliefGenomeProject.org | David Edwin Meyers | All rights reserved.
           </p>
           <div className="flex gap-6 text-sm text-muted-foreground">
             <a href="#" className="hover:text-foreground transition-colors">Privacy Policy</a>
