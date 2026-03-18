@@ -30,7 +30,7 @@ export default function About() {
           </p>
         </motion.div>
 
-        <motion.div {...fadeUp} transition={{ delay: 0.2 }} className="mb-16">
+        <motion.div {...fadeUp} transition={{ delay: 0.15 }} className="mb-16">
           <div className="bg-card border border-border rounded-2xl p-8 md:p-12">
             <div className="flex flex-col md:flex-row gap-8 items-start">
               <div className="w-32 h-32 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
@@ -39,15 +39,16 @@ export default function About() {
               <div>
                 <h2 className="text-2xl font-bold text-foreground mb-4">The Founder</h2>
                 <p className="text-muted-foreground leading-relaxed mb-4">
-                  The creator of WhooRU is a researcher, developer, and writer who has spent over a decade exploring the intersection of psychology, technology, and human self-understanding.
+                  The Belief Genome Project is spearheaded by David Edwin Meyers, a creative polymath, researcher, developer, and writer who has spent over two decades exploring the intersection of psychology, technology, and human self-understanding.
                 </p>
                 <p className="text-muted-foreground leading-relaxed">
-                  After years of working across disciplines — from cognitive science to artificial intelligence — a single realization crystallized: every problem we face as individuals and as a species ultimately traces back to beliefs we have never examined. WhooRU was born from the conviction that self-knowledge, made precise and measurable, is the missing variable in every equation we've tried to solve.
+                  After years of working across creative disciplines, a single realization crystallized: every problem we face as individuals and as a species ultimately traces back to beliefs we have never examined at a quantum level. The Belief Genome Project was born from the conviction that self-knowledge, made precise and measurable, is a missing variable in every equation we've tried to solve.
                 </p>
               </div>
             </div>
           </div>
         </motion.div>
+
 
         <motion.div {...fadeUp} transition={{ delay: 0.3 }} className="mb-16">
           <h2 className="text-3xl font-bold text-foreground mb-6">The Origin Story</h2>
