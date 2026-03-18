@@ -33,8 +33,8 @@ export default function About() {
         <motion.div {...fadeUp} transition={{ delay: 0.15 }} className="mb-16">
           <div className="bg-card border border-border rounded-2xl p-8 md:p-12">
             <div className="flex flex-col md:flex-row gap-8 items-start">
-              <div className="w-32 h-32 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
-                <Brain className="w-16 h-16 text-primary" />
+              <div className="w-32 h-32 rounded-2xl overflow-hidden shrink-0">
+                <img src={`${import.meta.env.BASE_URL}images/founder.jpeg`} alt="David Edwin Meyers" className="w-full h-full object-cover" />
               </div>
               <div>
                 <h2 className="text-2xl font-bold text-foreground mb-4">The Founder</h2>
