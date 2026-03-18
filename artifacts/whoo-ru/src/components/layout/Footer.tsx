@@ -17,7 +17,7 @@ export function Footer() {
               </span>
             </Link>
             <p className="text-muted-foreground text-lg max-w-md font-display leading-relaxed">
-              {settings?.tagline || "WhooRU? — Who Are You? The only question that has ever really mattered."}
+              {settings?.tagline || "Who Are You? — The only question that has ever really mattered."}
             </p>
             <div className="flex items-center gap-4">
               {settings?.twitterUrl && (
