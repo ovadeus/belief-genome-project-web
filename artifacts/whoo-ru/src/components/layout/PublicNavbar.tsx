@@ -6,10 +6,10 @@ import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
-  { href: "/about", label: "About" },
   { href: "/blog", label: "Blog" },
   { href: "/app", label: "The App" },
   { href: "/book", label: "The Book" },
+  { href: "/about", label: "About" },
 ];
 
 export function PublicNavbar() {
