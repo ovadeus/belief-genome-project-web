@@ -15,82 +15,138 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - **Validation**: Zod (`zod/v4`), `drizzle-zod`
 - **API codegen**: Orval (from OpenAPI spec)
 - **Build**: esbuild (CJS bundle)
+- **Frontend**: React 19 + Vite + Tailwind CSS + wouter
+- **UI**: Custom dark theme components, Framer Motion, Lucide icons
 
 ## Structure
 
 ```text
 artifacts-monorepo/
 ├── artifacts/              # Deployable applications
-│   └── api-server/         # Express API server
+│   ├── api-server/         # Express API server (port 8080)
+│   ├── whoo-ru/            # React + Vite frontend
+│   └── mockup-sandbox/     # Component preview server
 ├── lib/                    # Shared libraries
 │   ├── api-spec/           # OpenAPI spec + Orval codegen config
 │   ├── api-client-react/   # Generated React Query hooks
 │   ├── api-zod/            # Generated Zod schemas from OpenAPI
 │   └── db/                 # Drizzle ORM schema + DB connection
 ├── scripts/                # Utility scripts (single workspace package)
-│   └── src/                # Individual .ts scripts, run via `pnpm --filter @workspace/scripts run <script>`
-├── pnpm-workspace.yaml     # pnpm workspace (artifacts/*, lib/*, lib/integrations/*, scripts)
-├── tsconfig.base.json      # Shared TS options (composite, bundler resolution, es2022)
-├── tsconfig.json           # Root TS project references
-└── package.json            # Root package with hoisted devDeps
+│   └── src/                # Individual .ts scripts
+├── pnpm-workspace.yaml
+├── tsconfig.base.json
+├── tsconfig.json
+└── package.json
 ```
+
+## WhooRU Project
+
+WhooRU is a full-stack website for a self-knowledge framework, desktop app, and book.
+
+### Design
+- Dark premium aesthetic: `#0a0a0f` background, `#6c8fff` electric blue primary, `#a78bfa` violet, `#22d3ee` cyan
+- Font: Space Grotesk (display), Inter (body)
+- CSS animated triple helix in hero section
+
+### Public Pages
+- **Home** (`/`): Hero with triple helix animation, tagline, CTAs
+- **About** (`/about`): Founder bio, origin story, research mission, development timeline
+- **Blog** (`/blog`): Post listing with search, hashtag filters, pagination
+- **Blog Post** (`/blog/:slug`): Full article with sharing, related posts
+- **App** (`/app`): Desktop app showcase, features, FAQ accordion, download CTA
+- **Book** (`/book`): Book promo with 3D cover, early bird signup, chapter excerpt
+- **Subscribe** (`/subscribe`): Newsletter subscription form with benefit cards
+
+### Admin Panel (`/admin/*`)
+- **Login** (`/admin/login`): JWT cookie-based auth
+- **Dashboard** (`/admin/dashboard`): Stats cards, recent signups, recent posts
+- **Blog Posts** (`/admin/blog`): CRUD list with status toggle
+- **Blog Editor** (`/admin/blog/new`, `/admin/blog/edit/:id`): Markdown editor with toolbar
+- **Subscribers** (`/admin/subscribers`): List with search/filter, CSV export
+- **Early Bird** (`/admin/earlybird`): List with CSV export
+- **Settings** (`/admin/settings`): Site settings, change password
+
+### Admin Credentials
+- Username: `admin`, Password: `WhooRU2025!`
+- JWT_SECRET set in environment variables
+
+### Database Tables
+- `blogPosts`: Blog content with slug, excerpt, body, hashtags, status
+- `subscribers`: Newsletter subscribers with email, name, source
+- `earlyBird`: Book early bird signups
+- `adminUsers`: Admin accounts with hashed passwords
+- `siteSettings`: Key-value site configuration
+
+### API Routes (Express, `/api`)
+- `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me`
+- `GET/POST /api/blog`, `GET/PUT/DELETE /api/blog/:slug`
+- `GET /api/admin/stats`, `GET/POST/PUT/DELETE /api/admin/blog/*`
+- `GET/POST/DELETE /api/admin/subscribers/*`
+- `GET/POST/DELETE /api/admin/earlybird/*`
+- `GET/PUT /api/admin/settings`
+- `POST /api/admin/change-password`
+- `POST /api/subscribe`, `POST /api/earlybird`
+
+### Key Dependencies
+- `@tanstack/react-query` for data fetching
+- `react-hook-form` + `zod` for form validation
+- `framer-motion` for animations
+- `date-fns` for date formatting
+- `bcryptjs`, `jsonwebtoken` for auth
+- `multer` for file uploads
+- `express-rate-limit` for rate limiting
 
 ## TypeScript & Composite Projects
 
-Every package extends `tsconfig.base.json` which sets `composite: true`. The root `tsconfig.json` lists all packages as project references. This means:
+Every package extends `tsconfig.base.json` which sets `composite: true`. The root `tsconfig.json` lists all packages as project references.
 
-- **Always typecheck from the root** — run `pnpm run typecheck` (which runs `tsc --build --emitDeclarationOnly`). This builds the full dependency graph so that cross-package imports resolve correctly. Running `tsc` inside a single package will fail if its dependencies haven't been built yet.
-- **`emitDeclarationOnly`** — we only emit `.d.ts` files during typecheck; actual JS bundling is handled by esbuild/tsx/vite...etc, not `tsc`.
-- **Project references** — when package A depends on package B, A's `tsconfig.json` must list B in its `references` array. `tsc --build` uses this to determine build order and skip up-to-date packages.
+- **Always typecheck from the root** — run `pnpm run typecheck`
+- **`emitDeclarationOnly`** — only `.d.ts` files during typecheck
+- **Project references** — A's `tsconfig.json` must list B in its `references` array
 
 ## Root Scripts
 
-- `pnpm run build` — runs `typecheck` first, then recursively runs `build` in all packages that define it
-- `pnpm run typecheck` — runs `tsc --build --emitDeclarationOnly` using project references
+- `pnpm run build` — runs `typecheck` first, then recursively runs `build`
+- `pnpm run typecheck` — runs `tsc --build --emitDeclarationOnly`
 
 ## Packages
 
 ### `artifacts/api-server` (`@workspace/api-server`)
 
-Express 5 API server. Routes live in `src/routes/` and use `@workspace/api-zod` for request and response validation and `@workspace/db` for persistence.
+Express 5 API server with JWT cookie-based auth, blog CRUD, subscriber/early bird management, and admin dashboard.
 
 - Entry: `src/index.ts` — reads `PORT`, starts Express
-- App setup: `src/app.ts` — mounts CORS, JSON/urlencoded parsing, routes at `/api`
-- Routes: `src/routes/index.ts` mounts sub-routers; `src/routes/health.ts` exposes `GET /health` (full path: `/api/health`)
+- App setup: `src/app.ts` — mounts CORS (origin-locked), JSON parsing, cookie parser, routes at `/api`
+- Routes: auth, blog, admin, subscribers, earlybird, settings
 - Depends on: `@workspace/db`, `@workspace/api-zod`
-- `pnpm --filter @workspace/api-server run dev` — run the dev server
-- `pnpm --filter @workspace/api-server run build` — production esbuild bundle (`dist/index.cjs`)
-- Build bundles an allowlist of deps (express, cors, pg, drizzle-orm, zod, etc.) and externalizes the rest
+
+### `artifacts/whoo-ru` (`@workspace/whoo-ru`)
+
+React + Vite frontend with dark premium design, wouter routing, React Query hooks.
+
+- Entry: `src/main.tsx`
+- Router: `src/App.tsx` with wouter
+- Pages: `src/pages/` (public + admin)
+- Hooks: `src/hooks/` (use-auth, use-admin, use-blog, use-toast)
+- Layouts: `src/components/layout/` (PublicLayout, AdminLayout)
 
 ### `lib/db` (`@workspace/db`)
 
-Database layer using Drizzle ORM with PostgreSQL. Exports a Drizzle client instance and schema models.
-
-- `src/index.ts` — creates a `Pool` + Drizzle instance, exports schema
-- `src/schema/index.ts` — barrel re-export of all models
-- `src/schema/<modelname>.ts` — table definitions with `drizzle-zod` insert schemas (no models definitions exist right now)
-- `drizzle.config.ts` — Drizzle Kit config (requires `DATABASE_URL`, automatically provided by Replit)
-- Exports: `.` (pool, db, schema), `./schema` (schema only)
-
-Production migrations are handled by Replit when publishing. In development, we just use `pnpm --filter @workspace/db run push`, and we fallback to `pnpm --filter @workspace/db run push-force`.
+Database layer using Drizzle ORM with PostgreSQL.
 
 ### `lib/api-spec` (`@workspace/api-spec`)
 
-Owns the OpenAPI 3.1 spec (`openapi.yaml`) and the Orval config (`orval.config.ts`). Running codegen produces output into two sibling packages:
-
-1. `lib/api-client-react/src/generated/` — React Query hooks + fetch client
-2. `lib/api-zod/src/generated/` — Zod schemas
-
-Run codegen: `pnpm --filter @workspace/api-spec run codegen`
+OpenAPI 3.1 spec and Orval codegen config.
 
 ### `lib/api-zod` (`@workspace/api-zod`)
 
-Generated Zod schemas from the OpenAPI spec (e.g. `HealthCheckResponse`). Used by `api-server` for response validation.
+Generated Zod schemas from OpenAPI spec.
 
 ### `lib/api-client-react` (`@workspace/api-client-react`)
 
-Generated React Query hooks and fetch client from the OpenAPI spec (e.g. `useHealthCheck`, `healthCheck`).
+Generated React Query hooks and fetch client.
 
 ### `scripts` (`@workspace/scripts`)
 
-Utility scripts package. Each script is a `.ts` file in `src/` with a corresponding npm script in `package.json`. Run scripts via `pnpm --filter @workspace/scripts run <script>`. Scripts can import any workspace package (e.g., `@workspace/db`) by adding it as a dependency in `scripts/package.json`.
+Utility scripts. Run via `pnpm --filter @workspace/scripts run <script>`.
+- `seed` — seeds database with admin user, sample blog posts, subscribers
