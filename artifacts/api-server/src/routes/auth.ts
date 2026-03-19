@@ -63,7 +63,7 @@ router.post("/auth/login", loginLimiter, async (req, res): Promise<void> => {
     maxAge: 24 * 60 * 60 * 1000,
   });
 
-  res.json({ message: "Login successful", user: { id: user.id, username: user.username } });
+  res.json({ message: "Login successful", user: { id: userId, username: tokenUsername } });
 });
 
 router.get("/auth/me", requireAuth, async (req, res): Promise<void> => {
