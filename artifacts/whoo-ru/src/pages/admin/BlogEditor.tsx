@@ -1,12 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRoute, useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ArrowLeft, Save, Globe, Image as ImageIcon, X, Bold, Italic, Heading2, List, ListOrdered, Quote, Link2, Minus } from "lucide-react";
+import { ArrowLeft, Save, Globe, Image as ImageIcon, X, Bold, Italic, Heading2, List, ListOrdered, Quote, Link2, Minus, Upload, Loader2 } from "lucide-react";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { useAdminCreatePost, useAdminUpdatePost } from "@/hooks/use-admin";
 import { useGetAdminBlogPost } from "@workspace/api-client-react";
+import { useMediaLibrary, useUploadMedia, getMediaUrl } from "@/hooks/use-media";
+import type { MediaItem } from "@/hooks/use-media";
 
 const postSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -38,6 +40,10 @@ export default function BlogEditor() {
   const id = Number(params?.id);
   
   const [hashtagInput, setHashtagInput] = useState("");
+  const [showMediaPicker, setShowMediaPicker] = useState<"featured" | "inline" | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const mediaLibrary = useMediaLibrary(1);
+  const uploadMedia = useUploadMedia();
 
   const { data: existingPost, isLoading: isLoadingPost } = useGetAdminBlogPost(id, {
     query: { enabled: isEditing }
@@ -109,6 +115,33 @@ export default function BlogEditor() {
     }
   };
 
+  const selectMedia = (media: MediaItem) => {
+    const url = getMediaUrl(media.objectPath);
+    if (showMediaPicker === "featured") {
+      form.setValue("featuredImage", url);
+    } else if (showMediaPicker === "inline") {
+      const textarea = document.getElementById("body-editor") as HTMLTextAreaElement;
+      if (textarea) {
+        const md = `\n![${media.alt || media.filename}](${url})\n`;
+        const pos = textarea.selectionStart;
+        textarea.setRangeText(md, pos, pos, "end");
+        textarea.focus();
+        form.setValue("body", textarea.value);
+      }
+    }
+    setShowMediaPicker(null);
+  };
+
+  const handlePickerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const media = await uploadMedia.mutateAsync(file);
+      selectMedia(media);
+    } catch {}
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
   const handleToolbar = (action: string) => {
     const textarea = document.getElementById("body-editor") as HTMLTextAreaElement;
     if (!textarea) return;
@@ -121,6 +154,7 @@ export default function BlogEditor() {
       case "ol": insertMarkdown(textarea, "1. "); break;
       case "quote": insertMarkdown(textarea, "> "); break;
       case "link": insertMarkdown(textarea, "[", "](url)"); break;
+      case "image": setShowMediaPicker("inline"); return;
       case "hr": insertMarkdown(textarea, "\n---\n"); break;
     }
     form.setValue("body", textarea.value);
@@ -189,13 +223,22 @@ export default function BlogEditor() {
 
           <div className="bg-card border border-border rounded-2xl p-6 md:p-8">
             <label className="flex items-center gap-2 text-foreground font-semibold mb-4">
-              <ImageIcon size={18} /> Featured Image URL
+              <ImageIcon size={18} /> Featured Image
             </label>
-            <input
-              {...form.register("featuredImage")}
-              className="w-full px-4 py-3 bg-background border border-border rounded-xl focus:outline-none focus:border-primary text-foreground"
-              placeholder="https://..."
-            />
+            <div className="flex gap-2">
+              <input
+                {...form.register("featuredImage")}
+                className="flex-1 px-4 py-3 bg-background border border-border rounded-xl focus:outline-none focus:border-primary text-foreground"
+                placeholder="https://... or choose from media library"
+              />
+              <button
+                type="button"
+                onClick={() => setShowMediaPicker("featured")}
+                className="px-4 py-3 bg-primary/10 text-primary border border-primary/20 rounded-xl hover:bg-primary/20 transition-colors font-medium text-sm whitespace-nowrap"
+              >
+                Browse Media
+              </button>
+            </div>
             {form.watch("featuredImage") && (
               <div className="mt-4 aspect-video w-full max-w-lg rounded-xl overflow-hidden border border-border bg-background">
                 <img src={form.watch("featuredImage")} alt="Preview" className="w-full h-full object-cover" />
@@ -225,6 +268,7 @@ export default function BlogEditor() {
                 { action: "ol", icon: ListOrdered, label: "Numbered List" },
                 { action: "quote", icon: Quote, label: "Quote" },
                 { action: "link", icon: Link2, label: "Link" },
+                { action: "image", icon: ImageIcon, label: "Insert Image" },
                 { action: "hr", icon: Minus, label: "Divider" },
               ].map(({ action, icon: Icon, label }) => (
                 <button
@@ -271,6 +315,75 @@ export default function BlogEditor() {
           </div>
         </div>
       </form>
+
+      {showMediaPicker && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={() => setShowMediaPicker(null)}>
+          <div className="bg-card border border-border rounded-2xl max-w-3xl w-full max-h-[80vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border sticky top-0 bg-card z-10">
+              <h3 className="font-semibold text-foreground text-lg">
+                {showMediaPicker === "featured" ? "Choose Featured Image" : "Insert Image"}
+              </h3>
+              <div className="flex items-center gap-3">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePickerUpload}
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadMedia.isPending}
+                  className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium hover:brightness-110 disabled:opacity-50"
+                >
+                  {uploadMedia.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                  Upload New
+                </button>
+                <button type="button" onClick={() => setShowMediaPicker(null)} className="text-muted-foreground hover:text-foreground">
+                  <X size={20} />
+                </button>
+              </div>
+            </div>
+            <div className="p-6">
+              {mediaLibrary.isLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                </div>
+              ) : !mediaLibrary.data?.items.length ? (
+                <div className="text-center py-12">
+                  <ImageIcon className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+                  <p className="text-muted-foreground mb-4">No images uploaded yet</p>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="bg-primary text-primary-foreground px-5 py-2 rounded-lg font-medium text-sm"
+                  >
+                    Upload Your First Image
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                  {mediaLibrary.data.items.map((media) => (
+                    <button
+                      key={media.id}
+                      type="button"
+                      onClick={() => selectMedia(media)}
+                      className="aspect-square bg-background border border-border rounded-lg overflow-hidden hover:border-primary hover:ring-2 hover:ring-primary/30 transition-all"
+                    >
+                      <img
+                        src={getMediaUrl(media.objectPath)}
+                        alt={media.alt || media.filename}
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </AdminLayout>
   );
 }

@@ -1,7 +1,8 @@
 import { Router, type IRouter } from "express";
 import { eq, desc, sql, and, ilike } from "drizzle-orm";
 import bcrypt from "bcryptjs";
-import { db, blogPostsTable, subscribersTable, earlyBirdTable, adminUsersTable, siteSettingsTable } from "@workspace/db";
+import { db, blogPostsTable, subscribersTable, earlyBirdTable, adminUsersTable, siteSettingsTable, mediaTable } from "@workspace/db";
+import { ObjectStorageService } from "../lib/objectStorage";
 import {
   CreateBlogPostBody,
   UpdateBlogPostBody,
@@ -350,6 +351,54 @@ router.post("/admin/change-password", async (req, res): Promise<void> => {
   const newHash = await bcrypt.hash(parsed.data.newPassword, 12);
   await db.update(adminUsersTable).set({ passwordHash: newHash }).where(eq(adminUsersTable.id, userId));
   res.json({ message: "Password changed successfully" });
+});
+
+router.get("/admin/media", async (req, res): Promise<void> => {
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 20;
+  const offset = (page - 1) * limit;
+
+  const [items, countResult] = await Promise.all([
+    db.select().from(mediaTable).orderBy(desc(mediaTable.createdAt)).limit(limit).offset(offset),
+    db.select({ count: sql<number>`count(*)::int` }).from(mediaTable),
+  ]);
+
+  res.json({
+    items,
+    total: countResult[0]?.count || 0,
+    page,
+    totalPages: Math.ceil((countResult[0]?.count || 0) / limit),
+  });
+});
+
+router.post("/admin/media", async (req, res): Promise<void> => {
+  const { filename, objectPath, contentType, size, alt } = req.body;
+  if (!filename || !objectPath || !contentType || !size) {
+    res.status(400).json({ error: "Missing required fields" });
+    return;
+  }
+
+  const [media] = await db.insert(mediaTable).values({
+    filename,
+    objectPath,
+    contentType,
+    size,
+    alt: alt || null,
+  }).returning();
+
+  res.json(media);
+});
+
+router.delete("/admin/media/:id", async (req, res): Promise<void> => {
+  const id = parseInt(req.params.id);
+  const [media] = await db.select().from(mediaTable).where(eq(mediaTable.id, id));
+  if (!media) {
+    res.status(404).json({ error: "Media not found" });
+    return;
+  }
+
+  await db.delete(mediaTable).where(eq(mediaTable.id, id));
+  res.json({ message: "Media deleted" });
 });
 
 export default router;

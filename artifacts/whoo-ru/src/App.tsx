@@ -18,6 +18,7 @@ import BlogEditor from "./pages/admin/BlogEditor";
 import AdminSubscribers from "./pages/admin/Subscribers";
 import AdminEarlyBird from "./pages/admin/EarlyBird";
 import AdminSettings from "./pages/admin/Settings";
+import MediaLibrary from "./pages/admin/MediaLibrary";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,7 @@ function Router() {
       <Route path="/admin/blog/edit/:id" component={BlogEditor} />
       <Route path="/admin/subscribers" component={AdminSubscribers} />
       <Route path="/admin/earlybird" component={AdminEarlyBird} />
+      <Route path="/admin/media" component={MediaLibrary} />
       <Route path="/admin/settings" component={AdminSettings} />
       <Route component={NotFound} />
     </Switch>

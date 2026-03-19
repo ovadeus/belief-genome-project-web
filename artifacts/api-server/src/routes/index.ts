@@ -6,6 +6,7 @@ import subscribersRouter from "./subscribers";
 import earlybirdRouter from "./earlybird";
 import adminRouter from "./admin";
 import settingsRouter from "./settings";
+import storageRouter from "./storage";
 
 const router: IRouter = Router();
 
@@ -16,5 +17,6 @@ router.use(subscribersRouter);
 router.use(earlybirdRouter);
 router.use(adminRouter);
 router.use(settingsRouter);
+router.use(storageRouter);
 
 export default router;
