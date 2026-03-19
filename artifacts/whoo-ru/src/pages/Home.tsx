@@ -36,7 +36,7 @@ export default function Home() {
             transition={{ duration: 0.9, ease: "easeOut" }}
             className="text-center"
           >
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-display font-bold tracking-tight text-white mb-8 leading-[1.1]">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-display font-bold tracking-tight text-white mb-8 leading-[1.1]">
               A Systematic Blueprint For
               <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
