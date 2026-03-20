@@ -1,9 +1,9 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { BrainCircuit } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Link } from "wouter";
+import faviconImg from "/favicon.png";
 
 const loginSchema = z.object({
   username: z.string().min(1, "Username is required"),
@@ -29,9 +29,9 @@ export default function AdminLogin() {
       {/* Background glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
 
-      <Link href="/" className="flex items-center gap-2 mb-12 relative z-10 hover:opacity-80 transition-opacity">
-        <BrainCircuit className="text-primary w-10 h-10" />
-        <span className="font-display text-4xl font-bold text-foreground">WhooRU Admin</span>
+      <Link href="/" className="flex items-center gap-3 mb-12 relative z-10 hover:opacity-80 transition-opacity">
+        <img src={faviconImg} alt="BGP" className="w-10 h-10" />
+        <span className="font-display text-4xl font-bold text-foreground">BGP Admin</span>
       </Link>
 
       <div className="w-full max-w-md bg-card border border-border rounded-3xl p-8 shadow-2xl relative z-10">

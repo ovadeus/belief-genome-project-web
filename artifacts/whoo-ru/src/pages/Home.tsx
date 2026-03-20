@@ -67,7 +67,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* WHAT IS WHOORU */}
+      {/* WHAT IS BGP */}
       <section className="py-24 bg-background relative border-t border-border">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-display font-bold mb-8">

@@ -8,9 +8,9 @@ import { useState } from "react";
 
 const benefits = [
   { icon: BookOpen, title: "Research Updates", description: "Be the first to learn about new findings from the Belief Genome framework." },
-  { icon: Bell, title: "App Releases", description: "Get notified when new WhooRU features and updates are available." },
-  { icon: Sparkles, title: "Book Progress", description: "Follow the development of the WhooRU book and secure your early bird copy." },
-  { icon: Mail, title: "Blog Digests", description: "Curated highlights from the WhooRU blog delivered to your inbox." },
+  { icon: Bell, title: "App Releases", description: "Get notified when new BGP features and updates are available." },
+  { icon: Sparkles, title: "Book Progress", description: "Follow the development of the Belief Genome Project book and secure your early bird copy." },
+  { icon: Mail, title: "Blog Digests", description: "Curated highlights from the Belief Genome Project blog delivered to your inbox." },
 ];
 
 export default function Subscribe() {
@@ -63,7 +63,7 @@ export default function Subscribe() {
             </div>
             <h2 className="text-2xl font-bold text-foreground mb-3">You're In</h2>
             <p className="text-muted-foreground">
-              Welcome to the WhooRU research community. You'll receive updates on the framework, app releases, and research findings.
+              Welcome to the Belief Genome Project research community. You'll receive updates on the framework, app releases, and research findings.
             </p>
           </motion.div>
         ) : (

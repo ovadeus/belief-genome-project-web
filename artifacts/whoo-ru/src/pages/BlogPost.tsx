@@ -79,7 +79,7 @@ export default function BlogPost() {
                 </div>
               </div>
               <div>
-                <p className="font-medium text-foreground">WhooRU Research</p>
+                <p className="font-medium text-foreground">BGP Research</p>
                 <p className="text-sm text-muted-foreground">
                   {post.publishedAt ? format(new Date(post.publishedAt), 'MMMM d, yyyy') : 'Draft'} 
                   {post.readTimeMins && ` • ${post.readTimeMins} min read`}

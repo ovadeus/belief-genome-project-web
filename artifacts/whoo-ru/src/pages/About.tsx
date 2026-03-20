@@ -5,9 +5,9 @@ import { BookOpen, Code, Brain, Lightbulb, Target, Telescope } from "lucide-reac
 const milestones = [
   { year: "2022", title: "The Spark", description: "The Wizard of Oz moment — a startling encounter with the question that refuses to be ignored: Who are you, really?" },
   { year: "2023", title: "Framework Design", description: "Development of the 124 psychological dimensions that form the Belief Genome architecture." },
-  { year: "2024", title: "Desktop App Alpha", description: "First working prototype of the WhooRU desktop application for macOS." },
+  { year: "2024", title: "Desktop App Alpha", description: "First working prototype of the BGP desktop application for macOS." },
   { year: "2024", title: "Forecaster Engine", description: "The predictive belief engine reaches functional accuracy across core dimension clusters." },
-  { year: "2025", title: "Public Beta", description: "WhooRU desktop app released as a free public beta for macOS users." },
+  { year: "2025", title: "Public Beta", description: "BGP desktop app released as a free public beta for macOS users." },
   { year: "2025", title: "Research Publication", description: "First research papers on the Belief Genome framework submitted for peer review." },
 ];
 
@@ -63,7 +63,7 @@ export default function About() {
               Most of us never face that moment. We define ourselves through roles, relationships, achievements, and affiliations. We perform identity rather than examine it. We curate versions of ourselves for different audiences without ever asking which version is real — or whether any of them are.
             </p>
             <p className="text-muted-foreground leading-relaxed">
-              WhooRU exists because that question deserves more than a performance. It deserves a framework, a methodology, and a technology precise enough to map the real answer — the layered, dimensional, evolving architecture of what you actually believe about yourself, the world, and your place in it.
+              The Belief Genome Project exists because that question deserves more than a performance. It deserves a framework, a methodology, and a technology precise enough to map the real answer — the layered, dimensional, evolving architecture of what you actually believe about yourself, the world, and your place in it.
             </p>
           </div>
         </motion.div>

@@ -57,7 +57,7 @@ export default function Book() {
                 {/* Book Cover Image */}
                 <img 
                   src={`${import.meta.env.BASE_URL}images/book-cover.png`} 
-                  alt="WhooRU Book Cover" 
+                  alt="Belief Genome Project Book Cover" 
                   className="w-full h-full object-cover"
                 />
                 
@@ -77,7 +77,7 @@ export default function Book() {
             </h1>
             
             <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
-              A deep-dive into the WhooRU framework, the research behind the 124 cognitive dimensions, and a practical guide to mapping your own belief genome in an age of artificial intelligence.
+              A deep-dive into the Belief Genome Project framework, the research behind the 124 cognitive dimensions, and a practical guide to mapping your own belief genome in an age of artificial intelligence.
             </p>
 
             <div className="bg-card border border-border p-8 rounded-3xl relative overflow-hidden">
@@ -142,7 +142,7 @@ export default function Book() {
           
           <div className="prose prose-invert prose-lg max-w-none prose-p:text-muted-foreground prose-p:leading-loose">
             <p>
-              When we built the first cognitive models for what would become WhooRU, we assumed that people held beliefs like objects in a box. You could take one out, examine it, and perhaps replace it with a better one if evidence warranted it. 
+              When we built the first cognitive models for what would become the Belief Genome Project, we assumed that people held beliefs like objects in a box. You could take one out, examine it, and perhaps replace it with a better one if evidence warranted it. 
             </p>
             <p>
               We were entirely wrong.

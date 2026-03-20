@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, FileText, Users, Bookmark, Settings, LogOut, BrainCircuit, ImageIcon } from "lucide-react";
+import { LayoutDashboard, FileText, Users, Bookmark, Settings, LogOut, ImageIcon } from "lucide-react";
+import faviconImg from "/favicon.png";
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 
@@ -30,8 +31,8 @@ export function AdminLayout({ children }: { children: ReactNode }) {
       <aside className="w-64 border-r border-border bg-card flex flex-col hidden md:flex fixed inset-y-0 left-0 z-10">
         <div className="h-20 flex items-center px-6 border-b border-border">
           <Link href="/admin/dashboard" className="flex items-center gap-2 text-foreground font-display font-bold text-xl">
-            <BrainCircuit className="text-primary" />
-            WhooRU Admin
+            <img src={faviconImg} alt="BGP" className="w-6 h-6" />
+            BGP Admin
           </Link>
         </div>
         
@@ -74,8 +75,8 @@ export function AdminLayout({ children }: { children: ReactNode }) {
         {/* Mobile Header */}
         <header className="md:hidden h-16 border-b border-border bg-card flex items-center px-4 sticky top-0 z-20">
            <Link href="/admin/dashboard" className="flex items-center gap-2 text-foreground font-display font-bold">
-            <BrainCircuit className="text-primary" size={20} />
-            WhooRU Admin
+            <img src={faviconImg} alt="BGP" className="w-5 h-5" />
+            BGP Admin
           </Link>
           <button 
             onClick={() => logout.mutate()}
