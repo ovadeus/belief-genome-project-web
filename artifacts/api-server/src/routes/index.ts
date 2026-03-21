@@ -7,6 +7,9 @@ import earlybirdRouter from "./earlybird";
 import adminRouter from "./admin";
 import settingsRouter from "./settings";
 import storageRouter from "./storage";
+import genomeAuthRouter, { genomeAuth } from "./genome-auth";
+import genomeProbesRouter from "./genome-probes";
+import genomeDataRouter from "./genome-data";
 
 const router: IRouter = Router();
 
@@ -18,5 +21,9 @@ router.use(earlybirdRouter);
 router.use(adminRouter);
 router.use(settingsRouter);
 router.use(storageRouter);
+
+router.use("/genome", genomeAuthRouter);
+router.use("/genome", genomeAuth, genomeDataRouter);
+router.use("/genome/probes", genomeAuth, genomeProbesRouter);
 
 export default router;

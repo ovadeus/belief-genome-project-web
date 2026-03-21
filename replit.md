@@ -30,7 +30,8 @@ artifacts-monorepo/
 │   ├── api-spec/           # OpenAPI spec + Orval codegen config
 │   ├── api-client-react/   # Generated React Query hooks
 │   ├── api-zod/            # Generated Zod schemas from OpenAPI
-│   └── db/                 # Drizzle ORM schema + DB connection
+│   ├── db/                 # Drizzle ORM schema + DB connection
+│   └── belief-engine/      # Belief Genome domain logic (dimensions, probes, DNA)
 ├── scripts/                # Utility scripts (single workspace package)
 │   └── src/                # Individual .ts scripts
 ├── pnpm-workspace.yaml
@@ -39,9 +40,9 @@ artifacts-monorepo/
 └── package.json
 ```
 
-## WhooRU Project
+## Belief Genome Project
 
-WhooRU is a full-stack website for a self-knowledge framework, desktop app, and book.
+Full-stack website for a psychometric self-knowledge framework, desktop app, and book.
 
 ### Design
 - Dark premium aesthetic: `#0a0a0f` background, `#6c8fff` electric blue primary, `#a78bfa` violet, `#22d3ee` cyan
@@ -50,7 +51,7 @@ WhooRU is a full-stack website for a self-knowledge framework, desktop app, and 
 
 ### Public Pages
 - **Home** (`/`): Hero with triple helix animation, tagline, CTAs
-- **About** (`/about`): Founder bio, origin story, research mission, development timeline
+- **About** (`/about`): Founder bio (David Edwin Meyers), origin story, research mission, timeline
 - **Blog** (`/blog`): Post listing with search, hashtag filters, pagination
 - **Blog Post** (`/blog/:slug`): Full article with sharing, related posts
 - **App** (`/app`): Desktop app showcase, features, FAQ accordion, download CTA
@@ -58,10 +59,11 @@ WhooRU is a full-stack website for a self-knowledge framework, desktop app, and 
 - **Subscribe** (`/subscribe`): Newsletter subscription form with benefit cards
 
 ### Admin Panel (`/admin/*`)
-- **Login** (`/admin/login`): JWT cookie-based auth
+- **Login** (`/admin/login`): JWT cookie-based auth (separate from genome user auth)
 - **Dashboard** (`/admin/dashboard`): Stats cards, recent signups, recent posts
 - **Blog Posts** (`/admin/blog`): CRUD list with status toggle
 - **Blog Editor** (`/admin/blog/new`, `/admin/blog/edit/:id`): Markdown editor with toolbar
+- **Media Library** (`/admin/media`): Upload/browse/delete media via object storage
 - **Subscribers** (`/admin/subscribers`): List with search/filter, CSV export
 - **Early Bird** (`/admin/earlybird`): List with CSV export
 - **Settings** (`/admin/settings`): Site settings, change password
@@ -70,12 +72,40 @@ WhooRU is a full-stack website for a self-knowledge framework, desktop app, and 
 - Username: `admin`, Password: `WhooRU2025!`
 - JWT_SECRET set in environment variables
 
+### Belief Genome Feature (`/genome/*`)
+Interactive belief mapping system — completely separate auth from admin.
+
+- **Register** (`/genome/register`): Create genome user account
+- **Login** (`/genome/login`): Sign in to genome
+- **Probe** (`/genome/probe`): Answer belief probes (core interaction)
+- **Dashboard** (`/genome/dashboard`): Radar chart, breakdown bars, history, DNA string
+- **Profile** (`/genome/profile`): User profile with demographic data
+
+#### Genome Auth
+- Separate `users` table, JWT tokens via `GENOME_JWT_SECRET`
+- Context: `GenomeAuthProvider` wrapping the app
+- API helper: `genomeApi()` for authenticated requests
+- Navbar: Sign In / Get Started buttons (or Dashboard + Sign Out when logged in)
+
+#### Belief Engine (`@belief-genome/engine`)
+Pure domain logic package with no framework deps:
+- `beliefDNA.ts`: 128-dimension framework, DIMENSIONS, CATEGORIES constants
+- `probeBank.ts`: 100+ categorized belief probes with dimension weights
+- `dnaCalculator.ts`: DNA string builder, dimension value calculator
+- `probeFeeds.ts`: RSS news feed → AI-classified belief probes (requires OPENAI_API_KEY)
+
 ### Database Tables
 - `blogPosts`: Blog content with slug, excerpt, body, hashtags, status
 - `subscribers`: Newsletter subscribers with email, name, source
 - `earlyBird`: Book early bird signups
 - `adminUsers`: Admin accounts with hashed passwords
 - `siteSettings`: Key-value site configuration
+- `media`: Uploaded file metadata
+- `users`: Genome user accounts (email, password, demographics)
+- `beliefResponses`: User probe responses with dimension weights
+- `probes`: Queued probes per user (bank + news sources)
+- `dimensionScores`: Aggregated dimension scores per user
+- `dnaSnapshots`: Saved DNA string snapshots
 
 ### API Routes (Express, `/api`)
 - `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me`
@@ -86,6 +116,11 @@ WhooRU is a full-stack website for a self-knowledge framework, desktop app, and 
 - `GET/PUT /api/admin/settings`
 - `POST /api/admin/change-password`
 - `POST /api/subscribe`, `POST /api/earlybird`
+- `POST /api/genome/register`, `POST /api/genome/login`, `POST /api/genome/logout`
+- `GET /api/genome/me`, `GET /api/genome/dna`, `GET /api/genome/history`
+- `GET/PUT /api/genome/profile`, `GET /api/genome/dimensions`
+- `POST /api/genome/snapshot`
+- `GET /api/genome/probes/next`, `POST /api/genome/probes/respond`
 
 ### Key Dependencies
 - `@tanstack/react-query` for data fetching
@@ -93,7 +128,7 @@ WhooRU is a full-stack website for a self-knowledge framework, desktop app, and 
 - `framer-motion` for animations
 - `date-fns` for date formatting
 - `bcryptjs`, `jsonwebtoken` for auth
-- `multer` for file uploads
+- `chart.js`, `react-chartjs-2` for genome radar/bar charts
 - `express-rate-limit` for rate limiting
 
 ## TypeScript & Composite Projects
@@ -113,12 +148,12 @@ Every package extends `tsconfig.base.json` which sets `composite: true`. The roo
 
 ### `artifacts/api-server` (`@workspace/api-server`)
 
-Express 5 API server with JWT cookie-based auth, blog CRUD, subscriber/early bird management, and admin dashboard.
+Express 5 API server with JWT cookie-based auth, blog CRUD, subscriber/early bird management, genome user auth and probes.
 
 - Entry: `src/index.ts` — reads `PORT`, starts Express
 - App setup: `src/app.ts` — mounts CORS (origin-locked), JSON parsing, cookie parser, routes at `/api`
-- Routes: auth, blog, admin, subscribers, earlybird, settings
-- Depends on: `@workspace/db`, `@workspace/api-zod`
+- Routes: auth, blog, admin, subscribers, earlybird, settings, storage, genome-auth, genome-probes, genome-data
+- Depends on: `@workspace/db`, `@workspace/api-zod`, `@belief-genome/engine`
 
 ### `artifacts/whoo-ru` (`@workspace/whoo-ru`)
 
@@ -126,13 +161,18 @@ React + Vite frontend with dark premium design, wouter routing, React Query hook
 
 - Entry: `src/main.tsx`
 - Router: `src/App.tsx` with wouter
-- Pages: `src/pages/` (public + admin)
-- Hooks: `src/hooks/` (use-auth, use-admin, use-blog, use-toast)
+- Pages: `src/pages/` (public + admin + genome)
+- Hooks: `src/hooks/` (use-auth, use-admin, use-blog, use-toast, use-media)
 - Layouts: `src/components/layout/` (PublicLayout, AdminLayout)
+- Genome: `src/components/genome/` (GenomeAuthContext, RadarChart, BreakdownBars, DnaString, HistoryList)
 
 ### `lib/db` (`@workspace/db`)
 
 Database layer using Drizzle ORM with PostgreSQL.
+
+### `lib/belief-engine` (`@belief-genome/engine`)
+
+Pure TypeScript domain logic for the 128-dimension belief mapping system. Shared between API server and frontend.
 
 ### `lib/api-spec` (`@workspace/api-spec`)
 

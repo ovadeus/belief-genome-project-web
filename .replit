@@ -29,6 +29,7 @@ timeoutMs = 20000
 
 [userenv.shared]
 JWT_SECRET = "whoo-ru-jwt-secret-ud384l9bb9"
+GENOME_JWT_SECRET = "734676ab1bda88f51be77d6c4cc1ba9f2247cc9fa3397db1d910e5c54d7b59f4"
 
 [nix]
 channel = "stable-25_05"

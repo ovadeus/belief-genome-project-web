@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useGenomeAuth } from "@/components/genome/GenomeAuthContext";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -11,6 +12,49 @@ const NAV_LINKS = [
   { href: "/book", label: "Book" },
   { href: "/about", label: "About" },
 ];
+
+function GenomeAuthButton() {
+  const { user, logout } = useGenomeAuth();
+  const [, setLocation] = useLocation();
+
+  if (user) {
+    return (
+      <div className="flex items-center gap-3">
+        <Link
+          href="/genome/dashboard"
+          className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+        >
+          Dashboard
+        </Link>
+        <span className="text-border">|</span>
+        <span className="text-xs text-muted-foreground">{user.name}</span>
+        <button
+          onClick={logout}
+          className="px-3 py-1.5 rounded-lg border border-border text-xs text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
+        >
+          Sign Out
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <Link
+        href="/genome/login"
+        className="px-4 py-2 rounded-lg border border-primary/30 text-sm font-medium text-primary hover:bg-primary/10 transition-colors"
+      >
+        Sign In
+      </Link>
+      <Link
+        href="/genome/register"
+        className="px-4 py-2 rounded-lg bg-primary text-sm font-medium text-white hover:bg-primary/90 transition-colors"
+      >
+        Get Started
+      </Link>
+    </div>
+  );
+}
 
 export function PublicNavbar() {
   const [location] = useLocation();
@@ -74,6 +118,7 @@ export function PublicNavbar() {
             >
               Subscribe
             </Link>
+            <GenomeAuthButton />
           </nav>
 
           {/* Mobile Toggle */}
@@ -115,6 +160,9 @@ export function PublicNavbar() {
               >
                 Subscribe
               </Link>
+              <div className="mt-4">
+                <GenomeAuthButton />
+              </div>
             </div>
           </motion.div>
         )}
