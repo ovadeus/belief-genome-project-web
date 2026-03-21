@@ -3,28 +3,27 @@ import { useState, useEffect, useCallback } from 'react';
 import { genomeApi } from '../../components/genome/GenomeAuthContext';
 import { PROBE_CATEGORIES } from '@belief-genome/engine';
 
-const SEMANTIC_LABELS = [
-  { at: 0,    label: 'Strongly Disagree' },
-  { at: 0.25, label: 'Disagree' },
-  { at: 0.5,  label: 'Neutral' },
-  { at: 0.75, label: 'Agree' },
-  { at: 1,    label: 'Strongly Agree' },
-];
-
+/* ── Semantic labels — MUST match desktop exactly ───────────── */
 function getSemanticLabel(value: number): string {
-  let closest = SEMANTIC_LABELS[0];
-  for (const s of SEMANTIC_LABELS) {
-    if (Math.abs(value - s.at) < Math.abs(value - closest.at)) closest = s;
-  }
-  return closest.label;
+  const pct = Math.round(value * 100);
+  if (pct <= 10)  return 'False to me';
+  if (pct <= 30)  return 'Unlikely true';
+  if (pct <= 45)  return 'Leaning false';
+  if (pct <= 55)  return 'Uncertain';
+  if (pct <= 70)  return 'Leaning true';
+  if (pct <= 88)  return 'Likely true';
+  return 'Deeply true to me';
 }
 
 function sliderColor(value: number): string {
-  if (value <= 0.2) return '#ff4757';
-  if (value <= 0.4) return '#ff7f50';
-  if (value <= 0.6) return '#6c8fff';
-  if (value <= 0.8) return '#7bed9f';
-  return '#20bf6b';
+  const pct = Math.round(value * 100);
+  if (pct <= 10)  return '#dc3232';
+  if (pct <= 30)  return '#ff7728';
+  if (pct <= 45)  return '#c8a03c';
+  if (pct <= 55)  return '#787891';
+  if (pct <= 70)  return '#3cb4b4';
+  if (pct <= 88)  return '#3c82ff';
+  return '#50b4ff';
 }
 
 export default function ProbePage() {
@@ -137,9 +136,9 @@ export default function ProbePage() {
           display: 'flex', justifyContent: 'space-between',
           fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 4,
         }}>
-          <span>Strongly Disagree</span>
-          <span>Neutral</span>
-          <span>Strongly Agree</span>
+          <span>False to me</span>
+          <span>Uncertain</span>
+          <span>Deeply true to me</span>
         </div>
       </div>
 

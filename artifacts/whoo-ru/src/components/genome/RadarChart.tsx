@@ -1,84 +1,157 @@
-// Radar chart for belief dimension categories
-// Uses Chart.js — install: pnpm add chart.js react-chartjs-2
-
+// World View Radar — Chart.js radar with 9 category axes
+// Matches desktop: same categories, same colors, same tooltips
 import { Radar } from 'react-chartjs-2';
 import {
   Chart as ChartJS, RadialLinearScale, PointElement, LineElement, Filler, Tooltip,
 } from 'chart.js';
-import { CATEGORIES } from '@belief-genome/engine';
 
 ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip);
 
-interface Props {
-  dimensionScores: Record<number, number>;
-}
-
-// Category ranges for computing averages
-const CAT_RANGES: Record<string, [number, number]> = {
-  epistemology:  [4, 13],
-  spirituality:  [14, 28],
-  morality:      [29, 43],
-  politics:      [44, 63],
-  social:        [64, 78],
-  economics:     [79, 88],
-  science_tech:  [89, 98],
-  education:     [99, 103],
-  health:        [104, 108],
-  psychology:    [109, 118],
-  relationships: [119, 127],
+const CAT_ORDER = ['philosophy', 'religion', 'psychology', 'relationships', 'society', 'economics', 'science_tech', 'politics', 'life'];
+const CAT_SHORT: Record<string, string> = {
+  philosophy: 'Philosophy', religion: 'Religion', psychology: 'Psychology',
+  relationships: 'Relationships', society: 'Society', economics: 'Economics',
+  science_tech: 'Sci & Tech', politics: 'Politics', life: 'Life',
 };
 
-export default function RadarChart({ dimensionScores }: Props) {
-  const catKeys = Object.keys(CATEGORIES);
+const DOMAIN_AXES: Record<string, { left: string; right: string; mid: string }> = {
+  philosophy:    { left: 'Relativist',   right: 'Absolutist',      mid: 'Mixed epistemic'  },
+  religion:      { left: 'Secular',      right: 'Spiritual',       mid: 'Open spiritual'   },
+  psychology:    { left: 'Determinist',  right: 'Autonomous',      mid: 'Compatibilist'    },
+  relationships: { left: 'Fluid',        right: 'Traditional',     mid: 'Contextual'       },
+  society:       { left: 'Collectivist', right: 'Individualist',   mid: 'Balanced social'  },
+  economics:     { left: 'Progressive',  right: 'Market-oriented', mid: 'Mixed economic'   },
+  science_tech:  { left: 'Tech-skeptic', right: 'Techno-optimist', mid: 'Tech-pragmatist'  },
+  politics:      { left: 'Progressive',  right: 'Conservative',    mid: 'Centrist'         },
+  life:          { left: 'Structured',   right: 'Spontaneous',     mid: 'Balanced'         },
+};
 
-  const averages = catKeys.map(cat => {
-    const [lo, hi] = CAT_RANGES[cat];
-    let sum = 0, count = 0;
-    for (let i = lo; i <= hi; i++) {
-      if (dimensionScores[i] !== undefined) {
-        sum += dimensionScores[i];
-        count++;
-      }
+function domainLabel(cat: string, avg: number): string {
+  const axis = DOMAIN_AXES[cat];
+  if (!axis || avg == null) return '—';
+  if (avg <= 0.22) return `Strongly ${axis.left}`;
+  if (avg <= 0.40) return axis.left;
+  if (avg <= 0.60) return axis.mid;
+  if (avg <= 0.78) return axis.right;
+  return `Strongly ${axis.right}`;
+}
+
+interface HistoryEntry {
+  probeCategory: string;
+  value: number;
+}
+
+interface Props {
+  history: HistoryEntry[];
+}
+
+export default function RadarChart({ history }: Props) {
+  // Compute category averages from history (value 0-1 scale)
+  const buckets: Record<string, number[]> = {};
+  for (const h of history) {
+    const cat = h.probeCategory || 'life';
+    if (!buckets[cat]) buckets[cat] = [];
+    buckets[cat].push(h.value);
+  }
+  const avgs: Record<string, number | null> = {};
+  for (const cat of CAT_ORDER) {
+    if (buckets[cat] && buckets[cat].length > 0) {
+      avgs[cat] = buckets[cat].reduce((s, v) => s + v, 0) / buckets[cat].length;
+    } else {
+      avgs[cat] = null;
     }
-    return count > 0 ? sum / count : 5;
-  });
+  }
+
+  const labels = CAT_ORDER.map(c => CAT_SHORT[c] || c);
+  const dataVals = CAT_ORDER.map(c => avgs[c] != null ? Math.round(avgs[c]! * 100) : null);
+  const radarData = dataVals.map(v => v ?? 50);
+  const hasData = dataVals.filter(v => v != null).length;
+
+  const subtitle = hasData < 3
+    ? `Answer more probes to fill the radar (${hasData}/${CAT_ORDER.length} categories)`
+    : `${hasData} of ${CAT_ORDER.length} categories mapped`;
 
   const data = {
-    labels: catKeys.map(k => CATEGORIES[k].label),
+    labels,
     datasets: [{
-      data: averages,
-      backgroundColor: 'rgba(108, 143, 255, 0.15)',
-      borderColor: '#6c8fff',
+      label: 'Your Position',
+      data: radarData,
+      backgroundColor: 'rgba(108, 99, 255, 0.15)',
+      borderColor: 'rgba(108, 99, 255, 0.8)',
+      pointBackgroundColor: CAT_ORDER.map(c => {
+        const v = avgs[c];
+        if (v == null) return 'rgba(255,255,255,0.15)';
+        return v >= 0.6 ? '#44ff88' : v <= 0.4 ? '#ff4444' : '#aaaaaa';
+      }),
+      pointRadius: 5,
+      pointHoverRadius: 7,
       borderWidth: 2,
-      pointBackgroundColor: '#6c8fff',
-      pointBorderColor: '#fff',
-      pointBorderWidth: 1,
-      pointRadius: 4,
     }],
   };
 
   const options = {
     responsive: true,
-    plugins: { legend: { display: false } },
+    animation: { duration: 600, easing: 'easeInOutQuart' as const },
     scales: {
       r: {
-        min: 0,
-        max: 9,
+        min: 0, max: 100,
         ticks: {
-          stepSize: 3,
-          color: 'rgba(255,255,255,0.3)',
+          stepSize: 25,
+          color: 'rgba(255,255,255,0.2)',
           backdropColor: 'transparent',
-          font: { size: 10 },
+          font: { size: 9, family: "'Space Mono', monospace" },
+          callback: (v: number) => v === 50 ? 'Neutral' : v === 0 ? 'False' : v === 100 ? 'True' : '',
         },
-        grid: { color: 'rgba(255,255,255,0.08)' },
-        angleLines: { color: 'rgba(255,255,255,0.08)' },
+        grid: { color: 'rgba(255,255,255,0.07)' },
+        angleLines: { color: 'rgba(255,255,255,0.07)' },
         pointLabels: {
           color: 'rgba(255,255,255,0.6)',
-          font: { size: 10 },
+          font: { size: 11, family: "'DM Sans', sans-serif" },
         },
+      },
+    },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: (ctx: any) => {
+            const cat = CAT_ORDER[ctx.dataIndex];
+            const avg = avgs[cat];
+            const cnt = (buckets[cat] || []).length;
+            if (avg == null) return ' No data yet';
+            const pct = Math.round(avg * 100);
+            const lbl = domainLabel(cat, avg);
+            return ` ${lbl} (${pct}%) · ${cnt} response${cnt !== 1 ? 's' : ''}`;
+          },
+        },
+        backgroundColor: 'rgba(20,20,40,0.95)',
+        titleColor: '#fff',
+        bodyColor: 'rgba(255,255,255,0.7)',
+        borderColor: 'rgba(108,99,255,0.4)',
+        borderWidth: 1,
       },
     },
   };
 
-  return <Radar data={data} options={options} />;
+  return (
+    <div>
+      <div style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12,
+      }}>
+        <span style={{
+          fontSize: 11, fontFamily: "'Space Mono', monospace", textTransform: 'uppercase',
+          letterSpacing: 1.5, color: 'rgba(255,255,255,0.5)',
+        }}>
+          World View Radar
+        </span>
+        <span style={{
+          fontSize: 10, fontFamily: "'Space Mono', monospace", textTransform: 'uppercase',
+          letterSpacing: 1, color: 'rgba(108,143,255,0.6)',
+        }}>
+          {subtitle}
+        </span>
+      </div>
+      <Radar data={data} options={options as any} />
+    </div>
+  );
 }
