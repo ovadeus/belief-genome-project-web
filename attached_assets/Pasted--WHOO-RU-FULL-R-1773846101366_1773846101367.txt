@@ -1,0 +1,734 @@
+
+================================================================================
+  WHOO RU — FULL REPLIT BUILD PROMPT
+  Comprehensive Site Specification v1.0
+================================================================================
+
+Build a full-stack website called "WhooRU" — a platform presenting a
+self-knowledge framework, desktop application, and research publication.
+The site must be production-quality, mobile-responsive, and visually
+striking with a dark, premium aesthetic (deep navy/black backgrounds,
+electric blue accents, clean sans-serif typography).
+
+The name "WhooRU" is a reference to the dramatic moment in The Wizard of Oz
+when the Wizard turns to Dorothy and her companions and demands to know:
+"Who are you?" — a stark, startling reminder that facing and expressing
+who we truly are is one of the most confronting experiences a human being
+can have. The brand is serious yet playful. Pronounced "Hoo-Roo."
+
+--------------------------------------------------------------------------------
+TECH STACK
+--------------------------------------------------------------------------------
+
+- Frontend:   React (with React Router for navigation)
+- Backend:    Node.js + Express
+- Database:   PostgreSQL (via Replit's built-in DB or Neon)
+- Auth:       JWT-based session auth for admin area
+- Email:      Nodemailer or Sendgrid for subscription confirmations
+- Animation:  Three.js r158+ with EffectComposer + UnrealBloomPass
+- Charting:   D3.js (for belief network globe visualization)
+- Uploads:    Multer (for blog featured images)
+- Styling:    Tailwind CSS
+- Deployment: Replit always-on
+
+--------------------------------------------------------------------------------
+DESIGN SYSTEM
+--------------------------------------------------------------------------------
+
+Colors:
+  Background:        #0a0a0f  (near black)
+  Surface / Cards:   #12121a
+  Primary Accent:    #6c8fff  (electric blue)
+  Secondary Accent:  #a78bfa  (soft violet)
+  Tertiary Accent:   #22d3ee  (cyan / teal)
+  Text Primary:      #f0f0f5
+  Text Muted:        #6b7280
+  Danger:            #ef4444
+
+Typography:
+  Headings: Inter (bold/extrabold weights)
+  Body:     system-ui / Inter Regular
+  Mono:     JetBrains Mono (code blocks, dimension labels)
+
+Components:
+  Border radius: 12px cards, 8px buttons
+  Hover states:  subtle glow on accent color elements (box-shadow with accent)
+  Buttons:       primary = solid electric blue, secondary = violet outline,
+                 tertiary = text link with chevron arrow
+
+Logo:
+  "WhooRU" in bold white — the "?" styled in electric blue (#6c8fff)
+  Include a small brain icon (SVG) to the left of the wordmark
+
+--------------------------------------------------------------------------------
+PAGES & ROUTES
+--------------------------------------------------------------------------------
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. HOME  ( / )
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+HERO SECTION — Full screen, dark background with Three.js Triple Helix
+animation (see full animation spec below).
+
+Left side (desktop): Large "WhooRU?" heading, tagline, two CTAs:
+  → [Download the App — Free for macOS]   (primary button)
+  → [Join the Early Bird Book List]        (secondary button)
+
+Text fades in on load: tagline at 0.8s, CTAs at 1.2s, ease-out cubic.
+
+On mobile: helix centered behind text, reduced scale, dark gradient overlay
+on left ensures text legibility.
+
+---
+
+SECTION: "What is WhooRU?"
+
+Brief philosophical introduction. Copy:
+
+  There is a moment in The Wizard of Oz — dramatic, thundering, impossible
+  to ignore — when the great Wizard turns to Dorothy and her companions and
+  demands to know: "Who are you?"
+
+  The room shakes. Smoke fills the air. And for just a moment, everyone
+  freezes.
+
+  Because being truly asked that question — and being expected to actually
+  answer it — is one of the most startling experiences a human being can face.
+
+  We spend our entire lives answering to the world. Very few of us ever
+  stop to answer to ourselves.
+
+  WhooRU is a self-knowledge framework, a desktop application, and a growing
+  body of research dedicated to one deceptively simple mission: mapping who
+  you actually are — at the level of your beliefs, values, and world view.
+
+  Not who you were told to be. Not who you perform for others. Not the
+  curated version that exists on social media.
+
+  The real one. The layered one. The one behind the curtain.
+
+  Through a proprietary Belief Genome system — built on 124 psychological
+  dimensions — WhooRU captures the architecture of your inner world with a
+  depth and precision that no personality test, therapy tool, or self-help
+  framework has attempted before.
+
+---
+
+SECTION: "The Framework" — Three column feature overview
+
+Column 1: Belief Genome
+  Icon: DNA strand
+  Text: 124 psychological dimensions mapped, weighted, and visualized
+        as a living portrait of your inner world.
+
+Column 2: Self Mapping
+  Icon: Radar / target
+  Text: Track how your beliefs evolve over time. See patterns emerge.
+        Understand the architecture beneath your decisions.
+
+Column 3: AI Alignment
+  Icon: Brain / circuit
+  Text: The foundation for genuine personal AI alignment — companions
+        that know not just your preferences, but your actual world view.
+
+---
+
+SECTION: "The Forecaster" — You Cannot Change What You Cannot See Coming
+
+Copy:
+
+  Self-knowledge is not merely retrospective.
+
+  Understanding who you are — your belief architecture, your psychological
+  dimensions, your core world view — gives you something far more powerful
+  than insight into your past. It gives you the ability to see your future
+  responses before they happen.
+
+  WhooRU's Belief Forecaster is a predictive engine built into the core of
+  the framework. Feed it a question — a moral dilemma, a life decision, a
+  social challenge, a philosophical probe — and it returns a prediction of
+  how you are likely to respond, based on the accumulated architecture of
+  your belief genome.
+
+  Not a guess. A forecast. Derived from your actual psychological dimensions,
+  weighted by depth of data, and refined every time you engage with the system.
+
+  The implications are profound:
+
+    → Understand your blind spots before they become regrets
+    → Anticipate your reactions before high-stakes moments
+    → Identify where your stated values diverge from your actual belief patterns
+    → Track how your beliefs evolve over time — and why
+
+  Because here is the uncomfortable truth most self-help frameworks avoid:
+  knowing who you are today is not enough.
+
+  The person you are becoming — shaped by experience, by relationships, by
+  the slow drift of culture — is already in motion. The Forecaster makes
+  that motion visible.
+
+Visual: animated CSS/JS component showing a belief slider moving toward a
+predicted position with confidence indicator dots. Style matches the app's
+forecaster UI — dark card, electric blue track, violet confidence dots.
+
+---
+
+SECTION: "This Is Bigger Than You" — The Wicked Problems
+
+Subheadline: "Individual self-knowledge is the missing variable in every
+equation we have tried to solve."
+
+Copy:
+
+  We live in an era of wicked problems.
+
+  Climate. Polarization. Inequality. Radicalization. Mental health collapse.
+  Democratic erosion. Technological displacement. The fracturing of shared
+  reality itself.
+
+  These are not problems that yield to simple solutions. They are wicked —
+  meaning they are deeply interconnected, they resist resolution, and every
+  attempt to solve them changes the nature of the problem itself.
+
+  For decades, the world's brightest minds have attacked these challenges
+  with policy, technology, economics, and data. And yet the needle barely
+  moves.
+
+  Because we have been solving the wrong problem.
+
+  Every wicked problem humanity faces has the same root architecture: human
+  beings acting from belief systems they have never examined, in conflict
+  with other human beings acting from belief systems they have never examined,
+  at scale.
+
+  We do not disagree about the planet's future because we lack evidence.
+  The data has been in front of us for half a century — since Meadows,
+  Randers, and the Club of Rome first published The Limits to Growth in 1972
+  and laid bare the mathematical certainty of what infinite consumption on a
+  finite planet ultimately produces. The models have been refined. The
+  measurements have been taken. The warnings have grown louder with every
+  passing decade. Donella Meadows' foundational work in Thinking in Systems
+  made it undeniable: we are not facing a resource problem or a technology
+  problem — we are facing a systems problem, driven by feedback loops we
+  refuse to examine because the beliefs that sustain them are invisible
+  to us.
+
+  And still we accelerate.
+
+  Not because the science is unclear — but because our belief architecture
+  about growth, progress, human exceptionalism, and our relationship to
+  natural limits remains unexamined, unchallenged, and invisible even to
+  ourselves. We carry deep, inherited convictions that growth is inherently
+  good, that technology will always arrive in time, that the earth is a
+  resource rather than a system, and that tomorrow's problem belongs to
+  tomorrow's people. These are not facts. They are beliefs. And until we
+  can see them clearly — name them, map them, weigh them against reality —
+  no amount of data will move the needle.
+
+  The crisis is not informational. It is psychological. And it is architectural.
+
+  We do not fracture politically because bad people exist. We fracture because
+  belief patterns cluster, calcify, and amplify without any mechanism for
+  individuals to understand the architecture of their own position — let
+  alone the architecture of those they oppose.
+
+  WhooRU is building that mechanism.
+
+---
+
+PULL QUOTE — display as large typographic block, full width, centered:
+
+  "The unexamined belief does not stay private.
+   It becomes policy. It becomes culture.
+   It becomes the world your children inherit."
+
+  — WhooRU Research Framework, 2025
+
+Style: large serif or bold sans, electric blue quotation marks, dark
+surface background, subtle glow effect behind the text block.
+
+---
+
+SECTION: "What Happens When Millions Map Their Belief Genome?"
+
+Copy:
+
+  The individual application of WhooRU is powerful.
+  The collective application is civilization-altering.
+
+  Imagine a world where:
+
+    → We can map the actual belief architecture of communities, cities,
+      nations — not through polls or surveys, but through deep psychological
+      profiling at scale
+
+    → We can identify where belief patterns are converging toward dangerous
+      consensus, and where they are diverging toward irreconcilable
+      fragmentation — before either becomes a crisis
+
+    → We can see, with dimensional precision, not just what people believe,
+      but why — the underlying psychological weights that make certain beliefs
+      feel self-evident to some and incomprehensible to others
+
+    → Policymakers, educators, community leaders, and AI systems can operate
+      with genuine understanding of the psychological terrain they are
+      navigating — rather than the crude demographic proxies we currently
+      rely on
+
+  This is the long horizon of this work.
+
+  It begins with one person asking one question — honestly, deeply, without
+  the smoke and the curtain.
+
+  It begins with WhooRU?
+
+  And it scales into the most important dataset humanity has never had:
+  a living, dimensional map of what we actually believe — and where those
+  beliefs are taking us.
+
+Visual: D3.js animated globe/network graph. Nodes light up across a world
+map, connected by belief dimension threads in the brand colors (#6c8fff,
+#a78bfa, #22d3ee). Nodes pulse and connect as the user scrolls into the
+section. Gives visceral sense of global scale.
+
+---
+
+SECTION: "Three Frontiers. One Foundation."
+
+Three column layout with icons:
+
+PERSONAL SOVEREIGNTY
+  Understanding your own belief architecture is the foundation of genuine
+  autonomy. Not freedom from external constraint — but freedom from the
+  unexamined internal patterns that quietly govern every decision you make.
+
+AI ALIGNMENT
+  The artificial intelligences entering our lives — as assistants, companions,
+  advisors, and eventually physical presences — must be aligned not with
+  generic human values, but with your values. WhooRU is building the belief
+  infrastructure that makes true personal AI alignment possible for the
+  first time. Whether your AI companion serves in a productivity role, a
+  creative partnership, or an intimate personal capacity — alignment begins
+  with self-knowledge.
+
+COLLECTIVE INTELLIGENCE
+  The solutions to humanity's wicked problems will not come from data alone.
+  They will come from a new capacity to understand belief at scale — to see
+  the psychological architecture beneath our conflicts, and to navigate it
+  with precision and compassion. WhooRU is building the first framework
+  capable of delivering that understanding.
+
+---
+
+FEATURED BLOG POSTS — 3 cards, most recent posts, link to /blog
+
+---
+
+BOOK TEASER SECTION
+
+Headline: "The Book Is Coming"
+Copy: A deep-dive into the WhooRU framework, the research behind it,
+and a practical guide to mapping your own belief genome.
+CTA: [Reserve Your Early Bird Copy]
+
+---
+
+NEWSLETTER STRIP — full width, dark surface
+
+Headline: "Follow the Research"
+Subtext: "Updates on the framework, the app, and the findings.
+No noise. Only signal."
+Form: Name + Email + [Subscribe] button
+
+---
+
+FINAL CTA SECTION
+
+Headline: "The Curtain Is Already Pulled Back."
+Subheadline: "The only question is whether you are ready to look."
+
+Three CTAs:
+  1. [Download WhooRU — Free for macOS]   — primary, electric blue
+  2. [Reserve Your Copy of the Book]       — secondary, violet outline
+  3. [Follow the Research]                 — tertiary, text link + arrow
+
+---
+
+FOOTER
+
+Links: Home | About | Blog | The App | The Book | Subscribe
+Tagline: "WhooRU? — The only question that has ever really mattered."
+Copyright: © 2025 WhooRU. All rights reserved.
+Social icons: Twitter/X, LinkedIn, GitHub (links configurable in admin)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. ABOUT  ( /about )
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+- Founder bio with photo (image upload via admin settings)
+- The origin story: the Wizard of Oz moment, the startling nature of
+  genuine self-examination, how this project began
+- The research mission statement
+- Timeline of development milestones (vertical timeline component)
+- Links to blog and book
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3. BLOG  ( /blog )
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Index page:
+- Masonry or card grid layout: featured image, title, date, excerpt,
+  hashtag pills, read time
+- Filter by hashtag (click pill to filter)
+- Search bar (searches title + body)
+- Pagination: 10 posts per page
+- Featured post (most recent published) displayed full-width at top
+
+Individual post page  ( /blog/:slug ):
+- Full article with rich text rendering (Markdown supported)
+- Featured image hero
+- Author info, publish date, read time estimate
+- Hashtag pills (clickable — returns to filtered blog index)
+- Social share buttons: Twitter/X, LinkedIn, Copy Link
+- Related posts section (matched by hashtag, 3 cards)
+- Previous / Next post navigation
+- Comments: disabled for v1
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4. THE APP  ( /app )
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+- App hero: large screenshot/mockup of WhooRU desktop app
+- Feature breakdown with icons and descriptions:
+    Belief Genome        — 124-dimension psychological mapping
+    Forecaster           — Predict your future responses
+    Research Pulse       — Track topics shaping your world view
+    DNA Visualization    — See your belief architecture visually
+    Media Library        — Your transcripts, audio, research in one place
+- System requirements: macOS 12+, Apple Silicon or Intel
+- Download button (links to hosted .dmg file or GitHub release URL,
+  configurable in admin settings)
+- Version history / changelog accordion
+- FAQ accordion (populate with 6–8 common questions)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5. THE BOOK  ( /book )
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+- Book cover mockup (placeholder image, swappable via admin)
+- Description: what the book covers, who it's for, why now
+- Chapter preview teaser (first chapter or intro excerpt,
+  displayed as styled long-form text with pull quotes)
+- "Why This Book Matters" — ties directly to AI alignment future vision
+  and the wicked problems framework
+- Early Bird signup form: Name + Email + [Reserve My Copy] button
+  (stores in early_bird table, sends confirmation email)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6. SUBSCRIBE  ( /subscribe )
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+- Newsletter signup form: Name + Email
+- What subscribers receive: research updates, blog digests,
+  app release news, book progress reports
+- Success message displayed after submission
+- Duplicate email prevention with friendly error message
+- Every confirmation email includes unsubscribe link
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+7. ADMIN  ( /admin )  — PRIVATE, LOGIN REQUIRED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Admin Login  ( /admin/login ):
+  - Username + password (single admin user, credentials stored in .env)
+  - JWT token stored in httpOnly cookie, 24hr expiry
+  - Redirect to dashboard on success
+  - Failed login: generic "Invalid credentials" message (no enumeration)
+
+Admin Dashboard  ( /admin/dashboard ):
+  - Stats cards:
+      Total Newsletter Subscribers
+      Total Early Bird Signups
+      Total Blog Posts (Published / Drafts)
+      App Downloads (if tracked via download counter endpoint)
+  - Recent signups list (last 5, with source tag)
+  - Recent blog activity (last 5 posts with status)
+
+Blog Manager  ( /admin/blog ):
+  - Table: title, date, status (Draft/Published), hashtags, actions
+  - Toggle Published/Draft inline
+  - Edit button → opens Blog Editor
+  - Delete button with confirmation modal
+  - [+ New Post] button
+
+Blog Editor  ( /admin/blog/new  and  /admin/blog/edit/:id ):
+  - Rich text editor: use TipTap (preferred) or React Quill
+  - Fields:
+      Title                (text input)
+      Slug                 (auto-generated from title, manually editable)
+      Featured Image       (file upload via Multer, preview shown)
+      Excerpt              (textarea, 160 char limit with counter)
+      Body                 (rich text editor — headings, bold, italic,
+                            links, blockquotes, images, ordered/unordered
+                            lists, horizontal rules)
+      Hashtags             (tag input — type and press Enter, displayed
+                            as removable pills)
+      Status               (toggle: Draft / Published)
+      Publish Date         (date/time picker — can schedule future publish)
+  - [Preview] button — opens post in new tab as it will appear live
+  - [Save Draft] and [Publish] buttons
+  - Auto-save draft every 60 seconds with "Saved" indicator
+
+Subscribers  ( /admin/subscribers ):
+  - Table: Name, Email, Signup Date, Source (newsletter / book / app)
+  - Search by name or email
+  - Filter by source
+  - [Export CSV] button — downloads all subscribers as .csv
+  - Delete subscriber (with confirmation)
+  - Pagination: 25 per page
+
+Early Bird List  ( /admin/earlybird ):
+  - Table: Name, Email, Signup Date
+  - [Export CSV] button
+  - Delete entry (with confirmation)
+  - Total count displayed prominently
+
+Settings  ( /admin/settings ):
+  - Change admin password (requires current password)
+  - Site tagline (editable, displayed in footer)
+  - App download link URL (for the .dmg on /app page)
+  - Social media URLs: Twitter/X, LinkedIn, GitHub
+  - Founder bio photo upload
+  - Book cover image upload
+
+--------------------------------------------------------------------------------
+DATABASE SCHEMA
+--------------------------------------------------------------------------------
+
+Table: blog_posts
+  id               SERIAL PRIMARY KEY
+  title            VARCHAR(255) NOT NULL
+  slug             VARCHAR(255) UNIQUE NOT NULL
+  excerpt          TEXT
+  body             TEXT
+  featured_image   VARCHAR(500)
+  hashtags         TEXT[]
+  status           VARCHAR(20) DEFAULT 'draft'   -- 'draft' or 'published'
+  published_at     TIMESTAMP
+  created_at       TIMESTAMP DEFAULT NOW()
+  updated_at       TIMESTAMP DEFAULT NOW()
+  read_time_mins   INTEGER
+
+Table: subscribers
+  id               SERIAL PRIMARY KEY
+  name             VARCHAR(255)
+  email            VARCHAR(255) UNIQUE NOT NULL
+  source           VARCHAR(50)    -- 'newsletter', 'book', 'app'
+  created_at       TIMESTAMP DEFAULT NOW()
+  is_active        BOOLEAN DEFAULT TRUE
+
+Table: early_bird
+  id               SERIAL PRIMARY KEY
+  name             VARCHAR(255)
+  email            VARCHAR(255) UNIQUE NOT NULL
+  created_at       TIMESTAMP DEFAULT NOW()
+
+Table: admin_users
+  id               SERIAL PRIMARY KEY
+  username         VARCHAR(100) UNIQUE NOT NULL
+  password_hash    VARCHAR(255) NOT NULL
+  last_login       TIMESTAMP
+
+Table: site_settings
+  key              VARCHAR(100) PRIMARY KEY
+  value            TEXT
+
+--------------------------------------------------------------------------------
+HERO ANIMATION — THREE.JS TRIPLE HELIX
+--------------------------------------------------------------------------------
+
+The homepage hero section must feature a full-screen, real-time 3D triple
+helix animation built with Three.js. This is the visual centerpiece of the
+entire site and must feel cinematic, scientific, and alive.
+
+STRUCTURE:
+  - Three intertwining DNA-style helical strands (three — not two —
+    referencing the app's Triple Helix visualization system)
+  - Each strand: ~120 luminous node spheres connected by thin cylindrical
+    or line segments
+  - Cross-bridge connectors between strands at regular intervals, like base
+    pairs — these pulse with traveling light periodically
+  - The entire helix rotates slowly on its vertical Y-axis (~0.3 RPM),
+    giving a majestic, unhurried sense of scale
+  - Subtle upward drift — the helix slowly rises through space, looping
+    seamlessly
+
+COLORS:
+  Strand 1:        #6c8fff  (electric blue)   — Cognitive dimensions
+  Strand 2:        #a78bfa  (soft violet)     — Emotional dimensions
+  Strand 3:        #22d3ee  (cyan / teal)     — Philosophical dimensions
+  Cross-bridges:   #ffffff at 30% opacity, pulsing to 80% in a traveling
+                   wave that moves upward along the helix
+  Background:      #0a0a0f with subtle radial glow at center (blue, ~8% opacity)
+
+PARTICLE FIELD:
+  - 300–500 tiny floating particles scattered in the background
+  - Size: 1–2px, white at 15–25% opacity
+  - Slow random drift — creates a "deep space / quantum field" atmosphere
+
+LIGHTING & GLOW:
+  - Each node sphere: bloom/glow effect via Three.js UnrealBloomPass
+    (EffectComposer post-processing pipeline)
+  - Bloom settings: strength 1.2, radius 0.4, threshold 0.3
+  - Glow intensifies on the traveling cross-bridge pulse wave
+  - No hard shadows — everything emissive/additive
+
+CAMERA:
+  - Slight auto-orbit: camera circles the helix very slowly (2–3°/second)
+  - Tilt: camera sits slightly below center looking up — monumental quality
+  - Mouse parallax: helix tilts slightly toward cursor position (max 5°),
+    making it feel responsive and alive
+  - Field of view: 60 degrees
+
+SCALE & POSITIONING:
+  - Desktop: helix occupies right 60% of hero
+  - Left side: dark gradient fade (#0a0a0f → transparent) for text legibility
+  - Mobile: helix centered, reduced scale, text overlaid with gradient
+  - Helix extends beyond viewport top and bottom — implying infinite scale
+
+SUBTLE DETAIL — NEURON FIRE:
+  - Every 8–12 seconds, one random node on any strand briefly "activates":
+    flares to full white brightness, sends a ripple of increased glow along
+    its strand for ~1.5 seconds, then fades back
+  - Timing is organic and unpredictable — not mechanical or looping
+
+BACKGROUND DETAIL:
+  - Very faint wireframe sphere (opacity ~5%) behind the helix, rotating
+    in the opposite direction — gives depth, implies the helix exists
+    inside a larger system
+
+HELIX GEOMETRY — generate programmatically:
+  x = radius * cos(t + phaseOffset)
+  y = t * heightScale
+  z = radius * sin(t + phaseOffset)
+  phaseOffset differs by (2π/3) for each of the three strands
+  Cross-bridges drawn between corresponding t-values on adjacent strands
+  every N steps
+
+PULSE WAVE:
+  Animate traveling pulse by cycling emissive intensity of cross-bridge
+  meshes using a sine wave offset by their index position
+
+PERFORMANCE:
+  - Use requestAnimationFrame with delta time for consistent speed
+  - Reduce particle count to 150 on mobile
+  - Detect low-performance devices (navigator.hardwareConcurrency < 4)
+    and fall back to a CSS-animated static helix illustration
+  - Target 60fps on modern hardware, graceful degradation to 30fps
+
+LOADING STATE:
+  - Before Three.js initializes: CSS pulsing placeholder — three vertical
+    lines in brand colors (#6c8fff, #a78bfa, #22d3ee) with breathing
+    opacity animation
+  - Fade canvas in over 600ms once scene is ready
+
+SCROLL BEHAVIOR:
+  As the user scrolls down from the hero, the helix gradually shrinks and
+  migrates to a small persistent position in the top-right corner of the
+  viewport (like a living logo), scaled down to ~80px, continuing to
+  rotate. This uses a scroll event listener + CSS transform transition.
+  On mobile this persistent helix is hidden to preserve performance.
+
+--------------------------------------------------------------------------------
+GLOBAL FEATURES & BEHAVIOR
+--------------------------------------------------------------------------------
+
+Forms:
+  - Client-side + server-side validation on all forms
+  - Duplicate email prevention with user-friendly message
+  - Success/error toast notifications (top-right, auto-dismiss 4s)
+  - Rate limiting on all form submissions (express-rate-limit: 5 req/15min)
+
+Blog:
+  - Hashtags stored as array, rendered as clickable pills
+  - Clicking a hashtag filters the blog index
+  - Slugs: auto-generated from title (kebab-case), editable in admin
+  - Read time: auto-calculated from word count (avg 200 wpm)
+
+SEO:
+  - Each page: unique <title> and <meta description>
+  - Blog posts: Open Graph tags (og:title, og:description, og:image)
+    for rich social sharing previews
+  - Canonical URLs on all pages
+  - robots.txt: allow all except /admin
+
+Mobile:
+  - Fully responsive at 320px, 768px, 1024px, 1440px breakpoints
+  - Hamburger navigation on mobile
+  - Touch-friendly tap targets (min 44px)
+
+Security:
+  - All /admin routes protected by JWT middleware
+  - Rate limiting on login endpoint (5 attempts / 15min, then lockout)
+  - Input sanitization on all text fields (prevent XSS)
+  - SQL injection prevention via parameterized queries
+  - CORS configured for production domain only
+  - Admin password stored as bcrypt hash (rounds: 12)
+  - httpOnly, Secure, SameSite=Strict cookies for JWT
+
+Environment Variables (.env):
+  DATABASE_URL
+  JWT_SECRET
+  ADMIN_USERNAME
+  ADMIN_PASSWORD_HASH
+  SENDGRID_API_KEY   (or SMTP_HOST / SMTP_PORT / SMTP_USER / SMTP_PASS)
+  SITE_URL
+  APP_DOWNLOAD_URL
+
+--------------------------------------------------------------------------------
+NAVIGATION
+--------------------------------------------------------------------------------
+
+Public navbar:
+  Logo (WhooRU?) | Home | About | Blog | The App | The Book | Subscribe
+  Sticky on scroll, slight backdrop blur when scrolled
+
+Admin sidebar:
+  🧠 WhooRU Admin
+  ─────────────────
+  Dashboard
+  Blog Posts
+  Subscribers
+  Early Bird List
+  Settings
+  ─────────────────
+  Logout
+
+--------------------------------------------------------------------------------
+BUILD ORDER
+--------------------------------------------------------------------------------
+
+Build in this sequence:
+
+1. Database setup — create all tables, run migrations
+2. Backend — Express server, all API routes, JWT auth middleware
+3. Admin auth — login, JWT issuance, protected route middleware
+4. Admin dashboard + blog editor (with TipTap rich text)
+5. Public pages — Home (without animation first), About, Blog, App, Book,
+   Subscribe
+6. Three.js hero animation — implement last, after all pages work
+7. D3.js globe visualization — implement after hero animation
+8. Email confirmation flows — newsletter + early bird
+9. CSV export endpoints
+10. SEO meta tags, Open Graph, robots.txt
+11. Performance pass — mobile optimization, lazy loading, fallbacks
+12. Seed data — one admin user, 3 sample blog posts, sample subscribers
+
+Provide complete, working code for every step.
+Do not use placeholder "TODO" comments — implement every feature fully.
+All components should be in separate files with clean imports.
+
+================================================================================
+  END OF PROMPT
+================================================================================

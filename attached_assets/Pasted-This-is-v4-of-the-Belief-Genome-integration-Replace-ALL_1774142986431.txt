@@ -1,0 +1,35 @@
+This is v4 of the Belief Genome integration. Replace ALL files under:
+
+artifacts/whoo-ru/src/components/genome/
+artifacts/whoo-ru/src/pages/genome/
+artifacts/api-server/src/routes/genome-auth.ts, genome-probes.ts, genome-data.ts
+lib/belief-engine/src/
+lib/db/src/schema/users.ts
+What changed in v4:
+
+Country codes switched from 2-letter alpha (US, GB) to 3-digit ISO numeric (840, 826, 392). The DNA string is now 136 characters (was 135). Country field in the DB should store a 3-char string. The profile dropdown shows country names but stores/displays numeric codes. Default for no country is 000.
+
+DNA string positions shifted:
+
+0-7: Identity (century, year, month, day, gender)
+8-10: Country (3-digit numeric)
+11-15: Zip/postal (5 chars)
+16-139: 124 belief dimensions
+Global nav bar (GenomeNav.tsx) — Text links with pipe separators: Belief Genome Project on left, then Probe | Dashboard | DNA | Analyze | Sync Data | Profile | [User Name] | Sign Out on right. Active link gets white text + blue underline.
+
+GenomeLayout.tsx wraps all /genome/* routes — handles nav + auth redirect. Wire routes in App.tsx like:
+
+<Route path="/genome/probe"><GenomeLayout><ProbePage /></GenomeLayout></Route>
+<Route path="/genome/dashboard"><GenomeLayout><DashboardPage /></GenomeLayout></Route>
+<Route path="/genome/dna"><GenomeLayout><DnaPage /></GenomeLayout></Route>
+<Route path="/genome/analyze"><GenomeLayout><AnalyzePage /></GenomeLayout></Route>
+<Route path="/genome/sync"><GenomeLayout><SyncPage /></GenomeLayout></Route>
+<Route path="/genome/profile"><GenomeLayout><ProfilePage /></GenomeLayout></Route>
+<Route path="/genome/login"><GenomeLayout><LoginPage /></GenomeLayout></Route>
+<Route path="/genome/register"><GenomeLayout><RegisterPage /></GenomeLayout></Route>
+
+Profile page now has editable Name field, plus the country dropdown uses 3-digit numeric codes.
+
+DB migration needed — the country_code column should accept 3 characters now (was 2). Run drizzle-kit generate and drizzle-kit migrate.
+
+Do NOT merge genome auth with admin auth. Separate systems by design for security — different user tables, different JWT tokens, different routes.
