@@ -37,7 +37,7 @@ export default function DnaPage() {
         <div>
           <h1 style={{ fontSize: 24, fontWeight: 700, color: '#fff', margin: 0 }}>Belief DNA</h1>
           <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', margin: '4px 0 0' }}>
-            Your 135-character cognitive fingerprint
+            Your 140-character cognitive fingerprint
           </p>
         </div>
         <button onClick={copyDna} style={{
@@ -88,15 +88,15 @@ export default function DnaPage() {
             <p>Century, birth year, month, day, and gender — your demographic metadata.</p>
           </div>
           <div>
-            <strong style={{ color: '#00d2d3' }}>Positions 8-9: Country</strong>
-            <p>ISO 3166-1 alpha-2 country code (e.g. US, GB, JP). Defaults to 00.</p>
+            <strong style={{ color: '#00d2d3' }}>Positions 8-10: Country</strong>
+            <p>ISO 3166-1 numeric country code (e.g. 840, 826, 392). Defaults to 000.</p>
           </div>
           <div>
-            <strong style={{ color: '#f5a623' }}>Positions 10-14: Zip/Postal</strong>
+            <strong style={{ color: '#f5a623' }}>Positions 11-15: Zip/Postal</strong>
             <p>5-character postal code for geographic belief analysis. Defaults to 00000.</p>
           </div>
           <div>
-            <strong style={{ color: '#6c8fff' }}>Positions 15-138: Beliefs</strong>
+            <strong style={{ color: '#6c8fff' }}>Positions 16-139: Beliefs</strong>
             <p>124 belief dimensions scored 0-9. Each dot ({'\u00B7'}) is an unexplored dimension.</p>
           </div>
         </div>

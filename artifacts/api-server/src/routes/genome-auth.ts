@@ -5,13 +5,14 @@
 import { Router, Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { db } from '@workspace/db';
-import { users } from '@workspace/db';
+import { db } from '@workspace/db'; // your existing Drizzle db instance
+import { users } from '@workspace/db/schema';
 import { eq } from 'drizzle-orm';
 
 const router = Router();
 
-const JWT_SECRET = process.env.GENOME_JWT_SECRET || process.env.JWT_SECRET || 'change-me';
+const JWT_SECRET = process.env.GENOME_JWT_SECRET || process.env.JWT_SECRET;
+if (!JWT_SECRET) throw new Error('GENOME_JWT_SECRET or JWT_SECRET must be set');
 const TOKEN_EXPIRY = '30d';
 
 // ── Middleware: extract genome user from JWT ────────────────

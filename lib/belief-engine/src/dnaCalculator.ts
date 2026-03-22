@@ -1,16 +1,16 @@
-// Calculates the 135-character Belief DNA string from user responses
+// Calculates the 140-character Belief DNA string from user responses
 // Pure domain logic — no framework dependencies
 import { DIMENSIONS } from './beliefDNA';
 
-// ── DNA String format (135 characters) ────────────────────────
+// ── DNA String format (140 characters) ────────────────────────
 // Pos 0:      Century (0=1900s, 1=2000s)
 // Pos 1-2:    Birth year within century (00-99)
 // Pos 3-4:    Birth month (01-12)
 // Pos 5-6:    Birth day (01-31)
 // Pos 7:      Sex (0=F,1=M,2=Intersex,5=PNS,9=NB)
-// Pos 8-9:    Country code (ISO 3166-1 alpha-2, e.g. "US", "GB")
-// Pos 10-14:  Zip/postal code (5 chars, "00000" if unavailable)
-// Pos 15-138: 124 belief dimensions (0-9 each, ·=unresolved)
+// Pos 8-10:   Country code (ISO 3166-1 numeric, e.g. 840=US, 826=GB)
+// Pos 11-15:  Zip/postal code (5 chars, "00000" if unavailable)
+// Pos 16-139: 124 belief dimensions (0-9 each, ·=unresolved)
 
 export interface Accumulator {
   sum: number;
@@ -54,9 +54,9 @@ export function buildDNAString(dimensionScores: Record<number, number>, userMeta
   const birthDay = bdRaw ? String(parseInt(String(bdRaw))).padStart(2, '0') : '00';
   const sex = meta.sex ?? '5';
 
-  // Geographic identity
+  // Geographic identity — ISO 3166-1 numeric (3-digit)
   const countryRaw = meta.countryCode || '';
-  const countryCode = countryRaw ? String(countryRaw).toUpperCase().slice(0, 2).padEnd(2, '0') : '00';
+  const countryCode = countryRaw ? String(countryRaw).replace(/[^0-9]/g, '').slice(0, 3).padStart(3, '0') : '000';
   const zipRaw = meta.zipCode || '';
   const zipCode = zipRaw ? String(zipRaw).replace(/[^A-Za-z0-9]/g, '').slice(0, 5).padEnd(5, '0') : '00000';
 

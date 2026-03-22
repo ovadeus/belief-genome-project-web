@@ -29,7 +29,7 @@ export default function AnalyzePage() {
       </h1>
       <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)', marginBottom: 32, lineHeight: 1.6 }}>
         Rebuild your Belief DNA from scratch. This recalculates all 124 dimension scores
-        from your complete response history and regenerates your 135-character DNA string.
+        from your complete response history and regenerates your 140-character DNA string.
       </p>
 
       {/* Trigger */}

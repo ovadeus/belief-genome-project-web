@@ -3,7 +3,7 @@
 
 import { Router, Request, Response } from 'express';
 import { db } from '@workspace/db';
-import { probes, beliefResponses, dimensionScores } from '@workspace/db';
+import { probes, beliefResponses, dimensionScores } from '@workspace/db/schema';
 import { eq, and, sql } from 'drizzle-orm';
 import {
   PROBE_BANK, QUALITY_PRESETS,

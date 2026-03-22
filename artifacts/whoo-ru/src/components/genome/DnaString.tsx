@@ -1,4 +1,4 @@
-// 135-character Belief DNA string with color-coded segments
+// 140-character Belief DNA string with color-coded segments
 
 interface Props {
   dnaString: string;
@@ -8,9 +8,9 @@ interface Props {
 }
 
 function charColor(ch: string, pos: number): string {
-  if (pos <= 7) return '#3dd68c';     // Identity
-  if (pos <= 9) return '#00d2d3';     // Country
-  if (pos <= 14) return '#f5a623';    // Zip
+  if (pos <= 7) return '#3dd68c';      // Identity (0-7)
+  if (pos <= 10) return '#00d2d3';     // Country (8-10)
+  if (pos <= 15) return '#f5a623';     // Zip (11-15)
   if (ch === '\u00B7' || ch === '.' || ch === '_') return 'rgba(255,255,255,0.15)';
   const n = parseInt(ch);
   if (isNaN(n)) return 'rgba(255,255,255,0.4)';
@@ -24,8 +24,6 @@ function charColor(ch: string, pos: number): string {
 }
 
 export default function DnaString({ dnaString, dimensionsCovered, totalResponses, overallConfidence }: Props) {
-  const countryCode = dnaString.slice(8, 10) === '00' ? '' : dnaString.slice(8, 10);
-
   return (
     <div>
       {/* Stats */}
@@ -44,12 +42,6 @@ export default function DnaString({ dnaString, dimensionsCovered, totalResponses
           <div style={{ fontSize: 20, fontFamily: 'monospace', color: '#f5a623' }}>{overallConfidence}%</div>
           <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase' }}>Confidence</div>
         </div>
-        {countryCode && (
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 20, fontFamily: 'monospace', color: '#00d2d3' }}>{countryCode}</div>
-            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase' }}>Country</div>
-          </div>
-        )}
       </div>
 
       {/* DNA String display */}
@@ -69,9 +61,9 @@ export default function DnaString({ dnaString, dimensionsCovered, totalResponses
               i <= 4 ? 'Birth Month' :
               i <= 6 ? 'Birth Day' :
               i === 7 ? 'Sex' :
-              i <= 9 ? 'Country Code' :
-              i <= 14 ? 'Zip Code' :
-              `Dimension ${i - 11} (Position ${i})`
+              i <= 10 ? 'Country Code (ISO numeric)' :
+              i <= 15 ? 'Zip Code' :
+              `Dimension ${i - 15} (Position ${i})`
             }
           >
             {ch}
@@ -85,9 +77,9 @@ export default function DnaString({ dnaString, dimensionsCovered, totalResponses
         fontSize: 9, color: 'rgba(255,255,255,0.4)', flexWrap: 'wrap',
       }}>
         <span style={{ color: '#3dd68c' }}>Identity (0-7)</span>
-        <span style={{ color: '#00d2d3' }}>Country (8-9)</span>
-        <span style={{ color: '#f5a623' }}>Zip (10-14)</span>
-        <span>Beliefs (15-138)</span>
+        <span style={{ color: '#00d2d3' }}>Country (8-10)</span>
+        <span style={{ color: '#f5a623' }}>Zip (11-15)</span>
+        <span>Beliefs (16-139)</span>
       </div>
 
       <div style={{

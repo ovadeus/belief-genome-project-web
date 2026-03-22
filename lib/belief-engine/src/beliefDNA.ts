@@ -21,10 +21,10 @@ export interface Category {
 // Position 3-4:  Birth month (01-12)
 // Position 5-6:  Birth day (01-31)
 // Position 7:    Sex (0=F, 1=M, 2=Intersex, 5=PNS, 9=NB)
-// Position 8-9:  Country code (ISO 3166-1 alpha-2)
-// Position 10-14: Zip/postal code (5 chars)
+// Position 8-10: Country code (ISO 3166-1 numeric, e.g. 840=US, 826=GB)
+// Position 11-15: Zip/postal code (5 chars)
 
-// ── Belief Dimensions (positions 15-138) ─────────────────────
+// ── Belief Dimensions (positions 16-139) ─────────────────────
 // Scale: 0=Strongly False/Disagree, 5=Neutral/Superposition, 9=Strongly True/Agree
 
 export const DIMENSIONS: Dimension[] = [

@@ -80,13 +80,13 @@ All genome pages wrapped in `GenomeLayout` which provides sticky `GenomeNav` bar
 - **Login** (`/genome/login`): Sign in to genome (no nav shown)
 - **Probe** (`/genome/probe`): Answer belief probes (core interaction)
 - **Dashboard** (`/genome/dashboard`): 6-tab dashboard — Triple Helix, Radar, Breakdown, Timeline, History, Forecaster
-- **Belief DNA** (`/genome/dna`): Full 135-char DNA string viewer with copy button and how-it-works legend
+- **Belief DNA** (`/genome/dna`): Full 140-char DNA string viewer with copy button and how-it-works legend
 - **Analyze** (`/genome/analyze`): Full DNA rebuild from all responses, shows dimensions covered and confidence
 - **Sync Data** (`/genome/sync`): Sync status (Chrome extension, website, desktop counts) + manual sync trigger
-- **Profile** (`/genome/profile`): Editable name, gender, DOB, country dropdown (55 countries), zip code, live DNA prefix preview
+- **Profile** (`/genome/profile`): Editable name, gender, DOB, country dropdown (55 countries, ISO 3166-1 numeric 3-digit codes), zip code, live DNA prefix preview
 
 #### GenomeNav (sticky nav bar on all authenticated genome pages)
-Links: Dashboard | DNA | Analyze | Sync Data | Profile | [User Name] | Sign Out
+Text links with pipe separators: Belief Genome Project (left) | Probe | Dashboard | DNA | Analyze | Sync Data | Profile | [User Name] | Sign Out (right). Active link: white text + blue underline.
 
 #### Genome Auth
 - Separate `users` table, JWT tokens via `GENOME_JWT_SECRET`
@@ -96,9 +96,10 @@ Links: Dashboard | DNA | Analyze | Sync Data | Profile | [User Name] | Sign Out
 
 #### Belief Engine (`@belief-genome/engine`)
 Pure domain logic package with no framework deps:
-- `beliefDNA.ts`: 128-dimension framework, DIMENSIONS, CATEGORIES constants
+- `beliefDNA.ts`: 124-dimension framework (IDs 4-127), DIMENSIONS, CATEGORIES constants
 - `probeBank.ts`: 100+ categorized belief probes with dimension weights
-- `dnaCalculator.ts`: DNA string builder, dimension value calculator
+- `dnaCalculator.ts`: DNA string builder (140 chars: 16 identity prefix + 124 belief dimensions), dimension value calculator
+- DNA prefix: pos 0-7 identity, pos 8-10 country (ISO numeric 3-digit), pos 11-15 zip, pos 16-139 beliefs
 - `probeFeeds.ts`: RSS news feed → AI-classified belief probes (requires OPENAI_API_KEY)
 
 ### Database Tables

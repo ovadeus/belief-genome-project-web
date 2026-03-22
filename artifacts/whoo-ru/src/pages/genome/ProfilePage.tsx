@@ -3,36 +3,37 @@ import { useState, useEffect } from 'react';
 import { useGenomeAuth, genomeApi } from '../../components/genome/GenomeAuthContext';
 import DnaString from '../../components/genome/DnaString';
 
+// ISO 3166-1 numeric codes (3-digit) — abstract in DNA string, no identifiable letters
 const COUNTRIES = [
   { code: '', label: 'Select country...' },
-  { code: 'US', label: 'United States' }, { code: 'GB', label: 'United Kingdom' },
-  { code: 'CA', label: 'Canada' }, { code: 'AU', label: 'Australia' },
-  { code: 'DE', label: 'Germany' }, { code: 'FR', label: 'France' },
-  { code: 'JP', label: 'Japan' }, { code: 'BR', label: 'Brazil' },
-  { code: 'IN', label: 'India' }, { code: 'MX', label: 'Mexico' },
-  { code: 'KR', label: 'South Korea' }, { code: 'IT', label: 'Italy' },
-  { code: 'ES', label: 'Spain' }, { code: 'NL', label: 'Netherlands' },
-  { code: 'SE', label: 'Sweden' }, { code: 'NO', label: 'Norway' },
-  { code: 'DK', label: 'Denmark' }, { code: 'FI', label: 'Finland' },
-  { code: 'CH', label: 'Switzerland' }, { code: 'AT', label: 'Austria' },
-  { code: 'BE', label: 'Belgium' }, { code: 'IE', label: 'Ireland' },
-  { code: 'NZ', label: 'New Zealand' }, { code: 'SG', label: 'Singapore' },
-  { code: 'IL', label: 'Israel' }, { code: 'ZA', label: 'South Africa' },
-  { code: 'AR', label: 'Argentina' }, { code: 'CL', label: 'Chile' },
-  { code: 'CO', label: 'Colombia' }, { code: 'PL', label: 'Poland' },
-  { code: 'PT', label: 'Portugal' }, { code: 'RU', label: 'Russia' },
-  { code: 'CN', label: 'China' }, { code: 'TW', label: 'Taiwan' },
-  { code: 'TH', label: 'Thailand' }, { code: 'PH', label: 'Philippines' },
-  { code: 'NG', label: 'Nigeria' }, { code: 'EG', label: 'Egypt' },
-  { code: 'KE', label: 'Kenya' }, { code: 'GH', label: 'Ghana' },
-  { code: 'AE', label: 'UAE' }, { code: 'SA', label: 'Saudi Arabia' },
-  { code: 'TR', label: 'Turkey' }, { code: 'PK', label: 'Pakistan' },
-  { code: 'BD', label: 'Bangladesh' }, { code: 'ID', label: 'Indonesia' },
-  { code: 'MY', label: 'Malaysia' }, { code: 'VN', label: 'Vietnam' },
-  { code: 'UA', label: 'Ukraine' }, { code: 'RO', label: 'Romania' },
-  { code: 'CZ', label: 'Czech Republic' }, { code: 'HU', label: 'Hungary' },
-  { code: 'GR', label: 'Greece' }, { code: 'HR', label: 'Croatia' },
-  { code: 'PE', label: 'Peru' }, { code: 'EC', label: 'Ecuador' },
+  { code: '840', label: 'United States' }, { code: '826', label: 'United Kingdom' },
+  { code: '124', label: 'Canada' }, { code: '036', label: 'Australia' },
+  { code: '276', label: 'Germany' }, { code: '250', label: 'France' },
+  { code: '392', label: 'Japan' }, { code: '076', label: 'Brazil' },
+  { code: '356', label: 'India' }, { code: '484', label: 'Mexico' },
+  { code: '410', label: 'South Korea' }, { code: '380', label: 'Italy' },
+  { code: '724', label: 'Spain' }, { code: '528', label: 'Netherlands' },
+  { code: '752', label: 'Sweden' }, { code: '578', label: 'Norway' },
+  { code: '208', label: 'Denmark' }, { code: '246', label: 'Finland' },
+  { code: '756', label: 'Switzerland' }, { code: '040', label: 'Austria' },
+  { code: '056', label: 'Belgium' }, { code: '372', label: 'Ireland' },
+  { code: '554', label: 'New Zealand' }, { code: '702', label: 'Singapore' },
+  { code: '376', label: 'Israel' }, { code: '710', label: 'South Africa' },
+  { code: '032', label: 'Argentina' }, { code: '152', label: 'Chile' },
+  { code: '170', label: 'Colombia' }, { code: '616', label: 'Poland' },
+  { code: '620', label: 'Portugal' }, { code: '643', label: 'Russia' },
+  { code: '156', label: 'China' }, { code: '158', label: 'Taiwan' },
+  { code: '764', label: 'Thailand' }, { code: '608', label: 'Philippines' },
+  { code: '566', label: 'Nigeria' }, { code: '818', label: 'Egypt' },
+  { code: '404', label: 'Kenya' }, { code: '288', label: 'Ghana' },
+  { code: '784', label: 'UAE' }, { code: '682', label: 'Saudi Arabia' },
+  { code: '792', label: 'Turkey' }, { code: '586', label: 'Pakistan' },
+  { code: '050', label: 'Bangladesh' }, { code: '360', label: 'Indonesia' },
+  { code: '458', label: 'Malaysia' }, { code: '704', label: 'Vietnam' },
+  { code: '804', label: 'Ukraine' }, { code: '642', label: 'Romania' },
+  { code: '203', label: 'Czech Republic' }, { code: '348', label: 'Hungary' },
+  { code: '300', label: 'Greece' }, { code: '191', label: 'Croatia' },
+  { code: '604', label: 'Peru' }, { code: '218', label: 'Ecuador' },
 ];
 
 const inputStyle: React.CSSProperties = {
@@ -79,7 +80,7 @@ export default function ProfilePage() {
     const mm = profile.birthMonth ? String(profile.birthMonth).padStart(2, '0') : '00';
     const dd = profile.birthDay ? String(profile.birthDay).padStart(2, '0') : '00';
     const sex = profile.sex || '5';
-    const cc = profile.countryCode ? profile.countryCode.toUpperCase().slice(0, 2).padEnd(2, '0') : '00';
+    const cc = profile.countryCode ? profile.countryCode.replace(/[^0-9]/g, '').slice(0, 3).padStart(3, '0') : '000';
     const zip = profile.zipCode ? profile.zipCode.replace(/[^A-Za-z0-9]/g, '').slice(0, 5).padEnd(5, '0') : '00000';
     return `${century}${yy}${mm}${dd}${sex}${cc}${zip}`;
   })();
@@ -107,7 +108,7 @@ export default function ProfilePage() {
       <div style={{ padding: 20, borderRadius: 12, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', marginBottom: 24 }}>
         <h3 style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', marginBottom: 16 }}>Identity Metadata</h3>
         <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', marginBottom: 20 }}>
-          This data forms the prefix of your 135-character Belief DNA string.
+          This data forms the prefix of your 140-character Belief DNA string.
           Used for demographic and geographic belief analysis — never shared individually.
         </p>
 
@@ -175,8 +176,8 @@ export default function ProfilePage() {
             <strong>{previewPrefix.slice(3, 5)}</strong> month &middot;{' '}
             <strong>{previewPrefix.slice(5, 7)}</strong> day &middot;{' '}
             <strong>{previewPrefix[7]}</strong> gender &middot;{' '}
-            <strong>{previewPrefix.slice(8, 10)}</strong> country &middot;{' '}
-            <strong>{previewPrefix.slice(10, 15)}</strong> zip
+            <strong>{previewPrefix.slice(8, 11)}</strong> country &middot;{' '}
+            <strong>{previewPrefix.slice(11, 16)}</strong> zip
           </div>
         </div>
 

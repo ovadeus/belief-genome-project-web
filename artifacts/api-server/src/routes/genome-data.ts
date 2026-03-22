@@ -3,7 +3,7 @@
 
 import { Router, Request, Response } from 'express';
 import { db } from '@workspace/db';
-import { users, beliefResponses, dimensionScores, dnaSnapshots } from '@workspace/db';
+import { users, beliefResponses, dimensionScores, dnaSnapshots } from '@workspace/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { DIMENSIONS, CATEGORIES } from '@belief-genome/engine';
 import { buildDNAString, calcDimensionValue, calcConfidence } from '@belief-genome/engine';
@@ -105,8 +105,8 @@ router.put('/profile', async (req: Request, res: Response) => {
   const { userId } = (req as any).genomeUser;
   const { name, birthYear, birthMonth, birthDay, sex, countryCode, zipCode } = req.body;
 
-  // Validate country code
-  const cc = countryCode ? String(countryCode).toUpperCase().replace(/[^A-Z]/g, '').slice(0, 2) : null;
+  // Validate country code — ISO 3166-1 numeric (3 digits)
+  const cc = countryCode ? String(countryCode).replace(/[^0-9]/g, '').slice(0, 3).padStart(3, '0') : null;
   // Validate zip
   const zip = zipCode ? String(zipCode).replace(/[^A-Za-z0-9]/g, '').slice(0, 5) : null;
 
