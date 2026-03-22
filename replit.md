@@ -81,10 +81,12 @@ All genome pages wrapped in `GenomeLayout` which provides sticky `GenomeNav` bar
 - **Probe** (`/genome/probe`): Answer belief probes (core interaction)
 - **Dashboard** (`/genome/dashboard`): 6-tab dashboard — Triple Helix, Radar, Breakdown, Timeline, History, Forecaster
 - **Belief DNA** (`/genome/dna`): Full 135-char DNA string viewer with copy button and how-it-works legend
+- **Analyze** (`/genome/analyze`): Full DNA rebuild from all responses, shows dimensions covered and confidence
+- **Sync Data** (`/genome/sync`): Sync status (Chrome extension, website, desktop counts) + manual sync trigger
 - **Profile** (`/genome/profile`): Editable name, gender, DOB, country dropdown (55 countries), zip code, live DNA prefix preview
 
 #### GenomeNav (sticky nav bar on all authenticated genome pages)
-Links: Probe | Genome Analytics | Belief DNA | Profile | Sign Out
+Links: Dashboard | DNA | Analyze | Sync Data | Profile | [User Name] | Sign Out
 
 #### Genome Auth
 - Separate `users` table, JWT tokens via `GENOME_JWT_SECRET`
@@ -126,6 +128,8 @@ Pure domain logic package with no framework deps:
 - `GET/PUT /api/genome/profile`, `GET /api/genome/dimensions`
 - `POST /api/genome/snapshot`
 - `GET /api/genome/probes/next`, `POST /api/genome/probes/respond`
+- `POST /api/genome/analyze` (rebuild all dimension scores from scratch)
+- `GET /api/genome/sync/status`, `POST /api/genome/sync` (cross-platform sync)
 
 ### Key Dependencies
 - `@tanstack/react-query` for data fetching

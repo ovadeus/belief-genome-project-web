@@ -319,6 +319,178 @@ Return ONLY valid JSON, nothing else:
   }
 });
 
+// ── POST /analyze — full DNA rebuild from all responses ─────
+router.post('/analyze', async (req: Request, res: Response) => {
+  const { userId } = (req as any).genomeUser;
+
+  // Get all responses
+  const responses = await db
+    .select({
+      probeCategory: beliefResponses.probeCategory,
+      value: beliefResponses.value,
+      dimensionWeights: beliefResponses.dimensionWeights,
+    })
+    .from(beliefResponses)
+    .where(eq(beliefResponses.userId, userId));
+
+  if (responses.length === 0) {
+    return res.json({ totalResponses: 0, dimensionsCovered: 0, overallConfidence: 0, dnaString: null });
+  }
+
+  // Rebuild all accumulators from scratch
+  const accumulators: Record<number, Accumulator> = {};
+
+  for (const r of responses) {
+    const weights = r.dimensionWeights as Record<string, { direction: number; weight: number }> | null;
+    if (!weights) continue;
+
+    for (const [dimIdStr, { direction, weight }] of Object.entries(weights)) {
+      const dimId = parseInt(dimIdStr);
+      if (isNaN(dimId)) continue;
+
+      if (!accumulators[dimId]) {
+        accumulators[dimId] = { sum: 0, totalWeight: 0, count: 0 };
+      }
+
+      const normalizedValue = (r.value - 0.5) * 2 * direction; // -1 to +1
+      accumulators[dimId].sum += normalizedValue * weight;
+      accumulators[dimId].totalWeight += weight;
+      accumulators[dimId].count += 1;
+    }
+  }
+
+  // Save rebuilt scores to database
+  for (const [dimIdStr, accum] of Object.entries(accumulators)) {
+    const dimId = parseInt(dimIdStr);
+
+    // Upsert dimension score
+    const existing = await db.select().from(dimensionScores)
+      .where(eq(dimensionScores.userId, userId))
+      .then(rows => rows.find(r => r.dimensionId === dimId));
+
+    if (existing) {
+      await db.update(dimensionScores)
+        .set({ weightedSum: accum.sum, totalWeight: accum.totalWeight, count: accum.count })
+        .where(eq(dimensionScores.id, existing.id));
+    } else {
+      await db.insert(dimensionScores).values({
+        userId, dimensionId: dimId,
+        weightedSum: accum.sum, totalWeight: accum.totalWeight, count: accum.count,
+      });
+    }
+  }
+
+  // Build DNA string
+  const [user] = await db.select().from(users).where(eq(users.id, userId));
+  const dimScores: Record<number, number> = {};
+  const confidence: Record<number, number> = {};
+
+  for (const [dimIdStr, accum] of Object.entries(accumulators)) {
+    const dimId = parseInt(dimIdStr);
+    const val = calcDimensionValue(accum);
+    if (val !== null) {
+      dimScores[dimId] = val;
+      confidence[dimId] = calcConfidence(accum);
+    }
+  }
+
+  const dnaString = buildDNAString(dimScores, {
+    birthYear: user?.birthYear ?? undefined,
+    birthMonth: user?.birthMonth ?? undefined,
+    birthDay: user?.birthDay ?? undefined,
+    sex: user?.sex ?? '5',
+    countryCode: user?.countryCode ?? undefined,
+    zipCode: user?.zipCode ?? undefined,
+  });
+
+  const confValues = Object.values(confidence);
+  const overallConfidence = confValues.length
+    ? Math.round(confValues.reduce((s, v) => s + v, 0) / confValues.length)
+    : 0;
+
+  return res.json({
+    totalResponses: responses.length,
+    dimensionsCovered: Object.keys(dimScores).length,
+    overallConfidence,
+    dnaString,
+  });
+});
+
+// ── GET /sync/status — sync status overview ─────────────────
+router.get('/sync/status', async (req: Request, res: Response) => {
+  const { userId } = (req as any).genomeUser;
+
+  const responses = await db
+    .select({
+      probeSource: beliefResponses.probeSource,
+      createdAt: beliefResponses.createdAt,
+    })
+    .from(beliefResponses)
+    .where(eq(beliefResponses.userId, userId));
+
+  const sources = { extension: 0, web: 0, desktop: 0 };
+  let lastSync: string | null = null;
+
+  for (const r of responses) {
+    const src = r.probeSource || 'web';
+    if (src === 'extension') sources.extension++;
+    else if (src === 'desktop') sources.desktop++;
+    else sources.web++;
+
+    if (src === 'extension' || src === 'desktop') {
+      const ts = r.createdAt instanceof Date ? r.createdAt.toISOString() : String(r.createdAt);
+      if (!lastSync || ts > lastSync) lastSync = ts;
+    }
+  }
+
+  return res.json({
+    totalResponses: responses.length,
+    sources,
+    lastSync,
+  });
+});
+
+// ── POST /sync — merge external responses ───────────────────
+router.post('/sync', async (req: Request, res: Response) => {
+  const { userId } = (req as any).genomeUser;
+  const { responses: incoming } = req.body;
+
+  if (!Array.isArray(incoming)) {
+    return res.json({ merged: 0 });
+  }
+
+  // Get existing to deduplicate
+  const existing = await db.select({
+    probeText: beliefResponses.probeText,
+    value: beliefResponses.value,
+    createdAt: beliefResponses.createdAt,
+  }).from(beliefResponses).where(eq(beliefResponses.userId, userId));
+
+  const existingKeys = new Set(
+    existing.map(r => `${r.probeText}|${r.value}|${r.createdAt}`)
+  );
+
+  let merged = 0;
+  for (const r of incoming) {
+    const key = `${r.probeText || r.probe_text}|${r.value}|${r.createdAt || r.created_at}`;
+    if (existingKeys.has(key)) continue;
+
+    await db.insert(beliefResponses).values({
+      userId,
+      probeText: r.probeText || r.probe_text,
+      probeCategory: r.probeCategory || r.probe_category || 'life',
+      probeSource: r.probeSource || r.probe_source || 'extension',
+      value: r.value,
+      confidence: r.confidence || 2,
+      dimensionWeights: r.dimensionWeights || null,
+    });
+    existingKeys.add(key);
+    merged++;
+  }
+
+  return res.json({ merged });
+});
+
 // ── POST /analyse — AI world view summary ───────────────────
 router.post('/analyse', async (req: Request, res: Response) => {
   const { userId } = (req as any).genomeUser;
