@@ -7,34 +7,7 @@ import {
 
 ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip);
 
-const CAT_ORDER = ['philosophy', 'religion', 'psychology', 'relationships', 'society', 'economics', 'science_tech', 'politics', 'life'];
-const CAT_SHORT: Record<string, string> = {
-  philosophy: 'Philosophy', religion: 'Religion', psychology: 'Psychology',
-  relationships: 'Relationships', society: 'Society', economics: 'Economics',
-  science_tech: 'Sci & Tech', politics: 'Politics', life: 'Life',
-};
-
-const DOMAIN_AXES: Record<string, { left: string; right: string; mid: string }> = {
-  philosophy:    { left: 'Relativist',   right: 'Absolutist',      mid: 'Mixed epistemic'  },
-  religion:      { left: 'Secular',      right: 'Spiritual',       mid: 'Open spiritual'   },
-  psychology:    { left: 'Determinist',  right: 'Autonomous',      mid: 'Compatibilist'    },
-  relationships: { left: 'Fluid',        right: 'Traditional',     mid: 'Contextual'       },
-  society:       { left: 'Collectivist', right: 'Individualist',   mid: 'Balanced social'  },
-  economics:     { left: 'Progressive',  right: 'Market-oriented', mid: 'Mixed economic'   },
-  science_tech:  { left: 'Tech-skeptic', right: 'Techno-optimist', mid: 'Tech-pragmatist'  },
-  politics:      { left: 'Progressive',  right: 'Conservative',    mid: 'Centrist'         },
-  life:          { left: 'Structured',   right: 'Spontaneous',     mid: 'Balanced'         },
-};
-
-function domainLabel(cat: string, avg: number): string {
-  const axis = DOMAIN_AXES[cat];
-  if (!axis || avg == null) return '—';
-  if (avg <= 0.22) return `Strongly ${axis.left}`;
-  if (avg <= 0.40) return axis.left;
-  if (avg <= 0.60) return axis.mid;
-  if (avg <= 0.78) return axis.right;
-  return `Strongly ${axis.right}`;
-}
+import { CAT_ORDER, CAT_SHORT, domainLabel } from './genome-utils';
 
 interface HistoryEntry {
   probeCategory: string;

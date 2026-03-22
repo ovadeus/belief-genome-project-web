@@ -1,35 +1,14 @@
 // Belief history — searchable, filterable, paginated response list
 // Matches desktop: same labels, same colors, same filters
 import { useState, useMemo } from 'react';
+import { CAT_SHORT, beliefLabel as _beliefLabel, beliefColor as _beliefColor } from './genome-utils';
 
-const CAT_SHORT: Record<string, string> = {
-  philosophy: 'Philosophy', religion: 'Religion', psychology: 'Psychology',
-  relationships: 'Relationships', society: 'Society', economics: 'Economics',
-  science_tech: 'Sci & Tech', politics: 'Politics', life: 'Life',
-};
-
-/* ── Semantic labels — MUST match desktop exactly ───────────── */
 function beliefLabel(v: number): string {
-  // v is 0-1 scale, convert to 0-100
-  const pct = Math.round(v * 100);
-  if (pct <= 10)  return 'False to me';
-  if (pct <= 30)  return 'Unlikely true';
-  if (pct <= 45)  return 'Leaning false';
-  if (pct <= 55)  return 'Uncertain';
-  if (pct <= 70)  return 'Leaning true';
-  if (pct <= 88)  return 'Likely true';
-  return 'Deeply true to me';
+  return _beliefLabel(Math.round(v * 100));
 }
 
 function beliefColor(v: number): string {
-  const pct = Math.round(v * 100);
-  if (pct <= 10)  return '#dc3232';
-  if (pct <= 30)  return '#ff7728';
-  if (pct <= 45)  return '#c8a03c';
-  if (pct <= 55)  return '#787891';
-  if (pct <= 70)  return '#3cb4b4';
-  if (pct <= 88)  return '#3c82ff';
-  return '#50b4ff';
+  return _beliefColor(Math.round(v * 100));
 }
 
 interface HistoryEntry {

@@ -173,7 +173,7 @@ React + Vite frontend with dark premium design, wouter routing, React Query hook
 - Pages: `src/pages/` (public + admin + genome)
 - Hooks: `src/hooks/` (use-auth, use-admin, use-blog, use-toast, use-media)
 - Layouts: `src/components/layout/` (PublicLayout, AdminLayout)
-- Genome: `src/components/genome/` (GenomeAuthContext, RadarChart, BreakdownBars, DnaString, HistoryList)
+- Genome: `src/components/genome/` (GenomeAuthContext, genome-utils, RadarChart, BreakdownBars, DnaString, HistoryList, TripleHelix, Timeline, Forecaster, GenomeLayout, GenomeNav)
 
 ### `lib/db` (`@workspace/db`)
 

@@ -16,7 +16,14 @@ interface GenomeAuthContextType {
   logout: () => void;
 }
 
-const GenomeAuthContext = createContext<GenomeAuthContextType>(null!);
+const FALLBACK: GenomeAuthContextType = {
+  user: null, token: null, loading: true,
+  login: async () => ({ ok: false, error: 'Not initialized' }),
+  register: async () => ({ ok: false, error: 'Not initialized' }),
+  logout: () => {},
+};
+
+const GenomeAuthContext = createContext<GenomeAuthContextType>(FALLBACK);
 
 export function useGenomeAuth() {
   return useContext(GenomeAuthContext);

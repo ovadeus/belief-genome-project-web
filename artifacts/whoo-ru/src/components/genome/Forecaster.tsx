@@ -2,27 +2,7 @@
 // User enters a probe statement, AI predicts their slider position based on history
 import { useState } from 'react';
 import { genomeApi } from './GenomeAuthContext';
-
-/* ── Semantic labels (MUST match desktop exactly) ───────────── */
-function beliefLabel(v: number): string {
-  if (v <= 10)  return 'False to me';
-  if (v <= 30)  return 'Unlikely true';
-  if (v <= 45)  return 'Leaning false';
-  if (v <= 55)  return 'Uncertain';
-  if (v <= 70)  return 'Leaning true';
-  if (v <= 88)  return 'Likely true';
-  return 'Deeply true to me';
-}
-
-function beliefColor(v: number): string {
-  if (v <= 10)  return '#dc3232';
-  if (v <= 30)  return '#ff7728';
-  if (v <= 45)  return '#c8a03c';
-  if (v <= 55)  return '#787891';
-  if (v <= 70)  return '#3cb4b4';
-  if (v <= 88)  return '#3c82ff';
-  return '#50b4ff';
-}
+import { beliefColor } from './genome-utils';
 
 const ZONE_LABELS = [
   'False to me', 'Unlikely true', 'Leaning false', 'Uncertain',

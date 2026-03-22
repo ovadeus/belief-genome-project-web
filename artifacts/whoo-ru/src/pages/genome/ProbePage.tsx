@@ -2,28 +2,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { genomeApi } from '../../components/genome/GenomeAuthContext';
 import { PROBE_CATEGORIES } from '@belief-genome/engine';
+import { beliefLabel, beliefColor } from '../../components/genome/genome-utils';
 
-/* ── Semantic labels — MUST match desktop exactly ───────────── */
 function getSemanticLabel(value: number): string {
-  const pct = Math.round(value * 100);
-  if (pct <= 10)  return 'False to me';
-  if (pct <= 30)  return 'Unlikely true';
-  if (pct <= 45)  return 'Leaning false';
-  if (pct <= 55)  return 'Uncertain';
-  if (pct <= 70)  return 'Leaning true';
-  if (pct <= 88)  return 'Likely true';
-  return 'Deeply true to me';
+  return beliefLabel(Math.round(value * 100));
 }
 
 function sliderColor(value: number): string {
-  const pct = Math.round(value * 100);
-  if (pct <= 10)  return '#dc3232';
-  if (pct <= 30)  return '#ff7728';
-  if (pct <= 45)  return '#c8a03c';
-  if (pct <= 55)  return '#787891';
-  if (pct <= 70)  return '#3cb4b4';
-  if (pct <= 88)  return '#3c82ff';
-  return '#50b4ff';
+  return beliefColor(Math.round(value * 100));
 }
 
 export default function ProbePage() {
