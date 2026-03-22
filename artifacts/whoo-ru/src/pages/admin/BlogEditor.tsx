@@ -3,7 +3,7 @@ import { useRoute, useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ArrowLeft, Save, Globe, Image as ImageIcon, X, Bold, Italic, Heading2, List, ListOrdered, Quote, Link2, Minus, Upload, Loader2, Lock } from "lucide-react";
+import { ArrowLeft, Save, Globe, Image as ImageIcon, X, Bold, Italic, Heading2, List, ListOrdered, Quote, Link2, Minus, Upload, Loader2, Lock, Code, FileText } from "lucide-react";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { useAdminCreatePost, useAdminUpdatePost } from "@/hooks/use-admin";
 import { useGetAdminBlogPost } from "@workspace/api-client-react";
@@ -41,6 +41,7 @@ export default function BlogEditor() {
   const id = Number(params?.id);
   
   const [hashtagInput, setHashtagInput] = useState("");
+  const [editorMode, setEditorMode] = useState<"markdown" | "html">("markdown");
   const [showMediaPicker, setShowMediaPicker] = useState<"featured" | "inline" | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const mediaLibrary = useMediaLibrary(1);
@@ -262,34 +263,66 @@ export default function BlogEditor() {
           </div>
 
           <div className="bg-card border border-border rounded-2xl overflow-hidden">
-            <div className="flex items-center gap-1 px-4 py-2 border-b border-border bg-background/50 flex-wrap">
-              {[
-                { action: "bold", icon: Bold, label: "Bold" },
-                { action: "italic", icon: Italic, label: "Italic" },
-                { action: "h2", icon: Heading2, label: "Heading" },
-                { action: "ul", icon: List, label: "Bullet List" },
-                { action: "ol", icon: ListOrdered, label: "Numbered List" },
-                { action: "quote", icon: Quote, label: "Quote" },
-                { action: "link", icon: Link2, label: "Link" },
-                { action: "image", icon: ImageIcon, label: "Insert Image" },
-                { action: "hr", icon: Minus, label: "Divider" },
-              ].map(({ action, icon: Icon, label }) => (
+            <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-background/50">
+              {editorMode === "markdown" ? (
+                <div className="flex items-center gap-1 flex-wrap">
+                  {[
+                    { action: "bold", icon: Bold, label: "Bold" },
+                    { action: "italic", icon: Italic, label: "Italic" },
+                    { action: "h2", icon: Heading2, label: "Heading" },
+                    { action: "ul", icon: List, label: "Bullet List" },
+                    { action: "ol", icon: ListOrdered, label: "Numbered List" },
+                    { action: "quote", icon: Quote, label: "Quote" },
+                    { action: "link", icon: Link2, label: "Link" },
+                    { action: "image", icon: ImageIcon, label: "Insert Image" },
+                    { action: "hr", icon: Minus, label: "Divider" },
+                  ].map(({ action, icon: Icon, label }) => (
+                    <button
+                      key={action}
+                      type="button"
+                      onClick={() => handleToolbar(action)}
+                      title={label}
+                      className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/5 transition"
+                    >
+                      <Icon size={18} />
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium flex items-center gap-1.5">
+                  <Code size={14} /> HTML Source
+                </span>
+              )}
+              <div className="flex items-center bg-background border border-border rounded-lg p-0.5 ml-3 shrink-0">
                 <button
-                  key={action}
                   type="button"
-                  onClick={() => handleToolbar(action)}
-                  title={label}
-                  className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/5 transition"
+                  onClick={() => setEditorMode("markdown")}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                    editorMode === "markdown"
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
                 >
-                  <Icon size={18} />
+                  <FileText size={14} /> Markdown
                 </button>
-              ))}
+                <button
+                  type="button"
+                  onClick={() => setEditorMode("html")}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                    editorMode === "html"
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Code size={14} /> HTML
+                </button>
+              </div>
             </div>
             <textarea
               id="body-editor"
               {...form.register("body")}
               className="w-full min-h-[400px] px-6 py-4 bg-transparent text-foreground focus:outline-none resize-y font-mono text-sm leading-relaxed"
-              placeholder="Write your post in Markdown..."
+              placeholder={editorMode === "markdown" ? "Write your post in Markdown..." : "Paste or write HTML here..."}
             />
           </div>
 
