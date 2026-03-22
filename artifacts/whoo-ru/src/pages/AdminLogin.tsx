@@ -43,8 +43,13 @@ export default function AdminLogin() {
             <input
               {...form.register("username")}
               type="text"
+              inputMode="text"
               autoComplete="username"
-              className="w-full px-4 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-foreground"
+              autoCapitalize="off"
+              autoCorrect="off"
+              enterKeyHint="next"
+              placeholder="Enter username"
+              className="w-full px-4 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-foreground text-base"
             />
             {form.formState.errors.username && (
               <p className="text-destructive text-sm mt-1">{form.formState.errors.username.message}</p>
@@ -56,8 +61,11 @@ export default function AdminLogin() {
             <input
               {...form.register("password")}
               type="password"
+              inputMode="text"
               autoComplete="current-password"
-              className="w-full px-4 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-foreground"
+              enterKeyHint="go"
+              placeholder="Enter password"
+              className="w-full px-4 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-foreground text-base"
             />
             {form.formState.errors.password && (
               <p className="text-destructive text-sm mt-1">{form.formState.errors.password.message}</p>
