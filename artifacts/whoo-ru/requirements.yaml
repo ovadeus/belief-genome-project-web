@@ -1,0 +1,30 @@
+packages:
+  "framer-motion": "For premium page transitions and scroll-triggered animations"
+  "react-hook-form": "For robust form state management"
+  "@hookform/resolvers": "For Zod validation integration with react-hook-form"
+  "zod": "For client-side form validation matching API schemas"
+  "date-fns": "For human-readable date formatting on blog posts"
+  "react-markdown": "For rendering blog post markdown content securely"
+  "react-quill": "Rich text editor for the admin blog editor"
+  "@types/react-quill": "Type definitions for react-quill"
+  "clsx": "For conditional tailwind class merging"
+  "tailwind-merge": "For resolving tailwind class conflicts securely"
+
+images:
+  - path: "artifacts/whoo-ru/public/images/hero-bg.png"
+    description: "Deep space quantum field background, dark navy to black gradient, very subtle glowing particles, cinematic"
+    aspect_ratio: "16:9"
+  - path: "artifacts/whoo-ru/public/images/founder.png"
+    description: "Professional cinematic portrait of a researcher in dramatic moody lighting, deep shadows, electric blue rim light"
+    aspect_ratio: "1:1"
+  - path: "artifacts/whoo-ru/public/images/book-cover.png"
+    description: "Minimalist abstract book cover design with a glowing triple helix, dark background, premium cinematic feel"
+    aspect_ratio: "3:4"
+  - path: "artifacts/whoo-ru/public/images/app-mockup.png"
+    description: "Cinematic 3D render of a sleek desktop application interface showing data visualization, dark mode, glowing blue and violet accents"
+    aspect_ratio: "16:9"
+
+notes:
+  - Admin routes require JWT cookie authentication.
+  - Orval generated hooks are used from @workspace/api-client-react.
+  - Using react-quill for rich text editing as requested.

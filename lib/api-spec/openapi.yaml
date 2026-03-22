@@ -1,0 +1,978 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: WhooRU API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: blog
+    description: Blog operations
+  - name: subscribers
+    description: Subscriber operations
+  - name: earlybird
+    description: Early bird operations
+  - name: auth
+    description: Authentication operations
+  - name: admin
+    description: Admin operations
+  - name: settings
+    description: Site settings operations
+  - name: Storage
+    description: Object storage upload and serving endpoints.
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /blog:
+    get:
+      operationId: listBlogPosts
+      tags: [blog]
+      summary: List published blog posts
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: hashtag
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Blog posts list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlogPostListResponse"
+
+  /blog/{slug}:
+    get:
+      operationId: getBlogPost
+      tags: [blog]
+      summary: Get a single blog post by slug
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Blog post
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlogPost"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /blog/{slug}/related:
+    get:
+      operationId: getRelatedPosts
+      tags: [blog]
+      summary: Get related posts by hashtag
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Related posts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BlogPost"
+
+  /subscribe:
+    post:
+      operationId: createSubscriber
+      tags: [subscribers]
+      summary: Subscribe to newsletter
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSubscriberBody"
+      responses:
+        "201":
+          description: Subscribed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Already subscribed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /earlybird:
+    post:
+      operationId: createEarlyBird
+      tags: [earlybird]
+      summary: Join early bird book list
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateEarlyBirdBody"
+      responses:
+        "201":
+          description: Signed up
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "409":
+          description: Already signed up
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/login:
+    post:
+      operationId: adminLogin
+      tags: [auth]
+      summary: Admin login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginBody"
+      responses:
+        "200":
+          description: Login success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/me:
+    get:
+      operationId: getAuthUser
+      tags: [auth]
+      summary: Get current admin user
+      responses:
+        "200":
+          description: Authenticated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUser"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/logout:
+    post:
+      operationId: adminLogout
+      tags: [auth]
+      summary: Admin logout
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /admin/stats:
+    get:
+      operationId: getAdminStats
+      tags: [admin]
+      summary: Get dashboard stats
+      responses:
+        "200":
+          description: Dashboard stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminStats"
+
+  /admin/blog:
+    get:
+      operationId: listAdminBlogPosts
+      tags: [admin]
+      summary: List all blog posts (admin)
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 25
+      responses:
+        "200":
+          description: All blog posts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlogPostListResponse"
+    post:
+      operationId: createBlogPost
+      tags: [admin]
+      summary: Create blog post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBlogPostBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlogPost"
+
+  /admin/blog/{id}:
+    get:
+      operationId: getAdminBlogPost
+      tags: [admin]
+      summary: Get blog post by ID (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Blog post
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlogPost"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      operationId: updateBlogPost
+      tags: [admin]
+      summary: Update blog post
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateBlogPostBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlogPost"
+    delete:
+      operationId: deleteBlogPost
+      tags: [admin]
+      summary: Delete blog post
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /admin/blog/{id}/toggle-status:
+    patch:
+      operationId: toggleBlogPostStatus
+      tags: [admin]
+      summary: Toggle blog post published/draft
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Toggled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlogPost"
+
+  /admin/blog/upload-image:
+    post:
+      operationId: uploadBlogImage
+      tags: [admin]
+      summary: Upload blog featured image
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          description: Image URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImageUploadResponse"
+
+  /admin/subscribers:
+    get:
+      operationId: listSubscribers
+      tags: [admin]
+      summary: List subscribers
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 25
+        - name: source
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Subscribers list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubscriberListResponse"
+
+  /admin/subscribers/{id}:
+    delete:
+      operationId: deleteSubscriber
+      tags: [admin]
+      summary: Delete subscriber
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /admin/subscribers/export:
+    get:
+      operationId: exportSubscribers
+      tags: [admin]
+      summary: Export subscribers as CSV
+      responses:
+        "200":
+          description: CSV file
+          content:
+            text/csv:
+              schema:
+                type: string
+
+  /admin/earlybird:
+    get:
+      operationId: listEarlyBird
+      tags: [admin]
+      summary: List early bird signups
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 25
+      responses:
+        "200":
+          description: Early bird list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EarlyBirdListResponse"
+
+  /admin/earlybird/{id}:
+    delete:
+      operationId: deleteEarlyBird
+      tags: [admin]
+      summary: Delete early bird entry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /admin/earlybird/export:
+    get:
+      operationId: exportEarlyBird
+      tags: [admin]
+      summary: Export early bird list as CSV
+      responses:
+        "200":
+          description: CSV file
+          content:
+            text/csv:
+              schema:
+                type: string
+
+  /admin/settings:
+    get:
+      operationId: getSettings
+      tags: [settings]
+      summary: Get all site settings
+      responses:
+        "200":
+          description: Settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteSettings"
+    patch:
+      operationId: updateSettings
+      tags: [settings]
+      summary: Update site settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateSettingsBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteSettings"
+
+  /admin/change-password:
+    post:
+      operationId: changeAdminPassword
+      tags: [admin]
+      summary: Change admin password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangePasswordBody"
+      responses:
+        "200":
+          description: Password changed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /settings/public:
+    get:
+      operationId: getPublicSettings
+      tags: [settings]
+      summary: Get public site settings
+      responses:
+        "200":
+          description: Public settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicSettings"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    SuccessResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+
+    BlogPost:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        slug:
+          type: string
+        excerpt:
+          type: ["string", "null"]
+        body:
+          type: ["string", "null"]
+        featuredImage:
+          type: ["string", "null"]
+        hashtags:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+        publishedAt:
+          type: ["string", "null"]
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        readTimeMins:
+          type: ["integer", "null"]
+      required:
+        - id
+        - title
+        - slug
+        - status
+        - createdAt
+        - updatedAt
+
+    BlogPostListResponse:
+      type: object
+      properties:
+        posts:
+          type: array
+          items:
+            $ref: "#/components/schemas/BlogPost"
+        total:
+          type: integer
+        page:
+          type: integer
+        totalPages:
+          type: integer
+      required:
+        - posts
+        - total
+        - page
+        - totalPages
+
+    CreateBlogPostBody:
+      type: object
+      properties:
+        title:
+          type: string
+        slug:
+          type: string
+        excerpt:
+          type: string
+        body:
+          type: string
+        featuredImage:
+          type: string
+        hashtags:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+        publishedAt:
+          type: ["string", "null"]
+          format: date-time
+        customCss:
+          type: string
+        customJs:
+          type: string
+      required:
+        - title
+        - slug
+
+    UpdateBlogPostBody:
+      type: object
+      properties:
+        title:
+          type: string
+        slug:
+          type: string
+        excerpt:
+          type: string
+        body:
+          type: string
+        featuredImage:
+          type: string
+        hashtags:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+        publishedAt:
+          type: ["string", "null"]
+          format: date-time
+        customCss:
+          type: string
+        customJs:
+          type: string
+
+    CreateSubscriberBody:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        source:
+          type: string
+      required:
+        - email
+        - source
+
+    Subscriber:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: ["string", "null"]
+        email:
+          type: string
+        source:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+        isActive:
+          type: boolean
+      required:
+        - id
+        - email
+        - createdAt
+        - isActive
+
+    SubscriberListResponse:
+      type: object
+      properties:
+        subscribers:
+          type: array
+          items:
+            $ref: "#/components/schemas/Subscriber"
+        total:
+          type: integer
+        page:
+          type: integer
+        totalPages:
+          type: integer
+      required:
+        - subscribers
+        - total
+        - page
+        - totalPages
+
+    CreateEarlyBirdBody:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+      required:
+        - email
+
+    EarlyBird:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: ["string", "null"]
+        email:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - email
+        - createdAt
+
+    EarlyBirdListResponse:
+      type: object
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: "#/components/schemas/EarlyBird"
+        total:
+          type: integer
+        page:
+          type: integer
+        totalPages:
+          type: integer
+      required:
+        - entries
+        - total
+        - page
+        - totalPages
+
+    LoginBody:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      required:
+        - username
+        - password
+
+    LoginResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        user:
+          $ref: "#/components/schemas/AuthUser"
+      required:
+        - message
+        - user
+
+    AuthUser:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+      required:
+        - id
+        - username
+
+    AdminStats:
+      type: object
+      properties:
+        totalSubscribers:
+          type: integer
+        totalEarlyBird:
+          type: integer
+        totalPosts:
+          type: integer
+        publishedPosts:
+          type: integer
+        draftPosts:
+          type: integer
+        recentSubscribers:
+          type: array
+          items:
+            $ref: "#/components/schemas/Subscriber"
+        recentPosts:
+          type: array
+          items:
+            $ref: "#/components/schemas/BlogPost"
+      required:
+        - totalSubscribers
+        - totalEarlyBird
+        - totalPosts
+        - publishedPosts
+        - draftPosts
+        - recentSubscribers
+        - recentPosts
+
+    ImageUploadResponse:
+      type: object
+      properties:
+        url:
+          type: string
+      required:
+        - url
+
+    SiteSettings:
+      type: object
+      properties:
+        tagline:
+          type: string
+        appDownloadUrl:
+          type: string
+        twitterUrl:
+          type: string
+        linkedinUrl:
+          type: string
+        githubUrl:
+          type: string
+        founderPhotoUrl:
+          type: string
+        bookCoverUrl:
+          type: string
+      required:
+        - tagline
+
+    UpdateSettingsBody:
+      type: object
+      properties:
+        tagline:
+          type: string
+        appDownloadUrl:
+          type: string
+        twitterUrl:
+          type: string
+        linkedinUrl:
+          type: string
+        githubUrl:
+          type: string
+        founderPhotoUrl:
+          type: string
+        bookCoverUrl:
+          type: string
+
+    PublicSettings:
+      type: object
+      properties:
+        tagline:
+          type: string
+        appDownloadUrl:
+          type: string
+        twitterUrl:
+          type: string
+        linkedinUrl:
+          type: string
+        githubUrl:
+          type: string
+        founderPhotoUrl:
+          type: string
+        bookCoverUrl:
+          type: string
+
+    ChangePasswordBody:
+      type: object
+      properties:
+        currentPassword:
+          type: string
+        newPassword:
+          type: string
+      required:
+        - currentPassword
+        - newPassword
+    UploadUrlRequest:
+      type: object
+      required: [name, size, contentType]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        size:
+          type: integer
+          minimum: 1
+        contentType:
+          type: string
+          minLength: 1
+    UploadUrlResponse:
+      type: object
+      required: [uploadURL, objectPath]
+      properties:
+        uploadURL:
+          type: string
+          format: uri
+        objectPath:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/UploadUrlRequest'
+    ErrorEnvelope:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string

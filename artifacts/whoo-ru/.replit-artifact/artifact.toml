@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "WhooRU"
+version = "1.0.0"
+id = "artifacts/whoo-ru"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+localPort = 20064
+name = "web"
+paths = ["/"]
+
+[services.development]
+run = "pnpm --filter @workspace/whoo-ru run dev"
+
+[services.env]
+PORT = "20064"
+BASE_PATH = "/"
+
+[services.production]
+build = ["pnpm", "--filter", "@workspace/whoo-ru", "run", "build"]
+publicDir = "artifacts/whoo-ru/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
