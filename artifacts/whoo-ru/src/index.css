@@ -111,6 +111,15 @@
   font-family: var(--font-display);
   @apply text-foreground font-bold tracking-tight mt-8 mb-4;
 }
+.prose h1 {
+  @apply text-4xl md:text-5xl mt-10 mb-6;
+}
+.prose h2 {
+  @apply text-2xl md:text-3xl mt-8 mb-4;
+}
+.prose h3 {
+  @apply text-xl md:text-2xl mt-6 mb-3;
+}
 .prose p {
   @apply text-muted-foreground leading-relaxed mb-6;
 }
