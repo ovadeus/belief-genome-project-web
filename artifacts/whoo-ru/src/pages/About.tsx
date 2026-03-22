@@ -3,12 +3,12 @@ import { motion } from "framer-motion";
 import { BookOpen, Code, Brain, Lightbulb, Target, Telescope } from "lucide-react";
 
 const milestones = [
-  { year: "2022", title: "The Spark", description: "The Wizard of Oz moment — a startling encounter with the question that refuses to be ignored: Who are you, really?" },
-  { year: "2023", title: "Framework Design", description: "Development of the 124 psychological dimensions that form the Belief Genome architecture." },
-  { year: "2024", title: "Desktop App Alpha", description: "First working prototype of the BGP desktop application for macOS." },
-  { year: "2024", title: "Forecaster Engine", description: "The predictive belief engine reaches functional accuracy across core dimension clusters." },
-  { year: "2025", title: "Public Beta", description: "BGP desktop app released as a free public beta for macOS users." },
-  { year: "2025", title: "Research Publication", description: "First research papers on the Belief Genome framework submitted for peer review." },
+  { year: "2024", title: "The Spark", description: "The Wizard of Oz moment — a startling encounter with the question that refuses to be ignored: Who are you, really?" },
+  { year: "2025", title: "Framework Design", description: "Development of the 124 psychological dimensions that form the Belief Genome architecture." },
+  { year: "Spring 2026", title: "Web App Alpha", description: "First working prototype of the BGP web application goes live for early testers." },
+  { year: "Summer 2026", title: "Forecaster Engine", description: "The predictive belief engine reaches functional accuracy across core dimension clusters." },
+  { year: "Fall 2026", title: "Public Beta", description: "BGP web app released as a free public beta for all users." },
+  { year: "Fall 2026", title: "Research Publication", description: "First research papers on the Belief Genome framework submitted for peer review." },
 ];
 
 const fadeUp = {
