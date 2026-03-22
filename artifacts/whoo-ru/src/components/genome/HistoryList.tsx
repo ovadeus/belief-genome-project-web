@@ -1,15 +1,11 @@
 // Belief history — searchable, filterable, paginated response list
 // Matches desktop: same labels, same colors, same filters
 import { useState, useMemo } from 'react';
+
 import { CAT_SHORT, beliefLabel as _beliefLabel, beliefColor as _beliefColor } from './genome-utils';
 
-function beliefLabel(v: number): string {
-  return _beliefLabel(Math.round(v * 100));
-}
-
-function beliefColor(v: number): string {
-  return _beliefColor(Math.round(v * 100));
-}
+function beliefLabel(v: number): string { return _beliefLabel(Math.round(v * 100)); }
+function beliefColor(v: number): string { return _beliefColor(Math.round(v * 100)); }
 
 interface HistoryEntry {
   id: number;

@@ -2,7 +2,8 @@
 // User enters a probe statement, AI predicts their slider position based on history
 import { useState } from 'react';
 import { genomeApi } from './GenomeAuthContext';
-import { beliefColor } from './genome-utils';
+
+import { beliefLabel, beliefColor } from './genome-utils';
 
 const ZONE_LABELS = [
   'False to me', 'Unlikely true', 'Leaning false', 'Uncertain',

@@ -76,17 +76,17 @@ Full-stack website for a psychometric self-knowledge framework, desktop app, and
 Interactive belief mapping system — completely separate auth from admin.
 All genome pages wrapped in `GenomeLayout` which provides sticky `GenomeNav` bar + auth guard.
 
-- **Register** (`/genome/register`): Create genome user account (no nav shown)
-- **Login** (`/genome/login`): Sign in to genome (no nav shown)
-- **Probe** (`/genome/probe`): Answer belief probes (core interaction)
-- **Dashboard** (`/genome/dashboard`): 6-tab dashboard — Triple Helix, Radar, Breakdown, Timeline, History, Forecaster
+- **Register** (`/genome/register`): Create genome user account (no nav shown). Styled with molecular dot logo, glassmorphism card, "Join the Project" heading. Redirects to Dashboard.
+- **Login** (`/genome/login`): Sign in to genome (no nav shown). Styled with molecular dot logo, glassmorphism card, "Secure Access" heading, blue-to-violet gradient button. Redirects to Dashboard.
+- **Reflections** (`/genome/probe`): Answer belief probes (core interaction) — renamed from "Probe"
+- **Dashboard** (`/genome/dashboard`): Personalized time-of-day greeting + daily rotating quote (100 curated quotes). 6-tab dashboard — Triple Helix, Radar, Breakdown, Timeline, History, Forecaster
 - **Belief DNA** (`/genome/dna`): Full 140-char DNA string viewer with copy button and how-it-works legend
 - **Analyze** (`/genome/analyze`): Full DNA rebuild from all responses, shows dimensions covered and confidence
 - **Sync Data** (`/genome/sync`): Sync status (Chrome extension, website, desktop counts) + manual sync trigger
 - **Profile** (`/genome/profile`): Editable name, gender, DOB, country dropdown (55 countries, ISO 3166-1 numeric 3-digit codes), zip code, live DNA prefix preview
 
 #### GenomeNav (sticky nav bar on all authenticated genome pages)
-Text links with pipe separators: Belief Genome Project (left) | Probe | Dashboard | DNA | Analyze | Sync Data | Profile | [User Name] | Sign Out (right). Active link: white text + blue underline.
+Text links with pipe separators: Belief Genome Project (left) | Reflections | Dashboard | DNA | Analyze | Sync Data | Profile | [User Name] | Sign Out (right). Active link: white text + blue underline.
 
 #### Genome Auth
 - Separate `users` table, JWT tokens via `GENOME_JWT_SECRET`

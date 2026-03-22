@@ -7,7 +7,7 @@ import {
 
 ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip);
 
-import { CAT_ORDER, CAT_SHORT, domainLabel } from './genome-utils';
+import { CAT_ORDER, CAT_SHORT, DOMAIN_AXES, domainLabel } from './genome-utils';
 
 interface HistoryEntry {
   probeCategory: string;

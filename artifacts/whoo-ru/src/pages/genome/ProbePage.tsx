@@ -2,15 +2,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { genomeApi } from '../../components/genome/GenomeAuthContext';
 import { PROBE_CATEGORIES } from '@belief-genome/engine';
+
 import { beliefLabel, beliefColor } from '../../components/genome/genome-utils';
 
-function getSemanticLabel(value: number): string {
-  return beliefLabel(Math.round(value * 100));
-}
-
-function sliderColor(value: number): string {
-  return beliefColor(Math.round(value * 100));
-}
+function getSemanticLabel(value: number): string { return beliefLabel(Math.round(value * 100)); }
+function sliderColor(value: number): string { return beliefColor(Math.round(value * 100)); }
 
 export default function ProbePage() {
   const [probe, setProbe] = useState<any>(null);
@@ -58,7 +54,7 @@ export default function ProbePage() {
 
   return (
     <div style={{ maxWidth: 600, margin: '0 auto' }}>
-      <h1 style={{ fontSize: 24, marginBottom: 32, color: '#fff' }}>Belief Probe</h1>
+      <h1 style={{ fontSize: 24, marginBottom: 32, color: '#fff' }}>Reflections</h1>
 
       {/* Probe count */}
       {count > 0 && (
