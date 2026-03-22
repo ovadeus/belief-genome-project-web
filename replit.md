@@ -74,18 +74,23 @@ Full-stack website for a psychometric self-knowledge framework, desktop app, and
 
 ### Belief Genome Feature (`/genome/*`)
 Interactive belief mapping system — completely separate auth from admin.
+All genome pages wrapped in `GenomeLayout` which provides sticky `GenomeNav` bar + auth guard.
 
-- **Register** (`/genome/register`): Create genome user account
-- **Login** (`/genome/login`): Sign in to genome
+- **Register** (`/genome/register`): Create genome user account (no nav shown)
+- **Login** (`/genome/login`): Sign in to genome (no nav shown)
 - **Probe** (`/genome/probe`): Answer belief probes (core interaction)
-- **Dashboard** (`/genome/dashboard`): Radar chart, breakdown bars, history, DNA string
-- **Profile** (`/genome/profile`): User profile with demographic data
+- **Dashboard** (`/genome/dashboard`): 6-tab dashboard — Triple Helix, Radar, Breakdown, Timeline, History, Forecaster
+- **Belief DNA** (`/genome/dna`): Full 135-char DNA string viewer with copy button and how-it-works legend
+- **Profile** (`/genome/profile`): Editable name, gender, DOB, country dropdown (55 countries), zip code, live DNA prefix preview
+
+#### GenomeNav (sticky nav bar on all authenticated genome pages)
+Links: Probe | Genome Analytics | Belief DNA | Profile | Sign Out
 
 #### Genome Auth
 - Separate `users` table, JWT tokens via `GENOME_JWT_SECRET`
 - Context: `GenomeAuthProvider` wrapping the app
 - API helper: `genomeApi()` for authenticated requests
-- Navbar: Sign In / Get Started buttons (or Dashboard + Sign Out when logged in)
+- Homepage navbar: Sign In / Get Started buttons (or Dashboard + user name + Sign Out when logged in)
 
 #### Belief Engine (`@belief-genome/engine`)
 Pure domain logic package with no framework deps:

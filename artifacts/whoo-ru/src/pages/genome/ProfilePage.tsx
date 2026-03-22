@@ -47,6 +47,7 @@ export default function ProfilePage() {
     birthDay: null as number | null, sex: '5', countryCode: '', zipCode: '',
   });
   const [dna, setDna] = useState<any>(null);
+  const [editName, setEditName] = useState(user?.name || '');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -62,7 +63,7 @@ export default function ProfilePage() {
 
   const handleSave = async () => {
     setSaving(true);
-    await genomeApi('/profile', { method: 'PUT', body: JSON.stringify(profile) });
+    await genomeApi('/profile', { method: 'PUT', body: JSON.stringify({ ...profile, name: editName }) });
     const dnaData = await genomeApi('/dna').then(r => r.json());
     setDna(dnaData);
     setSaved(true);
@@ -92,12 +93,12 @@ export default function ProfilePage() {
         <h3 style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', marginBottom: 16 }}>Account</h3>
         <div style={{ display: 'grid', gap: 12 }}>
           <div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginBottom: 4 }}>NAME</div>
-            <div style={{ fontSize: 15 }}>{user?.name || 'Unknown'}</div>
+            <label style={{ display: 'block', fontSize: 11, color: 'rgba(255,255,255,0.3)', marginBottom: 4, textTransform: 'uppercase', fontFamily: "'Space Mono', monospace", letterSpacing: '0.06em' }}>Name</label>
+            <input type="text" style={inputStyle} value={editName} onChange={e => setEditName(e.target.value)} placeholder="Your name" />
           </div>
           <div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginBottom: 4 }}>EMAIL</div>
-            <div style={{ fontSize: 15 }}>{user?.email || 'Unknown'}</div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginBottom: 4, textTransform: 'uppercase', fontFamily: "'Space Mono', monospace", letterSpacing: '0.06em' }}>Email</div>
+            <div style={{ fontSize: 15, color: 'rgba(255,255,255,0.6)' }}>{user?.email || 'Unknown'}</div>
           </div>
         </div>
       </div>

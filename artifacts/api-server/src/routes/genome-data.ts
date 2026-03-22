@@ -103,21 +103,26 @@ router.get('/profile', async (req: Request, res: Response) => {
 // ── PUT /profile — update profile ───────────────────────────
 router.put('/profile', async (req: Request, res: Response) => {
   const { userId } = (req as any).genomeUser;
-  const { birthYear, birthMonth, birthDay, sex, countryCode, zipCode } = req.body;
+  const { name, birthYear, birthMonth, birthDay, sex, countryCode, zipCode } = req.body;
 
   // Validate country code
   const cc = countryCode ? String(countryCode).toUpperCase().replace(/[^A-Z]/g, '').slice(0, 2) : null;
   // Validate zip
   const zip = zipCode ? String(zipCode).replace(/[^A-Za-z0-9]/g, '').slice(0, 5) : null;
 
-  await db.update(users).set({
+  const updateData: any = {
     birthYear: birthYear ? parseInt(birthYear) : null,
     birthMonth: birthMonth ? parseInt(birthMonth) : null,
     birthDay: birthDay ? parseInt(birthDay) : null,
     sex: sex || '5',
     countryCode: cc,
     zipCode: zip || '00000',
-  }).where(eq(users.id, userId));
+  };
+  if (name && typeof name === 'string' && name.trim()) {
+    updateData.name = name.trim();
+  }
+
+  await db.update(users).set(updateData).where(eq(users.id, userId));
 
   return res.json({ ok: true });
 });

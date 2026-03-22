@@ -1,4 +1,4 @@
-import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
+import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -20,22 +20,16 @@ import AdminEarlyBird from "./pages/admin/EarlyBird";
 import AdminSettings from "./pages/admin/Settings";
 import MediaLibrary from "./pages/admin/MediaLibrary";
 
-import { GenomeAuthProvider, useGenomeAuth } from "./components/genome/GenomeAuthContext";
+import { GenomeAuthProvider } from "./components/genome/GenomeAuthContext";
+import GenomeLayout from "./components/genome/GenomeLayout";
 import LoginPage from "./pages/genome/LoginPage";
 import RegisterPage from "./pages/genome/RegisterPage";
 import ProbePage from "./pages/genome/ProbePage";
 import DashboardPage from "./pages/genome/DashboardPage";
+import DnaPage from "./pages/genome/DnaPage";
 import ProfilePage from "./pages/genome/ProfilePage";
 
 const queryClient = new QueryClient();
-
-function GenomeProtected({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useGenomeAuth();
-  const [, setLocation] = useLocation();
-  if (loading) return <div className="min-h-screen bg-background flex items-center justify-center"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div></div>;
-  if (!user) { setLocation('/genome/login'); return null; }
-  return <>{children}</>;
-}
 
 function Router() {
   return (
@@ -57,16 +51,23 @@ function Router() {
       <Route path="/admin/media" component={MediaLibrary} />
       <Route path="/admin/settings" component={AdminSettings} />
 
-      <Route path="/genome/login" component={LoginPage} />
-      <Route path="/genome/register" component={RegisterPage} />
+      <Route path="/genome/login">
+        <GenomeLayout><LoginPage /></GenomeLayout>
+      </Route>
+      <Route path="/genome/register">
+        <GenomeLayout><RegisterPage /></GenomeLayout>
+      </Route>
       <Route path="/genome/probe">
-        <GenomeProtected><ProbePage /></GenomeProtected>
+        <GenomeLayout><ProbePage /></GenomeLayout>
       </Route>
       <Route path="/genome/dashboard">
-        <GenomeProtected><DashboardPage /></GenomeProtected>
+        <GenomeLayout><DashboardPage /></GenomeLayout>
+      </Route>
+      <Route path="/genome/dna">
+        <GenomeLayout><DnaPage /></GenomeLayout>
       </Route>
       <Route path="/genome/profile">
-        <GenomeProtected><ProfilePage /></GenomeProtected>
+        <GenomeLayout><ProfilePage /></GenomeLayout>
       </Route>
 
       <Route component={NotFound} />
