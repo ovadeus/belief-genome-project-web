@@ -1,0 +1,38 @@
+Upload `replit-integration-v3.zip` and paste this:
+
+> This is an updated Belief Genome integration package. Please replace ALL files under these directories with the new versions from the zip:
+> - `artifacts/whoo-ru/src/components/genome/`
+> - `artifacts/whoo-ru/src/pages/genome/`
+> - `artifacts/api-server/src/routes/genome-auth.ts`, `genome-probes.ts`, `genome-data.ts`
+>
+> Then follow `INTEGRATION-GUIDE.md` for any new wiring. Here's what changed:
+>
+> **1. Global Nav Bar (GenomeNav.tsx + GenomeLayout.tsx)**
+> All genome pages now get a sticky top nav: `Belief Genome Project` on the left, then `Probe | Dashboard | DNA | Analyze | Sync Data | Profile | [User Name] | Sign Out` on the right with pipe separators and underline on the active link. Wrap all `/genome/*` routes in `<GenomeLayout>` — it handles the nav and auth redirect automatically.
+>
+> **2. New Pages:**
+> - `ProbePage.tsx` → `/genome/probe` — Probe answering with slider, semantic labels, category badge, Submit & Next / Skip
+> - `DashboardPage.tsx` → `/genome/dashboard` — 6-tab dashboard (Triple Helix, Radar, Breakdown, Timeline, History, Forecaster)
+> - `DnaPage.tsx` → `/genome/dna` — Full 135-char DNA string viewer with copy button and legend
+> - `AnalyzePage.tsx` → `/genome/analyze` — Full DNA rebuild from all responses
+> - `SyncPage.tsx` → `/genome/sync` — Sync status across Chrome extension, website, desktop app + manual sync
+> - `ProfilePage.tsx` → `/genome/profile` — Editable name, gender, DOB, country dropdown (55 countries), zip code, live DNA prefix preview
+>
+> **3. New API Routes** (in `genome-data.ts`):
+> - `POST /api/genome/analyze` — Rebuilds all 124 dimension scores from scratch
+> - `GET /api/genome/sync/status` — Response counts by source (extension/web/desktop)
+> - `POST /api/genome/sync` — Merges incoming responses with deduplication
+>
+> **4. App.tsx Route Wiring** (Step 5 in guide):
+> ```tsx
+> <Route path="/genome/probe"><GenomeLayout><ProbePage /></GenomeLayout></Route>
+> <Route path="/genome/dashboard"><GenomeLayout><DashboardPage /></GenomeLayout></Route>
+> <Route path="/genome/dna"><GenomeLayout><DnaPage /></GenomeLayout></Route>
+> <Route path="/genome/analyze"><GenomeLayout><AnalyzePage /></GenomeLayout></Route>
+> <Route path="/genome/sync"><GenomeLayout><SyncPage /></GenomeLayout></Route>
+> <Route path="/genome/profile"><GenomeLayout><ProfilePage /></GenomeLayout></Route>
+> <Route path="/genome/login"><GenomeLayout><LoginPage /></GenomeLayout></Route>
+> <Route path="/genome/register"><GenomeLayout><RegisterPage /></GenomeLayout></Route>
+> ```
+>
+> **5. Do NOT merge genome auth with admin auth.** They are separate systems — different tables, different JWT tokens, different routes.

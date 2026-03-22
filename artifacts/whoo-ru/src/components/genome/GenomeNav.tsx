@@ -9,6 +9,7 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
+  { path: '/genome/probe',     label: 'Probe' },
   { path: '/genome/dashboard', label: 'Dashboard' },
   { path: '/genome/dna',       label: 'DNA' },
   { path: '/genome/analyze',   label: 'Analyze' },
