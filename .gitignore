@@ -47,6 +47,11 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+.agents/
+.canvas/
+.replit
+attached_assets/
+*.tar.gz
 
 # Environment files
 .env
