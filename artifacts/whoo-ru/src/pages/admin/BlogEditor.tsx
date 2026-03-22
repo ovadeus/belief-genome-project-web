@@ -355,7 +355,7 @@ export default function BlogEditor() {
                     type="button"
                     onClick={() => handleToolbar(action)}
                     title={label}
-                    className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/5 transition"
+                    className={`p-2 rounded-lg hover:text-foreground hover:bg-white/5 transition ${action === "iframe" ? "text-cyan-400" : "text-muted-foreground"}`}
                   >
                     <Icon size={18} />
                   </button>
