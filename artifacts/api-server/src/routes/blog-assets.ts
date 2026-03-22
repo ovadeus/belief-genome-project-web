@@ -6,11 +6,22 @@ import { requireAuth } from "../middlewares/auth";
 
 const router: IRouter = Router();
 
-const BLOG_ASSETS_DIR = path.resolve(process.cwd(), "../../blog-assets");
+// Try multiple paths — Replit's cwd varies depending on build context
+const CANDIDATE_PATHS = [
+  path.resolve(process.cwd(), "blog-assets"),         // repo root
+  path.resolve(process.cwd(), "../../blog-assets"),    // from artifacts/api-server/
+  path.resolve(process.cwd(), "../blog-assets"),       // one level up
+  path.resolve("/home/runner/workspace/blog-assets"),  // Replit absolute path
+];
+
+const BLOG_ASSETS_DIR = CANDIDATE_PATHS.find(p => fs.existsSync(p))
+  || path.resolve(process.cwd(), "../../blog-assets");
 
 if (!fs.existsSync(BLOG_ASSETS_DIR)) {
   fs.mkdirSync(BLOG_ASSETS_DIR, { recursive: true });
 }
+
+console.log(`[blog-assets] Serving from: ${BLOG_ASSETS_DIR}`);
 
 function isValidFilename(filename: string): boolean {
   const resolved = path.resolve(BLOG_ASSETS_DIR, filename);

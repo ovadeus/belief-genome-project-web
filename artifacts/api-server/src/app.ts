@@ -2,6 +2,7 @@ import express, { type Express } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import path from "path";
+import fs from "fs";
 import router from "./routes";
 
 const app: Express = express();
@@ -29,7 +30,17 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
-app.use("/api/blog-assets/files", express.static(path.resolve(process.cwd(), "../../blog-assets")));
+// Resolve blog-assets directory — try multiple paths for Replit compatibility
+const blogAssetsCandidates = [
+  path.resolve(process.cwd(), "blog-assets"),
+  path.resolve(process.cwd(), "../../blog-assets"),
+  path.resolve(process.cwd(), "../blog-assets"),
+  path.resolve("/home/runner/workspace/blog-assets"),
+];
+const blogAssetsDir = blogAssetsCandidates.find(p => fs.existsSync(p))
+  || path.resolve(process.cwd(), "../../blog-assets");
+console.log(`[static] blog-assets serving from: ${blogAssetsDir}`);
+app.use("/api/blog-assets/files", express.static(blogAssetsDir));
 
 app.use("/api", router);
 
