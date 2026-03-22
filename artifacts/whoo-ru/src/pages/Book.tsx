@@ -73,9 +73,12 @@ export default function Book() {
             </div>
             
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-display font-bold text-foreground leading-tight mb-6">
-              The Architecture of Belief
+              The Belief Genome
             </h1>
-            
+            <p className="text-lg text-secondary/80 font-medium mb-4 tracking-wide">
+              The Hidden Code That Shapes Every Decision You Make
+            </p>
+
             <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
               A deep-dive into the Belief Genome Project framework, the research behind the 124 cognitive dimensions, and a practical guide to mapping your own belief genome in an age of artificial intelligence.
             </p>
