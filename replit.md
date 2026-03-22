@@ -61,10 +61,10 @@ Full-stack website for a psychometric self-knowledge framework, desktop app, and
 ### Admin Panel (`/admin/*`)
 - **Login** (`/admin/login`): JWT cookie-based auth (separate from genome user auth)
 - **Dashboard** (`/admin/dashboard`): Stats cards, recent signups, recent posts
-- **Blog Posts** (`/admin/blog`): CRUD list with status toggle
-- **Blog Editor** (`/admin/blog/new`, `/admin/blog/edit/:id`): Markdown editor with toolbar
+- **Blog Posts** (`/admin/blog`): CRUD list with status toggle, private post indicator (amber lock badge)
+- **Blog Editor** (`/admin/blog/new`, `/admin/blog/edit/:id`): Markdown editor with toolbar, Private Post toggle (hides post from public blog)
 - **Media Library** (`/admin/media`): Upload/browse/delete media via object storage
-- **Subscribers** (`/admin/subscribers`): List with search/filter, CSV export
+- **Subscribers** (`/admin/subscribers`): List with search/filter, CSV export, member status toggle (shield icon)
 - **Early Bird** (`/admin/earlybird`): List with CSV export
 - **Settings** (`/admin/settings`): Site settings, change password
 
@@ -103,8 +103,8 @@ Pure domain logic package with no framework deps:
 - `probeFeeds.ts`: RSS news feed → AI-classified belief probes (requires OPENAI_API_KEY)
 
 ### Database Tables
-- `blogPosts`: Blog content with slug, excerpt, body, hashtags, status
-- `subscribers`: Newsletter subscribers with email, name, source
+- `blogPosts`: Blog content with slug, excerpt, body, hashtags, status, isPrivate (private posts hidden from public)
+- `subscribers`: Newsletter subscribers with email, name, source, isMember (member status for private content access)
 - `earlyBird`: Book early bird signups
 - `adminUsers`: Admin accounts with hashed passwords
 - `siteSettings`: Key-value site configuration
@@ -119,7 +119,7 @@ Pure domain logic package with no framework deps:
 - `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me`
 - `GET/POST /api/blog`, `GET/PUT/DELETE /api/blog/:slug`
 - `GET /api/admin/stats`, `GET/POST/PUT/DELETE /api/admin/blog/*`
-- `GET/POST/DELETE /api/admin/subscribers/*`
+- `GET/POST/DELETE /api/admin/subscribers/*`, `PATCH /api/admin/subscribers/:id/toggle-member`
 - `GET/POST/DELETE /api/admin/earlybird/*`
 - `GET/PUT /api/admin/settings`
 - `POST /api/admin/change-password`

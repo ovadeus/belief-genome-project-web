@@ -24,4 +24,5 @@ export interface BlogPost {
   updatedAt: Date;
   /** @nullable */
   readTimeMins?: number | null;
+  isPrivate: boolean;
 }

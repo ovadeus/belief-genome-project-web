@@ -9,6 +9,7 @@ export const subscribersTable = pgTable("subscribers", {
   source: varchar("source", { length: 50 }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   isActive: boolean("is_active").notNull().default(true),
+  isMember: boolean("is_member").notNull().default(false),
 });
 
 export const insertSubscriberSchema = createInsertSchema(subscribersTable).omit({ id: true, createdAt: true });

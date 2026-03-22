@@ -37,6 +37,7 @@ import type {
   LoginResponse,
   PublicSettings,
   SiteSettings,
+  Subscriber,
   SubscriberListResponse,
   SuccessResponse,
   UpdateBlogPostBody,
@@ -1674,6 +1675,89 @@ export const useDeleteSubscriber = <
   TContext
 > => {
   return useMutation(getDeleteSubscriberMutationOptions(options));
+};
+
+/**
+ * @summary Toggle subscriber member status
+ */
+export const getToggleSubscriberMemberUrl = (id: number) => {
+  return `/api/admin/subscribers/${id}/toggle-member`;
+};
+
+export const toggleSubscriberMember = async (
+  id: number,
+  options?: RequestInit,
+): Promise<Subscriber> => {
+  return customFetch<Subscriber>(getToggleSubscriberMemberUrl(id), {
+    ...options,
+    method: "PATCH",
+  });
+};
+
+export const getToggleSubscriberMemberMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof toggleSubscriberMember>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof toggleSubscriberMember>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  const mutationKey = ["toggleSubscriberMember"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof toggleSubscriberMember>>,
+    { id: number }
+  > = (props) => {
+    const { id } = props ?? {};
+    return toggleSubscriberMember(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ToggleSubscriberMemberMutationResult = NonNullable<
+  Awaited<ReturnType<typeof toggleSubscriberMember>>
+>;
+
+export type ToggleSubscriberMemberMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Toggle subscriber member status
+ */
+export const useToggleSubscriberMember = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof toggleSubscriberMember>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof toggleSubscriberMember>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  return useMutation(getToggleSubscriberMemberMutationOptions(options));
 };
 
 /**

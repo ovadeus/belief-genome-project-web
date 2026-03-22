@@ -19,7 +19,7 @@ router.get("/blog", async (req, res): Promise<void> => {
   const search = params.success ? params.data.search : undefined;
   const offset = (page - 1) * limit;
 
-  const conditions = [eq(blogPostsTable.status, "published")];
+  const conditions = [eq(blogPostsTable.status, "published"), eq(blogPostsTable.isPrivate, false)];
   if (hashtag) {
     conditions.push(arrayContains(blogPostsTable.hashtags, [hashtag]));
   }
@@ -57,7 +57,7 @@ router.get("/blog", async (req, res): Promise<void> => {
 router.get("/blog/:slug", async (req, res): Promise<void> => {
   const raw = Array.isArray(req.params.slug) ? req.params.slug[0] : req.params.slug;
   const [post] = await db.select().from(blogPostsTable).where(eq(blogPostsTable.slug, raw));
-  if (!post || post.status !== "published") {
+  if (!post || post.status !== "published" || post.isPrivate) {
     res.status(404).json({ error: "Post not found" });
     return;
   }
@@ -80,6 +80,7 @@ router.get("/blog/:slug/related", async (req, res): Promise<void> => {
       .where(
         and(
           eq(blogPostsTable.status, "published"),
+          eq(blogPostsTable.isPrivate, false),
           ne(blogPostsTable.id, post.id),
           sql`${blogPostsTable.hashtags} && ${sql.raw(`ARRAY[${post.hashtags.map(t => `'${t.replace(/'/g, "''")}'`).join(",")}]::text[]`)}`
         )

@@ -8,6 +8,7 @@ import {
   useToggleBlogPostStatus,
   useListSubscribers,
   useDeleteSubscriber,
+  useToggleSubscriberMember,
   useListEarlyBird,
   useDeleteEarlyBird,
   useGetSettings,
@@ -99,6 +100,23 @@ export function useAdminTogglePostStatus() {
 // Subscribers Admin
 export function useAdminSubscribers(params: { page?: number, limit?: number, search?: string, source?: string } = {}) {
   return useListSubscribers(params);
+}
+
+export function useAdminToggleMember() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  
+  return useToggleSubscriberMember({
+    mutation: {
+      onSuccess: (data) => {
+        queryClient.invalidateQueries({ queryKey: getListSubscribersQueryKey() });
+        toast({ title: "Member status updated", description: `Subscriber is now ${data.isMember ? "a member" : "a regular subscriber"}.` });
+      },
+      onError: () => {
+        toast({ title: "Error", description: "Failed to update member status.", variant: "destructive" });
+      }
+    }
+  });
 }
 
 export function useAdminDeleteSubscriber() {

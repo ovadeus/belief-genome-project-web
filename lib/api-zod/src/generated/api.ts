@@ -42,6 +42,7 @@ export const ListBlogPostsResponse = zod.object({
       createdAt: zod.date(),
       updatedAt: zod.date(),
       readTimeMins: zod.number().nullish(),
+      isPrivate: zod.boolean(),
     }),
   ),
   total: zod.number(),
@@ -69,6 +70,7 @@ export const GetBlogPostResponse = zod.object({
   createdAt: zod.date(),
   updatedAt: zod.date(),
   readTimeMins: zod.number().nullish(),
+      isPrivate: zod.boolean(),
 });
 
 /**
@@ -91,6 +93,7 @@ export const GetRelatedPostsResponseItem = zod.object({
   createdAt: zod.date(),
   updatedAt: zod.date(),
   readTimeMins: zod.number().nullish(),
+      isPrivate: zod.boolean(),
 });
 export const GetRelatedPostsResponse = zod.array(GetRelatedPostsResponseItem);
 
@@ -159,6 +162,7 @@ export const GetAdminStatsResponse = zod.object({
       source: zod.string().nullish(),
       createdAt: zod.date(),
       isActive: zod.boolean(),
+      isMember: zod.boolean(),
     }),
   ),
   recentPosts: zod.array(
@@ -175,6 +179,7 @@ export const GetAdminStatsResponse = zod.object({
       createdAt: zod.date(),
       updatedAt: zod.date(),
       readTimeMins: zod.number().nullish(),
+      isPrivate: zod.boolean(),
     }),
   ),
 });
@@ -205,6 +210,7 @@ export const ListAdminBlogPostsResponse = zod.object({
       createdAt: zod.date(),
       updatedAt: zod.date(),
       readTimeMins: zod.number().nullish(),
+      isPrivate: zod.boolean(),
     }),
   ),
   total: zod.number(),
@@ -224,6 +230,7 @@ export const CreateBlogPostBody = zod.object({
   hashtags: zod.array(zod.string()).optional(),
   status: zod.string().optional(),
   publishedAt: zod.date().nullish(),
+  isPrivate: zod.boolean().optional(),
 });
 
 /**
@@ -246,6 +253,7 @@ export const GetAdminBlogPostResponse = zod.object({
   createdAt: zod.date(),
   updatedAt: zod.date(),
   readTimeMins: zod.number().nullish(),
+      isPrivate: zod.boolean(),
 });
 
 /**
@@ -264,6 +272,7 @@ export const UpdateBlogPostBody = zod.object({
   hashtags: zod.array(zod.string()).optional(),
   status: zod.string().optional(),
   publishedAt: zod.date().nullish(),
+  isPrivate: zod.boolean().optional(),
 });
 
 export const UpdateBlogPostResponse = zod.object({
@@ -279,6 +288,7 @@ export const UpdateBlogPostResponse = zod.object({
   createdAt: zod.date(),
   updatedAt: zod.date(),
   readTimeMins: zod.number().nullish(),
+      isPrivate: zod.boolean(),
 });
 
 /**
@@ -308,6 +318,7 @@ export const ToggleBlogPostStatusResponse = zod.object({
   createdAt: zod.date(),
   updatedAt: zod.date(),
   readTimeMins: zod.number().nullish(),
+      isPrivate: zod.boolean(),
 });
 
 /**
@@ -343,6 +354,7 @@ export const ListSubscribersResponse = zod.object({
       source: zod.string().nullish(),
       createdAt: zod.date(),
       isActive: zod.boolean(),
+      isMember: zod.boolean(),
     }),
   ),
   total: zod.number(),

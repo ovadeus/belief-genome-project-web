@@ -35,6 +35,7 @@ export interface BlogPost {
   updatedAt: string;
   /** @nullable */
   readTimeMins?: number | null;
+  isPrivate: boolean;
 }
 
 export interface BlogPostListResponse {
@@ -54,6 +55,7 @@ export interface CreateBlogPostBody {
   status?: string;
   /** @nullable */
   publishedAt?: string | null;
+  isPrivate?: boolean;
 }
 
 export interface UpdateBlogPostBody {
@@ -66,6 +68,7 @@ export interface UpdateBlogPostBody {
   status?: string;
   /** @nullable */
   publishedAt?: string | null;
+  isPrivate?: boolean;
 }
 
 export interface CreateSubscriberBody {
@@ -83,6 +86,7 @@ export interface Subscriber {
   source?: string | null;
   createdAt: string;
   isActive: boolean;
+  isMember: boolean;
 }
 
 export interface SubscriberListResponse {

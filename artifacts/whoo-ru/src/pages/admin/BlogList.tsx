@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "wouter";
 import { format } from "date-fns";
-import { Plus, Edit2, Trash2, Globe, FileEdit } from "lucide-react";
+import { Plus, Edit2, Trash2, Globe, FileEdit, Lock } from "lucide-react";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { useAdminBlogPosts, useAdminDeletePost, useAdminTogglePostStatus } from "@/hooks/use-admin";
 
@@ -46,7 +46,14 @@ export default function BlogList() {
                 data?.posts?.map((post) => (
                   <tr key={post.id} className="hover:bg-white/[0.02] transition-colors">
                     <td className="px-6 py-4">
-                      <p className="font-bold text-foreground mb-1">{post.title}</p>
+                      <p className="font-bold text-foreground mb-1 flex items-center gap-2">
+                        {post.title}
+                        {post.isPrivate && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                            <Lock size={10} /> Private
+                          </span>
+                        )}
+                      </p>
                       <div className="flex gap-2 text-xs">
                         <span className="text-muted-foreground">/{post.slug}</span>
                       </div>

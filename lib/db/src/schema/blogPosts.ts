@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, integer, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, integer, varchar, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -15,6 +15,7 @@ export const blogPostsTable = pgTable("blog_posts", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
   readTimeMins: integer("read_time_mins"),
+  isPrivate: boolean("is_private").notNull().default(false),
 });
 
 export const insertBlogPostSchema = createInsertSchema(blogPostsTable).omit({ id: true, createdAt: true, updatedAt: true });

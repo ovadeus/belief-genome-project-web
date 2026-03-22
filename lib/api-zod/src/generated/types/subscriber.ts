@@ -15,4 +15,5 @@ export interface Subscriber {
   source?: string | null;
   createdAt: Date;
   isActive: boolean;
+  isMember: boolean;
 }

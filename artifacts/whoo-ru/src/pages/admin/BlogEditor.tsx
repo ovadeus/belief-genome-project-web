@@ -3,7 +3,7 @@ import { useRoute, useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ArrowLeft, Save, Globe, Image as ImageIcon, X, Bold, Italic, Heading2, List, ListOrdered, Quote, Link2, Minus, Upload, Loader2 } from "lucide-react";
+import { ArrowLeft, Save, Globe, Image as ImageIcon, X, Bold, Italic, Heading2, List, ListOrdered, Quote, Link2, Minus, Upload, Loader2, Lock } from "lucide-react";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { useAdminCreatePost, useAdminUpdatePost } from "@/hooks/use-admin";
 import { useGetAdminBlogPost } from "@workspace/api-client-react";
@@ -18,6 +18,7 @@ const postSchema = z.object({
   featuredImage: z.string().optional().default(""),
   status: z.enum(["draft", "published"]).default("draft"),
   hashtags: z.array(z.string()).default([]),
+  isPrivate: z.boolean().default(false),
 });
 
 type PostForm = z.infer<typeof postSchema>;
@@ -62,6 +63,7 @@ export default function BlogEditor() {
       featuredImage: "",
       status: "draft",
       hashtags: [],
+      isPrivate: false,
     }
   });
 
@@ -82,6 +84,7 @@ export default function BlogEditor() {
         featuredImage: existingPost.featuredImage || "",
         status: existingPost.status as "draft" | "published",
         hashtags: existingPost.hashtags || [],
+        isPrivate: existingPost.isPrivate ?? false,
       });
     }
   }, [existingPost, form]);
@@ -312,6 +315,24 @@ export default function BlogEditor() {
               className="w-full px-4 py-3 bg-background border border-border rounded-xl focus:outline-none focus:border-primary text-foreground"
               placeholder="Type tag and press Enter..."
             />
+          </div>
+
+          <div className="bg-card border border-border rounded-2xl p-6 md:p-8">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <div className={`relative w-11 h-6 rounded-full transition-colors ${form.watch("isPrivate") ? "bg-amber-500" : "bg-muted"}`}>
+                <input
+                  type="checkbox"
+                  {...form.register("isPrivate")}
+                  className="sr-only peer"
+                />
+                <div className={`absolute left-0.5 top-0.5 w-5 h-5 rounded-full bg-white transition-transform ${form.watch("isPrivate") ? "translate-x-5" : "translate-x-0"}`} />
+              </div>
+              <div className="flex items-center gap-2">
+                <Lock size={18} className={form.watch("isPrivate") ? "text-amber-500" : "text-muted-foreground"} />
+                <span className="text-foreground font-semibold">Private Post</span>
+              </div>
+            </label>
+            <p className="text-sm text-muted-foreground mt-2 ml-14">Private posts are hidden from the public blog. Only members and admins can see them.</p>
           </div>
         </div>
       </form>

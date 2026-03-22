@@ -1,7 +1,7 @@
 import { AdminLayout } from "@/components/layout/AdminLayout";
-import { useAdminSubscribers, useAdminDeleteSubscriber } from "@/hooks/use-admin";
+import { useAdminSubscribers, useAdminDeleteSubscriber, useAdminToggleMember } from "@/hooks/use-admin";
 import { useState } from "react";
-import { Search, Trash2, Download } from "lucide-react";
+import { Search, Trash2, Download, Shield, ShieldOff } from "lucide-react";
 import { format } from "date-fns";
 
 export default function AdminSubscribers() {
@@ -10,6 +10,7 @@ export default function AdminSubscribers() {
   const [source, setSource] = useState("");
   const { data, isLoading } = useAdminSubscribers({ page, limit: 25, search: search || undefined, source: source || undefined });
   const deleteSub = useAdminDeleteSubscriber();
+  const toggleMember = useAdminToggleMember();
 
   return (
     <AdminLayout>
@@ -55,15 +56,16 @@ export default function AdminSubscribers() {
                   <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-6 py-3">Name</th>
                   <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-6 py-3">Email</th>
                   <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-6 py-3">Source</th>
+                  <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-6 py-3">Member</th>
                   <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-6 py-3">Date</th>
                   <th className="text-right text-xs font-medium text-muted-foreground uppercase tracking-wider px-6 py-3">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {isLoading ? (
-                  <tr><td colSpan={5} className="px-6 py-10 text-center text-muted-foreground">Loading...</td></tr>
+                  <tr><td colSpan={6} className="px-6 py-10 text-center text-muted-foreground">Loading...</td></tr>
                 ) : data?.subscribers?.length === 0 ? (
-                  <tr><td colSpan={5} className="px-6 py-10 text-center text-muted-foreground">No subscribers found</td></tr>
+                  <tr><td colSpan={6} className="px-6 py-10 text-center text-muted-foreground">No subscribers found</td></tr>
                 ) : (
                   data?.subscribers?.map((sub) => (
                     <tr key={sub.id} className="border-b border-border/50 hover:bg-white/[0.02]">
@@ -73,6 +75,19 @@ export default function AdminSubscribers() {
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
                           {sub.source || "—"}
                         </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <button
+                          onClick={() => toggleMember.mutate({ id: sub.id })}
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition ${
+                            sub.isMember
+                              ? "bg-green-500/10 text-green-400 hover:bg-green-500/20"
+                              : "bg-muted text-muted-foreground hover:bg-muted/80"
+                          }`}
+                        >
+                          {sub.isMember ? <Shield className="w-3.5 h-3.5" /> : <ShieldOff className="w-3.5 h-3.5" />}
+                          {sub.isMember ? "Member" : "Regular"}
+                        </button>
                       </td>
                       <td className="px-6 py-4 text-sm text-muted-foreground">
                         {format(new Date(sub.createdAt), "MMM d, yyyy")}

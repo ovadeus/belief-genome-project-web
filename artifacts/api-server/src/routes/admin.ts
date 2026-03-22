@@ -86,6 +86,7 @@ router.post("/admin/blog", async (req, res): Promise<void> => {
       status: parsed.data.status || "draft",
       publishedAt,
       readTimeMins,
+      isPrivate: parsed.data.isPrivate ?? false,
     })
     .returning();
 
@@ -234,10 +235,33 @@ router.delete("/admin/subscribers/:id", async (req, res): Promise<void> => {
   res.sendStatus(204);
 });
 
+router.patch("/admin/subscribers/:id/toggle-member", async (req, res): Promise<void> => {
+  const raw = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+  const id = parseInt(raw, 10);
+  if (isNaN(id)) {
+    res.status(400).json({ error: "Invalid ID" });
+    return;
+  }
+
+  const [existing] = await db.select().from(subscribersTable).where(eq(subscribersTable.id, id));
+  if (!existing) {
+    res.status(404).json({ error: "Subscriber not found" });
+    return;
+  }
+
+  const [updated] = await db
+    .update(subscribersTable)
+    .set({ isMember: !existing.isMember })
+    .where(eq(subscribersTable.id, id))
+    .returning();
+
+  res.json(updated);
+});
+
 router.get("/admin/subscribers/export", async (_req, res): Promise<void> => {
   const subscribers = await db.select().from(subscribersTable).orderBy(desc(subscribersTable.createdAt));
-  const csv = ["Name,Email,Source,Signup Date,Active"]
-    .concat(subscribers.map(s => `"${s.name || ""}","${s.email}","${s.source || ""}","${s.createdAt.toISOString()}","${s.isActive}"`))
+  const csv = ["Name,Email,Source,Signup Date,Active,Member"]
+    .concat(subscribers.map(s => `"${s.name || ""}","${s.email}","${s.source || ""}","${s.createdAt.toISOString()}","${s.isActive}","${s.isMember}"`))
     .join("\n");
   res.setHeader("Content-Type", "text/csv");
   res.setHeader("Content-Disposition", "attachment; filename=subscribers.csv");
