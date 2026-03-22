@@ -1,5 +1,6 @@
-import { Router, type IRouter } from "express";
-import { eq, desc, sql, ilike, and, ne, arrayContains } from "drizzle-orm";
+import { Router, type IRouter, type Request } from "express";
+import { eq, desc, sql, ilike, and, ne, arrayContains, or } from "drizzle-orm";
+import jwt from "jsonwebtoken";
 import { db, blogPostsTable } from "@workspace/db";
 import {
   ListBlogPostsQueryParams,
@@ -8,6 +9,29 @@ import {
   GetBlogPostResponse,
   GetRelatedPostsParams,
 } from "@workspace/api-zod";
+
+const ADMIN_JWT_SECRET = process.env.JWT_SECRET || "whoo-ru-secret-key-change-in-production";
+const GENOME_JWT_SECRET = process.env.GENOME_JWT_SECRET || process.env.JWT_SECRET || "";
+
+function isAuthenticated(req: Request): boolean {
+  const adminToken = req.cookies?.token;
+  if (adminToken) {
+    try {
+      jwt.verify(adminToken, ADMIN_JWT_SECRET);
+      return true;
+    } catch {}
+  }
+
+  const genomeToken = req.headers.authorization?.replace("Bearer ", "") || req.cookies?.genome_token;
+  if (genomeToken) {
+    try {
+      jwt.verify(genomeToken, GENOME_JWT_SECRET);
+      return true;
+    } catch {}
+  }
+
+  return false;
+}
 
 const router: IRouter = Router();
 
@@ -19,7 +43,12 @@ router.get("/blog", async (req, res): Promise<void> => {
   const search = params.success ? params.data.search : undefined;
   const offset = (page - 1) * limit;
 
-  const conditions = [eq(blogPostsTable.status, "published"), eq(blogPostsTable.isPrivate, false)];
+  const authed = isAuthenticated(req);
+
+  const conditions = [eq(blogPostsTable.status, "published")];
+  if (!authed) {
+    conditions.push(eq(blogPostsTable.isPrivate, false));
+  }
   if (hashtag) {
     conditions.push(arrayContains(blogPostsTable.hashtags, [hashtag]));
   }
@@ -57,10 +86,16 @@ router.get("/blog", async (req, res): Promise<void> => {
 router.get("/blog/:slug", async (req, res): Promise<void> => {
   const raw = Array.isArray(req.params.slug) ? req.params.slug[0] : req.params.slug;
   const [post] = await db.select().from(blogPostsTable).where(eq(blogPostsTable.slug, raw));
-  if (!post || post.status !== "published" || post.isPrivate) {
+  if (!post || post.status !== "published") {
     res.status(404).json({ error: "Post not found" });
     return;
   }
+
+  if (post.isPrivate && !isAuthenticated(req)) {
+    res.status(404).json({ error: "Post not found" });
+    return;
+  }
+
   res.json(GetBlogPostResponse.parse({ ...post, hashtags: post.hashtags ?? [] }));
 });
 
@@ -72,19 +107,23 @@ router.get("/blog/:slug/related", async (req, res): Promise<void> => {
     return;
   }
 
+  const authed = isAuthenticated(req);
+
   let related = [];
   if (post.hashtags && post.hashtags.length > 0) {
+    const relatedConditions = [
+      eq(blogPostsTable.status, "published"),
+      ne(blogPostsTable.id, post.id),
+      sql`${blogPostsTable.hashtags} && ${sql.raw(`ARRAY[${post.hashtags.map(t => `'${t.replace(/'/g, "''")}'`).join(",")}]::text[]`)}`,
+    ];
+    if (!authed) {
+      relatedConditions.push(eq(blogPostsTable.isPrivate, false));
+    }
+
     related = await db
       .select()
       .from(blogPostsTable)
-      .where(
-        and(
-          eq(blogPostsTable.status, "published"),
-          eq(blogPostsTable.isPrivate, false),
-          ne(blogPostsTable.id, post.id),
-          sql`${blogPostsTable.hashtags} && ${sql.raw(`ARRAY[${post.hashtags.map(t => `'${t.replace(/'/g, "''")}'`).join(",")}]::text[]`)}`
-        )
-      )
+      .where(and(...relatedConditions))
       .orderBy(desc(blogPostsTable.publishedAt))
       .limit(3);
   }

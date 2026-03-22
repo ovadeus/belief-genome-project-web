@@ -285,6 +285,13 @@ export async function customFetch<T = unknown>(
 
   const headers = mergeHeaders(isRequest(input) ? input.headers : undefined, headersInit);
 
+  if (!headers.has("authorization")) {
+    const genomeToken = typeof localStorage !== "undefined" ? localStorage.getItem("genome_token") : null;
+    if (genomeToken) {
+      headers.set("authorization", `Bearer ${genomeToken}`);
+    }
+  }
+
   if (
     typeof init.body === "string" &&
     !headers.has("content-type") &&
@@ -299,7 +306,7 @@ export async function customFetch<T = unknown>(
 
   const requestInfo = { method, url: resolveUrl(input) };
 
-  const response = await fetch(input, { ...init, method, headers });
+  const response = await fetch(input, { ...init, method, headers, credentials: "include" });
 
   if (!response.ok) {
     const errorData = await parseErrorBody(response, method);
