@@ -7,6 +7,7 @@ import earlybirdRouter from "./earlybird";
 import adminRouter from "./admin";
 import settingsRouter from "./settings";
 import storageRouter from "./storage";
+import blogAssetsRouter from "./blog-assets";
 import genomeAuthRouter, { genomeAuth } from "./genome-auth";
 import genomeProbesRouter from "./genome-probes";
 import genomeDataRouter from "./genome-data";
@@ -21,6 +22,7 @@ router.use(earlybirdRouter);
 router.use(adminRouter);
 router.use(settingsRouter);
 router.use(storageRouter);
+router.use(blogAssetsRouter);
 
 router.use("/genome", genomeAuthRouter);
 router.use("/genome", genomeAuth, genomeDataRouter);

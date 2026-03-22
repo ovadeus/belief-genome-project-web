@@ -69,6 +69,7 @@ function HtmlFrame({ html, customCss, customJs }: { html: string; customCss?: st
     const bodyHtml = isMarkdown(html) ? marked.parse(html, { async: false }) as string : html;
     return `<!DOCTYPE html>
 <html><head>
+<base href="${window.location.origin}/" />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>${BASE_STYLES}</style>
 ${customCss ? `<style>${customCss}</style>` : ""}

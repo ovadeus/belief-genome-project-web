@@ -3,7 +3,7 @@ import { useRoute, useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ArrowLeft, Save, Globe, Image as ImageIcon, X, Bold, Italic, Heading1, Heading2, Heading3, List, ListOrdered, Quote, Link2, Minus, Upload, Loader2, Lock, AlignLeft, AlignCenter, AlignRight, ChevronDown, ChevronRight, Palette, Code } from "lucide-react";
+import { ArrowLeft, Save, Globe, Image as ImageIcon, X, Bold, Italic, Heading1, Heading2, Heading3, List, ListOrdered, Quote, Link2, Minus, Upload, Loader2, Lock, AlignLeft, AlignCenter, AlignRight, ChevronDown, ChevronRight, Palette, Code, Frame } from "lucide-react";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { useAdminCreatePost, useAdminUpdatePost } from "@/hooks/use-admin";
 import { useGetAdminBlogPost } from "@workspace/api-client-react";
@@ -44,6 +44,8 @@ export default function BlogEditor() {
   
   const [hashtagInput, setHashtagInput] = useState("");
   const [showMediaPicker, setShowMediaPicker] = useState<"featured" | "inline" | null>(null);
+  const [showIframePicker, setShowIframePicker] = useState(false);
+  const [blogAssetFiles, setBlogAssetFiles] = useState<{ filename: string; url: string }[]>([]);
   const [showStyleEditor, setShowStyleEditor] = useState(false);
   const [showJsEditor, setShowJsEditor] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -170,6 +172,15 @@ export default function BlogEditor() {
       case "quote": insertHtml(textarea, "<blockquote>", "</blockquote>"); break;
       case "link": insertHtml(textarea, '<a href="url">', "</a>"); break;
       case "image": setShowMediaPicker("inline"); return;
+      case "iframe": {
+        fetch("/api/blog-assets", { credentials: "include" })
+          .then(r => r.json())
+          .then(data => {
+            setBlogAssetFiles(data.files || []);
+            setShowIframePicker(true);
+          });
+        return;
+      }
       case "hr": {
         const pos = textarea.selectionStart;
         textarea.setRangeText("\n<hr />\n", pos, pos, "end");
@@ -333,6 +344,7 @@ export default function BlogEditor() {
                   { action: "quote", icon: Quote, label: "Blockquote" },
                   { action: "link", icon: Link2, label: "Link" },
                   { action: "image", icon: ImageIcon, label: "Insert Image" },
+                  { action: "iframe", icon: Frame, label: "Insert iFrame" },
                   { action: "hr", icon: Minus, label: "Divider" },
                   { action: "align-left", icon: AlignLeft, label: "Align Left" },
                   { action: "align-center", icon: AlignCenter, label: "Align Center" },
@@ -490,6 +502,61 @@ export default function BlogEditor() {
                         alt={media.alt || media.filename}
                         className="w-full h-full object-cover"
                       />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showIframePicker && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={() => setShowIframePicker(false)}>
+          <div className="bg-card border border-border rounded-2xl max-w-lg w-full max-h-[60vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border sticky top-0 bg-card z-10">
+              <h3 className="font-semibold text-foreground text-lg flex items-center gap-2">
+                <Frame size={20} className="text-primary" /> Insert iFrame
+              </h3>
+              <button type="button" onClick={() => setShowIframePicker(false)} className="text-muted-foreground hover:text-foreground">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="p-6">
+              {blogAssetFiles.length === 0 ? (
+                <div className="text-center py-8">
+                  <Frame className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+                  <p className="text-muted-foreground">No HTML files found in <code className="text-primary text-xs">blog-assets/</code></p>
+                  <p className="text-xs text-muted-foreground mt-2">Place <code>.html</code> files in the blog-assets directory to use them here.</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {blogAssetFiles.map((file) => (
+                    <button
+                      key={file.filename}
+                      type="button"
+                      onClick={() => {
+                        const textarea = document.getElementById("body-editor") as HTMLTextAreaElement;
+                        if (textarea) {
+                          const iframeTag = `\n<iframe src="${file.url}" style="width:100%; min-height:600px; border:none; border-radius:12px;" loading="lazy"></iframe>\n`;
+                          const pos = textarea.selectionStart;
+                          textarea.setRangeText(iframeTag, pos, pos, "end");
+                          textarea.focus();
+                          const ev = new Event("input", { bubbles: true });
+                          textarea.dispatchEvent(ev);
+                          form.setValue("body", textarea.value);
+                        }
+                        setShowIframePicker(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-border hover:border-primary hover:bg-primary/5 transition-all text-left"
+                    >
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                        <Code size={18} className="text-primary" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-foreground font-medium text-sm truncate">{file.filename}</p>
+                        <p className="text-xs text-muted-foreground truncate">{file.url}</p>
+                      </div>
                     </button>
                   ))}
                 </div>

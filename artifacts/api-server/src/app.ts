@@ -29,6 +29,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+app.use("/api/blog-assets/files", express.static(path.resolve(process.cwd(), "../../blog-assets")));
 
 app.use("/api", router);
 
