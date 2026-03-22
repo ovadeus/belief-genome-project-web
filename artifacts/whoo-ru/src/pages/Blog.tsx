@@ -127,7 +127,7 @@ export default function Blog() {
                     <button 
                       key={tag} 
                       onClick={(e) => { e.preventDefault(); setHashtag(tag); setPage(1); }}
-                      className="text-xs font-medium text-secondary bg-secondary/10 hover:bg-secondary/20 px-2.5 py-1 rounded-md transition-colors z-10"
+                      className="text-xs font-medium text-secondary bg-secondary/10 hover:bg-secondary/20 px-3 py-1.5 rounded-md active:scale-95 transition-all z-10"
                     >
                       #{tag}
                     </button>
@@ -158,17 +158,17 @@ export default function Blog() {
             <button 
               onClick={() => setPage(p => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="px-4 py-2 rounded-lg border border-border bg-card text-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/5 transition-colors"
+              className="px-5 py-3 rounded-xl border border-border bg-card text-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/5 active:scale-95 transition-all font-medium"
             >
               Previous
             </button>
-            <span className="px-4 py-2 text-muted-foreground flex items-center">
+            <span className="px-4 py-3 text-muted-foreground flex items-center">
               Page {page} of {data.totalPages}
             </span>
             <button 
               onClick={() => setPage(p => Math.min(data.totalPages, p + 1))}
               disabled={page === data.totalPages}
-              className="px-4 py-2 rounded-lg border border-border bg-card text-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/5 transition-colors"
+              className="px-5 py-3 rounded-xl border border-border bg-card text-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/5 active:scale-95 transition-all font-medium"
             >
               Next
             </button>

@@ -110,9 +110,9 @@ export default function AdminSubscribers() {
 
         {data && data.totalPages > 1 && (
           <div className="flex items-center justify-center gap-2">
-            <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1} className="px-3 py-1.5 rounded-lg bg-card border border-border text-sm text-foreground disabled:opacity-30">Previous</button>
-            <span className="text-sm text-muted-foreground">Page {page} of {data.totalPages}</span>
-            <button onClick={() => setPage(p => p + 1)} disabled={page >= data.totalPages} className="px-3 py-1.5 rounded-lg bg-card border border-border text-sm text-foreground disabled:opacity-30">Next</button>
+            <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1} className="px-5 py-3 rounded-xl bg-card border border-border text-sm font-medium text-foreground disabled:opacity-30 active:scale-95 transition-all">Previous</button>
+            <span className="text-sm text-muted-foreground px-2">Page {page} of {data.totalPages}</span>
+            <button onClick={() => setPage(p => p + 1)} disabled={page >= data.totalPages} className="px-5 py-3 rounded-xl bg-card border border-border text-sm font-medium text-foreground disabled:opacity-30 active:scale-95 transition-all">Next</button>
           </div>
         )}
       </div>

@@ -195,14 +195,14 @@ export default function BlogPost() {
               </div>
             </div>
             
-            <div className="flex items-center gap-2">
-              <button onClick={() => window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(post.title)}`)} className="w-10 h-10 rounded-full bg-card border border-border flex items-center justify-center hover:text-primary hover:border-primary transition-colors text-muted-foreground">
+            <div className="flex items-center gap-3">
+              <button onClick={() => window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(post.title)}`)} className="w-11 h-11 rounded-full bg-card border border-border flex items-center justify-center hover:text-primary hover:border-primary active:scale-95 transition-all text-muted-foreground">
                 <Twitter size={18} />
               </button>
-              <button onClick={() => window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`)} className="w-10 h-10 rounded-full bg-card border border-border flex items-center justify-center hover:text-primary hover:border-primary transition-colors text-muted-foreground">
+              <button onClick={() => window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`)} className="w-11 h-11 rounded-full bg-card border border-border flex items-center justify-center hover:text-primary hover:border-primary active:scale-95 transition-all text-muted-foreground">
                 <Linkedin size={18} />
               </button>
-              <button onClick={handleCopyLink} className="w-10 h-10 rounded-full bg-card border border-border flex items-center justify-center hover:text-primary hover:border-primary transition-colors text-muted-foreground">
+              <button onClick={handleCopyLink} className="w-11 h-11 rounded-full bg-card border border-border flex items-center justify-center hover:text-primary hover:border-primary active:scale-95 transition-all text-muted-foreground">
                 <LinkIcon size={18} />
               </button>
             </div>

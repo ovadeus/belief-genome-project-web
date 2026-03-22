@@ -30,7 +30,7 @@ function GenomeAuthButton() {
         <span className="text-xs text-muted-foreground">{user.name}</span>
         <button
           onClick={logout}
-          className="px-3 py-1.5 rounded-lg border border-border text-xs text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
+          className="px-4 py-2 rounded-lg border border-border text-sm text-muted-foreground hover:text-foreground hover:border-foreground/30 active:scale-95 transition-all"
         >
           Sign Out
         </button>
@@ -123,8 +123,9 @@ export function PublicNavbar() {
 
           {/* Mobile Toggle */}
           <button 
-            className="md:hidden p-2 text-foreground"
+            className="md:hidden p-3 -mr-2 text-foreground active:scale-90 transition-transform"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
           >
             {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>

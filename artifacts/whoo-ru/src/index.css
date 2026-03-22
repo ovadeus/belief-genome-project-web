@@ -141,3 +141,17 @@
 .prose hr {
   @apply border-border my-10;
 }
+
+@media (pointer: coarse) {
+  button, a, [role="button"], input[type="submit"], select {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  button:active, a:active, [role="button"]:active {
+    opacity: 0.7;
+    transform: scale(0.97);
+  }
+  input, textarea, select {
+    font-size: 16px;
+  }
+}

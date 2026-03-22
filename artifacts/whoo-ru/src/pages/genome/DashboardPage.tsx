@@ -279,23 +279,23 @@ export default function DashboardPage() {
 
       {/* Tab bar */}
       <div style={{
-        display: 'flex', gap: 4, marginBottom: 20, flexWrap: 'wrap',
+        display: 'flex', gap: 6, marginBottom: 20, flexWrap: 'wrap',
       }}>
         {TABS.map(t => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
             style={{
-              padding: '8px 16px', borderRadius: 8,
+              padding: '10px 18px', borderRadius: 10, minHeight: 44,
               background: tab === t.key ? 'rgba(108,143,255,0.2)' : 'transparent',
               color: tab === t.key ? '#6c8fff' : 'rgba(255,255,255,0.4)',
-              fontSize: 13, cursor: 'pointer', transition: 'all 0.2s',
+              fontSize: 14, cursor: 'pointer', transition: 'all 0.2s',
               display: 'flex', alignItems: 'center', gap: 6,
               fontWeight: tab === t.key ? 600 : 400,
               border: tab === t.key ? '1px solid rgba(108,143,255,0.3)' : '1px solid transparent',
             }}
           >
-            <span style={{ fontSize: 14 }}>{t.icon}</span>
+            <span style={{ fontSize: 15 }}>{t.icon}</span>
             {t.label}
           </button>
         ))}

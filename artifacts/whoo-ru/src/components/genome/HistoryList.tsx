@@ -185,20 +185,20 @@ export default function HistoryList({ history }: Props) {
 }
 
 const inputStyle: React.CSSProperties = {
-  padding: '6px 12px', borderRadius: 6,
+  padding: '10px 14px', borderRadius: 8,
   background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
-  color: '#fff', fontSize: 12, minWidth: 150,
+  color: '#fff', fontSize: 14, minWidth: 150, minHeight: 44,
 };
 
 const selectStyle: React.CSSProperties = {
-  padding: '6px 8px', borderRadius: 6,
+  padding: '10px 12px', borderRadius: 8,
   background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
-  color: '#fff', fontSize: 11,
+  color: '#fff', fontSize: 13, minHeight: 44, cursor: 'pointer',
 };
 
 const pageBtnStyle: React.CSSProperties = {
-  padding: '6px 12px', borderRadius: 6,
+  padding: '10px 16px', borderRadius: 8,
   background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
-  color: 'rgba(255,255,255,0.6)', fontSize: 11, cursor: 'pointer',
-  fontFamily: "'Space Mono', monospace",
+  color: 'rgba(255,255,255,0.6)', fontSize: 13, cursor: 'pointer',
+  fontFamily: "'Space Mono', monospace", minHeight: 44,
 };

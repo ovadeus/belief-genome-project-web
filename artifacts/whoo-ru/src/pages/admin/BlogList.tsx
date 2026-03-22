@@ -86,7 +86,7 @@ export default function BlogList() {
                       <button 
                         onClick={() => toggleStatus.mutate({ id: post.id })}
                         disabled={toggleStatus.isPending}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-colors border ${
+                        className={`flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider active:scale-95 transition-all border ${
                           post.status === 'published' 
                             ? 'bg-green-500/10 text-green-500 border-green-500/20 hover:bg-green-500/20' 
                             : 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20 hover:bg-yellow-500/20'
@@ -100,10 +100,10 @@ export default function BlogList() {
                       {format(new Date(post.createdAt), 'MMM d, yyyy')}
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <div className="flex justify-end gap-2">
+                      <div className="flex justify-end gap-1">
                         <Link 
                           href={`/admin/blog/edit/${post.id}`}
-                          className="p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                          className="p-3 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg active:scale-90 transition-all"
                         >
                           <Edit2 size={18} />
                         </Link>
@@ -113,7 +113,7 @@ export default function BlogList() {
                               deletePost.mutate({ id: post.id });
                             }
                           }}
-                          className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+                          className="p-3 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg active:scale-90 transition-all"
                         >
                           <Trash2 size={18} />
                         </button>

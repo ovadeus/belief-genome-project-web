@@ -79,7 +79,7 @@ export default function Subscribe() {
                   <label className="block text-sm font-medium text-foreground mb-2">Name</label>
                   <input
                     {...register("name")}
-                    className="w-full bg-background border border-input rounded-xl px-4 py-3 text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+                    className="w-full bg-background border border-input rounded-xl px-4 py-3 text-base text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
                     placeholder="Your name"
                   />
                 </div>
@@ -88,7 +88,7 @@ export default function Subscribe() {
                   <input
                     {...register("email", { required: "Email is required", pattern: { value: /^\S+@\S+\.\S+$/, message: "Invalid email" } })}
                     type="email"
-                    className="w-full bg-background border border-input rounded-xl px-4 py-3 text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+                    className="w-full bg-background border border-input rounded-xl px-4 py-3 text-base text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
                     placeholder="you@example.com"
                   />
                   {errors.email && <p className="text-sm text-destructive mt-1">{errors.email.message}</p>}
