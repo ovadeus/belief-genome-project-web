@@ -197,6 +197,8 @@ export const listAdminBlogPostsQueryLimitDefault = 25;
 export const ListAdminBlogPostsQueryParams = zod.object({
   page: zod.coerce.number().default(listAdminBlogPostsQueryPageDefault),
   limit: zod.coerce.number().default(listAdminBlogPostsQueryLimitDefault),
+  search: zod.string().optional(),
+  status: zod.string().optional(),
 });
 
 export const ListAdminBlogPostsResponse = zod.object({
