@@ -1,4 +1,5 @@
 import { useRoute } from "wouter";
+import { useRef, useEffect, useCallback } from "react";
 import { format } from "date-fns";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
@@ -7,6 +8,46 @@ import { PublicLayout } from "@/components/layout/PublicLayout";
 import { usePublicBlogPost, usePublicRelatedPosts } from "@/hooks/use-blog";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
+
+function HtmlFrame({ html }: { html: string }) {
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  const resize = useCallback(() => {
+    const iframe = iframeRef.current;
+    if (!iframe?.contentDocument?.body) return;
+    const h = iframe.contentDocument.documentElement.scrollHeight;
+    iframe.style.height = h + "px";
+  }, []);
+
+  useEffect(() => {
+    const iframe = iframeRef.current;
+    if (!iframe) return;
+    const onLoad = () => {
+      resize();
+      const observer = new MutationObserver(resize);
+      if (iframe.contentDocument?.body) {
+        observer.observe(iframe.contentDocument.body, { childList: true, subtree: true, attributes: true });
+      }
+      const resizeObserver = new ResizeObserver(resize);
+      if (iframe.contentDocument?.body) {
+        resizeObserver.observe(iframe.contentDocument.body);
+      }
+    };
+    iframe.addEventListener("load", onLoad);
+    return () => iframe.removeEventListener("load", onLoad);
+  }, [resize]);
+
+  return (
+    <iframe
+      ref={iframeRef}
+      srcDoc={html}
+      sandbox="allow-scripts allow-same-origin"
+      className="w-full border-0 rounded-xl overflow-hidden"
+      style={{ minHeight: 200 }}
+      title="Blog content"
+    />
+  );
+}
 
 export default function BlogPost() {
   const [, params] = useRoute("/blog/:slug");
@@ -112,7 +153,7 @@ export default function BlogPost() {
               const body = post.body || "";
               const hasHtml = /<(div|style|section|article|table|iframe|form|header|footer|nav|main|aside)\b/i.test(body);
               if (hasHtml) {
-                return <div dangerouslySetInnerHTML={{ __html: body }} />;
+                return <HtmlFrame html={body} />;
               }
               return <ReactMarkdown rehypePlugins={[rehypeRaw]}>{body}</ReactMarkdown>;
             })()}
