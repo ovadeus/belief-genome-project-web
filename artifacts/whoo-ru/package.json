@@ -81,6 +81,7 @@
     "react-chartjs-2": "^5.3.1",
     "react-markdown": "^10.1.0",
     "react-quill": "^2.0.0",
+    "rehype-raw": "^7.0.0",
     "three": "^0.183.2"
   }
 }

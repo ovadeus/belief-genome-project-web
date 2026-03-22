@@ -1,6 +1,7 @@
 import { useRoute } from "wouter";
 import { format } from "date-fns";
 import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
 import { Twitter, Linkedin, Link as LinkIcon, ArrowLeft } from "lucide-react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { usePublicBlogPost, usePublicRelatedPosts } from "@/hooks/use-blog";
@@ -107,7 +108,7 @@ export default function BlogPost() {
           )}
 
           <div className="prose prose-invert prose-lg max-w-none">
-            <ReactMarkdown>{post.body || ""}</ReactMarkdown>
+            <ReactMarkdown rehypePlugins={[rehypeRaw]}>{post.body || ""}</ReactMarkdown>
           </div>
           
         </div>
