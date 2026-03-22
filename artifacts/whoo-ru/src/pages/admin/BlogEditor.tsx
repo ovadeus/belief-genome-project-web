@@ -3,7 +3,7 @@ import { useRoute, useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ArrowLeft, Save, Globe, Image as ImageIcon, X, Bold, Italic, Heading1, Heading2, Heading3, List, ListOrdered, Quote, Link2, Minus, Upload, Loader2, Lock, Code, FileText, AlignLeft, AlignCenter, AlignRight } from "lucide-react";
+import { ArrowLeft, Save, Globe, Image as ImageIcon, X, Bold, Italic, Heading1, Heading2, Heading3, List, ListOrdered, Quote, Link2, Minus, Upload, Loader2, Lock, AlignLeft, AlignCenter, AlignRight, ChevronDown, ChevronRight, Palette, Code } from "lucide-react";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { useAdminCreatePost, useAdminUpdatePost } from "@/hooks/use-admin";
 import { useGetAdminBlogPost } from "@workspace/api-client-react";
@@ -19,11 +19,13 @@ const postSchema = z.object({
   status: z.enum(["draft", "published"]).default("draft"),
   hashtags: z.array(z.string()).default([]),
   isPrivate: z.boolean().default(false),
+  customCss: z.string().optional().default(""),
+  customJs: z.string().optional().default(""),
 });
 
 type PostForm = z.infer<typeof postSchema>;
 
-function insertMarkdown(textarea: HTMLTextAreaElement, before: string, after: string = "") {
+function insertHtml(textarea: HTMLTextAreaElement, before: string, after: string = "") {
   const start = textarea.selectionStart;
   const end = textarea.selectionEnd;
   const selected = textarea.value.substring(start, end);
@@ -41,8 +43,9 @@ export default function BlogEditor() {
   const id = Number(params?.id);
   
   const [hashtagInput, setHashtagInput] = useState("");
-  const [editorMode, setEditorMode] = useState<"markdown" | "html">("markdown");
   const [showMediaPicker, setShowMediaPicker] = useState<"featured" | "inline" | null>(null);
+  const [showStyleEditor, setShowStyleEditor] = useState(false);
+  const [showJsEditor, setShowJsEditor] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const mediaLibrary = useMediaLibrary(1);
   const uploadMedia = useUploadMedia();
@@ -65,6 +68,8 @@ export default function BlogEditor() {
       status: "draft",
       hashtags: [],
       isPrivate: false,
+      customCss: "",
+      customJs: "",
     }
   });
 
@@ -86,7 +91,11 @@ export default function BlogEditor() {
         status: existingPost.status as "draft" | "published",
         hashtags: existingPost.hashtags || [],
         isPrivate: existingPost.isPrivate ?? false,
+        customCss: existingPost.customCss || "",
+        customJs: existingPost.customJs || "",
       });
+      if (existingPost.customCss) setShowStyleEditor(true);
+      if (existingPost.customJs) setShowJsEditor(true);
     }
   }, [existingPost, form]);
 
@@ -126,9 +135,9 @@ export default function BlogEditor() {
     } else if (showMediaPicker === "inline") {
       const textarea = document.getElementById("body-editor") as HTMLTextAreaElement;
       if (textarea) {
-        const md = `\n![${media.alt || media.filename}](${url})\n`;
+        const imgTag = `\n<img src="${url}" alt="${media.alt || media.filename}" style="width:100%; border-radius:12px; margin:1.5rem 0;" />\n`;
         const pos = textarea.selectionStart;
-        textarea.setRangeText(md, pos, pos, "end");
+        textarea.setRangeText(imgTag, pos, pos, "end");
         textarea.focus();
         form.setValue("body", textarea.value);
       }
@@ -151,17 +160,24 @@ export default function BlogEditor() {
     if (!textarea) return;
     
     switch (action) {
-      case "bold": insertMarkdown(textarea, "**", "**"); break;
-      case "italic": insertMarkdown(textarea, "*", "*"); break;
-      case "h1": insertMarkdown(textarea, "# "); break;
-      case "h2": insertMarkdown(textarea, "## "); break;
-      case "h3": insertMarkdown(textarea, "### "); break;
-      case "ul": insertMarkdown(textarea, "- "); break;
-      case "ol": insertMarkdown(textarea, "1. "); break;
-      case "quote": insertMarkdown(textarea, "> "); break;
-      case "link": insertMarkdown(textarea, "[", "](url)"); break;
+      case "bold": insertHtml(textarea, "<strong>", "</strong>"); break;
+      case "italic": insertHtml(textarea, "<em>", "</em>"); break;
+      case "h1": insertHtml(textarea, "<h1>", "</h1>"); break;
+      case "h2": insertHtml(textarea, "<h2>", "</h2>"); break;
+      case "h3": insertHtml(textarea, "<h3>", "</h3>"); break;
+      case "ul": insertHtml(textarea, "<ul>\n  <li>", "</li>\n</ul>"); break;
+      case "ol": insertHtml(textarea, "<ol>\n  <li>", "</li>\n</ol>"); break;
+      case "quote": insertHtml(textarea, "<blockquote>", "</blockquote>"); break;
+      case "link": insertHtml(textarea, '<a href="url">', "</a>"); break;
       case "image": setShowMediaPicker("inline"); return;
-      case "hr": insertMarkdown(textarea, "\n---\n"); break;
+      case "hr": {
+        const pos = textarea.selectionStart;
+        textarea.setRangeText("\n<hr />\n", pos, pos, "end");
+        textarea.focus();
+        const ev = new Event("input", { bubbles: true });
+        textarea.dispatchEvent(ev);
+        break;
+      }
       case "align-left":
       case "align-center":
       case "align-right": {
@@ -279,72 +295,95 @@ export default function BlogEditor() {
           </div>
 
           <div className="bg-card border border-border rounded-2xl overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-background/50">
-              {editorMode === "markdown" ? (
-                <div className="flex items-center gap-1 flex-wrap">
-                  {[
-                    { action: "bold", icon: Bold, label: "Bold" },
-                    { action: "italic", icon: Italic, label: "Italic" },
-                    { action: "h1", icon: Heading1, label: "Heading 1" },
-                    { action: "h2", icon: Heading2, label: "Heading 2" },
-                    { action: "h3", icon: Heading3, label: "Heading 3" },
-                    { action: "ul", icon: List, label: "Bullet List" },
-                    { action: "ol", icon: ListOrdered, label: "Numbered List" },
-                    { action: "quote", icon: Quote, label: "Quote" },
-                    { action: "link", icon: Link2, label: "Link" },
-                    { action: "image", icon: ImageIcon, label: "Insert Image" },
-                    { action: "hr", icon: Minus, label: "Divider" },
-                    { action: "align-left", icon: AlignLeft, label: "Align Left" },
-                    { action: "align-center", icon: AlignCenter, label: "Align Center" },
-                    { action: "align-right", icon: AlignRight, label: "Align Right" },
-                  ].map(({ action, icon: Icon, label }) => (
-                    <button
-                      key={action}
-                      type="button"
-                      onClick={() => handleToolbar(action)}
-                      title={label}
-                      className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/5 transition"
-                    >
-                      <Icon size={18} />
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium flex items-center gap-1.5">
-                  <Code size={14} /> HTML Source
-                </span>
+            <button
+              type="button"
+              onClick={() => setShowStyleEditor(!showStyleEditor)}
+              className="w-full flex items-center gap-2 px-4 py-3 text-left hover:bg-white/5 transition-colors border-b border-border"
+            >
+              {showStyleEditor ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+              <Palette size={16} className="text-violet-400" />
+              <span className="text-sm font-semibold text-foreground">Custom CSS</span>
+              {form.watch("customCss") && (
+                <span className="ml-auto text-xs text-violet-400 bg-violet-400/10 px-2 py-0.5 rounded-full">active</span>
               )}
-              <div className="flex items-center bg-background border border-border rounded-lg p-0.5 ml-3 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => setEditorMode("markdown")}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-                    editorMode === "markdown"
-                      ? "bg-primary text-primary-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  <FileText size={14} /> Markdown
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setEditorMode("html")}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-                    editorMode === "html"
-                      ? "bg-primary text-primary-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  <Code size={14} /> HTML
-                </button>
+            </button>
+            {showStyleEditor && (
+              <div className="p-4 border-b border-border bg-background/30">
+                <textarea
+                  {...form.register("customCss")}
+                  className="w-full min-h-[150px] px-4 py-3 bg-background border border-border rounded-xl focus:outline-none focus:border-violet-400 text-foreground resize-y font-mono text-sm leading-relaxed"
+                  placeholder={`/* Custom styles for this post */\nh1 { color: #6c8fff; }\n.highlight { background: rgba(108,143,255,0.1); padding: 1rem; border-radius: 8px; }`}
+                />
+                <p className="text-xs text-muted-foreground mt-2">Styles are scoped to this post and injected inside the content frame.</p>
               </div>
+            )}
+          </div>
+
+          <div className="bg-card border border-border rounded-2xl overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-background/50">
+              <div className="flex items-center gap-1 flex-wrap">
+                {[
+                  { action: "bold", icon: Bold, label: "Bold" },
+                  { action: "italic", icon: Italic, label: "Italic" },
+                  { action: "h1", icon: Heading1, label: "Heading 1" },
+                  { action: "h2", icon: Heading2, label: "Heading 2" },
+                  { action: "h3", icon: Heading3, label: "Heading 3" },
+                  { action: "ul", icon: List, label: "Bullet List" },
+                  { action: "ol", icon: ListOrdered, label: "Numbered List" },
+                  { action: "quote", icon: Quote, label: "Blockquote" },
+                  { action: "link", icon: Link2, label: "Link" },
+                  { action: "image", icon: ImageIcon, label: "Insert Image" },
+                  { action: "hr", icon: Minus, label: "Divider" },
+                  { action: "align-left", icon: AlignLeft, label: "Align Left" },
+                  { action: "align-center", icon: AlignCenter, label: "Align Center" },
+                  { action: "align-right", icon: AlignRight, label: "Align Right" },
+                ].map(({ action, icon: Icon, label }) => (
+                  <button
+                    key={action}
+                    type="button"
+                    onClick={() => handleToolbar(action)}
+                    title={label}
+                    className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/5 transition"
+                  >
+                    <Icon size={18} />
+                  </button>
+                ))}
+              </div>
+              <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium flex items-center gap-1.5 ml-3 shrink-0">
+                <Code size={14} /> HTML
+              </span>
             </div>
             <textarea
               id="body-editor"
               {...form.register("body")}
               className="w-full min-h-[400px] px-6 py-4 bg-transparent text-foreground focus:outline-none resize-y font-mono text-sm leading-relaxed"
-              placeholder={editorMode === "markdown" ? "Write your post in Markdown..." : "Paste or write HTML here..."}
+              placeholder="Write your post HTML here..."
             />
+          </div>
+
+          <div className="bg-card border border-border rounded-2xl overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setShowJsEditor(!showJsEditor)}
+              className="w-full flex items-center gap-2 px-4 py-3 text-left hover:bg-white/5 transition-colors border-b border-border"
+            >
+              {showJsEditor ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+              <Code size={16} className="text-cyan-400" />
+              <span className="text-sm font-semibold text-foreground">Custom JavaScript</span>
+              {form.watch("customJs") && (
+                <span className="ml-auto text-xs text-cyan-400 bg-cyan-400/10 px-2 py-0.5 rounded-full">active</span>
+              )}
+            </button>
+            {showJsEditor && (
+              <div className="p-4 border-b border-border bg-background/30">
+                <textarea
+                  {...form.register("customJs")}
+                  className="w-full min-h-[150px] px-4 py-3 bg-background border border-border rounded-xl focus:outline-none focus:border-cyan-400 text-foreground resize-y font-mono text-sm leading-relaxed"
+                  placeholder={`// Custom JavaScript for this post\ndocument.querySelectorAll('.toggle').forEach(el => {\n  el.addEventListener('click', () => el.classList.toggle('open'));\n});`}
+                />
+                <p className="text-xs text-muted-foreground mt-2">JavaScript runs inside the post frame after the content loads.</p>
+              </div>
+            )}
           </div>
 
           <div className="bg-card border border-border rounded-2xl p-6 md:p-8">

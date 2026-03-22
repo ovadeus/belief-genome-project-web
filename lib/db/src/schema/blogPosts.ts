@@ -16,6 +16,8 @@ export const blogPostsTable = pgTable("blog_posts", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
   readTimeMins: integer("read_time_mins"),
   isPrivate: boolean("is_private").notNull().default(false),
+  customCss: text("custom_css"),
+  customJs: text("custom_js"),
 });
 
 export const insertBlogPostSchema = createInsertSchema(blogPostsTable).omit({ id: true, createdAt: true, updatedAt: true });

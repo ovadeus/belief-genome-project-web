@@ -17,4 +17,6 @@ export interface CreateBlogPostBody {
   /** @nullable */
   publishedAt?: Date | null;
   isPrivate?: boolean;
+  customCss?: string;
+  customJs?: string;
 }

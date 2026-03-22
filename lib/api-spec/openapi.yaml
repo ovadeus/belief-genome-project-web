@@ -672,6 +672,10 @@ components:
         publishedAt:
           type: ["string", "null"]
           format: date-time
+        customCss:
+          type: string
+        customJs:
+          type: string
       required:
         - title
         - slug
@@ -698,6 +702,10 @@ components:
         publishedAt:
           type: ["string", "null"]
           format: date-time
+        customCss:
+          type: string
+        customJs:
+          type: string
 
     CreateSubscriberBody:
       type: object

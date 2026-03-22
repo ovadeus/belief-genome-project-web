@@ -36,6 +36,10 @@ export interface BlogPost {
   /** @nullable */
   readTimeMins?: number | null;
   isPrivate: boolean;
+  /** @nullable */
+  customCss?: string | null;
+  /** @nullable */
+  customJs?: string | null;
 }
 
 export interface BlogPostListResponse {
@@ -56,6 +60,8 @@ export interface CreateBlogPostBody {
   /** @nullable */
   publishedAt?: string | null;
   isPrivate?: boolean;
+  customCss?: string;
+  customJs?: string;
 }
 
 export interface UpdateBlogPostBody {
@@ -69,6 +75,8 @@ export interface UpdateBlogPostBody {
   /** @nullable */
   publishedAt?: string | null;
   isPrivate?: boolean;
+  customCss?: string;
+  customJs?: string;
 }
 
 export interface CreateSubscriberBody {

@@ -43,6 +43,8 @@ export const ListBlogPostsResponse = zod.object({
       updatedAt: zod.date(),
       readTimeMins: zod.number().nullish(),
       isPrivate: zod.boolean(),
+      customCss: zod.string().nullish(),
+      customJs: zod.string().nullish(),
     }),
   ),
   total: zod.number(),
@@ -71,6 +73,8 @@ export const GetBlogPostResponse = zod.object({
   updatedAt: zod.date(),
   readTimeMins: zod.number().nullish(),
       isPrivate: zod.boolean(),
+  customCss: zod.string().nullish(),
+  customJs: zod.string().nullish(),
 });
 
 /**
@@ -211,6 +215,8 @@ export const ListAdminBlogPostsResponse = zod.object({
       updatedAt: zod.date(),
       readTimeMins: zod.number().nullish(),
       isPrivate: zod.boolean(),
+      customCss: zod.string().nullish(),
+      customJs: zod.string().nullish(),
     }),
   ),
   total: zod.number(),
@@ -231,6 +237,8 @@ export const CreateBlogPostBody = zod.object({
   status: zod.string().optional(),
   publishedAt: zod.date().nullish(),
   isPrivate: zod.boolean().optional(),
+  customCss: zod.string().optional(),
+  customJs: zod.string().optional(),
 });
 
 /**
@@ -254,6 +262,8 @@ export const GetAdminBlogPostResponse = zod.object({
   updatedAt: zod.date(),
   readTimeMins: zod.number().nullish(),
       isPrivate: zod.boolean(),
+  customCss: zod.string().nullish(),
+  customJs: zod.string().nullish(),
 });
 
 /**
@@ -273,6 +283,8 @@ export const UpdateBlogPostBody = zod.object({
   status: zod.string().optional(),
   publishedAt: zod.date().nullish(),
   isPrivate: zod.boolean().optional(),
+  customCss: zod.string().optional(),
+  customJs: zod.string().optional(),
 });
 
 export const UpdateBlogPostResponse = zod.object({
@@ -289,6 +301,8 @@ export const UpdateBlogPostResponse = zod.object({
   updatedAt: zod.date(),
   readTimeMins: zod.number().nullish(),
       isPrivate: zod.boolean(),
+  customCss: zod.string().nullish(),
+  customJs: zod.string().nullish(),
 });
 
 /**

@@ -1,16 +1,71 @@
 import { useRoute } from "wouter";
-import { useRef, useEffect, useCallback } from "react";
+import { useRef, useEffect, useCallback, useMemo } from "react";
 import { format } from "date-fns";
-import ReactMarkdown from "react-markdown";
-import rehypeRaw from "rehype-raw";
 import { Twitter, Linkedin, Link as LinkIcon, ArrowLeft } from "lucide-react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { usePublicBlogPost, usePublicRelatedPosts } from "@/hooks/use-blog";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
 
-function HtmlFrame({ html }: { html: string }) {
+const BASE_STYLES = `
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0a0a0f;
+    color: #f0f0f5;
+    padding: 0;
+    line-height: 1.8;
+    font-size: 16px;
+  }
+  h1, h2, h3, h4 {
+    font-family: 'Space Grotesk', 'Inter', sans-serif;
+    color: #f0f0f5;
+    font-weight: 700;
+  }
+  h1 { font-size: 2.25rem; margin-top: 2.5rem; margin-bottom: 1.5rem; }
+  h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; }
+  h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+  p { color: #f0f0f5; margin-bottom: 1.25rem; line-height: 1.8; }
+  a { color: #6c8fff; text-decoration: none; }
+  a:hover { color: #a78bfa; }
+  ul, ol { color: #f0f0f5; margin-bottom: 1.25rem; padding-left: 1.5rem; }
+  li { margin-bottom: 0.5rem; }
+  blockquote {
+    border-left: 4px solid #6c8fff;
+    padding: 1rem 1.5rem;
+    font-style: italic;
+    color: #f0f0f5;
+    margin: 2rem 0;
+    background: rgba(108, 143, 255, 0.05);
+    border-radius: 0 0.5rem 0.5rem 0;
+  }
+  img { max-width: 100%; height: auto; border-radius: 12px; margin: 1.5rem 0; }
+  code {
+    background: rgba(255, 255, 255, 0.06);
+    padding: 0.2em 0.4em;
+    border-radius: 4px;
+    font-size: 0.9em;
+  }
+  hr {
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    margin: 2rem 0;
+  }
+  strong { color: #f0f0f5; }
+  em { color: #f0f0f5; }
+`;
+
+function HtmlFrame({ html, customCss, customJs }: { html: string; customCss?: string | null; customJs?: string | null }) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  const srcDoc = useMemo(() => {
+    return `<!DOCTYPE html>
+<html><head>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>${BASE_STYLES}</style>
+${customCss ? `<style>${customCss}</style>` : ""}
+</head><body>${html}${customJs ? `<script>${customJs}<\/script>` : ""}</body></html>`;
+  }, [html, customCss, customJs]);
 
   const resize = useCallback(() => {
     const iframe = iframeRef.current;
@@ -40,9 +95,9 @@ function HtmlFrame({ html }: { html: string }) {
   return (
     <iframe
       ref={iframeRef}
-      srcDoc={html}
+      srcDoc={srcDoc}
       sandbox="allow-scripts allow-same-origin"
-      className="w-full border-0 rounded-xl overflow-hidden"
+      className="w-full border-0 overflow-hidden"
       style={{ minHeight: 200 }}
       title="Blog content"
     />
@@ -148,15 +203,12 @@ export default function BlogPost() {
             </div>
           )}
 
-          <div className="prose prose-invert prose-lg max-w-none">
-            {(() => {
-              const body = post.body || "";
-              const hasHtml = /<(style|script|iframe|form)\b/i.test(body);
-              if (hasHtml) {
-                return <HtmlFrame html={body} />;
-              }
-              return <ReactMarkdown rehypePlugins={[rehypeRaw]}>{body}</ReactMarkdown>;
-            })()}
+          <div className="max-w-none">
+            <HtmlFrame
+              html={post.body || ""}
+              customCss={post.customCss}
+              customJs={post.customJs}
+            />
           </div>
           
         </div>
