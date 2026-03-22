@@ -45,6 +45,7 @@ export default function BlogEditor() {
   const [hashtagInput, setHashtagInput] = useState("");
   const [showMediaPicker, setShowMediaPicker] = useState<"featured" | "inline" | null>(null);
   const [showIframePicker, setShowIframePicker] = useState(false);
+  const [uploadingAsset, setUploadingAsset] = useState(false);
   const [blogAssetFiles, setBlogAssetFiles] = useState<{ filename: string; url: string }[]>([]);
   const [showStyleEditor, setShowStyleEditor] = useState(false);
   const [showJsEditor, setShowJsEditor] = useState(false);
@@ -205,6 +206,37 @@ export default function BlogEditor() {
       }
     }
     form.setValue("body", textarea.value);
+  };
+
+  const [assetError, setAssetError] = useState("");
+
+  const handleAssetUpload = async (file: File) => {
+    if (!file.name.match(/\.(html|htm)$/i)) {
+      setAssetError("Only .html files are allowed");
+      return;
+    }
+    setUploadingAsset(true);
+    setAssetError("");
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/blog-assets/upload", {
+        method: "POST",
+        credentials: "include",
+        body: formData,
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: "Upload failed" }));
+        throw new Error(err.error || "Upload failed");
+      }
+      const refreshRes = await fetch("/api/blog-assets", { credentials: "include" });
+      const data = await refreshRes.json();
+      setBlogAssetFiles(data.files || []);
+    } catch (e: any) {
+      setAssetError(e.message || "Upload failed");
+    } finally {
+      setUploadingAsset(false);
+    }
   };
 
   if (isEditing && isLoadingPost) return <AdminLayout><div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div></AdminLayout>;
@@ -523,11 +555,39 @@ export default function BlogEditor() {
               </button>
             </div>
             <div className="p-6">
+              <div className="mb-4">
+                <input
+                  type="file"
+                  accept=".html,.htm"
+                  className="hidden"
+                  id="asset-upload-input"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleAssetUpload(file);
+                    e.target.value = "";
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => document.getElementById("asset-upload-input")?.click()}
+                  disabled={uploadingAsset}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed border-cyan-500/40 hover:border-cyan-400 hover:bg-cyan-500/5 transition-all text-cyan-400 text-sm font-medium disabled:opacity-50"
+                >
+                  {uploadingAsset ? (
+                    <><Loader2 size={16} className="animate-spin" /> Uploading...</>
+                  ) : (
+                    <><Upload size={16} /> Upload HTML File</>
+                  )}
+                </button>
+                {assetError && (
+                  <p className="text-red-400 text-xs mt-2 text-center">{assetError}</p>
+                )}
+              </div>
               {blogAssetFiles.length === 0 ? (
-                <div className="text-center py-8">
-                  <Frame className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
-                  <p className="text-muted-foreground">No HTML files found in <code className="text-primary text-xs">blog-assets/</code></p>
-                  <p className="text-xs text-muted-foreground mt-2">Place <code>.html</code> files in the blog-assets directory to use them here.</p>
+                <div className="text-center py-6">
+                  <Frame className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
+                  <p className="text-muted-foreground text-sm">No HTML files yet</p>
+                  <p className="text-xs text-muted-foreground mt-1">Upload an <code>.html</code> file above to get started.</p>
                 </div>
               ) : (
                 <div className="space-y-2">
