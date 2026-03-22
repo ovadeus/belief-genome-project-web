@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { Link } from "wouter";
 import { format } from "date-fns";
-import { Plus, Edit2, Trash2, Globe, FileEdit, Lock } from "lucide-react";
+import { Plus, Edit2, Trash2, Globe, FileEdit, Lock, Search } from "lucide-react";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { useAdminBlogPosts, useAdminDeletePost, useAdminTogglePostStatus } from "@/hooks/use-admin";
 
 export default function BlogList() {
   const [page, setPage] = useState(1);
-  const { data, isLoading } = useAdminBlogPosts({ page, limit: 20 });
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const { data, isLoading } = useAdminBlogPosts({ page, limit: 20, search: search || undefined, status: statusFilter || undefined });
   const deletePost = useAdminDeletePost();
   const toggleStatus = useAdminTogglePostStatus();
 
@@ -24,6 +26,28 @@ export default function BlogList() {
         >
           <Plus size={18} /> New Post
         </Link>
+      </div>
+
+      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+          <input
+            type="text"
+            placeholder="Search posts by title or content..."
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+            className="w-full pl-10 pr-4 py-2.5 bg-card border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 text-foreground text-sm"
+          />
+        </div>
+        <select
+          value={statusFilter}
+          onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+          className="px-4 py-2.5 bg-card border border-border rounded-xl text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 appearance-none cursor-pointer"
+        >
+          <option value="">All Status</option>
+          <option value="published">Published</option>
+          <option value="draft">Drafts</option>
+        </select>
       </div>
 
       <div className="bg-card border border-border rounded-2xl overflow-hidden">

@@ -28,7 +28,7 @@ export function useDashboardStats() {
 }
 
 // Blog Admin
-export function useAdminBlogPosts(params: { page?: number, limit?: number } = {}) {
+export function useAdminBlogPosts(params: { page?: number, limit?: number, search?: string, status?: string } = {}) {
   return useListAdminBlogPosts(params);
 }
 

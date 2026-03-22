@@ -217,6 +217,8 @@ export type ListBlogPostsParams = {
 export type ListAdminBlogPostsParams = {
   page?: number;
   limit?: number;
+  search?: string;
+  status?: string;
 };
 
 export type UploadBlogImageBody = {

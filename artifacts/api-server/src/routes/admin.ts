@@ -49,12 +49,26 @@ router.get("/admin/blog", async (req, res): Promise<void> => {
   const params = ListAdminBlogPostsQueryParams.safeParse(req.query);
   const page = params.success ? params.data.page ?? 1 : 1;
   const limit = params.success ? params.data.limit ?? 25 : 25;
+  const search = params.success ? params.data.search : undefined;
+  const status = params.success ? params.data.status : undefined;
   const offset = (page - 1) * limit;
 
-  const [countResult] = await db.select({ count: sql<number>`count(*)::int` }).from(blogPostsTable);
+  const conditions = [];
+  if (search) {
+    conditions.push(
+      sql`(${blogPostsTable.title} ILIKE ${'%' + search + '%'} OR ${blogPostsTable.body} ILIKE ${'%' + search + '%'} OR ${blogPostsTable.slug} ILIKE ${'%' + search + '%'})`
+    );
+  }
+  if (status) {
+    conditions.push(eq(blogPostsTable.status, status));
+  }
+
+  const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+  const [countResult] = await db.select({ count: sql<number>`count(*)::int` }).from(blogPostsTable).where(whereClause);
   const total = countResult?.count ?? 0;
 
-  const posts = await db.select().from(blogPostsTable).orderBy(desc(blogPostsTable.createdAt)).limit(limit).offset(offset);
+  const posts = await db.select().from(blogPostsTable).where(whereClause).orderBy(desc(blogPostsTable.createdAt)).limit(limit).offset(offset);
 
   res.json({
     posts: posts.map(p => ({ ...p, hashtags: p.hashtags ?? [] })),
