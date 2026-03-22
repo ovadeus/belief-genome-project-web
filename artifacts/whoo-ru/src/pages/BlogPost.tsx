@@ -108,7 +108,14 @@ export default function BlogPost() {
           )}
 
           <div className="prose prose-invert prose-lg max-w-none">
-            <ReactMarkdown rehypePlugins={[rehypeRaw]}>{post.body || ""}</ReactMarkdown>
+            {(() => {
+              const body = post.body || "";
+              const hasHtml = /<(div|style|section|article|table|iframe|form|header|footer|nav|main|aside)\b/i.test(body);
+              if (hasHtml) {
+                return <div dangerouslySetInnerHTML={{ __html: body }} />;
+              }
+              return <ReactMarkdown rehypePlugins={[rehypeRaw]}>{body}</ReactMarkdown>;
+            })()}
           </div>
           
         </div>
