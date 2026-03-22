@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "wouter";
 import { format } from "date-fns";
-import { Search, Hash } from "lucide-react";
+import { Search, Hash, Lock } from "lucide-react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { usePublicBlog } from "@/hooks/use-blog";
 
@@ -85,9 +85,17 @@ export default function Blog() {
                       </span>
                     ))}
                   </div>
-                  <h2 className="text-4xl md:text-5xl font-display font-bold text-foreground mb-6 group-hover:text-primary transition-colors leading-tight">
-                    {featuredPost.title}
-                  </h2>
+                  <div className="flex items-center gap-3 mb-2">
+                    <h2 className="text-4xl md:text-5xl font-display font-bold text-foreground group-hover:text-primary transition-colors leading-tight">
+                      {featuredPost.title}
+                    </h2>
+                  </div>
+                  {featuredPost.isPrivate && (
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-red-500/10 border border-red-500/20 mb-4">
+                      <Lock size={12} className="text-red-400" />
+                      <span className="text-xs font-semibold text-red-400 uppercase tracking-wider">Private</span>
+                    </div>
+                  )}
                   <p className="text-xl text-muted-foreground mb-8 line-clamp-3">
                     {featuredPost.excerpt}
                   </p>
@@ -135,9 +143,14 @@ export default function Blog() {
                 </div>
                 
                 <Link href={`/blog/${post.slug}`} className="group">
-                  <h3 className="text-2xl font-bold text-foreground mb-3 leading-snug group-hover:text-primary transition-colors">
-                    {post.title}
-                  </h3>
+                  <div className="flex items-start gap-2 mb-3">
+                    <h3 className="text-2xl font-bold text-foreground leading-snug group-hover:text-primary transition-colors">
+                      {post.title}
+                    </h3>
+                    {post.isPrivate && (
+                      <Lock size={14} className="text-red-400 flex-shrink-0 mt-1.5" title="Private Post" />
+                    )}
+                  </div>
                   <p className="text-muted-foreground line-clamp-3 mb-6">
                     {post.excerpt}
                   </p>
