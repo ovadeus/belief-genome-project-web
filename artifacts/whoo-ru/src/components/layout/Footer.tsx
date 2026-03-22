@@ -42,7 +42,7 @@ export function Footer() {
             <h4 className="font-semibold text-foreground mb-6 font-display uppercase tracking-wider text-sm">Platform</h4>
             <ul className="space-y-4">
               <li><Link href="/about" className="text-muted-foreground hover:text-primary transition-colors">About the Research</Link></li>
-              <li><Link href="/app" className="text-muted-foreground hover:text-primary transition-colors">Desktop App</Link></li>
+              <li><Link href="/app" className="text-muted-foreground hover:text-primary transition-colors">Web App</Link></li>
               <li><Link href="/book" className="text-muted-foreground hover:text-primary transition-colors">The Book</Link></li>
             </ul>
           </div>

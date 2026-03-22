@@ -134,10 +134,10 @@ export default function Home() {
             <div className="flex-1 z-10">
               <h2 className="text-4xl md:text-5xl font-display font-bold mb-6">The Forecaster</h2>
               <p className="text-xl text-muted-foreground mb-8">
-                What if you could predict your own reactions? The Forecaster within the desktop app uses your Belief Genome to model how you'll respond to new information, news, and complex situations before they even happen.
+                What if you could predict your own reactions? The Forecaster uses your Belief Genome to model how you'll respond to new information, news, and complex situations before they even happen.
               </p>
-              <Link href="/app" className="text-primary font-semibold flex items-center gap-2 hover:gap-3 transition-all">
-                Explore the Desktop App <ArrowRight size={18} />
+              <Link href="/genome/register" className="text-primary font-semibold flex items-center gap-2 hover:gap-3 transition-all">
+                Start Mapping Your Beliefs <ArrowRight size={18} />
               </Link>
             </div>
             
@@ -242,11 +242,11 @@ export default function Home() {
             The only question is whether you are ready to look.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Link 
-              href="/app"
+            <Link
+              href="/genome/register"
               className="px-8 py-4 rounded-xl font-semibold text-lg bg-primary hover:bg-primary/90 text-primary-foreground transition-all"
             >
-              Download BGP App
+              Get Started — Free
             </Link>
             <Link 
               href="/book"

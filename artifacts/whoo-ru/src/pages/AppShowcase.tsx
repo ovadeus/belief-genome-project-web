@@ -1,7 +1,6 @@
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { motion } from "framer-motion";
-import { useGetPublicSettings } from "@workspace/api-client-react";
-import { Download, Dna, Activity, Radio, Eye, FolderOpen, ChevronDown } from "lucide-react";
+import { ArrowRight, Dna, Activity, Radio, Eye, FolderOpen, ChevronDown } from "lucide-react";
 import { useState } from "react";
 
 const features = [
@@ -13,10 +12,10 @@ const features = [
 ];
 
 const faqs = [
-  { q: "What platforms does BGP support?", a: "BGP is currently available for macOS 12+ (Monterey and later), supporting both Apple Silicon and Intel processors. Windows and Linux versions are in development." },
-  { q: "Is BGP free?", a: "Yes. The BGP desktop application is free during the beta period. We believe self-knowledge should be accessible to everyone." },
+  { q: "What platforms does BGP support?", a: "BGP is a web application accessible from any modern browser — desktop, tablet, or mobile. No download required." },
+  { q: "Is BGP free?", a: "Yes. The BGP web application is free during the beta period. We believe self-knowledge should be accessible to everyone." },
   { q: "How long does the initial belief mapping take?", a: "The initial Belief Genome mapping takes approximately 45-60 minutes, spread across several sessions. The system learns more about you with every interaction." },
-  { q: "Is my data private?", a: "Absolutely. Your belief data is stored locally on your machine. BGP does not upload, share, or sell your psychological data. Your inner world belongs to you." },
+  { q: "Is my data private?", a: "Absolutely. Your belief data is encrypted and stored securely. BGP does not share or sell your psychological data. Your inner world belongs to you." },
   { q: "What makes BGP different from personality tests?", a: "Personality tests measure traits — stable, broad categories. BGP maps beliefs — specific, weighted, contextual convictions that drive your actual decisions. The difference is dimensional precision." },
   { q: "Can I export my Belief Genome data?", a: "Yes. BGP supports full data export in multiple formats, including JSON and CSV. Your data is yours to keep, analyze, and use however you choose." },
 ];
@@ -28,7 +27,6 @@ const fadeUp = {
 };
 
 export default function AppShowcase() {
-  const { data: settings } = useGetPublicSettings();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   return (
@@ -40,23 +38,23 @@ export default function AppShowcase() {
               The <span className="text-primary">BGP (Belief Genome Project)</span> App
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
-              A secure and local desktop application for mapping, understanding, and forecasting your belief architecture with dimensional precision.
+              A secure web application for mapping, understanding, and forecasting your belief architecture with dimensional precision.
             </p>
             <a
-              href={settings?.appDownloadUrl || "#"}
+              href="/genome/register"
               className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-xl font-semibold text-lg hover:brightness-110 transition-all shadow-lg shadow-primary/25"
             >
-              <Download className="w-5 h-5" />
-              Download — Free for macOS
+              <ArrowRight className="w-5 h-5" />
+              Create Your Account — Free
             </a>
-            <p className="text-sm text-muted-foreground mt-3">macOS 12+ · Apple Silicon or Intel</p>
+            <p className="text-sm text-muted-foreground mt-3">No download required · Works in any modern browser</p>
           </motion.div>
 
           <motion.div {...fadeUp} transition={{ delay: 0.2 }} className="mb-20">
             <div className="aspect-video bg-card border border-border rounded-2xl overflow-hidden flex items-center justify-center">
               <img
                 src={`${import.meta.env.BASE_URL}images/app-mockup.png`}
-                alt="BGP Desktop Application"
+                alt="BGP Web Application"
                 className="w-full h-full object-cover"
               />
             </div>
@@ -107,11 +105,11 @@ export default function AppShowcase() {
           <motion.div {...fadeUp} className="text-center bg-card border border-border rounded-2xl p-12">
             <h2 className="text-2xl font-bold text-foreground mb-4">Ready to discover who you really are?</h2>
             <a
-              href={settings?.appDownloadUrl || "#"}
+              href="/genome/register"
               className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-xl font-semibold hover:brightness-110 transition-all"
             >
-              <Download className="w-5 h-5" />
-              Download BGP — Free
+              <ArrowRight className="w-5 h-5" />
+              Get Started — Free
             </a>
           </motion.div>
         </div>
