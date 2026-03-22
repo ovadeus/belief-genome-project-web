@@ -1,6 +1,7 @@
 import { useRoute } from "wouter";
 import { useRef, useEffect, useCallback, useMemo } from "react";
 import { format } from "date-fns";
+import { marked } from "marked";
 import { Twitter, Linkedin, Link as LinkIcon, ArrowLeft } from "lucide-react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { usePublicBlogPost, usePublicRelatedPosts } from "@/hooks/use-blog";
@@ -55,16 +56,23 @@ const BASE_STYLES = `
   em { color: #f0f0f5; }
 `;
 
+function isMarkdown(text: string): boolean {
+  const mdPatterns = /^#{1,6}\s|^\*\*|^\- |\!\[.*\]\(|^\d+\.\s/m;
+  const htmlPatterns = /<(h[1-6]|p|div|section|article|ul|ol|blockquote|table)\b/i;
+  return mdPatterns.test(text) && !htmlPatterns.test(text);
+}
+
 function HtmlFrame({ html, customCss, customJs }: { html: string; customCss?: string | null; customJs?: string | null }) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const srcDoc = useMemo(() => {
+    const bodyHtml = isMarkdown(html) ? marked.parse(html, { async: false }) as string : html;
     return `<!DOCTYPE html>
 <html><head>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>${BASE_STYLES}</style>
 ${customCss ? `<style>${customCss}</style>` : ""}
-</head><body>${html}${customJs ? `<script>${customJs}<\/script>` : ""}</body></html>`;
+</head><body>${bodyHtml}${customJs ? `<script>${customJs}<\/script>` : ""}</body></html>`;
   }, [html, customCss, customJs]);
 
   const resize = useCallback(() => {

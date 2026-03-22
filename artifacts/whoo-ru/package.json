@@ -78,6 +78,7 @@
     "@belief-genome/engine": "workspace:*",
     "@types/three": "^0.183.1",
     "chart.js": "^4.5.1",
+    "marked": "^17.0.5",
     "react-chartjs-2": "^5.3.1",
     "react-markdown": "^10.1.0",
     "react-quill": "^2.0.0",
