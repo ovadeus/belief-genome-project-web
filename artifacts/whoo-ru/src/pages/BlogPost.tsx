@@ -151,7 +151,7 @@ export default function BlogPost() {
           <div className="prose prose-invert prose-lg max-w-none">
             {(() => {
               const body = post.body || "";
-              const hasHtml = /<(div|style|section|article|table|iframe|form|header|footer|nav|main|aside)\b/i.test(body);
+              const hasHtml = /<(style|script|iframe|form)\b/i.test(body);
               if (hasHtml) {
                 return <HtmlFrame html={body} />;
               }
