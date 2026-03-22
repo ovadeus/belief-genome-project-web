@@ -43,6 +43,7 @@ export const ListBlogPostsResponse = zod.object({
       updatedAt: zod.date(),
       readTimeMins: zod.number().nullish(),
       isPrivate: zod.boolean(),
+      visibility: zod.enum(["public", "subscribers", "admin"]).optional().default("public"),
       customCss: zod.string().nullish(),
       customJs: zod.string().nullish(),
     }),
@@ -73,6 +74,7 @@ export const GetBlogPostResponse = zod.object({
   updatedAt: zod.date(),
   readTimeMins: zod.number().nullish(),
       isPrivate: zod.boolean(),
+      visibility: zod.enum(["public", "subscribers", "admin"]).optional().default("public"),
   customCss: zod.string().nullish(),
   customJs: zod.string().nullish(),
 });
@@ -98,6 +100,7 @@ export const GetRelatedPostsResponseItem = zod.object({
   updatedAt: zod.date(),
   readTimeMins: zod.number().nullish(),
       isPrivate: zod.boolean(),
+      visibility: zod.enum(["public", "subscribers", "admin"]).optional().default("public"),
 });
 export const GetRelatedPostsResponse = zod.array(GetRelatedPostsResponseItem);
 
@@ -184,6 +187,7 @@ export const GetAdminStatsResponse = zod.object({
       updatedAt: zod.date(),
       readTimeMins: zod.number().nullish(),
       isPrivate: zod.boolean(),
+      visibility: zod.enum(["public", "subscribers", "admin"]).optional().default("public"),
     }),
   ),
 });
@@ -217,6 +221,7 @@ export const ListAdminBlogPostsResponse = zod.object({
       updatedAt: zod.date(),
       readTimeMins: zod.number().nullish(),
       isPrivate: zod.boolean(),
+      visibility: zod.enum(["public", "subscribers", "admin"]).optional().default("public"),
       customCss: zod.string().nullish(),
       customJs: zod.string().nullish(),
     }),
@@ -239,6 +244,7 @@ export const CreateBlogPostBody = zod.object({
   status: zod.string().optional(),
   publishedAt: zod.date().nullish(),
   isPrivate: zod.boolean().optional(),
+  visibility: zod.enum(["public", "subscribers", "admin"]).optional(),
   customCss: zod.string().optional(),
   customJs: zod.string().optional(),
 });
@@ -264,6 +270,7 @@ export const GetAdminBlogPostResponse = zod.object({
   updatedAt: zod.date(),
   readTimeMins: zod.number().nullish(),
       isPrivate: zod.boolean(),
+      visibility: zod.enum(["public", "subscribers", "admin"]).optional().default("public"),
   customCss: zod.string().nullish(),
   customJs: zod.string().nullish(),
 });
@@ -285,6 +292,7 @@ export const UpdateBlogPostBody = zod.object({
   status: zod.string().optional(),
   publishedAt: zod.date().nullish(),
   isPrivate: zod.boolean().optional(),
+  visibility: zod.enum(["public", "subscribers", "admin"]).optional(),
   customCss: zod.string().optional(),
   customJs: zod.string().optional(),
 });
@@ -303,6 +311,7 @@ export const UpdateBlogPostResponse = zod.object({
   updatedAt: zod.date(),
   readTimeMins: zod.number().nullish(),
       isPrivate: zod.boolean(),
+      visibility: zod.enum(["public", "subscribers", "admin"]).optional().default("public"),
   customCss: zod.string().nullish(),
   customJs: zod.string().nullish(),
 });
@@ -335,6 +344,7 @@ export const ToggleBlogPostStatusResponse = zod.object({
   updatedAt: zod.date(),
   readTimeMins: zod.number().nullish(),
       isPrivate: zod.boolean(),
+      visibility: zod.enum(["public", "subscribers", "admin"]).optional().default("public"),
 });
 
 /**

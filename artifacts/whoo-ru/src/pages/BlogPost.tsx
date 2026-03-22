@@ -178,10 +178,16 @@ export default function BlogPost() {
             {post.title}
           </h1>
 
-          {post.isPrivate && (
+          {post.visibility === "subscribers" && (
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 mb-8">
+              <Lock size={13} className="text-amber-400" />
+              <span className="text-xs font-semibold text-amber-400 uppercase tracking-wider">Subscribers Only</span>
+            </div>
+          )}
+          {post.visibility === "admin" && (
             <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 mb-8">
               <Lock size={13} className="text-red-400" />
-              <span className="text-xs font-semibold text-red-400 uppercase tracking-wider">Private Post</span>
+              <span className="text-xs font-semibold text-red-400 uppercase tracking-wider">Admin Only</span>
             </div>
           )}
 

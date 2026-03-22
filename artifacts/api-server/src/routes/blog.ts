@@ -13,24 +13,39 @@ import {
 const ADMIN_JWT_SECRET = process.env.JWT_SECRET || "whoo-ru-secret-key-change-in-production";
 const GENOME_JWT_SECRET = process.env.GENOME_JWT_SECRET || process.env.JWT_SECRET || "";
 
-function isAuthenticated(req: Request): boolean {
+// Returns the viewer's access level: "admin", "subscriber", or "public"
+function getViewerRole(req: Request): "admin" | "subscriber" | "public" {
+  // Check admin JWT first (highest privilege)
   const adminToken = req.cookies?.token;
   if (adminToken) {
     try {
       jwt.verify(adminToken, ADMIN_JWT_SECRET);
-      return true;
+      return "admin";
     } catch {}
   }
 
+  // Check genome/subscriber JWT
   const genomeToken = req.headers.authorization?.replace("Bearer ", "") || req.cookies?.genome_token;
   if (genomeToken) {
     try {
       jwt.verify(genomeToken, GENOME_JWT_SECRET);
-      return true;
+      return "subscriber";
     } catch {}
   }
 
-  return false;
+  return "public";
+}
+
+// Check if a post's visibility allows access for the given role
+function canView(visibility: string, role: "admin" | "subscriber" | "public"): boolean {
+  if (role === "admin") return true; // Admin sees everything
+  if (role === "subscriber") return visibility === "public" || visibility === "subscribers";
+  return visibility === "public";
+}
+
+// Backward compat: kept for reference
+function isAuthenticated(req: Request): boolean {
+  return getViewerRole(req) !== "public";
 }
 
 const router: IRouter = Router();
@@ -43,12 +58,16 @@ router.get("/blog", async (req, res): Promise<void> => {
   const search = params.success ? params.data.search : undefined;
   const offset = (page - 1) * limit;
 
-  const authed = isAuthenticated(req);
+  const role = getViewerRole(req);
 
   const conditions = [eq(blogPostsTable.status, "published")];
-  if (!authed) {
-    conditions.push(eq(blogPostsTable.isPrivate, false));
+  // Filter by visibility based on viewer's role
+  if (role === "public") {
+    conditions.push(eq(blogPostsTable.visibility, "public"));
+  } else if (role === "subscriber") {
+    conditions.push(or(eq(blogPostsTable.visibility, "public"), eq(blogPostsTable.visibility, "subscribers"))!);
   }
+  // admin sees all — no filter needed
   if (hashtag) {
     conditions.push(arrayContains(blogPostsTable.hashtags, [hashtag]));
   }
@@ -91,7 +110,8 @@ router.get("/blog/:slug", async (req, res): Promise<void> => {
     return;
   }
 
-  if (post.isPrivate && !isAuthenticated(req)) {
+  const role = getViewerRole(req);
+  if (!canView(post.visibility || "public", role)) {
     res.status(404).json({ error: "Post not found" });
     return;
   }
@@ -107,7 +127,7 @@ router.get("/blog/:slug/related", async (req, res): Promise<void> => {
     return;
   }
 
-  const authed = isAuthenticated(req);
+  const relatedRole = getViewerRole(req);
 
   let related = [];
   if (post.hashtags && post.hashtags.length > 0) {
@@ -116,8 +136,10 @@ router.get("/blog/:slug/related", async (req, res): Promise<void> => {
       ne(blogPostsTable.id, post.id),
       sql`${blogPostsTable.hashtags} && ${sql.raw(`ARRAY[${post.hashtags.map(t => `'${t.replace(/'/g, "''")}'`).join(",")}]::text[]`)}`,
     ];
-    if (!authed) {
-      relatedConditions.push(eq(blogPostsTable.isPrivate, false));
+    if (relatedRole === "public") {
+      relatedConditions.push(eq(blogPostsTable.visibility, "public"));
+    } else if (relatedRole === "subscriber") {
+      relatedConditions.push(or(eq(blogPostsTable.visibility, "public"), eq(blogPostsTable.visibility, "subscribers"))!);
     }
 
     related = await db

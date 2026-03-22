@@ -90,10 +90,16 @@ export default function Blog() {
                       {featuredPost.title}
                     </h2>
                   </div>
-                  {featuredPost.isPrivate && (
+                  {featuredPost.visibility === "subscribers" && (
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-500/10 border border-amber-500/20 mb-4">
+                      <Lock size={12} className="text-amber-400" />
+                      <span className="text-xs font-semibold text-amber-400 uppercase tracking-wider">Subscribers</span>
+                    </div>
+                  )}
+                  {featuredPost.visibility === "admin" && (
                     <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-red-500/10 border border-red-500/20 mb-4">
                       <Lock size={12} className="text-red-400" />
-                      <span className="text-xs font-semibold text-red-400 uppercase tracking-wider">Private</span>
+                      <span className="text-xs font-semibold text-red-400 uppercase tracking-wider">Admin Only</span>
                     </div>
                   )}
                   <p className="text-xl text-muted-foreground mb-8 line-clamp-3">
@@ -147,8 +153,11 @@ export default function Blog() {
                     <h3 className="text-2xl font-bold text-foreground leading-snug group-hover:text-primary transition-colors">
                       {post.title}
                     </h3>
-                    {post.isPrivate && (
-                      <Lock size={14} className="text-red-400 flex-shrink-0 mt-1.5" title="Private Post" />
+                    {post.visibility === "subscribers" && (
+                      <Lock size={14} className="text-amber-400 flex-shrink-0 mt-1.5" title="Subscribers Only" />
+                    )}
+                    {post.visibility === "admin" && (
+                      <Lock size={14} className="text-red-400 flex-shrink-0 mt-1.5" title="Admin Only" />
                     )}
                   </div>
                   <p className="text-muted-foreground line-clamp-3 mb-6">

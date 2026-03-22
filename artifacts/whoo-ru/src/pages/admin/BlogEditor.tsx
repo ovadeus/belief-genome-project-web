@@ -19,6 +19,7 @@ const postSchema = z.object({
   status: z.enum(["draft", "published"]).default("draft"),
   hashtags: z.array(z.string()).default([]),
   isPrivate: z.boolean().default(false),
+  visibility: z.enum(["public", "subscribers", "admin"]).default("public"),
   customCss: z.string().optional().default(""),
   customJs: z.string().optional().default(""),
 });
@@ -455,21 +456,42 @@ export default function BlogEditor() {
           </div>
 
           <div className="bg-card border border-border rounded-2xl p-6 md:p-8">
-            <label className="flex items-center gap-3 cursor-pointer">
-              <div className={`relative w-11 h-6 rounded-full transition-colors ${form.watch("isPrivate") ? "bg-amber-500" : "bg-muted"}`}>
-                <input
-                  type="checkbox"
-                  {...form.register("isPrivate")}
-                  className="sr-only peer"
-                />
-                <div className={`absolute left-0.5 top-0.5 w-5 h-5 rounded-full bg-white transition-transform ${form.watch("isPrivate") ? "translate-x-5" : "translate-x-0"}`} />
-              </div>
-              <div className="flex items-center gap-2">
-                <Lock size={18} className={form.watch("isPrivate") ? "text-amber-500" : "text-muted-foreground"} />
-                <span className="text-foreground font-semibold">Private Post</span>
-              </div>
-            </label>
-            <p className="text-sm text-muted-foreground mt-2 ml-14">Private posts are hidden from the public blog. Only members and admins can see them.</p>
+            <div className="flex items-center gap-2 mb-4">
+              <Lock size={18} className="text-muted-foreground" />
+              <span className="text-foreground font-semibold">Visibility</span>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              {([
+                { value: "public", label: "Public", desc: "Everyone can see", color: "emerald" },
+                { value: "subscribers", label: "Subscribers", desc: "Subscribers & Admin", color: "amber" },
+                { value: "admin", label: "Admin Only", desc: "Only Admin can see", color: "red" },
+              ] as const).map((opt) => {
+                const selected = form.watch("visibility") === opt.value;
+                const borderColor = selected
+                  ? opt.color === "emerald" ? "border-emerald-500/40" : opt.color === "amber" ? "border-amber-500/40" : "border-red-500/40"
+                  : "border-border";
+                const bgColor = selected
+                  ? opt.color === "emerald" ? "bg-emerald-500/10" : opt.color === "amber" ? "bg-amber-500/10" : "bg-red-500/10"
+                  : "bg-background";
+                const textColor = selected
+                  ? opt.color === "emerald" ? "text-emerald-400" : opt.color === "amber" ? "text-amber-400" : "text-red-400"
+                  : "text-muted-foreground";
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => {
+                      form.setValue("visibility", opt.value);
+                      form.setValue("isPrivate", opt.value !== "public");
+                    }}
+                    className={`flex flex-col items-center gap-1 p-4 rounded-xl border-2 transition-all ${borderColor} ${bgColor} hover:opacity-90`}
+                  >
+                    <span className={`text-sm font-bold ${textColor}`}>{opt.label}</span>
+                    <span className="text-[10px] text-muted-foreground">{opt.desc}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       </form>

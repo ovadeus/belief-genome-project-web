@@ -72,9 +72,14 @@ export default function BlogList() {
                     <td className="px-6 py-4">
                       <p className="font-bold text-foreground mb-1 flex items-center gap-2">
                         {post.title}
-                        {post.isPrivate && (
+                        {(post.visibility === "subscribers" || (post.isPrivate && post.visibility !== "admin")) && (
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-amber-500/10 text-amber-500 border border-amber-500/20">
-                            <Lock size={10} /> Private
+                            <Lock size={10} /> Subscribers
+                          </span>
+                        )}
+                        {post.visibility === "admin" && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-red-500/10 text-red-500 border border-red-500/20">
+                            <Lock size={10} /> Admin Only
                           </span>
                         )}
                       </p>
