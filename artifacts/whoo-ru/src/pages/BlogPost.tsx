@@ -129,7 +129,7 @@ export default function BlogPost() {
   if (isLoading) {
     return (
       <PublicLayout>
-        <div className="w-full max-w-[1200px] mx-auto px-4 py-24 animate-pulse">
+        <div className="w-full max-w-7xl mx-auto px-4 py-24 animate-pulse">
           <div className="h-8 w-32 bg-card rounded mb-8" />
           <div className="h-16 bg-card rounded mb-6 w-3/4" />
           <div className="h-96 w-full bg-card rounded-2xl mb-12" />
@@ -146,7 +146,7 @@ export default function BlogPost() {
   if (isError || !post) {
     return (
       <PublicLayout>
-        <div className="w-full max-w-[1200px] mx-auto px-4 py-32 text-center">
+        <div className="w-full max-w-7xl mx-auto px-4 py-32 text-center">
           <h1 className="text-4xl font-bold mb-4">Post not found</h1>
           <p className="text-muted-foreground mb-8">The article you're looking for doesn't exist.</p>
           <Link href="/blog" className="text-primary hover:underline">← Back to blog</Link>
@@ -158,7 +158,7 @@ export default function BlogPost() {
   return (
     <PublicLayout>
       <article className="py-12 lg:py-20">
-        <div className="w-full max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <Link href="/blog" className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors font-medium mb-12">
             <ArrowLeft size={18} /> Back to all posts
