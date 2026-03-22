@@ -29,6 +29,8 @@ export default function Home() {
           </div>
         </div>
 
+        {/* TEMPORARILY HIDDEN — text and buttons */}
+        {/*
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -65,6 +67,7 @@ export default function Home() {
             </div>
           </motion.div>
         </div>
+        */}
       </section>
 
       {/* WHAT IS BGP */}
