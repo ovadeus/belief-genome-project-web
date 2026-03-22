@@ -3,7 +3,7 @@ import { useRoute, useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ArrowLeft, Save, Globe, Image as ImageIcon, X, Bold, Italic, Heading1, Heading2, Heading3, List, ListOrdered, Quote, Link2, Minus, Upload, Loader2, Lock, Code, FileText } from "lucide-react";
+import { ArrowLeft, Save, Globe, Image as ImageIcon, X, Bold, Italic, Heading1, Heading2, Heading3, List, ListOrdered, Quote, Link2, Minus, Upload, Loader2, Lock, Code, FileText, AlignLeft, AlignCenter, AlignRight } from "lucide-react";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { useAdminCreatePost, useAdminUpdatePost } from "@/hooks/use-admin";
 import { useGetAdminBlogPost } from "@workspace/api-client-react";
@@ -162,6 +162,20 @@ export default function BlogEditor() {
       case "link": insertMarkdown(textarea, "[", "](url)"); break;
       case "image": setShowMediaPicker("inline"); return;
       case "hr": insertMarkdown(textarea, "\n---\n"); break;
+      case "align-left":
+      case "align-center":
+      case "align-right": {
+        const align = action.replace("align-", "");
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const selected = textarea.value.substring(start, end) || "text";
+        const wrapped = `<div style="text-align: ${align};">${selected}</div>`;
+        textarea.setRangeText(wrapped, start, end, "end");
+        textarea.focus();
+        const ev = new Event("input", { bubbles: true });
+        textarea.dispatchEvent(ev);
+        break;
+      }
     }
     form.setValue("body", textarea.value);
   };
@@ -280,6 +294,9 @@ export default function BlogEditor() {
                     { action: "link", icon: Link2, label: "Link" },
                     { action: "image", icon: ImageIcon, label: "Insert Image" },
                     { action: "hr", icon: Minus, label: "Divider" },
+                    { action: "align-left", icon: AlignLeft, label: "Align Left" },
+                    { action: "align-center", icon: AlignCenter, label: "Align Center" },
+                    { action: "align-right", icon: AlignRight, label: "Align Right" },
                   ].map(({ action, icon: Icon, label }) => (
                     <button
                       key={action}
