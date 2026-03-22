@@ -3,7 +3,7 @@ import { useRoute, useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ArrowLeft, Save, Globe, Image as ImageIcon, X, Bold, Italic, Heading2, List, ListOrdered, Quote, Link2, Minus, Upload, Loader2, Lock, Code, FileText } from "lucide-react";
+import { ArrowLeft, Save, Globe, Image as ImageIcon, X, Bold, Italic, Heading1, Heading2, Heading3, List, ListOrdered, Quote, Link2, Minus, Upload, Loader2, Lock, Code, FileText } from "lucide-react";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { useAdminCreatePost, useAdminUpdatePost } from "@/hooks/use-admin";
 import { useGetAdminBlogPost } from "@workspace/api-client-react";
@@ -153,7 +153,9 @@ export default function BlogEditor() {
     switch (action) {
       case "bold": insertMarkdown(textarea, "**", "**"); break;
       case "italic": insertMarkdown(textarea, "*", "*"); break;
+      case "h1": insertMarkdown(textarea, "# "); break;
       case "h2": insertMarkdown(textarea, "## "); break;
+      case "h3": insertMarkdown(textarea, "### "); break;
       case "ul": insertMarkdown(textarea, "- "); break;
       case "ol": insertMarkdown(textarea, "1. "); break;
       case "quote": insertMarkdown(textarea, "> "); break;
@@ -269,7 +271,9 @@ export default function BlogEditor() {
                   {[
                     { action: "bold", icon: Bold, label: "Bold" },
                     { action: "italic", icon: Italic, label: "Italic" },
-                    { action: "h2", icon: Heading2, label: "Heading" },
+                    { action: "h1", icon: Heading1, label: "Heading 1" },
+                    { action: "h2", icon: Heading2, label: "Heading 2" },
+                    { action: "h3", icon: Heading3, label: "Heading 3" },
                     { action: "ul", icon: List, label: "Bullet List" },
                     { action: "ol", icon: ListOrdered, label: "Numbered List" },
                     { action: "quote", icon: Quote, label: "Quote" },
