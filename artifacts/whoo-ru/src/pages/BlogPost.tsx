@@ -10,7 +10,8 @@ import { Link } from "wouter";
 
 const BASE_STYLES = `
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { overflow: hidden; height: auto; }
+  html, body { overflow: hidden !important; height: auto; scrollbar-width: none; -ms-overflow-style: none; }
+  html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
   body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     background: #0a0a0f;
@@ -90,6 +91,10 @@ ${customCss ? `<style>${customCss}</style>` : ""}
     if (!iframe) return;
     const onLoad = () => {
       resize();
+      // Delayed resizes to catch fonts, images, and late-rendering content
+      setTimeout(resize, 100);
+      setTimeout(resize, 500);
+      setTimeout(resize, 1500);
       const observer = new MutationObserver(resize);
       if (iframe.contentDocument?.body) {
         observer.observe(iframe.contentDocument.body, { childList: true, subtree: true, attributes: true });
@@ -98,6 +103,10 @@ ${customCss ? `<style>${customCss}</style>` : ""}
       if (iframe.contentDocument?.body) {
         resizeObserver.observe(iframe.contentDocument.body);
       }
+      // Catch image loads
+      iframe.contentDocument?.querySelectorAll("img").forEach((img) => {
+        img.addEventListener("load", resize);
+      });
     };
     iframe.addEventListener("load", onLoad);
     return () => iframe.removeEventListener("load", onLoad);
@@ -108,8 +117,9 @@ ${customCss ? `<style>${customCss}</style>` : ""}
       ref={iframeRef}
       srcDoc={srcDoc}
       sandbox="allow-scripts allow-same-origin"
-      className="w-full border-0 overflow-hidden"
-      style={{ minHeight: 200 }}
+      className="w-full border-0"
+      scrolling="no"
+      style={{ minHeight: 200, overflow: "hidden" }}
       title="Blog content"
     />
   );
