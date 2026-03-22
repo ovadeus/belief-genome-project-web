@@ -10,6 +10,7 @@ import { Link } from "wouter";
 
 const BASE_STYLES = `
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { overflow: hidden; height: auto; }
   body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     background: #0a0a0f;
@@ -79,6 +80,7 @@ ${customCss ? `<style>${customCss}</style>` : ""}
   const resize = useCallback(() => {
     const iframe = iframeRef.current;
     if (!iframe?.contentDocument?.body) return;
+    iframe.style.height = "auto";
     const h = iframe.contentDocument.documentElement.scrollHeight;
     iframe.style.height = h + "px";
   }, []);
