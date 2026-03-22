@@ -100,7 +100,8 @@ router.post("/admin/blog", async (req, res): Promise<void> => {
       status: parsed.data.status || "draft",
       publishedAt,
       readTimeMins,
-      isPrivate: parsed.data.isPrivate ?? false,
+      isPrivate: parsed.data.visibility ? parsed.data.visibility !== "public" : (parsed.data.isPrivate ?? false),
+      visibility: parsed.data.visibility || (parsed.data.isPrivate ? "admin" : "public"),
       customCss: parsed.data.customCss || null,
       customJs: parsed.data.customJs || null,
     })

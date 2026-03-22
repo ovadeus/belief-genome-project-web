@@ -2,7 +2,7 @@ import { useRoute } from "wouter";
 import { useRef, useEffect, useCallback, useMemo } from "react";
 import { format } from "date-fns";
 import { marked } from "marked";
-import { Twitter, Linkedin, Link as LinkIcon, ArrowLeft } from "lucide-react";
+import { Twitter, Linkedin, Link as LinkIcon, ArrowLeft, Lock } from "lucide-react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { usePublicBlogPost, usePublicRelatedPosts } from "@/hooks/use-blog";
 import { useToast } from "@/hooks/use-toast";
@@ -177,6 +177,19 @@ export default function BlogPost() {
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-display font-bold text-foreground leading-tight mb-8">
             {post.title}
           </h1>
+
+          {post.visibility === "subscribers" && (
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 mb-8">
+              <Lock size={13} className="text-amber-400" />
+              <span className="text-xs font-semibold text-amber-400 uppercase tracking-wider">Subscribers Only</span>
+            </div>
+          )}
+          {post.visibility === "admin" && (
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 mb-8">
+              <Lock size={13} className="text-red-400" />
+              <span className="text-xs font-semibold text-red-400 uppercase tracking-wider">Admin Only</span>
+            </div>
+          )}
 
           <div className="flex items-center justify-between border-y border-border py-6 mb-12">
             <div className="flex items-center gap-4">

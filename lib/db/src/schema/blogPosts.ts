@@ -2,6 +2,7 @@ import { pgTable, text, serial, timestamp, integer, varchar, boolean } from "dri
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
+// Visibility levels: "public" (everyone), "subscribers" (subscribers + admin), "admin" (admin only)
 export const blogPostsTable = pgTable("blog_posts", {
   id: serial("id").primaryKey(),
   title: varchar("title", { length: 255 }).notNull(),
@@ -15,7 +16,8 @@ export const blogPostsTable = pgTable("blog_posts", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
   readTimeMins: integer("read_time_mins"),
-  isPrivate: boolean("is_private").notNull().default(false),
+  isPrivate: boolean("is_private").notNull().default(false), // kept for backward compat during migration
+  visibility: varchar("visibility", { length: 20 }).notNull().default("public"), // "public" | "subscribers" | "admin"
   customCss: text("custom_css"),
   customJs: text("custom_js"),
 });
