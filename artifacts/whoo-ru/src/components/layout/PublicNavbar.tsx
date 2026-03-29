@@ -10,7 +10,7 @@ const NAV_LINKS = [
   { href: "/blog", label: "Research Blog" },
   { href: "/app", label: "App" },
   { href: "/book", label: "Book" },
-  { href: "/mindmap.html", label: "How it Works", external: true },
+  { href: "/mindmap.html", label: "Mind Map", external: true },
   { href: "/about", label: "About" },
 ];
 
