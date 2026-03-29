@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Belief Genome — Scoring & Weighting System</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #06091a;
+  --bg2: #0c1025;
+  --bg3: #121730;
+  --text: #e8e8f0;
+  --dim: #6a6a8a;
+  --border: rgba(120,120,200,.15);
+  --accent: #6c8fff;
+  --violet: #a78bfa;
+  --cyan: #22d3ee;
+  --direct: #f59e0b;
+  --related: #60a5fa;
+  --indirect: #64748b;
+  --opposing: #f87171;
+  --superpos: #a78bfa;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', 'Outfit', sans-serif;
+  font-size: 16px;
+  line-height: 1.75;
+  padding-top: 0;
+}
+body.embedded { padding-top: 64px; }
+
+.page-header {
+  border-bottom: 1px solid var(--border);
+  padding: 32px 64px 24px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+.page-header .logotype {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+.page-header h1 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text);
+  max-width: 520px;
+}
+.page-header .doc-meta {
+  text-align: right;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--dim);
+  line-height: 1.8;
+}
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  padding: 48px 64px;
+  border-bottom: 1px solid var(--border);
+}
+.full-col {
+  padding: 48px 64px;
+  border-bottom: 1px solid var(--border);
+}
+.narrow {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.section-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+h2 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: var(--text);
+}
+h3 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  font-style: italic;
+  margin-bottom: 12px;
+  color: var(--dim);
+}
+p {
+  color: rgba(232,232,240,.7);
+  margin-bottom: 14px;
+  font-weight: 300;
+}
+p strong { font-weight: 600; color: var(--text); }
+em { font-style: italic; }
+
+.type-pill {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 4px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+.type-pill.direct   { background: rgba(245,158,11,.12); color: var(--direct); border: 1px solid rgba(245,158,11,.3); }
+.type-pill.related  { background: rgba(96,165,250,.12); color: var(--related); border: 1px solid rgba(96,165,250,.3); }
+.type-pill.indirect { background: rgba(100,116,139,.12); color: var(--indirect); border: 1px solid rgba(100,116,139,.3); }
+.type-pill.opposing { background: rgba(248,113,113,.12); color: var(--opposing); border: 1px solid rgba(248,113,113,.3); }
+
+.weight-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  margin-top: 8px;
+}
+.weight-table th {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--dim);
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.weight-table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.weight-table tr:last-child td { border-bottom: none; }
+.weight-val {
+  font-family: 'DM Mono', monospace;
+  font-size: 20px;
+  font-weight: 500;
+  display: block;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.weight-desc { font-size: 12px; color: var(--dim); font-family: 'DM Sans', sans-serif; font-weight: 300; }
+
+.score-bar-wrap { margin: 6px 0; }
+.score-bar-track {
+  height: 6px;
+  background: var(--bg3);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+.score-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.4s cubic-bezier(.4,0,.2,1);
+}
+.score-label-row {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--dim);
+  margin-top: 4px;
+}
+
+.simulator {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 32px;
+  margin-top: 8px;
+}
+.sim-source {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 24px;
+  align-items: center;
+  margin-bottom: 28px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+.dim-card {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 20px;
+}
+.dim-card .dim-id {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .1em;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.dim-card .dim-name {
+  font-family: 'Outfit', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: var(--text);
+}
+.dim-card .dim-cat {
+  font-size: 11px;
+  color: var(--dim);
+}
+
+.score-control { text-align: center; min-width: 120px; }
+.score-display {
+  font-family: 'DM Mono', monospace;
+  font-size: 52px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--text);
+  display: block;
+}
+.score-sublabel {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .1em;
+  color: var(--dim);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: block;
+}
+
+input[type=range] {
+  -webkit-appearance: none;
+  width: 120px;
+  height: 4px;
+  background: var(--bg3);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  transition: transform .15s;
+}
+input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+.score-band {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 4px;
+  margin-top: 8px;
+  display: inline-block;
+}
+
+.prop-rows { display: flex; flex-direction: column; gap: 14px; }
+.prop-row {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 18px;
+  display: grid;
+  grid-template-columns: 1fr 80px 100px 100px;
+  gap: 16px;
+  align-items: center;
+}
+.prop-dim-name { font-size: 13px; font-weight: 600; color: var(--text); }
+.prop-dim-cat  { font-size: 10px; color: var(--dim); margin-top: 2px; }
+.prop-weight-val {
+  font-family: 'DM Mono', monospace;
+  font-size: 18px;
+  font-weight: 500;
+  text-align: center;
+}
+.prop-influence { text-align: center; }
+.prop-influence .inf-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 22px;
+  font-weight: 500;
+  display: block;
+  line-height: 1;
+}
+.prop-influence .inf-lbl {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--dim);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.prop-col-head {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--dim);
+  text-align: center;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 10px;
+}
+
+.formula-block {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 28px 36px;
+  border-radius: 8px;
+  margin: 24px 0;
+  font-family: 'DM Mono', monospace;
+}
+.formula-block .formula-title {
+  font-size: 9px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 16px;
+}
+.formula-block .formula-main {
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+.formula-block .formula-note {
+  font-size: 11px;
+  color: var(--dim);
+  line-height: 1.7;
+}
+.formula-block .hl-direct   { color: var(--direct); }
+.formula-block .hl-related  { color: var(--related); }
+.formula-block .hl-indirect { color: var(--indirect); }
+.formula-block .hl-opposing { color: var(--opposing); }
+.formula-block .hl-val      { color: var(--violet); }
+
+.interference-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 16px;
+}
+.interference-case {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+}
+.interference-case h4 {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+  color: var(--accent);
+}
+.int-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+.int-arrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--dim);
+  flex-shrink: 0;
+}
+.int-source { font-weight: 600; font-size: 12px; color: var(--text); }
+.int-result {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin-top: 12px;
+}
+.int-result .res-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 6px;
+}
+.int-result .res-calc {
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  color: rgba(232,232,240,.7);
+  line-height: 1.7;
+}
+.res-final {
+  font-family: 'DM Mono', monospace;
+  font-size: 18px;
+  font-weight: 500;
+  margin-top: 6px;
+}
+
+.scale-strip {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 4px;
+  margin: 16px 0;
+}
+.scale-cell {
+  padding: 10px 4px;
+  text-align: center;
+  border-radius: 6px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  border: 1px solid transparent;
+  transition: all .2s;
+}
+.scale-cell .sc-num { font-size: 16px; display: block; line-height: 1; }
+.scale-cell .sc-lbl { font-size: 8px; letter-spacing: .05em; text-transform: uppercase; margin-top: 5px; display: block; }
+
+.callout {
+  border-left: 3px solid var(--violet);
+  padding: 16px 20px;
+  background: rgba(167,139,250,.08);
+  margin: 20px 0;
+  border-radius: 0 8px 8px 0;
+}
+.callout p { margin: 0; color: rgba(232,232,240,.7); }
+.callout strong { color: var(--violet); }
+
+.page-footer {
+  border-top: 1px solid var(--border);
+  padding: 24px 64px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--dim);
+}
+
+*:focus { outline: none; }
+
+@media (max-width: 800px) {
+  .two-col { grid-template-columns: 1fr; padding: 32px 24px; }
+  .full-col { padding: 32px 24px; }
+  .page-header { padding: 24px; flex-direction: column; align-items: flex-start; gap: 12px; }
+  .prop-row { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .interference-grid { grid-template-columns: 1fr; }
+  .sim-source { grid-template-columns: 1fr; }
+  .page-footer { padding: 24px; flex-direction: column; gap: 8px; }
+}
+</style>
+</head>
+<body>
+<script>if(new URLSearchParams(location.search).get('embedded')==='1'){document.body.classList.add('embedded');}</script>
+
+<header class="page-header">
+  <div>
+    <div class="logotype">Belief Genome Project · Technical Explainer</div>
+    <h1>Scoring, Weighting & Cross-Dimensional Influence</h1>
+  </div>
+  <div class="doc-meta">
+    Working Document<br>
+    Framework v1.0<br>
+    124 Dimensions · 11 Categories
+  </div>
+</header>
+
+<!-- SECTION 1: THE 0–9 SCALE -->
+<section class="full-col">
+  <div class="section-label">01 — The Scoring Scale</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start;">
+    <div>
+      <h2>A 10-Point Scale That Isn't Linear</h2>
+      <p>Every dimension in <strong>The Belief Genome Project</strong> is scored from <strong>0 to 9</strong>. But the scale is not a simple left-to-right slider from "disagree" to "agree." The endpoints represent strong, committed orientations. The middle — the score of <strong>5</strong> — is the most theoretically significant point on the entire scale.</p>
+      <p>A score of 5 does <em>not</em> mean indifference, apathy, or a failure to engage. It represents genuine <strong>quantum superposition</strong>: the belief is simultaneously held in two orientations and has not yet been collapsed by a forcing event. This distinction is what separates <strong>The Belief Genome Project</strong> from standard Likert-scale surveys — and from every prior attempt to map belief at population scale.</p>
+      <div class="callout">
+        <p><strong>The Belief Genome Project</strong> is built on the principles of Quantum Theory. The Superposition Principle holds that <strong>a score of 5 is the most informationally dense score on the scale</strong>. It signals a belief system under live tension — not neutrality. It predicts that a forcing event (an election, a crisis, a personal loss) will cause a sharp, directional collapse.</p>
+      </div>
+    </div>
+    <div>
+      <div class="section-label" style="margin-bottom:12px;">Scale Reference</div>
+      <div class="scale-strip" id="scale-strip"></div>
+      <p style="font-size:13px;margin-top:16px;">The colors above map to belief orientation strength — amber for low, violet for superposition, indigo for high. Hover over any cell to see the interpretive label.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 2: CONNECTION TYPES & WEIGHTS -->
+<section class="two-col">
+  <div>
+    <div class="section-label">02 — Connection Types</div>
+    <h2>Four Types of Dimensional Relationship</h2>
+    <p>When a score is recorded on one dimension, it exerts measurable influence on connected dimensions. The strength and direction of that influence depends on the relationship type. <strong>The Belief Genome Project</strong> defines four connection types, each with a precisely quantified weight multiplier — derived not from convention, but from the theoretical properties of how beliefs structurally depend on one another.</p>
+    <p>These weights reflect a core insight of <strong>The Belief Genome Project</strong>: belief systems behave like physical fields. Influence falls off with relational distance, and opposing beliefs create active interference rather than simple cancellation — just as waves in quantum systems do.</p>
+
+    <table class="weight-table" style="margin-top:24px;">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Weight</th>
+          <th>Meaning</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="type-pill direct">Direct</span></td>
+          <td>
+            <span class="weight-val" style="color:var(--direct);">×0.75</span>
+            <span class="weight-desc">Strongest pull</span>
+          </td>
+          <td style="font-size:13px;color:rgba(232,232,240,.6);">The two dimensions share a core theoretical assumption. A score on one <em>operationalizes</em> or <em>grounds</em> the other. Near-predictive relationship.</td>
+        </tr>
+        <tr>
+          <td><span class="type-pill related">Related</span></td>
+          <td>
+            <span class="weight-val" style="color:var(--related);">×0.45</span>
+            <span class="weight-desc">Moderate pull</span>
+          </td>
+          <td style="font-size:13px;color:rgba(232,232,240,.6);">The dimensions share overlapping conceptual territory but have independent variance. Connected through a common concern, not a common foundation.</td>
+        </tr>
+        <tr>
+          <td><span class="type-pill indirect">Indirect</span></td>
+          <td>
+            <span class="weight-val" style="color:var(--indirect);">×0.20</span>
+            <span class="weight-desc">Weak background pull</span>
+          </td>
+          <td style="font-size:13px;color:rgba(232,232,240,.6);">A contextual relationship. The dimensions interact through a third mediating concept. Influence is present but easily overridden by direct connections.</td>
+        </tr>
+        <tr>
+          <td><span class="type-pill opposing">Opposing</span></td>
+          <td>
+            <span class="weight-val" style="color:var(--opposing);">×−0.60</span>
+            <span class="weight-desc">Inverse pull</span>
+          </td>
+          <td style="font-size:13px;color:rgba(232,232,240,.6);">A high score on dimension A actively predicts a <em>lower</em> score on dimension B. These represent genuine philosophical tensions in belief architecture.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div>
+    <div class="section-label">02b — The Core Formula</div>
+    <h2>How Influence Is Calculated</h2>
+    <p>The influence a source dimension exerts on a target is a simple product. But the interesting behavior emerges when <em>multiple</em> source dimensions all influence the same target — they interfere with each other, constructively or destructively.</p>
+
+    <div class="formula-block">
+      <div class="formula-title">Single Connection Influence</div>
+      <div class="formula-main">
+        influence = <span class="hl-val">source_score</span> × <span class="hl-direct">weight</span>
+      </div>
+      <div class="formula-note">
+        Example: source = 8, type = direct<br>
+        influence = 8 × <span class="hl-direct">0.75</span> = <span class="hl-val">6.00</span>
+      </div>
+    </div>
+
+    <div class="formula-block">
+      <div class="formula-title">Multi-Source Weighted Score (Interference)</div>
+      <div class="formula-main">
+        weighted_score = Σ(<span class="hl-val">score_n</span> × <span class="hl-direct">w_n</span>) / Σ|<span class="hl-direct">w_n</span>|
+      </div>
+      <div class="formula-note">
+        The denominator normalizes by the sum of absolute weight values,<br>
+        keeping the result within the 0–9 scale.<br><br>
+        Opposing weights subtract — they don't just reduce,<br>
+        they actively <span class="hl-opposing">pull in the opposite direction</span>.
+      </div>
+    </div>
+
+    <div class="formula-block">
+      <div class="formula-title">Superposition Score (score = 5)</div>
+      <div class="formula-main">
+        influence = 5 × <span class="hl-direct">w</span> = <span class="hl-val">midpoint pressure</span>
+      </div>
+      <div class="formula-note">
+        A superposition score exerts neutral influence — it neither pulls<br>
+        the target high nor low. It preserves the target's own superposition<br>
+        state until a more committed score arrives.<br>
+        This is the quantum analog: <span class="hl-val">unmeasured = unforced</span>.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 3: INTERACTIVE SIMULATOR -->
+<section class="full-col">
+  <div class="section-label">03 — Live Propagation Simulator</div>
+  <h2>Set a Score, Watch It Ripple</h2>
+  <p class="narrow"><strong>The Belief Genome Project</strong> maps 124 dimensions across 11 categories — and every dimension is connected to others. The example below uses a real dimension from the framework: <strong>E09 — Skepticism Level</strong>. It has four cross-dimensional connections. Drag the slider to set a source score and see how the influence propagates to each connected dimension, calculated in real time according to The Belief Genome Project's weighting system.</p>
+
+  <div class="simulator">
+    <div class="sim-source">
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;">Source Dimension</div>
+        <div class="dim-card">
+          <div class="dim-id">E09 · EPI</div>
+          <div class="dim-name">Skepticism Level</div>
+          <div class="dim-cat">Epistemology & Reality</div>
+        </div>
+        <div style="margin-top:16px;display:flex;flex-direction:column;gap:10px;">
+          <div style="display:flex;align-items:center;gap:12px;font-size:13px;">
+            <span class="type-pill direct">Direct</span>
+            <span style="color:rgba(232,232,240,.7);">E06 — Evidence Standards</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;font-size:13px;">
+            <span class="type-pill related">Related</span>
+            <span style="color:rgba(232,232,240,.7);">SOC07 — Media Trust</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;font-size:13px;">
+            <span class="type-pill related">Related</span>
+            <span style="color:rgba(232,232,240,.7);">POL09 — Political Trust</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;font-size:13px;">
+            <span class="type-pill indirect">Indirect</span>
+            <span style="color:rgba(232,232,240,.7);">ECO03 — Market Trust</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="score-control">
+        <span class="score-sublabel">Source Score</span>
+        <span class="score-display" id="sim-score-display">5</span>
+        <div id="sim-score-band" class="score-band">Superposition</div>
+        <br>
+        <input type="range" id="sim-slider" min="0" max="9" value="5" step="1">
+        <div style="display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:9px;color:var(--dim);margin-top:4px;width:120px;">
+          <span>0</span><span>9</span>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div style="display:grid;grid-template-columns:1fr 80px 110px 180px;gap:16px;margin-bottom:8px;">
+        <div class="prop-col-head">Target Dimension</div>
+        <div class="prop-col-head">Weight</div>
+        <div class="prop-col-head">Influence</div>
+        <div class="prop-col-head">Influence Bar (0–9)</div>
+      </div>
+      <div class="prop-rows" id="prop-rows"></div>
+    </div>
+
+    <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border);">
+      <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;">Narrative Interpretation</div>
+      <p id="sim-narrative" style="font-style:italic;font-size:14px;color:rgba(232,232,240,.6);margin:0;line-height:1.7;"></p>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 4: INTERFERENCE PATTERNS -->
+<section class="full-col">
+  <div class="section-label">04 — Constructive & Destructive Interference</div>
+  <h2>When Multiple Dimensions Converge on One Target</h2>
+  <p class="narrow">The most significant analytical insights in <strong>The Belief Genome Project</strong> emerge not from single connections but from <em>convergence patterns</em> — when three or more dimensions all point toward the same target. This is the belief-system analog of wave interference in quantum mechanics, and it is the mechanism that allows The Belief Genome Project to detect internal contradictions that standard surveys cannot see. Signals in the same direction amplify into high-coherence profiles; opposing signals cancel or create measurable instability.</p>
+
+  <div class="interference-grid">
+    <div class="interference-case">
+      <h4>Constructive Interference — Reinforcement</h4>
+      <p style="font-size:12px;color:var(--dim);margin-bottom:16px;">Three dimensions all pushing <em>POL09 — Political Trust</em> in the same direction.</p>
+
+      <div class="int-row">
+        <div>
+          <div class="int-source">E09 Skepticism Level</div>
+          <div style="font-size:11px;color:var(--dim);">Score: 8 (high skepticism)</div>
+        </div>
+        <div class="int-arrow">→</div>
+        <span class="type-pill related">Related ×0.45</span>
+        <div style="font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--related);">+3.60</div>
+      </div>
+
+      <div class="int-row">
+        <div>
+          <div class="int-source">SOC07 Media Trust</div>
+          <div style="font-size:11px;color:var(--dim);">Score: 2 (low trust → pulls POL09 down)</div>
+        </div>
+        <div class="int-arrow">→</div>
+        <span class="type-pill related">Related ×0.45</span>
+        <div style="font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--related);">+0.90</div>
+      </div>
+
+      <div class="int-row">
+        <div>
+          <div class="int-source">E06 Evidence Standards</div>
+          <div style="font-size:11px;color:var(--dim);">Score: 7 (high standards)</div>
+        </div>
+        <div class="int-arrow">→</div>
+        <span class="type-pill direct">Direct ×0.75</span>
+        <div style="font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--direct);">+5.25</div>
+      </div>
+
+      <div class="int-result">
+        <div class="res-label">Constructive — all signals aligned ↑</div>
+        <div class="res-calc">
+          weighted = (8×0.45) + (2×0.45) + (7×0.75)<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= 3.60 + 0.90 + 5.25<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= 9.75 / (0.45+0.45+0.75)
+        </div>
+        <div class="res-final" style="color:var(--direct);">= 5.94 → Strong pull toward high trust</div>
+      </div>
+    </div>
+
+    <div class="interference-case">
+      <h4>Destructive Interference — Instability</h4>
+      <p style="font-size:12px;color:var(--dim);margin-bottom:16px;">Opposing forces converging on <em>POL02 — Individual Liberty</em>.</p>
+
+      <div class="int-row">
+        <div>
+          <div class="int-source">MOR06 Individual vs Collective</div>
+          <div style="font-size:11px;color:var(--dim);">Score: 8 (strong individualist)</div>
+        </div>
+        <div class="int-arrow">→</div>
+        <span class="type-pill direct">Direct ×0.75</span>
+        <div style="font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--direct);">+6.00</div>
+      </div>
+
+      <div class="int-row">
+        <div>
+          <div class="int-source">POL07 Law & Order Priority</div>
+          <div style="font-size:11px;color:var(--dim);">Score: 8 (high L&O)</div>
+        </div>
+        <div class="int-arrow">→</div>
+        <span class="type-pill opposing">Opposing ×−0.60</span>
+        <div style="font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--opposing);">−4.80</div>
+      </div>
+
+      <div class="int-row">
+        <div>
+          <div class="int-source">HLT02 Body Autonomy</div>
+          <div style="font-size:11px;color:var(--dim);">Score: 7 (high autonomy)</div>
+        </div>
+        <div class="int-arrow">→</div>
+        <span class="type-pill related">Related ×0.45</span>
+        <div style="font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--related);">+3.15</div>
+      </div>
+
+      <div class="int-result">
+        <div class="res-label">Destructive — opposing forces create tension</div>
+        <div class="res-calc">
+          weighted = (8×0.75) + (8×−0.60) + (7×0.45)<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= 6.00 − 4.80 + 3.15<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= 4.35 / (0.75+0.60+0.45)
+        </div>
+        <div class="res-final" style="color:var(--opposing);">= 2.42 → Near superposition under internal conflict</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:24px;" class="narrow">
+    <p>The destructive case above reveals a person holding simultaneously strong law-and-order values <em>and</em> strong individualist values — a recognizable real-world tension that conventional surveys simply average away. <strong>The Belief Genome Project</strong> does not resolve this contradiction; it <em>models</em> it. That score of 2.42 near superposition is the signal that this person is a prime candidate for belief collapse the moment a forcing event compels them to choose between the two.</p>
+  </div>
+</section>
+
+<!-- SECTION 5: WHY THIS MATTERS -->
+<section class="two-col">
+  <div>
+    <div class="section-label">05 — Why This Architecture</div>
+    <h2>Why Not Just Ask More Questions?</h2>
+    <p>Traditional belief surveys ask questions in isolation. They assume each answer is independent. <strong>The Belief Genome Project</strong>'s weighting system rejects this assumption entirely — it is the architectural difference that makes the framework a <em>genome</em> rather than a questionnaire.</p>
+    <p>Human belief systems are <em>relational architectures</em>. A person's score on <strong>Skepticism Level</strong> is not informationally independent from their score on <strong>Evidence Standards</strong>. They share conceptual foundations. To treat them as independent is to throw away the most valuable signal in the system. <strong>The Belief Genome Project</strong> encodes these relationships directly into the scoring engine.</p>
+    <p>The weighting system is the mechanism by which <strong>The Belief Genome Project</strong> captures <em>belief coherence</em> — the degree to which a person's scores form a structurally consistent whole — versus <em>belief tension</em> — the degree to which scores create internal interference patterns that signal instability or susceptibility to change.</p>
+  </div>
+  <div>
+    <div class="section-label">05b — Coherence vs. Tension</div>
+    <h2>Reading the System's Output</h2>
+    <p>Two profiles with the same average score can have radically different structural properties — and this is precisely what <strong>The Belief Genome Project</strong> is designed to surface:</p>
+    <p><strong>High Coherence Profile:</strong> Scores on connected dimensions reinforce each other. Direct connections show high correlation. The belief system is stable, internally consistent, and resistant to change. Forcing events cause confirmatory responses, not belief collapse. <strong>The Belief Genome Project</strong> identifies these as structurally entrenched profiles.</p>
+    <p><strong>High Tension Profile:</strong> Multiple opposing connections are activated simultaneously. The system contains unresolved interference. The person may hold politically libertarian values alongside strong authority/loyalty moral foundations — a classic destructive interference pattern that <strong>The Belief Genome Project</strong> can detect and quantify. A single forcing event can produce rapid, dramatic belief collapse.</p>
+    <p><strong>The 5-score superposition zones</strong> are particularly diagnostic. A cluster of 5-scores in connected dimensions is not a sign of an uncommitted respondent — it is the signature <strong>The Belief Genome Project</strong> reads as a belief system in active tension, poised for collapse.</p>
+  </div>
+</section>
+
+<!-- SECTION 6: THE WORKED EXAMPLE SUMMARY -->
+<section class="full-col">
+  <div class="section-label">06 — Summary Table</div>
+  <h2 class="narrow" style="margin-bottom:8px;">Weight Reference: At a Glance</h2>
+  <p class="narrow" style="margin-bottom:24px;font-size:14px;">A concise reference for how <strong>The Belief Genome Project</strong> quantifies the strength of every cross-dimensional relationship in the 124-dimension framework.</p>
+
+  <div style="max-width:700px;margin:0 auto;">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px;margin-bottom:32px;">
+      <div style="background:var(--bg2);border:1px solid var(--border);padding:20px;text-align:center;border-radius:8px;border-top:3px solid var(--direct);">
+        <div style="font-family:'DM Mono',monospace;font-size:32px;font-weight:500;color:var(--direct);">0.75</div>
+        <div style="margin:8px 0;"><span class="type-pill direct">Direct</span></div>
+        <div style="font-size:12px;color:var(--dim);line-height:1.5;">Shared foundation. Near-predictive. Same category or core concept.</div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);padding:20px;text-align:center;border-radius:8px;border-top:3px solid var(--related);">
+        <div style="font-family:'DM Mono',monospace;font-size:32px;font-weight:500;color:var(--related);">0.45</div>
+        <div style="margin:8px 0;"><span class="type-pill related">Related</span></div>
+        <div style="font-size:12px;color:var(--dim);line-height:1.5;">Overlapping territory. Correlated but independently variable.</div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);padding:20px;text-align:center;border-radius:8px;border-top:3px solid var(--indirect);">
+        <div style="font-family:'DM Mono',monospace;font-size:32px;font-weight:500;color:var(--indirect);">0.20</div>
+        <div style="margin:8px 0;"><span class="type-pill indirect">Indirect</span></div>
+        <div style="font-size:12px;color:var(--dim);line-height:1.5;">Background contextual pressure. Mediated through a third concept.</div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);padding:20px;text-align:center;border-radius:8px;border-top:3px solid var(--opposing);">
+        <div style="font-family:'DM Mono',monospace;font-size:32px;font-weight:500;color:var(--opposing);">−0.60</div>
+        <div style="margin:8px 0;"><span class="type-pill opposing">Opposing</span></div>
+        <div style="font-size:12px;color:var(--dim);line-height:1.5;">Genuine philosophical tension. High A predicts lower B.</div>
+      </div>
+    </div>
+
+    <div class="formula-block">
+      <div class="formula-title">Full Propagation Formula</div>
+      <div class="formula-main">
+        I(target) = [<span class="hl-val">S₁</span>×<span class="hl-direct">0.75</span> + <span class="hl-val">S₂</span>×<span class="hl-related">0.45</span> + <span class="hl-val">S₃</span>×<span class="hl-indirect">0.20</span> + <span class="hl-val">S₄</span>×<span class="hl-opposing">−0.60</span>] / Σ|w|
+      </div>
+      <div class="formula-note">
+        Where S₁…S₄ are the scores of directly, relatedly, indirectly,<br>
+        and opposingly connected source dimensions respectively.<br><br>
+        Result I(target) is always bounded to [0, 9].<br>
+        A result near 5 under high |w| total = <span class="hl-val">maximum superposition tension</span>.
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="page-footer">
+  <span>Belief Genome Project · beliefgenomeproject.org</span>
+  <span>Scoring & Weighting Framework v1.0</span>
+  <span>124 Dimensions · 11 Categories · 300+ Connections</span>
+</footer>
+
+<script>
+const scaleLabels = ['Strongly Low','Low','Leans Low','Mild Low','Near Super','Superposition','Near Super','Mild High','Leans High','Strongly High'];
+const strip = document.getElementById('scale-strip');
+for (let i = 0; i <= 9; i++) {
+  const cell = document.createElement('div');
+  cell.className = 'scale-cell';
+  let bg, fg, border;
+  if (i === 5) {
+    bg = 'rgba(167,139,250,.15)'; fg = '#a78bfa'; border = 'rgba(167,139,250,.35)';
+  } else if (i < 5) {
+    const t = i / 4;
+    bg = `rgba(245,158,11,${0.06+t*0.08})`;
+    fg = `hsl(35,${70+t*20}%,${65-t*10}%)`;
+    border = `rgba(245,158,11,${0.15+t*0.15})`;
+  } else {
+    const t = (i - 6) / 3;
+    bg = `rgba(96,165,250,${0.06+t*0.1})`;
+    fg = `hsl(215,${60+t*20}%,${68-t*10}%)`;
+    border = `rgba(96,165,250,${0.15+t*0.15})`;
+  }
+  cell.style.cssText = `background:${bg};color:${fg};border-color:${border};`;
+  cell.innerHTML = `<span class="sc-num">${i}</span><span class="sc-lbl">${i===5?'Super':scaleLabels[i].replace('Strongly ','Str. ').replace('Leans ','Ln. ').replace('Near ','Nr. ').replace('Mild ','Md. ')}</span>`;
+  cell.title = scaleLabels[i];
+  strip.appendChild(cell);
+}
+
+const connections = [
+  { id: 'E06',   name: 'Evidence Standards', cat: 'Epistemology', type: 'direct',   weight: 0.75 },
+  { id: 'SOC07', name: 'Media Trust',         cat: 'Social',       type: 'related',  weight: 0.45 },
+  { id: 'POL09', name: 'Political Trust',     cat: 'Political',    type: 'related',  weight: 0.45 },
+  { id: 'ECO03', name: 'Market Trust',        cat: 'Economics',    type: 'indirect', weight: 0.20 },
+];
+
+const typeColors = { direct: '#f59e0b', related: '#60a5fa', indirect: '#64748b', opposing: '#f87171' };
+const typeBgs    = { direct: 'rgba(245,158,11,.12)', related: 'rgba(96,165,250,.12)', indirect: 'rgba(100,116,139,.12)', opposing: 'rgba(248,113,113,.12)' };
+const typeBorder = { direct: 'rgba(245,158,11,.3)', related: 'rgba(96,165,250,.3)', indirect: 'rgba(100,116,139,.3)', opposing: 'rgba(248,113,113,.3)' };
+
+const bandData = [
+  { max: 1, label: 'Strong Resistance',   bg: 'rgba(245,158,11,.1)', color: '#f59e0b', border: 'rgba(245,158,11,.25)' },
+  { max: 2, label: 'Low Orientation',     bg: 'rgba(245,158,11,.1)', color: '#f59e0b', border: 'rgba(245,158,11,.25)' },
+  { max: 3, label: 'Leans Low',           bg: 'rgba(245,158,11,.08)', color: '#f59e0b', border: 'rgba(245,158,11,.2)' },
+  { max: 4, label: 'Mild Low',            bg: 'rgba(245,158,11,.06)', color: '#f59e0b', border: 'rgba(245,158,11,.15)' },
+  { max: 5, label: 'Superposition',       bg: 'rgba(167,139,250,.12)', color: '#a78bfa', border: 'rgba(167,139,250,.3)' },
+  { max: 6, label: 'Mild High',           bg: 'rgba(96,165,250,.08)', color: '#60a5fa', border: 'rgba(96,165,250,.15)' },
+  { max: 7, label: 'Leans High',          bg: 'rgba(96,165,250,.1)', color: '#60a5fa', border: 'rgba(96,165,250,.2)' },
+  { max: 8, label: 'High Orientation',    bg: 'rgba(96,165,250,.12)', color: '#60a5fa', border: 'rgba(96,165,250,.25)' },
+  { max: 9, label: 'Strong Affirmation',  bg: 'rgba(108,143,255,.15)', color: '#6c8fff', border: 'rgba(108,143,255,.3)' },
+];
+
+function getBand(score) {
+  return bandData.find(b => score <= b.max) || bandData[bandData.length - 1];
+}
+
+const narratives = [
+  'A score of 0 on Skepticism Level signals near-total institutional deference. The respondent accepts consensus with minimal resistance. Influence on all connected dimensions would pull them sharply toward high trust and low evidence-demanding.',
+  'Minimal skepticism. Institutional trust is high. Evidence standards are likely low. The belief system here is stable through deference rather than through reasoned coherence.',
+  'Low skepticism with occasional questioning. Media and political trust remain relatively high. This profile is susceptible to authority-based belief formation.',
+  'Below-average skepticism. The respondent is mostly deferential but shows early signs of critical engagement. Influences on trust dimensions are muted.',
+  'Moderate skepticism. Neither deferential nor resistant. Connections show modest influence. This is a common baseline profile in educated adult populations.',
+  'At superposition (5), Skepticism Level exerts <em>neutral pressure</em> on all connected dimensions — it neither pulls them high nor low. The respondent\'s trust architecture is genuinely unresolved. This is the most diagnostically interesting score: it signals a belief system awaiting a forcing event.',
+  'Above-average skepticism begins to pull Evidence Standards higher and Trust dimensions lower. The belief system is developing structural independence from institutional authority.',
+  'High skepticism creates significant downward pressure on Media Trust and Political Trust. Evidence Standards are pulled sharply up. This profile is analytically demanding and resistant to simple narratives.',
+  'Strong skepticism. The influences on trust dimensions are now powerful. Media Trust and Political Trust both show substantial negative pull. Evidence Standards push high. This is a coherent but potentially isolated belief architecture.',
+  'Maximum skepticism (9) creates the strongest possible downward pull on all trust dimensions and the highest possible pull on Evidence Standards. This profile is internally consistent but sits at the extreme edge of the distribution. Coherence is high; social integration is low.',
+];
+
+function renderSim(score) {
+  const display = document.getElementById('sim-score-display');
+  const band    = document.getElementById('sim-score-band');
+  const rows    = document.getElementById('prop-rows');
+  const narr    = document.getElementById('sim-narrative');
+
+  display.textContent = score;
+  const b = getBand(score);
+  band.textContent = b.label;
+  band.style.cssText = `background:${b.bg};color:${b.color};border:1px solid ${b.border};font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:4px;margin-top:8px;display:inline-block;`;
+
+  rows.innerHTML = connections.map(cx => {
+    const influence = parseFloat((score * cx.weight).toFixed(2));
+    const pct       = Math.max(0, Math.min(100, (Math.abs(influence) / 9) * 100));
+    const isNeg     = influence < 0;
+    const col       = typeColors[cx.type];
+    const bg        = typeBgs[cx.type];
+    const bdr       = typeBorder[cx.type];
+    const wLabel    = cx.weight > 0 ? `+${cx.weight}` : `${cx.weight}`;
+    const iLabel    = influence >= 0 ? `+${influence.toFixed(2)}` : influence.toFixed(2);
+
+    return `
+    <div class="prop-row" style="border-left:3px solid ${col};">
+      <div>
+        <div class="prop-dim-name">${cx.name}</div>
+        <div class="prop-dim-cat">${cx.id} · ${cx.cat}</div>
+      </div>
+      <div style="text-align:center;">
+        <span style="background:${bg};color:${col};border:1px solid ${bdr};padding:2px 8px;border-radius:4px;font-family:'DM Mono',monospace;font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:6px;">${cx.type}</span>
+        <span style="font-family:'DM Mono',monospace;font-size:16px;font-weight:500;color:${col};">${wLabel}</span>
+      </div>
+      <div class="prop-influence">
+        <span class="inf-num" style="color:${isNeg ? 'var(--opposing)' : col};">${iLabel}</span>
+        <span class="inf-lbl">of 9 max</span>
+      </div>
+      <div>
+        <div style="height:8px;background:var(--bg3);border-radius:4px;overflow:hidden;position:relative;margin-bottom:5px;">
+          <div style="height:100%;width:${pct}%;background:${isNeg ? 'var(--opposing)' : col};border-radius:4px;transition:width .4s cubic-bezier(.4,0,.2,1);"></div>
+        </div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--dim);display:flex;justify-content:space-between;">
+          <span>0</span><span>9</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  narr.innerHTML = narratives[score] || '';
+}
+
+const slider = document.getElementById('sim-slider');
+slider.addEventListener('input', () => renderSim(parseInt(slider.value)));
+renderSim(5);
+</script>
+</body>
+</html>

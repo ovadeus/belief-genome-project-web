@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useGenomeAuth } from "@/components/genome/GenomeAuthContext";
 
@@ -10,7 +10,13 @@ const NAV_LINKS = [
   { href: "/blog", label: "Research Blog" },
   { href: "/app", label: "Participate" },
   { href: "/book", label: "Book" },
-  { href: "/mindmap", label: "Mind Map" },
+  {
+    label: "Process",
+    children: [
+      { href: "/mindmap", label: "Mind Map" },
+      { href: "/scoring", label: "Scoring & Weighting" },
+    ],
+  },
   { href: "/about", label: "About" },
 ];
 
@@ -57,6 +63,69 @@ function GenomeAuthButton() {
   );
 }
 
+function ProcessDropdown({ location }: { location: string }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const processLink = NAV_LINKS.find(l => l.label === "Process")!;
+  const children = (processLink as any).children as { href: string; label: string }[];
+  const isActive = children.some(c => location === c.href);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        className={cn(
+          "text-sm font-medium transition-colors hover:text-primary relative py-2 flex items-center gap-1",
+          isActive ? "text-foreground" : "text-muted-foreground"
+        )}
+      >
+        Process
+        <ChevronDown size={14} className={cn("transition-transform", open && "rotate-180")} />
+        {isActive && (
+          <motion.div
+            layoutId="navbar-indicator"
+            className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"
+            transition={{ type: "spring", bounce: 0.25, duration: 0.5 }}
+          />
+        )}
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.15 }}
+            className="absolute top-full left-1/2 -translate-x-1/2 mt-2 min-w-[200px] bg-[#0c1025]/95 backdrop-blur-md border border-white/10 rounded-lg shadow-xl shadow-black/30 py-2 z-50"
+          >
+            {children.map(child => (
+              <Link
+                key={child.href}
+                href={child.href}
+                onClick={() => setOpen(false)}
+                className={cn(
+                  "block px-4 py-2.5 text-sm transition-colors hover:bg-white/5",
+                  location === child.href ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {child.label}
+              </Link>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 export function PublicNavbar() {
   const [location] = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
@@ -70,7 +139,6 @@ export function PublicNavbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close mobile menu on route change
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [location]);
@@ -92,27 +160,31 @@ export function PublicNavbar() {
             </span>
           </Link>
 
-          {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-8">
-            {NAV_LINKS.map((link) => (
-              <Link 
-                key={link.href} 
-                href={link.href}
-                className={cn(
-                  "text-sm font-medium transition-colors hover:text-primary relative py-2",
-                  location === link.href ? "text-foreground" : "text-muted-foreground"
-                )}
-              >
-                {link.label}
-                {location === link.href && (
-                  <motion.div
-                    layoutId="navbar-indicator"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"
-                    transition={{ type: "spring", bounce: 0.25, duration: 0.5 }}
-                  />
-                )}
-              </Link>
-            ))}
+            {NAV_LINKS.map((link) => {
+              if ("children" in link) {
+                return <ProcessDropdown key={link.label} location={location} />;
+              }
+              return (
+                <Link 
+                  key={link.href} 
+                  href={link.href!}
+                  className={cn(
+                    "text-sm font-medium transition-colors hover:text-primary relative py-2",
+                    location === link.href ? "text-foreground" : "text-muted-foreground"
+                  )}
+                >
+                  {link.label}
+                  {location === link.href && (
+                    <motion.div
+                      layoutId="navbar-indicator"
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"
+                      transition={{ type: "spring", bounce: 0.25, duration: 0.5 }}
+                    />
+                  )}
+                </Link>
+              );
+            })}
             <Link 
               href="/subscribe"
               className="ml-4 px-5 py-2.5 rounded-full font-semibold text-sm bg-white/10 hover:bg-white/20 text-white transition-colors border border-white/10"
@@ -122,7 +194,6 @@ export function PublicNavbar() {
             <GenomeAuthButton />
           </nav>
 
-          {/* Mobile Toggle */}
           <button 
             className="md:hidden p-3 -mr-2 text-foreground active:scale-90 transition-transform"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -133,7 +204,6 @@ export function PublicNavbar() {
         </div>
       </header>
 
-      {/* Mobile Nav Overlay */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
@@ -143,18 +213,34 @@ export function PublicNavbar() {
             className="fixed inset-0 z-40 bg-background/95 backdrop-blur-xl pt-24 px-4 pb-8 flex flex-col md:hidden"
           >
             <div className="flex flex-col gap-6 items-center justify-center h-full">
-              {NAV_LINKS.map((link) => (
-                <Link 
-                  key={link.href} 
-                  href={link.href}
-                  className={cn(
-                    "text-2xl font-display font-semibold transition-colors",
-                    location === link.href ? "text-primary" : "text-foreground"
-                  )}
-                >
-                  {link.label}
-                </Link>
-              ))}
+              {NAV_LINKS.map((link) => {
+                if ("children" in link) {
+                  return (link as any).children.map((child: { href: string; label: string }) => (
+                    <Link 
+                      key={child.href} 
+                      href={child.href}
+                      className={cn(
+                        "text-2xl font-display font-semibold transition-colors",
+                        location === child.href ? "text-primary" : "text-foreground"
+                      )}
+                    >
+                      {child.label}
+                    </Link>
+                  ));
+                }
+                return (
+                  <Link 
+                    key={link.href} 
+                    href={link.href!}
+                    className={cn(
+                      "text-2xl font-display font-semibold transition-colors",
+                      location === link.href ? "text-primary" : "text-foreground"
+                    )}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
               <div className="w-12 h-px bg-border my-4" />
               <Link 
                 href="/subscribe"
