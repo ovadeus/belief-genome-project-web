@@ -35,12 +35,21 @@ body {
 }
 body.embedded { padding-top: 64px; }
 
+.content-wrap {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
 .page-header {
   border-bottom: 1px solid var(--border);
-  padding: 32px 64px 24px;
+  padding: 32px 0 24px;
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
+  max-width: 860px;
+  margin: 0 auto;
+  padding-left: 24px;
+  padding-right: 24px;
 }
 .page-header .logotype {
   font-family: 'DM Mono', monospace;
@@ -67,19 +76,22 @@ body.embedded { padding-top: 64px; }
 }
 
 .two-col {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 48px;
-  padding: 48px 64px;
+  padding: 48px 24px;
   border-bottom: 1px solid var(--border);
+  max-width: 860px;
+  margin: 0 auto;
 }
 .full-col {
-  padding: 48px 64px;
+  padding: 48px 24px;
   border-bottom: 1px solid var(--border);
+  max-width: 860px;
+  margin: 0 auto;
 }
 .narrow {
-  max-width: 700px;
-  margin: 0 auto;
+  max-width: 100%;
 }
 
 .section-label {
@@ -365,8 +377,8 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
 .formula-block .hl-val      { color: var(--violet); }
 
 .interference-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 24px;
   margin-top: 16px;
 }
@@ -460,13 +472,15 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
 
 .page-footer {
   border-top: 1px solid var(--border);
-  padding: 24px 64px;
+  padding: 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-family: 'DM Mono', monospace;
   font-size: 10px;
   color: var(--dim);
+  max-width: 860px;
+  margin: 0 auto;
 }
 
 *:focus { outline: none; }
@@ -500,7 +514,7 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
 <!-- SECTION 1: THE 0–9 SCALE -->
 <section class="full-col">
   <div class="section-label">01 — The Scoring Scale</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start;">
+  <div style="display:flex;flex-direction:column;gap:36px;">
     <div>
       <h2>A 10-Point Scale That Isn't Linear</h2>
       <p>Every dimension in <strong>The Belief Genome Project</strong> is scored from <strong>0 to 9</strong>. But the scale is not a simple left-to-right slider from "disagree" to "agree." The endpoints represent strong, committed orientations. The middle — the score of <strong>5</strong> — is the most theoretically significant point on the entire scale.</p>
@@ -806,8 +820,8 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
   <h2 class="narrow" style="margin-bottom:8px;">Weight Reference: At a Glance</h2>
   <p class="narrow" style="margin-bottom:24px;font-size:14px;">A concise reference for how <strong>The Belief Genome Project</strong> quantifies the strength of every cross-dimensional relationship in the 124-dimension framework.</p>
 
-  <div style="max-width:700px;margin:0 auto;">
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px;margin-bottom:32px;">
+  <div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:32px;">
       <div style="background:var(--bg2);border:1px solid var(--border);padding:20px;text-align:center;border-radius:8px;border-top:3px solid var(--direct);">
         <div style="font-family:'DM Mono',monospace;font-size:32px;font-weight:500;color:var(--direct);">0.75</div>
         <div style="margin:8px 0;"><span class="type-pill direct">Direct</span></div>
