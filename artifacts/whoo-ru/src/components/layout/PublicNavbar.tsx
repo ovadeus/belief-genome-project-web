@@ -10,6 +10,7 @@ const NAV_LINKS = [
   { href: "/blog", label: "Research Blog" },
   { href: "/app", label: "App" },
   { href: "/book", label: "Book" },
+  { href: "/mindmap.html", label: "How it Works", external: true },
   { href: "/about", label: "About" },
 ];
 
@@ -94,23 +95,35 @@ export function PublicNavbar() {
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-8">
             {NAV_LINKS.map((link) => (
-              <Link 
-                key={link.href} 
-                href={link.href}
-                className={cn(
-                  "text-sm font-medium transition-colors hover:text-primary relative py-2",
-                  location === link.href ? "text-foreground" : "text-muted-foreground"
-                )}
-              >
-                {link.label}
-                {location === link.href && (
-                  <motion.div
-                    layoutId="navbar-indicator"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"
-                    transition={{ type: "spring", bounce: 0.25, duration: 0.5 }}
-                  />
-                )}
-              </Link>
+              link.external ? (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-medium transition-colors hover:text-primary relative py-2 text-muted-foreground"
+                >
+                  {link.label}
+                </a>
+              ) : (
+                <Link 
+                  key={link.href} 
+                  href={link.href}
+                  className={cn(
+                    "text-sm font-medium transition-colors hover:text-primary relative py-2",
+                    location === link.href ? "text-foreground" : "text-muted-foreground"
+                  )}
+                >
+                  {link.label}
+                  {location === link.href && (
+                    <motion.div
+                      layoutId="navbar-indicator"
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"
+                      transition={{ type: "spring", bounce: 0.25, duration: 0.5 }}
+                    />
+                  )}
+                </Link>
+              )
             ))}
             <Link 
               href="/subscribe"
@@ -143,16 +156,28 @@ export function PublicNavbar() {
           >
             <div className="flex flex-col gap-6 items-center justify-center h-full">
               {NAV_LINKS.map((link) => (
-                <Link 
-                  key={link.href} 
-                  href={link.href}
-                  className={cn(
-                    "text-2xl font-display font-semibold transition-colors",
-                    location === link.href ? "text-primary" : "text-foreground"
-                  )}
-                >
-                  {link.label}
-                </Link>
+                link.external ? (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-2xl font-display font-semibold transition-colors text-foreground"
+                  >
+                    {link.label}
+                  </a>
+                ) : (
+                  <Link 
+                    key={link.href} 
+                    href={link.href}
+                    className={cn(
+                      "text-2xl font-display font-semibold transition-colors",
+                      location === link.href ? "text-primary" : "text-foreground"
+                    )}
+                  >
+                    {link.label}
+                  </Link>
+                )
               ))}
               <div className="w-12 h-px bg-border my-4" />
               <Link 
