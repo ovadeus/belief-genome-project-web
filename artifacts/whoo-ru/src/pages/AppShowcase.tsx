@@ -1,6 +1,6 @@
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { motion } from "framer-motion";
-import { ArrowRight, Dna, Activity, Radio, Eye, FolderOpen, ChevronDown, Globe, Chrome, Monitor } from "lucide-react";
+import { ArrowRight, Dna, Activity, Eye, ChevronDown, Globe, Chrome, Monitor } from "lucide-react";
 import { useState } from "react";
 import { Link } from "wouter";
 
@@ -38,10 +38,8 @@ const engagementOptions = [
 
 const features = [
   { icon: Dna, title: "Belief Genome", description: "124-dimension psychological mapping that captures the full architecture of your inner world with precision no personality test has attempted before." },
+  { icon: Eye, title: "DNA Visualizer", description: "See your belief architecture rendered as a living, dimensional visualization — the triple helix of your cognitive, emotional, and philosophical dimensions." },
   { icon: Activity, title: "Forecaster", description: "Predict your future responses to moral dilemmas, life decisions, and philosophical probes based on your accumulated belief architecture." },
-  { icon: Radio, title: "Research Pulse", description: "Track the topics, ideas, and influences shaping your world view in real time. See what's moving the needle on your belief dimensions." },
-  { icon: Eye, title: "DNA Visualization", description: "See your belief architecture rendered as a living, dimensional visualization — the triple helix of your cognitive, emotional, and philosophical dimensions." },
-  { icon: FolderOpen, title: "Media Library", description: "Your transcripts, audio recordings, research notes, and belief exploration sessions — all organized in one searchable library." },
 ];
 
 const faqs = [
