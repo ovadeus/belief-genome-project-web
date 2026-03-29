@@ -73,7 +73,7 @@ export default function RegisterPage() {
           fontSize: 24, fontWeight: 700, color: '#fff',
           letterSpacing: '0.01em',
         }}>
-          Create Account
+          Join the Belief Genome Project
         </span>
       </div>
 
