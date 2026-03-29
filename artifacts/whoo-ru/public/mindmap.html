@@ -75,9 +75,14 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
 .xk.indirect{stroke:#64748b;stroke-dasharray:5,4;}
 .xk.opposing{stroke:#f87171;}
 ::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-thumb{background:rgba(167,139,250,.3);border-radius:2px;}
+.embedded #hdr{display:none;}
+.embedded #sw{top:76px;}
+.embedded #panel{top:64px;}
+.embedded body::before,.embedded body::after{top:0;}
 </style>
 </head>
 <body>
+<script>if(new URLSearchParams(location.search).get('embedded')==='1')document.body.classList.add('embedded');</script>
 <div id="hdr">
   <div><h1>Belief Genome Project</h1><p>Cognitive Dimension Map · Infinite Canvas · 124 Dimensions · 11 Categories</p></div>
   <div id="stats">

@@ -10,6 +10,7 @@ import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import AppShowcase from "./pages/AppShowcase";
 import Book from "./pages/Book";
+import MindMap from "./pages/MindMap";
 import Subscribe from "./pages/Subscribe";
 import AdminLogin from "./pages/AdminLogin";
 import Dashboard from "./pages/admin/Dashboard";
@@ -42,6 +43,7 @@ function Router() {
       <Route path="/blog/:slug" component={BlogPost} />
       <Route path="/app" component={AppShowcase} />
       <Route path="/book" component={Book} />
+      <Route path="/mindmap" component={MindMap} />
       <Route path="/subscribe" component={Subscribe} />
       <Route path="/admin/login" component={AdminLogin} />
       <Route path="/admin/dashboard" component={Dashboard} />
