@@ -8,7 +8,7 @@ export default function MindMap() {
       </div>
       <iframe
         src={`${import.meta.env.BASE_URL}mindmap.html?embedded=1`}
-        className="absolute inset-0 w-full h-full border-none"
+        className="absolute inset-0 w-full h-full border-none outline-none"
         title="Cognitive Dimension Map"
       />
     </div>
