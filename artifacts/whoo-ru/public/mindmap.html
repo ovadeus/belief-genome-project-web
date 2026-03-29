@@ -306,7 +306,7 @@ D.forEach(dim=>dim.cx.forEach(cx=>{
     const tgt=dimById[cx.to];if(!tgt)return;
     const mx=(dim.x+tgt.x)/2,my=(dim.y+tgt.y)/2,dx=tgt.x-dim.x,dy=tgt.y-dim.y;
     const cpx=mx-dy*0.22,cpy=my+dx*0.22;
-    XL[key]=xLay.append('path').attr('class',`xk ${cx.t}`).attr('d',`M${dim.x},${dim.y}Q${cpx},${cpy}${tgt.x},${tgt.y}`).datum({from:dim.id,to:cx.to,type:cx.t});
+    XL[key]=xLay.append('path').attr('class',`xk ${cx.t}`).attr('d',`M${dim.x},${dim.y} Q${cpx},${cpy} ${tgt.x},${tgt.y}`).datum({from:dim.id,to:cx.to,type:cx.t});
   }
 }));
 
