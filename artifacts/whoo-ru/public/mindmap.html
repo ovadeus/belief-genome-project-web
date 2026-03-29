@@ -286,10 +286,11 @@ rg.append('stop').attr('offset','0%').attr('stop-color','rgba(80,60,180,0.1)');
 rg.append('stop').attr('offset','100%').attr('stop-color','transparent');
 
 const root=svg.append('g').attr('id','root');
-const iScale=Math.min(W,H)/1480;
+const isEmbedded=document.body.classList.contains('embedded');
+const iScale=Math.min(W,isEmbedded?H-64:H)/1580;
 const zoom=d3.zoom().scaleExtent([0.05,6]).on('zoom',e=>root.attr('transform',e.transform));
 svg.call(zoom);
-svg.call(zoom.transform,d3.zoomIdentity.translate(W/2,H/2).scale(iScale));
+svg.call(zoom.transform,d3.zoomIdentity.translate(W/2,isEmbedded?H/2+32:H/2).scale(iScale));
 
 root.append('circle').attr('r',catR*1.15).attr('fill','url(#rg)');
 
