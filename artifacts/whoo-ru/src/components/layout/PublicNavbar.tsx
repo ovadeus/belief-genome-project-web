@@ -149,8 +149,8 @@ export function PublicNavbar() {
         className={cn(
           "fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b backdrop-blur-xl",
           isScrolled 
-            ? "bg-[#06091a]/95 border-border shadow-lg shadow-black/20 py-4" 
-            : "bg-[#06091a]/85 border-transparent py-6"
+            ? "bg-[#06091a]/[0.98] border-border shadow-lg shadow-black/20 py-4" 
+            : "bg-[#06091a]/[0.94] border-transparent py-6"
         )}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
