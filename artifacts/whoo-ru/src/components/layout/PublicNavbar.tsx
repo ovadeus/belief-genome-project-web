@@ -8,7 +8,7 @@ import { useGenomeAuth } from "@/components/genome/GenomeAuthContext";
 const NAV_LINKS = [
   { href: "/", label: "Home" },
   { href: "/app", label: "Participate" },
-  { href: "/blog", label: "Research Blog" },
+  { href: "/blog", label: "Blog" },
   { href: "/book", label: "Book" },
   {
     label: "Process",
