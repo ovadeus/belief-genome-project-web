@@ -7,7 +7,7 @@ import { Link } from "wouter";
 const engagementOptions = [
   {
     icon: Globe,
-    title: "1: Web App",
+    title: "1: Web App (Beta Testing)",
     description: "Sign up directly on this site to begin mapping your Belief Genome. Access your dashboard, respond to probes, and watch your cognitive DNA string emerge in real time.",
     buttonText: "Create Account",
     buttonHref: "/genome/register",
