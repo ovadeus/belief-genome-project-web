@@ -7,7 +7,7 @@ import { Link } from "wouter";
 const engagementOptions = [
   {
     icon: Globe,
-    title: "BGP Website",
+    title: "1: Web App",
     description: "Sign up directly on this site to begin mapping your Belief Genome. Access your dashboard, respond to probes, and watch your cognitive DNA string emerge in real time.",
     buttonText: "Create Account",
     buttonHref: "/genome/register",
@@ -16,7 +16,7 @@ const engagementOptions = [
   },
   {
     icon: Chrome,
-    title: "BGP Chrome Extension",
+    title: "2: Chrome Extension",
     description: "Install our optional Chrome extension to capture belief-relevant moments as you browse. Flag articles, debates, and ideas that shape your worldview — all synced to your Belief Genome.",
     buttonText: "Get Extension",
     buttonHref: "#",
@@ -26,7 +26,7 @@ const engagementOptions = [
   },
   {
     icon: Monitor,
-    title: "BGP Desktop App for Mac",
+    title: "3: Desktop App for Mac",
     description: "Download BGP AI Mission Control — a native desktop application for macOS. Deeper analysis, offline access, and an immersive environment for exploring your belief architecture.",
     buttonText: "Download App",
     buttonHref: "#",
