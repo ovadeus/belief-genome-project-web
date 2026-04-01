@@ -17,6 +17,7 @@ const NAV_LINKS = [
       { href: "/scoring", label: "Scoring & Weighting" },
     ],
   },
+  { href: "/support", label: "Support" },
   { href: "/about", label: "About" },
 ];
 

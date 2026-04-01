@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BGP Mission Control — Support Center</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300&family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Reset & Base ──────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-weight: 300;
+      font-size: 17px;
+      line-height: 1.8;
+      color: #f0f0f5;
+      background: #06091a;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: #6c8fff; text-decoration: none; transition: color 0.2s; }
+    a:hover { color: #a78bfa; }
+    code {
+      background: #121730;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 0.92em;
+      color: #22d3ee;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+    }
+    ::selection { background: #6c8fff33; }
+
+    /* ── Layout ────────────────────────────────────────────── */
+    .page-wrapper {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ── Sidebar ───────────────────────────────────────────── */
+    .sidebar {
+      position: sticky;
+      top: 0;
+      left: 0;
+      width: 260px;
+      min-width: 260px;
+      height: 100vh;
+      overflow-y: auto;
+      background: #0c1025;
+      border-right: 1px solid #1a1f3a;
+      padding: 92px 0 40px;
+      scrollbar-width: thin;
+      scrollbar-color: #1a1f3a transparent;
+      z-index: 100;
+    }
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-thumb { background: #1a1f3a; border-radius: 2px; }
+    .sidebar-brand {
+      padding: 0 20px 20px;
+      border-bottom: 1px solid #1a1f3a;
+      margin-bottom: 16px;
+    }
+    .sidebar-brand h2 {
+      font-family: 'Space Grotesk', 'Inter', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      color: #f0f0f5;
+      margin: 0;
+    }
+    .sidebar-brand span {
+      font-size: 0.78rem;
+      color: #6b6b7b;
+    }
+    .sidebar-section-label {
+      font-family: 'Space Grotesk', 'Inter', sans-serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #6c8fff;
+      padding: 14px 20px 6px;
+      display: block;
+    }
+    .sidebar-links {
+      list-style: none;
+      padding: 0 8px;
+    }
+    .sidebar-links li a {
+      display: block;
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 400;
+      color: #c8c8d8;
+      transition: background 0.15s, color 0.15s;
+      line-height: 1.6;
+    }
+    .sidebar-links li a:hover {
+      background: #121730;
+      color: #f0f0f5;
+    }
+
+    /* ── Main Content ──────────────────────────────────────── */
+    .main-content {
+      flex: 1;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 120px 40px 100px;
+      width: 100%;
+    }
+
+    /* ── Search ────────────────────────────────────────────── */
+    .search-bar {
+      position: relative;
+      margin-bottom: 40px;
+    }
+    .search-bar input {
+      width: 100%;
+      padding: 14px 18px 14px 48px;
+      background: #0c1025;
+      border: 1px solid #1a1f3a;
+      border-radius: 10px;
+      color: #f0f0f5;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-bar input::placeholder { color: #6b6b7b; }
+    .search-bar input:focus { border-color: #6c8fff; }
+    .search-bar svg {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6b6b7b;
+    }
+
+    /* ── Header ────────────────────────────────────────────── */
+    .page-header {
+      margin-bottom: 48px;
+    }
+    .page-header h1 {
+      font-family: 'Space Grotesk', 'Inter', sans-serif;
+      font-weight: 700;
+      font-size: 2.2rem;
+      color: #f0f0f5;
+      margin-bottom: 8px;
+    }
+    .page-header p {
+      color: #c8c8d8;
+      font-size: 1.05rem;
+    }
+
+    /* ── Section ───────────────────────────────────────────── */
+    .support-section {
+      margin-bottom: 56px;
+    }
+    .section-label {
+      font-family: 'Space Grotesk', 'Inter', sans-serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #6c8fff;
+      margin-bottom: 8px;
+      display: block;
+    }
+    .support-section > h2 {
+      font-family: 'Space Grotesk', 'Inter', sans-serif;
+      font-weight: 700;
+      font-size: 1.55rem;
+      color: #a78bfa;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #1a1f3a;
+    }
+
+    /* ── Card / Details ────────────────────────────────────── */
+    .support-card {
+      background: #0c1025;
+      border: 1px solid #1a1f3a;
+      border-radius: 12px;
+      margin-bottom: 14px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .support-card:hover { border-color: #2a2f5a; }
+    .support-card details { padding: 0; }
+    .support-card summary {
+      font-family: 'Space Grotesk', 'Inter', sans-serif;
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: #f0f0f5;
+      padding: 18px 22px;
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      user-select: none;
+      transition: background 0.15s;
+    }
+    .support-card summary:hover { background: #121730; }
+    .support-card summary::-webkit-details-marker { display: none; }
+    .support-card summary::before {
+      content: '\25B6';
+      font-size: 0.65rem;
+      color: #6c8fff;
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+    .support-card details[open] summary::before {
+      transform: rotate(90deg);
+    }
+    .support-card .card-body {
+      padding: 0 22px 22px;
+      color: #c8c8d8;
+    }
+    .support-card .card-body p { margin-bottom: 12px; }
+    .support-card .card-body h4 {
+      font-family: 'Space Grotesk', 'Inter', sans-serif;
+      font-weight: 600;
+      color: #f0f0f5;
+      font-size: 0.95rem;
+      margin: 18px 0 6px;
+    }
+    .support-card .card-body ul,
+    .support-card .card-body ol {
+      margin: 8px 0 12px 20px;
+    }
+    .support-card .card-body li {
+      margin-bottom: 4px;
+    }
+    .support-card .card-body .step-list {
+      counter-reset: step;
+      list-style: none;
+      margin-left: 0;
+      padding-left: 0;
+    }
+    .support-card .card-body .step-list li {
+      counter-increment: step;
+      padding-left: 32px;
+      position: relative;
+      margin-bottom: 10px;
+    }
+    .support-card .card-body .step-list li::before {
+      content: counter(step);
+      position: absolute;
+      left: 0;
+      top: 2px;
+      width: 22px;
+      height: 22px;
+      background: #6c8fff22;
+      color: #6c8fff;
+      border-radius: 50%;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+    .callout {
+      background: #121730;
+      border-left: 3px solid #6c8fff;
+      padding: 14px 18px;
+      border-radius: 0 8px 8px 0;
+      margin: 14px 0;
+      font-size: 0.95rem;
+    }
+    .callout.warning {
+      border-left-color: #f59e0b;
+    }
+    .callout.error {
+      border-left-color: #f87171;
+    }
+    .callout.tip {
+      border-left-color: #22d3ee;
+    }
+    .callout-label {
+      font-family: 'Space Grotesk', 'Inter', sans-serif;
+      font-weight: 700;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .callout.warning .callout-label { color: #f59e0b; }
+    .callout.error .callout-label { color: #f87171; }
+    .callout.tip .callout-label { color: #22d3ee; }
+
+    .tag {
+      display: inline-block;
+      background: #6c8fff18;
+      color: #6c8fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 2px 9px;
+      border-radius: 4px;
+      margin-right: 4px;
+    }
+
+    /* ── Back to Top ───────────────────────────────────────── */
+    .back-to-top {
+      position: fixed;
+      bottom: 32px;
+      right: 32px;
+      width: 44px;
+      height: 44px;
+      background: #6c8fff;
+      color: #06091a;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      box-shadow: 0 4px 20px #6c8fff44;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.3s, transform 0.3s;
+      z-index: 200;
+    }
+    .back-to-top.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .back-to-top:hover {
+      background: #a78bfa;
+      box-shadow: 0 4px 20px #a78bfa44;
+    }
+
+    /* ── Footer ────────────────────────────────────────────── */
+    .page-footer {
+      text-align: center;
+      padding: 40px 0 24px;
+      border-top: 1px solid #1a1f3a;
+      margin-top: 64px;
+      color: #6b6b7b;
+      font-size: 0.85rem;
+    }
+
+    /* ── Responsive ────────────────────────────────────────── */
+    @media (max-width: 1060px) {
+      .sidebar { display: none; }
+      .main-content { padding: 32px 20px 80px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-wrapper">
+
+  <!-- ── Sidebar Navigation ──────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <h2>&#x1F9EC; Support Center</h2>
+      <span>BGP Mission Control</span>
+    </div>
+
+    <span class="sidebar-section-label">Getting Started</span>
+    <ul class="sidebar-links">
+      <li><a href="#getting-started">Overview</a></li>
+      <li><a href="#installation">Installation</a></li>
+      <li><a href="#first-launch">First Launch</a></li>
+    </ul>
+
+    <span class="sidebar-section-label">API Keys</span>
+    <ul class="sidebar-links">
+      <li><a href="#api-keys">Overview</a></li>
+      <li><a href="#setup-claude">Claude (Anthropic)</a></li>
+      <li><a href="#setup-elevenlabs">ElevenLabs</a></li>
+      <li><a href="#setup-openai">OpenAI</a></li>
+      <li><a href="#setup-gmail">Gmail</a></li>
+    </ul>
+
+    <span class="sidebar-section-label">ElevenLabs / TTS</span>
+    <ul class="sidebar-links">
+      <li><a href="#elevenlabs-credits">Credits &amp; Quotas</a></li>
+      <li><a href="#elevenlabs-quota-error">Quota Error</a></li>
+      <li><a href="#elevenlabs-plans">Pricing Plans</a></li>
+      <li><a href="#elevenlabs-no-audio">No Audio Output</a></li>
+    </ul>
+
+    <span class="sidebar-section-label">Transcription</span>
+    <ul class="sidebar-links">
+      <li><a href="#youtube-transcribe">YouTube</a></li>
+      <li><a href="#youtube-errors">YouTube Errors</a></li>
+      <li><a href="#pdf-transcribe">PDF</a></li>
+      <li><a href="#pdf-garbled">Garbled PDF Text</a></li>
+      <li><a href="#audio-transcribe">Audio (Whisper)</a></li>
+    </ul>
+
+    <span class="sidebar-section-label">Agents</span>
+    <ul class="sidebar-links">
+      <li><a href="#agents-overview">What Are Agents?</a></li>
+      <li><a href="#desktop-cleanup">Desktop Cleanup</a></li>
+      <li><a href="#text-to-mp3">Text to MP3</a></li>
+      <li><a href="#research-pulse">Research Pulse</a></li>
+      <li><a href="#daily-planner">Daily Planner</a></li>
+    </ul>
+
+    <span class="sidebar-section-label">BGP Reflections</span>
+    <ul class="sidebar-links">
+      <li><a href="#bgp-reflections">Overview</a></li>
+      <li><a href="#belief-genome">Belief Genome</a></li>
+      <li><a href="#probes-explained">Probes</a></li>
+      <li><a href="#confidence-score">Confidence Score</a></li>
+    </ul>
+
+    <span class="sidebar-section-label">Dashboard</span>
+    <ul class="sidebar-links">
+      <li><a href="#dashboard-overview">Overview</a></li>
+      <li><a href="#background-options">Backgrounds</a></li>
+      <li><a href="#organize-widgets">Widgets</a></li>
+      <li><a href="#peek-mode">Peek Mode</a></li>
+    </ul>
+
+    <span class="sidebar-section-label">Media &amp; Brain</span>
+    <ul class="sidebar-links">
+      <li><a href="#media-library">Media Library</a></li>
+      <li><a href="#view-transcripts">Transcripts</a></li>
+      <li><a href="#download-files">Downloads</a></li>
+      <li><a href="#brain-overview">Brain Overview</a></li>
+      <li><a href="#brain-entries">Brain Entries</a></li>
+    </ul>
+
+    <span class="sidebar-section-label">Troubleshooting</span>
+    <ul class="sidebar-links">
+      <li><a href="#app-not-starting">App Won't Start</a></li>
+      <li><a href="#api-key-not-working">API Key Issues</a></li>
+      <li><a href="#no-internet">Offline Features</a></li>
+      <li><a href="#update-app">Updates</a></li>
+    </ul>
+  </aside>
+
+  <!-- ── Main Content ────────────────────────────────────── -->
+  <main class="main-content">
+
+    <!-- Header -->
+    <div class="page-header">
+      <h1>&#x1F9EC; BGP Mission Control &mdash; Support Center</h1>
+      <p>Find answers, setup guides, and troubleshooting help for your Belief Genome Project desktop companion.</p>
+    </div>
+
+    <!-- Search (cosmetic) -->
+    <div class="search-bar">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" placeholder="Search support topics..." />
+    </div>
+
+    <!-- ================================================================== -->
+    <!--  GETTING STARTED                                                    -->
+    <!-- ================================================================== -->
+    <section class="support-section">
+      <span class="section-label">Getting Started</span>
+      <h2>Getting Started</h2>
+
+      <div class="support-card" id="getting-started">
+        <details open>
+          <summary>Overview of BGP Mission Control</summary>
+          <div class="card-body">
+            <p>BGP Mission Control is the desktop companion app for the Belief Genome Project. It serves as your personal intelligence hub &mdash; combining AI-powered agents, a research feed, email management, media transcription, and the Belief Genome system into one unified dashboard.</p>
+            <p>The app is built on Electron and runs natively on macOS. Key features include:</p>
+            <ul>
+              <li><strong>Dashboard</strong> &mdash; A customizable home screen with widgets, background photos/videos, and an idle-fade feature that reveals your wallpaper after 30 seconds of inactivity.</li>
+              <li><strong>Agents</strong> &mdash; AI-powered automations that handle tasks like email summarization, research, text-to-speech, transcription, and file organization.</li>
+              <li><strong>Brain</strong> &mdash; A persistent memory layer that stores context from agent runs, reflections, and interactions.</li>
+              <li><strong>Media Library</strong> &mdash; A centralized library for transcripts, generated audio, and other media produced by agents.</li>
+              <li><strong>Belief Genome</strong> &mdash; A self-reflection framework that maps your beliefs across multiple dimensions using probes and confidence scoring.</li>
+              <li><strong>Research Feed</strong> &mdash; Curated research summaries based on your interests and passions.</li>
+            </ul>
+          </div>
+        </details>
+      </div>
+
+      <div class="support-card" id="installation">
+        <details>
+          <summary>Installation Guide (macOS)</summary>
+          <div class="card-body">
+            <h4>System Requirements</h4>
+            <ul>
+              <li>macOS 12 (Monterey) or later</li>
+              <li>At least 500 MB of free disk space</li>
+              <li>An internet connection for API-powered features</li>
+            </ul>
+            <h4>Installation Steps</h4>
+            <ol class="step-list">
+              <li>Download the latest <code>.dmg</code> installer from the official BGP website or your provided distribution link.</li>
+              <li>Double-click the <code>.dmg</code> file to mount it.</li>
+              <li>Drag <strong>BGP Mission Control</strong> into your <strong>Applications</strong> folder.</li>
+              <li>Eject the disk image and launch the app from Applications or Spotlight.</li>
+            </ol>
+            <div class="callout warning">
+              <div class="callout-label">Gatekeeper Notice</div>
+              On first launch, macOS may display a warning that the app is from an unidentified developer. Go to <strong>System Settings &gt; Privacy &amp; Security</strong> and click <strong>"Open Anyway"</strong> to authorize the app.
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <div class="support-card" id="first-launch">
+        <details>
+          <summary>What to Expect on First Launch</summary>
+          <div class="card-body">
+            <p>When you first open Mission Control, you will see the Dashboard with default widgets and a background image. Here is what to do next:</p>
+            <ol class="step-list">
+              <li><strong>Open Settings</strong> &mdash; Click the gear icon in the top-right corner of the dashboard.</li>
+              <li><strong>Add your API keys</strong> &mdash; Most agents require at least a Claude (Anthropic) API key. See the <a href="#api-keys">API Keys</a> section for details on which keys unlock which features.</li>
+              <li><strong>Connect Gmail</strong> (optional) &mdash; If you want email summarization and the Daily Planner, connect your Gmail account via OAuth.</li>
+              <li><strong>Explore Agents</strong> &mdash; Visit the <strong>Agents Library</strong> page from the sidebar to see all available agents, enable or disable them, and run your first automation.</li>
+              <li><strong>Customize your Dashboard</strong> &mdash; Set a background photo, rearrange widgets, and make the space yours.</li>
+            </ol>
+            <div class="callout tip">
+              <div class="callout-label">Tip</div>
+              The app stores all data locally on your machine in the Electron <code>userData</code> directory. No data is sent to BGP servers &mdash; API calls go directly to the respective providers (Anthropic, OpenAI, ElevenLabs, Google).
+            </div>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <!--  API KEYS & INTEGRATIONS                                            -->
+    <!-- ================================================================== -->
+    <section class="support-section">
+      <span class="section-label">Configuration</span>
+      <h2>API Keys &amp; Integrations</h2>
+
+      <div class="support-card" id="api-keys">
+        <details open>
+          <summary>Overview of API Keys</summary>
+          <div class="card-body">
+            <p>Mission Control connects to third-party AI services via API keys that you provide. Your keys are stored locally on your machine and are never shared with BGP.</p>
+            <h4>Which key unlocks what?</h4>
+            <ul>
+              <li><strong>Claude (Anthropic)</strong> &mdash; Required for most agents: Research Pulse, Daily Planner, Gmail Summary, Probe Generator, and PDF OCR fallback. This is the primary AI engine.</li>
+              <li><strong>OpenAI</strong> &mdash; Required for Audio Transcription (Whisper API). Also used as a fallback for YouTube transcription when captions are unavailable.</li>
+              <li><strong>ElevenLabs</strong> &mdash; Required for the Text to Speech agent. Converts text into high-quality MP3 audio.</li>
+              <li><strong>Gmail (OAuth)</strong> &mdash; Required for Gmail Summary, Daily Planner, and Inbox Audit agents. Uses Google OAuth so your password is never stored.</li>
+            </ul>
+            <div class="callout">
+              <div class="callout-label">Note</div>
+              You do not need all keys to use the app. Start with just a Claude API key and add others as you need specific features.
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <div class="support-card" id="setup-claude">
+        <details>
+          <summary>Setting Up Claude (Anthropic) API Key</summary>
+          <div class="card-body">
+            <ol class="step-list">
+              <li>Go to <a href="https://console.anthropic.com/" target="_blank" rel="noopener">console.anthropic.com</a> and sign in or create an account.</li>
+              <li>Navigate to <strong>API Keys</strong> in the left sidebar.</li>
+              <li>Click <strong>"Create Key"</strong>, give it a name (e.g., "Mission Control"), and copy the key. It starts with <code>sk-ant-</code>.</li>
+              <li>In Mission Control, open <strong>Settings</strong> (gear icon) and find the <strong>AI Models</strong> section.</li>
+              <li>Paste the key into the <strong>Claude API Key</strong> field and click Save.</li>
+            </ol>
+            <div class="callout warning">
+              <div class="callout-label">Important</div>
+              Anthropic requires a credit balance or active billing plan. New accounts often receive a small free credit, but you will need to add a payment method for continued use.
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <div class="support-card" id="setup-elevenlabs">
+        <details>
+          <summary>Setting Up ElevenLabs API Key</summary>
+          <div class="card-body">
+            <ol class="step-list">
+              <li>Go to <a href="https://elevenlabs.io/" target="_blank" rel="noopener">elevenlabs.io</a> and sign in or create a free account.</li>
+              <li>Click your profile icon in the bottom-left corner and select <strong>"Profile + API key"</strong>.</li>
+              <li>Copy your API key (or generate a new one).</li>
+              <li>In Mission Control, open <strong>Settings</strong> and find the <strong>Media &amp; Generation APIs</strong> section.</li>
+              <li>Paste the key into the <strong>ElevenLabs API Key</strong> field and click Save.</li>
+            </ol>
+            <p>The free tier includes a limited number of characters per month. See <a href="#elevenlabs-credits">Credits &amp; Quotas</a> for details on limits.</p>
+          </div>
+        </details>
+      </div>
+
+      <div class="support-card" id="setup-openai">
+        <details>
+          <summary>Setting Up OpenAI API Key</summary>
+          <div class="card-body">
+            <ol class="step-list">
+              <li>Go to <a href="https://platform.openai.com/" target="_blank" rel="noopener">platform.openai.com</a> and sign in.</li>
+              <li>Navigate to <strong>API Keys</strong> under your profile menu.</li>
+              <li>Click <strong>"Create new secret key"</strong> and copy it. It starts with <code>sk-</code>.</li>
+              <li>In Mission Control, open <strong>Settings</strong> and find the <strong>AI Models</strong> section.</li>
+              <li>Paste the key into the <strong>OpenAI API Key</strong> field and click Save.</li>
+            </ol>
+            <p>The OpenAI key is used exclusively for Whisper-based audio transcription and as a YouTube transcription fallback. You will not incur GPT chat charges from Mission Control.</p>
+          </div>
+        </details>
+      </div>
+
+      <div class="support-card" id="setup-gmail">
+        <details>
+          <summary>Connecting Gmail</summary>
+          <div class="card-body">
+            <p>Mission Control uses Google OAuth 2.0 to access your Gmail. This means you sign in through Google's official login page &mdash; Mission Control never sees or stores your password.</p>
+            <ol class="step-list">
+              <li>Open <strong>Settings</strong> and scroll to the <strong>Gmail</strong> section.</li>
+              <li>Click <strong>"Connect Gmail Account"</strong>. A browser window will open to Google's sign-in page.</li>
+              <li>Sign in with the Google account you want to connect and grant the requested permissions (read-only access to messages).</li>
+              <li>Once authorized, the window will close and your account will appear as connected in Settings.</li>
+            </ol>
+            <div class="callout tip">
+              <div class="callout-label">Tip</div>
+              You can connect multiple Gmail accounts. The Gmail Summary and Daily Planner agents will pull from all connected accounts.
+            </div>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <!--  ELEVENLABS / TEXT TO MP3                                           -->
+    <!-- ================================================================== -->
+    <section class="support-section">
+      <span class="section-label">Audio Generation</span>
+      <h2>ElevenLabs / Text to MP3</h2>
+
+      <div class="support-card" id="elevenlabs-credits">
+        <details>
+          <summary>Understanding ElevenLabs Credits &amp; Quotas</summary>
+          <div class="card-body">
+            <p>ElevenLabs uses a <strong>character-based credit system</strong>. Each plan gives you a monthly allotment of characters that resets on your billing date.</p>
+            <h4>How characters are counted</h4>
+            <ul>
+              <li>Every character in your input text counts &mdash; letters, spaces, punctuation, line breaks.</li>
+              <li>A typical page of text is roughly 2,000&ndash;3,000 characters.</li>
+              <li>Mission Control uses the <strong>eleven_multilingual_v2</strong> model, which may consume slightly more credits than the basic English-only model on some plans.</li>
+            </ul>
+            <h4>Checking your usage</h4>
+            <p>Log in to <a href="https://elevenlabs.io/" target="_blank" rel="noopener">elevenlabs.io</a> and check the usage meter in your profile. It shows remaining characters for the current billing cycle.</p>
+          </div>
+        </details>
+      </div>
+
+      <div class="support-card" id="elevenlabs-quota-error">
+        <details open>
+          <summary>"Request exceeds API key quota" Error</summary>
+          <div class="card-body">
+            <p>This is the <strong>most common support issue</strong> with Mission Control's Text to Speech feature. The error message can be confusing because ElevenLabs has <em>two separate layers</em> of limits:</p>
+
+            <h4>1. Account-Level Credits (monthly character allowance)</h4>
+            <p>This is the total number of characters your ElevenLabs plan allows per month. If you are on the free tier, this is typically 10,000 characters/month. When depleted, all API keys on the account stop working until the cycle resets or you upgrade.</p>
+
+            <h4>2. Per-API-Key Quotas (individual key limits)</h4>
+            <p>Each API key can have its <em>own</em> quota limit that is <strong>separate from and lower than</strong> your account credits. This is the part that catches most users off guard.</p>
+
+            <div class="callout error">
+              <div class="callout-label">The #1 Confusion</div>
+              <p>You can have <strong>5,000 account credits remaining</strong> but still get a quota error if your specific API key has been assigned a lower limit (e.g., 500 characters). ElevenLabs lets you create multiple API keys with different quotas for different apps &mdash; the per-key limit is enforced <em>before</em> the account limit is checked.</p>
+            </div>
+
+            <h4>How to fix this</h4>
+            <ol class="step-list">
+              <li>Log in to <a href="https://elevenlabs.io/" target="_blank" rel="noopener">elevenlabs.io</a> and go to <strong>Profile + API key</strong>.</li>
+              <li>Find the API key you are using in Mission Control.</li>
+              <li>Check if the key has a <strong>custom quota</strong> or <strong>rate limit</strong> set. If so, increase it or remove the limit.</li>
+              <li>Also check the <strong>account-level usage meter</strong> to make sure you have not exhausted your monthly allowance.</li>
+              <li>If your monthly credits are depleted, either wait for the billing cycle to reset or upgrade your plan.</li>
+            </ol>
+
+            <h4>Quick diagnostic</h4>
+            <ul>
+              <li><strong>Error appears on very short text (under 100 chars)?</strong> &rarr; Almost certainly a per-key quota issue, not an account credit issue.</li>
+              <li><strong>Error appears only on long text?</strong> &rarr; You may be near the end of your monthly credits. Check account usage.</li>
+              <li><strong>Worked yesterday, not today?</strong> &rarr; Monthly credits may have reset to a lower amount, or per-key quota was recently changed.</li>
+            </ul>
+          </div>
+        </details>
+      </div>
+
+      <div class="support-card" id="elevenlabs-plans">
+        <details>
+          <summary>ElevenLabs Pricing Plans</summary>
+          <div class="card-body">
+            <p>ElevenLabs offers several tiers. Approximate character limits as of early 2026:</p>
+            <ul>
+              <li><strong>Free</strong> &mdash; ~10,000 characters/month. Limited voice selection. Good for trying things out.</li>
+              <li><strong>Starter ($5/mo)</strong> &mdash; ~30,000 characters/month. Access to more voices and voice cloning.</li>
+              <li><strong>Creator ($22/mo)</strong> &mdash; ~100,000 characters/month. Professional voice cloning, higher quality.</li>
+              <li><strong>Pro ($99/mo)</strong> &mdash; ~500,000 characters/month. Priority processing, all features.</li>
+              <li><strong>Scale ($330/mo)</strong> &mdash; ~2,000,000 characters/month. Enterprise features.</li>
+            </ul>
+            <div class="callout">
+              <div class="callout-label">Note</div>
+              Prices and limits change frequently. Visit <a href="https://elevenlabs.io/pricing" target="_blank" rel="noopener">elevenlabs.io/pricing</a> for the latest information.
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <div class="support-card" id="elevenlabs-no-audio">
+        <details>
+          <summary>Generated MP3 Plays 0:00 / No Audio</summary>
+          <div class="card-body">
+            <p>If Mission Control reports that TTS generation succeeded but the resulting MP3 file is silent or shows a duration of 0:00, try the following:</p>
+            <ol class="step-list">
+              <li><strong>Check the text input.</strong> If the text is empty or contains only whitespace/special characters, ElevenLabs may return an empty audio payload.</li>
+              <li><strong>Check your ElevenLabs credits.</strong> Some edge cases return a 200 OK response with an empty audio body when credits are exhausted, rather than a proper error.</li>
+              <li><strong>Try a different voice.</strong> The default voice is "Roger" (a premade, free-tier compatible voice). If you have selected a custom or cloned voice that was deleted from your ElevenLabs account, the API may silently fail.</li>
+              <li><strong>Check the file in Finder.</strong> Navigate to the app's TTS output directory and check if the file has a non-zero file size. Files under 1 KB are almost certainly empty.</li>
+              <li><strong>Restart the app</strong> and try again. In rare cases, a stale HTTPS connection can cause truncated downloads.</li>
+            </ol>
+            <div class="callout tip">
+              <div class="callout-label">Where are TTS files stored?</div>
+              Generated MP3 files are saved to the app's internal <code>tts-output</code> directory within your Electron <code>userData</code> folder. You can find them in the Media Library or access them via Finder at <code>~/Library/Application Support/ovadeus/tts-output/</code>.
+            </div>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <!--  TRANSCRIPTION                                                      -->
+    <!-- ================================================================== -->
+    <section class="support-section">
+      <span class="section-label">Media Processing</span>
+      <h2>Transcription</h2>
+
+      <div class="support-card" id="youtube-transcribe">
+        <details>
+          <summary>How YouTube Transcription Works</summary>
+          <div class="card-body">
+            <p>The YouTube Transcribe agent extracts text from YouTube videos using a multi-strategy approach:</p>
+            <h4>Strategy 1: Caption Extraction (free, no API key needed)</h4>
+            <p>The agent first attempts to pull existing captions/subtitles directly from YouTube. It tries multiple YouTube InnerTube API client contexts (Android, iOS, TV, Web) and a direct timedtext endpoint. If the video has captions &mdash; auto-generated or manual &mdash; this method is fast and free.</p>
+            <h4>Strategy 2: Python youtube-transcript-api (fallback)</h4>
+            <p>If the InnerTube approach fails, the agent tries a Python-based extraction script as a secondary caption fallback. This requires <code>python3</code> to be available on your system (pre-installed on macOS).</p>
+            <h4>Strategy 3: Whisper Audio Transcription (final fallback)</h4>
+            <p>If no captions exist at all, the agent downloads the video's audio stream and sends it to OpenAI's Whisper API for speech-to-text. This requires an <a href="#setup-openai">OpenAI API key</a> and will incur a small cost.</p>
+            <div class="callout tip">
+              <div class="callout-label">Tip</div>
+              Most videos have auto-generated captions, so Strategy 1 succeeds the vast majority of the time at no cost. Whisper is only used as a last resort.
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <div class="support-card" id="youtube-errors">
+        <details>
+          <summary>Common YouTube Transcription Errors</summary>
+          <div class="card-body">
+            <h4>"Could not extract video ID"</h4>
+            <p>The URL you pasted is not a recognized YouTube format. Supported formats include:</p>
+            <ul>
+              <li><code>https://www.youtube.com/watch?v=XXXXXXXXXXX</code></li>
+              <li><code>https://youtu.be/XXXXXXXXXXX</code></li>
+              <li><code>https://youtube.com/shorts/XXXXXXXXXXX</code></li>
+            </ul>
+
+            <h4>"No captions available" + no OpenAI key</h4>
+            <p>The video has no captions (neither auto-generated nor manual), and you do not have an OpenAI API key configured for Whisper fallback. Either add an OpenAI key in Settings, or try a different video that has subtitles.</p>
+
+            <h4>"Too many redirects" or timeout errors</h4>
+            <p>These are typically transient network issues. Wait a moment and try again. If persistent, check your internet connection or try a VPN &mdash; some ISPs or networks throttle YouTube API requests.</p>
+
+            <h4>"Python output parse error"</h4>
+            <p>The Python fallback script failed. Ensure <code>python3</code> is installed and the <code>youtube-transcript-api</code> pip package is available. Run <code>pip3 install youtube-transcript-api</code> in Terminal to install it.</p>
+          </div>
+        </details>
+      </div>
+
+      <div class="support-card" id="pdf-transcribe">
+        <details>
+          <summary>How PDF Transcription Works</summary>
+          <div class="card-body">
+            <p>The PDF Transcribe agent extracts readable text from PDF files using a two-tier approach:</p>
+            <h4>Tier 1: pdf-parse (fast, local, free)</h4>
+            <p>The agent first uses Mozilla's pdf.js engine (via the <code>pdf-parse</code> library) to extract embedded text. This works for all standard PDFs with selectable text and properly handles Unicode, ligatures, and most font encodings.</p>
+            <h4>Tier 2: Claude Vision OCR (fallback for scanned PDFs)</h4>
+            <p>If Tier 1 fails or returns very little text (e.g., the PDF contains scanned images rather than embedded text), the agent automatically falls back to sending the pages to Claude as images for OCR. This requires a <a href="#setup-claude">Claude API key</a> and incurs a small cost per page.</p>
+            <h4>Limits</h4>
+            <ul>
+              <li>Maximum file size: <strong>20 MB</strong></li>
+              <li>Maximum pages: <strong>50</strong></li>
+            </ul>
+          </div>
+        </details>
+      </div>
+
+      <div class="support-card" id="pdf-garbled">
+        <details>
+          <summary>PDF Shows Garbled or Corrupted Text</summary>
+          <div class="card-body">
+            <p>Some PDFs produce garbled output (random characters, missing letters, or encoding artifacts). This usually happens because:</p>
+            <ul>
+              <li><strong>Custom font encoding:</strong> The PDF uses a proprietary or subset font that maps characters to non-standard Unicode points. The pdf-parse library does its best, but some fonts are unresolvable.</li>
+              <li><strong>Scanned document with partial OCR:</strong> The PDF has an OCR layer that was poorly generated, resulting in gibberish.</li>
+              <li><strong>Password-protected PDF:</strong> The extraction library cannot read encrypted content.</li>
+            </ul>
+            <h4>Solutions</h4>
+            <ol class="step-list">
+              <li><strong>Let Claude OCR handle it.</strong> If you have a Claude API key configured, the agent will automatically fall back to vision-based OCR when the text extraction looks garbled (under 20 characters). If it is not triggering automatically, the extracted text may be just long enough to pass the threshold. Try re-running the agent on the specific pages that are garbled.</li>
+              <li><strong>Re-export the PDF.</strong> Open the PDF in Preview (macOS), go to File &gt; Export as PDF, and save a new copy. This sometimes fixes encoding issues.</li>
+              <li><strong>Use a dedicated OCR tool first.</strong> Tools like Adobe Acrobat's OCR or macOS's built-in text recognition can produce a cleaner text layer before feeding the PDF into Mission Control.</li>
+            </ol>
+          </div>
+        </details>
+      </div>
+
+      <div class="support-card" id="audio-transcribe">
+        <details>
+          <summary>Audio File Transcription (Whisper)</summary>
+          <div class="card-body">
+            <p>The Audio Transcribe agent sends local audio files to OpenAI's Whisper API for speech-to-text conversion.</p>
+            <h4>Requirements</h4>
+            <ul>
+              <li>An <a href="#setup-openai">OpenAI API key</a> with billing enabled.</li>
+              <li>Supported audio formats: <code>.mp3</code>, <code>.wav</code>, <code>.m4a</code>, <code>.aac</code>, <code>.flac</code>, <code>.ogg</code>, <code>.aiff</code></li>
+              <li>Maximum file size supported by Whisper: <strong>25 MB</strong>. For larger files, split them first using a tool like Audacity or QuickTime.</li>
+            </ul>
+            <h4>How to use</h4>
+            <ol class="step-list">
+              <li>Navigate to the <strong>Agents Library</strong> and find <strong>Audio Transcribe</strong>.</li>
+              <li>Click <strong>Run</strong> and select your audio file from the file picker. The agent looks in <code>~/Downloads</code>, <code>~/Documents</code>, and <code>~/Music</code>.</li>
+              <li>Wait for the transcription to complete. The result will be saved to the <strong>Media Library</strong>.</li>
+            </ol>
+            <div class="callout">
+              <div class="callout-label">Cost</div>
+              Whisper API costs approximately $0.006 per minute of audio. A one-hour podcast costs roughly $0.36.
+            </div>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <!--  AGENTS                                                             -->
+    <!-- ================================================================== -->
+    <section class="support-section">
+      <span class="section-label">Automation</span>
+      <h2>Agents</h2>
+
+      <div class="support-card" id="agents-overview">
+        <details open>
+          <summary>What Are Agents?</summary>
+          <div class="card-body">
+            <p>Agents are AI-powered automations that perform specific tasks on your behalf. Each agent has a defined purpose, required permissions, and optional inputs. You can think of them as specialized assistants that run inside Mission Control.</p>
+            <h4>Agent types</h4>
+            <ul>
+              <li><strong>Built-in agents</strong> &mdash; Ship with the app. Includes Gmail Summary, Daily Planner, Research Pulse, YouTube Transcribe, PDF Transcribe, Audio Transcribe, Text to Speech, Desktop Cleanup, Probe Generator, File Organizer, and Gmail Spam Audit.</li>
+              <li><strong>Custom agents</strong> &mdash; Agents you create using the Agent Builder. Define behavior with natural language prompts.</li>
+              <li><strong>Community agents</strong> &mdash; Agents shared by the BGP community that you can install from the Agents Library.</li>
+            </ul>
+            <h4>Running an agent</h4>
+            <ol class="step-list">
+              <li>Go to the <strong>Agents Library</strong> from the sidebar.</li>
+              <li>Find the agent you want and click <strong>Run</strong>.</li>
+              <li>If the agent requires input (like a URL or file), you will be prompted to provide it.</li>
+              <li>Results appear in the <strong>Run View</strong>, and outputs are saved to the appropriate location (Media Library, Brain, etc.).</li>
+            </ol>
+            <h4>Enabling and disabling</h4>
+            <p>Each agent has an enable/disable toggle. Disabled agents will not appear in scheduled runs or the quick-run menu, but they remain available in the Agents Library if you want to re-enable them later.</p>
+          </div>
+        </details>
+      </div>
+
+      <div class="support-card" id="desktop-cleanup">
+        <details>
+          <summary>Desktop Cleanup Agent</summary>
+          <div class="card-body">
+            <p>The Desktop Cleanup agent organizes files on your macOS Desktop into categorized folders, reducing clutter instantly.</p>
+            <h4>Categories</h4>
+            <ul>
+              <li><strong>_Images</strong> &mdash; .png, .jpg, .jpeg, .gif, .svg, .webp, .ico, .bmp, .tiff, .heic, .heif</li>
+              <li><strong>_PDFs</strong> &mdash; .pdf</li>
+              <li><strong>_Docs</strong> &mdash; .doc, .docx, .xls, .xlsx, .ppt, .pptx, .txt, .csv, .rtf, .pages, .numbers, .key</li>
+              <li><strong>_Videos</strong> &mdash; .mp4, .mov, .avi, .mkv, .wmv, .webm, .m4v</li>
+              <li><strong>_Audio</strong> &mdash; .mp3, .wav, .m4a, .aac, .flac, .ogg, .aiff</li>
+              <li><strong>_Folders</strong> &mdash; Any existing folders on your Desktop (except the category folders themselves) are moved here.</li>
+              <li><strong>_Misc</strong> &mdash; Everything else that does not match the above categories.</li>
+            </ul>
+            <h4>Safety features</h4>
+            <ul>
+              <li>The agent asks for <strong>explicit permission</strong> via a system dialog before moving any files.</li>
+              <li>If a file with the same name already exists in the destination folder, a numbered suffix is added (e.g., <code>report (1).pdf</code>).</li>
+              <li>The agent never deletes files &mdash; it only moves them.</li>
+              <li>A summary of all moved files is saved to the <strong>Brain</strong> for future reference.</li>
+            </ul>
+            <div class="callout">
+              <div class="callout-label">No API key required</div>
+              This agent runs entirely locally and does not require any API keys or internet connection.
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <div class="support-card" id="text-to-mp3">
+        <details>
+          <summary>Text to MP3 Agent</summary>
+          <div class="card-body">
+            <p>The Text to MP3 (Text to Speech) agent converts written text into natural-sounding speech audio using the ElevenLabs API.</p>
+            <h4>How to use</h4>
+            <ol class="step-list">
+              <li>Ensure your <a href="#setup-elevenlabs">ElevenLabs API key</a> is configured in Settings.</li>
+              <li>Go to <strong>Agents Library</strong> and run <strong>Text to Speech</strong>.</li>
+              <li>Enter or paste the text you want converted.</li>
+              <li>Optionally select a voice from the dropdown (defaults to "Roger").</li>
+              <li>Click <strong>Run</strong>. The generated MP3 will appear in the <strong>Media Library</strong>.</li>
+            </ol>
+            <h4>Voices</h4>
+            <p>Mission Control fetches your available voices from ElevenLabs. Free-tier accounts have access to a selection of premade voices. Paid plans unlock voice cloning and additional premium voices.</p>
+            <p>If you encounter the "quota exceeded" error, see <a href="#elevenlabs-quota-error">this section</a> for detailed troubleshooting.</p>
+          </div>
+        </details>
+      </div>
+
+      <div class="support-card" id="research-pulse">
+        <details>
+          <summary>Research Pulse Agent</summary>
+          <div class="card-body">
+            <p>The Research Pulse agent researches your passion topics and returns concise summaries of recent developments, discoveries, and conversations happening in your areas of interest.</p>
+            <h4>Requirements</h4>
+            <ul>
+              <li>A <a href="#setup-claude">Claude API key</a> (used for summarization and synthesis).</li>
+              <li>An active internet connection (the agent fetches information from the web).</li>
+            </ul>
+            <h4>How it works</h4>
+            <ol class="step-list">
+              <li>The agent reads your configured interests and research topics from your profile.</li>
+              <li>It searches for recent content, news, and discussions related to those topics.</li>
+              <li>Claude synthesizes the findings into a structured summary.</li>
+              <li>Results are saved to the <strong>Research Feed</strong> and the <strong>Brain</strong>.</li>
+            </ol>
+            <p>Research Pulse is tagged as a "morning" agent and works well as part of a daily routine alongside the Daily Planner and Gmail Summary.</p>
+          </div>
+        </details>
+      </div>
+
+      <div class="support-card" id="daily-planner">
+        <details>
+          <summary>Daily Planner Agent</summary>
+          <div class="card-body">
+            <p>The Daily Planner creates a personalized daily plan by combining signals from your Gmail inbox, calendar, habits, and Brain context.</p>
+            <h4>Requirements</h4>
+            <ul>
+              <li>A <a href="#setup-claude">Claude API key</a>.</li>
+              <li><a href="#setup-gmail">Gmail connected</a> (for email context).</li>
+            </ul>
+            <h4>What it produces</h4>
+            <p>A structured daily plan that typically includes:</p>
+            <ul>
+              <li>Priority tasks extracted from recent emails.</li>
+              <li>Follow-up reminders for emails that need responses.</li>
+              <li>Time-blocked suggestions based on your patterns.</li>
+              <li>Reflection prompts tied to your Belief Genome dimensions.</li>
+            </ul>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <!--  BGP REFLECTIONS                                                    -->
+    <!-- ================================================================== -->
+    <section class="support-section">
+      <span class="section-label">Self-Reflection</span>
+      <h2>BGP Reflections</h2>
+
+      <div class="support-card" id="bgp-reflections">
+        <details open>
+          <summary>What Is BGP Reflections?</summary>
+          <div class="card-body">
+            <p>BGP Reflections is the self-reflection layer of Mission Control. It provides a structured framework for examining your beliefs, values, and perspectives over time. Rather than a personality test with fixed results, it is a living system that evolves as you interact with it.</p>
+            <p>The core loop is simple: the app presents you with <strong>probes</strong> (thought-provoking questions), you respond honestly, and the system maps your responses to your <strong>Belief Genome</strong> &mdash; a multi-dimensional profile of your worldview.</p>
+          </div>
+        </details>
+      </div>
+
+      <div class="support-card" id="belief-genome">
+        <details>
+          <summary>Understanding Your Belief Genome</summary>
+          <div class="card-body">
+            <p>Your Belief Genome is a structured representation of your beliefs across multiple dimensions. Think of it as a map of your inner landscape &mdash; not to judge or categorize, but to help you understand yourself more clearly.</p>
+            <h4>How it works</h4>
+            <ul>
+              <li>Each response you give to a probe is analyzed and mapped to one or more <strong>dimensions</strong> (e.g., "epistemology," "ethics," "aesthetics," "identity," "purpose").</li>
+              <li>Over time, patterns emerge that reveal your tendencies, tensions, and growth areas.</li>
+              <li>The Belief Genome page visualizes these dimensions and shows how they shift over time.</li>
+            </ul>
+            <h4>Privacy</h4>
+            <p>All Belief Genome data is stored locally on your machine. No responses are sent to BGP servers. The only external call is to Claude for analysis, and that is done via your own API key with Anthropic's standard data retention policies.</p>
+          </div>
+        </details>
+      </div>
+
+      <div class="support-card" id="probes-explained">
+        <details>
+          <summary>How Probes Work</summary>
+          <div class="card-body">
+            <p>Probes are the fundamental unit of interaction in the BGP Reflections system. Each probe is a carefully crafted question or prompt designed to surface your beliefs about a specific topic or dimension.</p>
+            <h4>Probe types</h4>
+            <ul>
+              <li><strong>Generated probes</strong> &mdash; Created by the Probe Generator agent using Claude, personalized based on your existing genome and areas that need more data.</li>
+              <li><strong>Curated probes</strong> &mdash; Pre-written probes from the BGP probe bank that cover foundational dimensions.</li>
+            </ul>
+            <h4>Responding to probes</h4>
+            <p>There are no right or wrong answers. Write as much or as little as you like. The system works best with honest, reflective responses rather than short yes/no answers. Each response is tagged with the relevant dimension(s) and saved to your Brain for long-term context.</p>
+            <h4>Dimension tagging</h4>
+            <p>Each probe targets one or more specific dimensions. This precise tagging ensures that your responses contribute to the right part of your Belief Genome rather than being spread across unrelated areas.</p>
+          </div>
+        </details>
+      </div>
+
+      <div class="support-card" id="confidence-score">
+        <details>
+          <summary>What Does "Confidence" Mean?</summary>
+          <div class="card-body">
+            <p>In the Belief Genome system, <strong>Confidence</strong> does not measure how sure <em>you</em> are of your beliefs. Instead, it represents how confident the <em>system</em> is in its mapping of your beliefs for a given dimension.</p>
+            <h4>Factors that increase confidence</h4>
+            <ul>
+              <li><strong>More responses</strong> &mdash; The more probes you answer in a dimension, the more data the system has to work with.</li>
+              <li><strong>Consistency</strong> &mdash; If your responses are internally consistent, confidence rises.</li>
+              <li><strong>Recency</strong> &mdash; Recent responses carry more weight than older ones.</li>
+            </ul>
+            <h4>What low confidence means</h4>
+            <p>A low confidence score simply means the system needs more data. It might indicate that you have not answered many probes in that dimension, or that your responses show a wide range of perspectives (which is perfectly healthy &mdash; it just means the map is harder to draw).</p>
+            <div class="callout tip">
+              <div class="callout-label">Tip</div>
+              Do not try to "raise" your confidence score by giving uniform answers. The goal is authentic self-reflection, not high numbers. A low confidence score in a dimension is an invitation to explore that area more deeply.
+            </div>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <!--  DASHBOARD & WIDGETS                                                -->
+    <!-- ================================================================== -->
+    <section class="support-section">
+      <span class="section-label">Interface</span>
+      <h2>Dashboard &amp; Widgets</h2>
+
+      <div class="support-card" id="dashboard-overview">
+        <details>
+          <summary>Dashboard Overview</summary>
+          <div class="card-body">
+            <p>The Dashboard is your home screen in Mission Control. It displays customizable widgets over a fullscreen background, with an intelligent idle-fade feature that turns the app into a gorgeous ambient display when you are not actively using it.</p>
+            <h4>Key features</h4>
+            <ul>
+              <li><strong>Widget grid</strong> &mdash; Shows your active widgets (clock, weather, inbox summary, recent runs, etc.).</li>
+              <li><strong>Idle fade</strong> &mdash; After 30 seconds of no mouse movement, widgets and overlays fade out to reveal the full background. Move your mouse to bring them back.</li>
+              <li><strong>Quick actions</strong> &mdash; The top-right buttons give you access to Settings, background options, and Peek mode.</li>
+            </ul>
+          </div>
+        </details>
+      </div>
+
+      <div class="support-card" id="background-options">
+        <details>
+          <summary>Background Options</summary>
+          <div class="card-body">
+            <p>Mission Control supports multiple background types for the Dashboard:</p>
+            <h4>Unsplash Photos</h4>
+            <p>Dynamic, high-resolution photos from Unsplash. The app fetches a new photo on each launch or at a configurable interval. You can set a topic or keyword to influence the photo selection.</p>
+            <h4>My Photos</h4>
+            <p>Use your own photos as the background. Select a folder on your Mac, and the app will cycle through the images within it.</p>
+            <h4>Video</h4>
+            <p>Set a local video file as a looping background. Supports .mp4 and .webm formats. Works beautifully with the idle-fade feature for an ambient display effect.</p>
+            <h4>Solid Color</h4>
+            <p>A simple solid color background. Useful for a clean, minimal look or for reducing distractions.</p>
+            <div class="callout tip">
+              <div class="callout-label">Tip</div>
+              A semi-transparent dark overlay is applied over backgrounds for widget readability. This overlay fades out along with the widgets when idle-fade activates, giving you the full-brightness photo/video experience.
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <div class="support-card" id="organize-widgets">
+        <details>
+          <summary>Organizing and Resizing Widgets</summary>
+          <div class="card-body">
+            <p>Widgets on the Dashboard can be rearranged and resized to fit your workflow:</p>
+            <ul>
+              <li><strong>Drag to rearrange</strong> &mdash; Click and hold a widget header, then drag it to a new position in the grid.</li>
+              <li><strong>Resize</strong> &mdash; Some widgets support resizing. Look for a resize handle in the bottom-right corner of the widget.</li>
+              <li><strong>Show/hide</strong> &mdash; Toggle widget visibility from Settings or the widget management panel.</li>
+            </ul>
+            <p>Widget layout is saved automatically and persists across app restarts.</p>
+          </div>
+        </details>
+      </div>
+
+      <div class="support-card" id="peek-mode">
+        <details>
+          <summary>Peek Mode</summary>
+          <div class="card-body">
+            <p>Peek mode lets you quickly glance at your Dashboard without fully switching to the app. Hover over the Mission Control icon in the bottom-right corner of your screen (Dock area) to activate a translucent, overlay-style preview.</p>
+            <p>Peek mode is read-only &mdash; it shows widget data but does not allow interaction. Click anywhere on the overlay to dismiss it, or click the main app icon to switch to the full app.</p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <!--  MEDIA LIBRARY                                                      -->
+    <!-- ================================================================== -->
+    <section class="support-section">
+      <span class="section-label">Content</span>
+      <h2>Media Library</h2>
+
+      <div class="support-card" id="media-library">
+        <details>
+          <summary>Using the Media Library</summary>
+          <div class="card-body">
+            <p>The Media Library is a centralized hub for all media generated or processed by Mission Control agents. This includes:</p>
+            <ul>
+              <li>YouTube transcripts</li>
+              <li>PDF extractions</li>
+              <li>Audio transcriptions (Whisper)</li>
+              <li>Generated MP3 files (TTS)</li>
+            </ul>
+            <p>Access the Media Library from the sidebar. Each item shows the source agent, creation date, and a preview of the content.</p>
+          </div>
+        </details>
+      </div>
+
+      <div class="support-card" id="view-transcripts">
+        <details>
+          <summary>Viewing Transcripts In-App</summary>
+          <div class="card-body">
+            <p>Click on any item in the Media Library to open a full-screen reader view. For transcripts, you get:</p>
+            <ul>
+              <li>Formatted, readable text with proper paragraph breaks.</li>
+              <li>Source information (YouTube URL, PDF filename, audio file path).</li>
+              <li>Copy-to-clipboard button for the full transcript.</li>
+              <li>For TTS items, an inline audio player to listen to the generated MP3.</li>
+            </ul>
+          </div>
+        </details>
+      </div>
+
+      <div class="support-card" id="download-files">
+        <details>
+          <summary>Downloading Files</summary>
+          <div class="card-body">
+            <p>To save a media item to a custom location on your Mac:</p>
+            <ol class="step-list">
+              <li>Open the item in the Media Library.</li>
+              <li>Click the <strong>Download</strong> or <strong>Export</strong> button.</li>
+              <li>Choose a save location in the file dialog.</li>
+            </ol>
+            <p>Transcript text is exported as <code>.txt</code> files. Audio files are exported as <code>.mp3</code>. The original files always remain in the app's internal storage.</p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <!--  BRAIN / MEMORY                                                     -->
+    <!-- ================================================================== -->
+    <section class="support-section">
+      <span class="section-label">Intelligence</span>
+      <h2>Brain / Memory</h2>
+
+      <div class="support-card" id="brain-overview">
+        <details>
+          <summary>What Is the Brain?</summary>
+          <div class="card-body">
+            <p>The Brain is Mission Control's persistent memory layer. It stores context, insights, and records from everything that happens in the app &mdash; agent runs, reflections, research findings, file operations, and more.</p>
+            <h4>Why it matters</h4>
+            <p>The Brain gives agents <strong>long-term context</strong>. When the Daily Planner creates your morning plan, it can reference past agent runs, previous research summaries, and your recent Belief Genome activity. This makes each agent run smarter and more personalized over time.</p>
+            <h4>How data gets in</h4>
+            <p>Brain entries are created automatically by agents after each run. You do not need to manually add entries (though you can via the Memory page). Examples:</p>
+            <ul>
+              <li>The Desktop Cleanup agent saves a summary of which files were moved where.</li>
+              <li>The Research Pulse agent saves research summaries and key findings.</li>
+              <li>The Gmail Summary agent saves a digest of important emails.</li>
+              <li>Probe responses are stored as reflections linked to Belief Genome dimensions.</li>
+            </ul>
+          </div>
+        </details>
+      </div>
+
+      <div class="support-card" id="brain-entries">
+        <details>
+          <summary>Understanding Brain Entries</summary>
+          <div class="card-body">
+            <p>Each Brain entry consists of:</p>
+            <ul>
+              <li><strong>Type</strong> &mdash; The category of the entry (e.g., "agent-run", "reflection", "research", "file-op").</li>
+              <li><strong>Content</strong> &mdash; The actual text content or summary.</li>
+              <li><strong>Source</strong> &mdash; Which agent or feature created the entry.</li>
+              <li><strong>Timestamp</strong> &mdash; When the entry was created.</li>
+              <li><strong>Tags</strong> &mdash; Optional tags for organization and filtering.</li>
+            </ul>
+            <h4>Browsing the Brain</h4>
+            <p>The <strong>Brain</strong> page (accessible from the sidebar) displays entries in reverse chronological order. You can filter by type, search by keyword, and expand individual entries to see the full content.</p>
+            <h4>The Memory page</h4>
+            <p>The <strong>Memory</strong> page is a separate, more structured view that lets you manually create, edit, and organize memory entries. Think of the Brain page as an activity log and the Memory page as a notebook.</p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <!--  TROUBLESHOOTING                                                    -->
+    <!-- ================================================================== -->
+    <section class="support-section">
+      <span class="section-label">Help</span>
+      <h2>Troubleshooting</h2>
+
+      <div class="support-card" id="app-not-starting">
+        <details>
+          <summary>App Won't Start</summary>
+          <div class="card-body">
+            <p>If Mission Control fails to launch or crashes immediately on startup, try these steps in order:</p>
+            <ol class="step-list">
+              <li><strong>Restart your Mac.</strong> A simple reboot resolves many Electron-related launch issues.</li>
+              <li><strong>Check macOS Gatekeeper.</strong> Go to <strong>System Settings &gt; Privacy &amp; Security</strong> and see if there is a blocked app notice. Click <strong>"Open Anyway"</strong> if prompted.</li>
+              <li><strong>Reset the app's data.</strong> If the app is crashing due to corrupted preferences, you can clear the stored data. In Finder, press <code>Cmd + Shift + G</code> and navigate to <code>~/Library/Application Support/ovadeus/</code>. Rename the folder to <code>ovadeus-backup</code> and relaunch the app. This will start with fresh defaults while preserving your old data as a backup.</li>
+              <li><strong>Check for macOS updates.</strong> Ensure you are running macOS 12 (Monterey) or later.</li>
+              <li><strong>Launch from Terminal.</strong> Open Terminal and run:<br />
+                <code>/Applications/BGP\ Mission\ Control.app/Contents/MacOS/BGP\ Mission\ Control</code><br />
+                This will show any error messages in the console that can help diagnose the issue.</li>
+              <li><strong>Reinstall the app.</strong> Delete the app from Applications and reinstall from the latest distribution.</li>
+            </ol>
+          </div>
+        </details>
+      </div>
+
+      <div class="support-card" id="api-key-not-working">
+        <details>
+          <summary>API Key Not Working</summary>
+          <div class="card-body">
+            <p>If an agent fails with an authentication or "invalid key" error, check the following:</p>
+            <ol class="step-list">
+              <li><strong>Verify the key format.</strong>
+                <ul>
+                  <li>Claude (Anthropic) keys start with <code>sk-ant-</code></li>
+                  <li>OpenAI keys start with <code>sk-</code></li>
+                  <li>ElevenLabs keys are alphanumeric strings (no prefix)</li>
+                </ul>
+              </li>
+              <li><strong>Check for extra whitespace.</strong> Copy-pasting keys sometimes introduces leading or trailing spaces. Open Settings, clear the field, and paste the key again carefully.</li>
+              <li><strong>Confirm billing is active.</strong> Most API providers require an active payment method or credit balance. A valid key with no billing will be rejected.</li>
+              <li><strong>Check if the key was revoked.</strong> Log in to the provider's dashboard and verify the key is still active and has not been rotated.</li>
+              <li><strong>Check rate limits.</strong> If the key works sometimes but not always, you may be hitting rate limits. Wait a minute and try again.</li>
+            </ol>
+            <div class="callout warning">
+              <div class="callout-label">ElevenLabs specifically</div>
+              Remember that ElevenLabs has both account-level credits <em>and</em> per-key quotas. See <a href="#elevenlabs-quota-error">the detailed breakdown</a> above.
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <div class="support-card" id="no-internet">
+        <details>
+          <summary>Features That Work Offline vs. Online</summary>
+          <div class="card-body">
+            <h4>Works offline (no internet required)</h4>
+            <ul>
+              <li>Dashboard, widgets, and background (if using local photos/video/solid color)</li>
+              <li>Desktop Cleanup agent</li>
+              <li>PDF Transcription (Tier 1 &mdash; local text extraction only; OCR fallback requires internet)</li>
+              <li>Brain and Memory browsing</li>
+              <li>Media Library browsing and playback</li>
+              <li>Belief Genome viewing (reading existing data)</li>
+              <li>All UI navigation and settings</li>
+            </ul>
+            <h4>Requires internet</h4>
+            <ul>
+              <li>Any agent that calls an external API (Claude, OpenAI, ElevenLabs, Gmail)</li>
+              <li>Research Pulse</li>
+              <li>YouTube Transcription</li>
+              <li>Audio Transcription (Whisper)</li>
+              <li>Text to Speech (ElevenLabs)</li>
+              <li>Gmail-based agents</li>
+              <li>Unsplash background photos</li>
+              <li>Probe generation (requires Claude)</li>
+              <li>Belief Genome analysis (requires Claude)</li>
+            </ul>
+          </div>
+        </details>
+      </div>
+
+      <div class="support-card" id="update-app">
+        <details>
+          <summary>How to Check for Updates</summary>
+          <div class="card-body">
+            <p>Mission Control does not currently auto-update. To check for a new version:</p>
+            <ol class="step-list">
+              <li>Visit the official BGP website at <a href="https://beliefgenomeproject.org" target="_blank" rel="noopener">beliefgenomeproject.org</a>.</li>
+              <li>Check the Downloads or Releases section for the latest version number.</li>
+              <li>Compare it with your installed version. You can find your version in <strong>Settings</strong> at the bottom of the page or in the app's <strong>About</strong> dialog (accessible from the macOS menu bar: <strong>BGP Mission Control &gt; About</strong>).</li>
+              <li>If a newer version is available, download the new <code>.dmg</code> and install it over your existing installation. Your settings and data will be preserved (they live in <code>~/Library/Application Support/ovadeus/</code>, not inside the app bundle).</li>
+            </ol>
+            <div class="callout">
+              <div class="callout-label">Note</div>
+              Auto-update functionality is planned for a future release. For now, check the website periodically or join the BGP community for update announcements.
+            </div>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- ── Footer ──────────────────────────────────────────── -->
+    <footer class="page-footer">
+      &copy; 2026 Belief Genome Project &mdash; Ov&auml;deus LLC
+    </footer>
+
+  </main>
+</div>
+
+<!-- Back to Top -->
+<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">&#8593;</button>
+
+<script>
+  // Back-to-top visibility
+  const btn = document.getElementById('backToTop');
+  const main = document.querySelector('.main-content');
+  (main || window).addEventListener('scroll', function() {
+    const scrollY = main ? main.scrollTop : window.scrollY;
+    btn.classList.toggle('visible', scrollY > 400);
+  });
+  window.addEventListener('scroll', function() {
+    btn.classList.toggle('visible', window.scrollY > 400);
+  });
+
+  // Smooth scroll for sidebar links (redundant with CSS scroll-behavior but ensures cross-browser)
+  document.querySelectorAll('.sidebar a[href^="#"]').forEach(link => {
+    link.addEventListener('click', e => {
+      const target = document.querySelector(link.getAttribute('href'));
+      if (target) {
+        e.preventDefault();
+        // Open the details element if closed
+        const details = target.querySelector('details') || target.closest('details');
+        if (details && !details.open) details.open = true;
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+
+  // Search filtering (cosmetic but functional for section visibility)
+  const searchInput = document.querySelector('.search-bar input');
+  searchInput.addEventListener('input', function() {
+    const query = this.value.toLowerCase().trim();
+    document.querySelectorAll('.support-card').forEach(card => {
+      if (!query) {
+        card.style.display = '';
+        return;
+      }
+      const text = card.textContent.toLowerCase();
+      card.style.display = text.includes(query) ? '' : 'none';
+    });
+    // Show/hide section headings based on visible cards
+    document.querySelectorAll('.support-section').forEach(section => {
+      if (!query) {
+        section.style.display = '';
+        return;
+      }
+      const visibleCards = section.querySelectorAll('.support-card:not([style*="display: none"])');
+      section.style.display = visibleCards.length ? '' : 'none';
+    });
+  });
+</script>
+
+</body>
+</html>

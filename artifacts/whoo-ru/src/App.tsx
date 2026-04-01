@@ -12,6 +12,7 @@ import AppShowcase from "./pages/AppShowcase";
 import Book from "./pages/Book";
 import MindMap from "./pages/MindMap";
 import ScoringWeighting from "./pages/ScoringWeighting";
+import Support from "./pages/Support";
 import Subscribe from "./pages/Subscribe";
 import AdminLogin from "./pages/AdminLogin";
 import Dashboard from "./pages/admin/Dashboard";
@@ -46,6 +47,7 @@ function Router() {
       <Route path="/book" component={Book} />
       <Route path="/mindmap" component={MindMap} />
       <Route path="/scoring" component={ScoringWeighting} />
+      <Route path="/support" component={Support} />
       <Route path="/subscribe" component={Subscribe} />
       <Route path="/admin/login" component={AdminLogin} />
       <Route path="/admin/dashboard" component={Dashboard} />
