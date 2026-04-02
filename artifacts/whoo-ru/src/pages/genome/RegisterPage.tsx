@@ -206,6 +206,21 @@ export default function RegisterPage() {
           Sign in
         </a>
       </div>
+
+      <a
+        href="/"
+        onClick={e => { e.preventDefault(); setLocation('/'); }}
+        style={{
+          display: 'inline-flex', alignItems: 'center', gap: 6,
+          color: 'rgba(255,255,255,0.35)', fontSize: 13, fontWeight: 500,
+          textDecoration: 'none', marginTop: 32,
+          transition: 'color 0.2s',
+        }}
+        onMouseEnter={e => (e.currentTarget.style.color = '#6c8fff')}
+        onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.35)')}
+      >
+        &larr; Back to Belief Genome Project
+      </a>
     </div>
   );
 }
