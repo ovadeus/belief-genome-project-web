@@ -133,6 +133,179 @@ function getFormattedDate(): string {
   });
 }
 
+function SubmitGenomeButton() {
+  const [showPopup, setShowPopup] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [result, setResult] = useState<{ status: string; message: string } | null>(null);
+  const [error, setError] = useState('');
+  const [publicStatus, setPublicStatus] = useState<{ submitted: boolean; lastUpdated?: string } | null>(null);
+
+  useEffect(() => {
+    genomeApi('/submit-public/status').then(r => r.json()).then(setPublicStatus).catch(() => {});
+  }, []);
+
+  const handleSubmit = async () => {
+    setSubmitting(true);
+    setError('');
+    setResult(null);
+    try {
+      const res = await genomeApi('/submit-public', { method: 'POST' });
+      const data = await res.json();
+      if (res.ok) {
+        setResult(data);
+        setPublicStatus({ submitted: true, lastUpdated: new Date().toISOString() });
+      } else {
+        setError(data.error || 'Submission failed');
+      }
+    } catch {
+      setError('Network error. Please try again.');
+    }
+    setSubmitting(false);
+  };
+
+  return (
+    <>
+      <button
+        onClick={() => setShowPopup(true)}
+        style={{
+          padding: '10px 20px', borderRadius: 10,
+          background: 'linear-gradient(135deg, #22c55e, #16a34a)',
+          border: 'none', color: '#fff', fontSize: 14, fontWeight: 600,
+          cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8,
+          boxShadow: '0 4px 16px rgba(34,197,94,0.3)',
+          transition: 'all 0.2s', fontFamily: 'inherit',
+        }}
+        onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(34,197,94,0.4)'; }}
+        onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(34,197,94,0.3)'; }}
+      >
+        <span style={{ fontSize: 16 }}>🧬</span>
+        Submit Genome
+        {publicStatus?.submitted && (
+          <span style={{
+            fontSize: 10, padding: '2px 6px', borderRadius: 6,
+            background: 'rgba(255,255,255,0.2)', marginLeft: 4,
+          }}>
+            ✓ Live
+          </span>
+        )}
+      </button>
+
+      {showPopup && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 1000, padding: 20, backdropFilter: 'blur(4px)',
+        }} onClick={() => { if (!submitting) setShowPopup(false); }}>
+          <div
+            style={{
+              maxWidth: 520, width: '100%', padding: 32, borderRadius: 16,
+              background: '#0a0e1f', border: '1px solid rgba(34,197,94,0.2)',
+              boxShadow: '0 16px 64px rgba(0,0,0,0.5)',
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ fontSize: 24 }}>🧬</span>
+                <h2 style={{ fontSize: 18, fontWeight: 700, color: '#fff', margin: 0 }}>Submit to Explore Database</h2>
+              </div>
+              <button
+                onClick={() => setShowPopup(false)}
+                style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: 20, cursor: 'pointer' }}
+              >
+                &times;
+              </button>
+            </div>
+
+            <div style={{
+              padding: 16, borderRadius: 10,
+              background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.12)',
+              marginBottom: 16, fontSize: 13, color: 'rgba(255,255,255,0.7)', lineHeight: 1.7,
+            }}>
+              <p style={{ margin: '0 0 10px' }}>
+                <strong style={{ color: '#22c55e' }}>What happens:</strong> Your Belief DNA string will be submitted
+                anonymously to the public Explore Beliefs database, where it contributes to aggregated visualizations
+                showing how beliefs vary across demographics.
+              </p>
+              <p style={{ margin: '0 0 10px' }}>
+                <strong style={{ color: '#22c55e' }}>Privacy:</strong> Your submission is fully anonymous. No name,
+                email, or account info is included — only your demographic metadata (birth year, country, gender)
+                and belief dimension scores.
+              </p>
+              <p style={{ margin: 0 }}>
+                <strong style={{ color: '#22c55e' }}>Synced with desktop app:</strong> Whether you submit from the
+                web or the Belief Genome desktop app, your submission uses the same anonymous key.
+                Resubmitting updates your entry rather than creating a duplicate.
+              </p>
+            </div>
+
+            {publicStatus?.submitted && (
+              <div style={{
+                padding: 10, borderRadius: 8, marginBottom: 16,
+                background: 'rgba(108,143,255,0.06)', border: '1px solid rgba(108,143,255,0.15)',
+                fontSize: 12, color: 'rgba(255,255,255,0.5)', textAlign: 'center',
+              }}>
+                You've already submitted. Clicking submit again will update your entry with your latest data.
+                {publicStatus.lastUpdated && (
+                  <span> Last updated: {new Date(publicStatus.lastUpdated).toLocaleDateString()}</span>
+                )}
+              </div>
+            )}
+
+            {error && (
+              <div style={{
+                padding: 10, borderRadius: 8, marginBottom: 16,
+                background: 'rgba(255,71,87,0.1)', border: '1px solid rgba(255,71,87,0.2)',
+                fontSize: 13, color: '#ff4757', textAlign: 'center',
+              }}>
+                {error}
+              </div>
+            )}
+
+            {result && (
+              <div style={{
+                padding: 10, borderRadius: 8, marginBottom: 16,
+                background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.2)',
+                fontSize: 13, color: '#22c55e', textAlign: 'center',
+              }}>
+                {result.message}
+              </div>
+            )}
+
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button
+                onClick={() => setShowPopup(false)}
+                style={{
+                  flex: 1, padding: '12px 20px', borderRadius: 10,
+                  background: 'transparent', border: '1px solid rgba(255,255,255,0.15)',
+                  color: 'rgba(255,255,255,0.5)', fontSize: 14, cursor: 'pointer',
+                  fontFamily: 'inherit',
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmit}
+                disabled={submitting}
+                style={{
+                  flex: 2, padding: '12px 20px', borderRadius: 10,
+                  background: submitting ? 'rgba(34,197,94,0.3)' : 'linear-gradient(135deg, #22c55e, #16a34a)',
+                  border: 'none', color: '#fff', fontSize: 14, fontWeight: 600,
+                  cursor: submitting ? 'not-allowed' : 'pointer',
+                  fontFamily: 'inherit',
+                  boxShadow: submitting ? 'none' : '0 4px 16px rgba(34,197,94,0.3)',
+                }}
+              >
+                {submitting ? 'Submitting...' : result ? 'Update Again' : publicStatus?.submitted ? 'Update Submission' : 'Submit Anonymously'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
 type Tab = 'helix' | 'radar' | 'breakdown' | 'timeline' | 'history' | 'forecaster';
 
 const TABS: { key: Tab; icon: string; label: string }[] = [
@@ -203,8 +376,9 @@ export default function DashboardPage() {
 
   return (
     <div style={{ maxWidth: 900, margin: '0 auto' }}>
-      {/* Greeting + Daily Quote — matches desktop */}
-      <div style={{ marginBottom: 20 }}>
+      {/* Greeting + Submit Genome */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 20, flexWrap: 'wrap' }}>
+      <div>
         <h1 style={{ fontSize: 32, fontWeight: 700, color: '#fff', margin: 0 }}>
           {greeting}
         </h1>
@@ -232,6 +406,8 @@ export default function DashboardPage() {
             {dailyQuote.author}
           </span>
         </div>
+      </div>
+      <SubmitGenomeButton />
       </div>
 
       {/* Analysis result */}

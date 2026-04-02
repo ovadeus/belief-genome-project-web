@@ -2,8 +2,9 @@
 // Mount at: app.use('/api/genome', genomeAuth, genomeDataRouter)
 
 import { Router, Request, Response } from 'express';
+import crypto from 'crypto';
 import { db } from '@workspace/db';
-import { users, beliefResponses, dimensionScores, dnaSnapshots } from '@workspace/db/schema';
+import { users, beliefResponses, dimensionScores, dnaSnapshots, genomeSubmissions } from '@workspace/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { DIMENSIONS, CATEGORIES } from '@belief-genome/engine';
 import { buildDNAString, calcDimensionValue, calcConfidence } from '@belief-genome/engine';
@@ -546,6 +547,138 @@ router.post('/analyse', async (req: Request, res: Response) => {
     return res.json({ analysis });
   } catch (e: any) {
     return res.status(500).json({ error: 'Analysis failed: ' + e.message });
+  }
+});
+
+const BGP_ANON_SALT = 'bgp-belief-genome-anonymous-v1';
+
+function deriveAnonymousKey(email: string): string {
+  return crypto.createHash('sha256').update(`${BGP_ANON_SALT}:${email.toLowerCase().trim()}`).digest('hex');
+}
+
+router.post('/submit-public', async (req: Request, res: Response) => {
+  try {
+    const { userId } = (req as any).genomeUser;
+
+    const [user] = await db.select().from(users).where(eq(users.id, userId));
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const scores = await db.select().from(dimensionScores).where(eq(dimensionScores.userId, userId));
+
+    const dimScores: Record<number, number> = {};
+    for (const s of scores) {
+      const accum: Accumulator = { sum: s.weightedSum, totalWeight: s.totalWeight, count: s.count };
+      const val = calcDimensionValue(accum);
+      if (val !== null) dimScores[s.dimensionId] = val;
+    }
+
+    if (Object.keys(dimScores).length < 5) {
+      return res.status(400).json({
+        error: 'Not enough data yet. Explore at least 5 belief dimensions before submitting.',
+      });
+    }
+
+    const dnaString = buildDNAString(dimScores, {
+      birthYear: user.birthYear ?? undefined,
+      birthMonth: user.birthMonth ?? undefined,
+      birthDay: user.birthDay ?? undefined,
+      sex: user.sex ?? '5',
+      countryCode: user.countryCode ?? undefined,
+      zipCode: user.zipCode ?? undefined,
+    });
+
+    const anonymousKey = deriveAnonymousKey(user.email);
+
+    const genderMap: Record<string, string> = { '0': 'F', '1': 'M', '2': 'Intersex', '5': 'PNS', '9': 'NB' };
+    const century = dnaString[0] === '1' ? 1 : 0;
+    const birthYear = user.birthYear || (century === 1 ? 2000 : 1900) + parseInt(dnaString.slice(1, 3));
+    const birthMonth = parseInt(dnaString.slice(3, 5)) || 1;
+    const birthDay = parseInt(dnaString.slice(5, 7)) || 1;
+    const genderCode = dnaString[7];
+    const gender = genderMap[genderCode] || 'PNS';
+    const countryCode = dnaString.slice(8, 11);
+    const zipCode = dnaString.slice(11, 16);
+
+    const beliefs = dnaString.slice(16);
+    const beliefValues: Record<string, number | null> = {};
+    let dimensionsExplored = 0;
+    for (let j = 0; j < beliefs.length && j < 124; j++) {
+      const ch = beliefs[j];
+      const dimId = j + 4;
+      if (ch === '.') {
+        beliefValues[String(dimId)] = null;
+      } else {
+        beliefValues[String(dimId)] = parseInt(ch);
+        dimensionsExplored++;
+      }
+    }
+
+    const demographicPrefix = `${century} century · ${dnaString.slice(1, 3)} year · ${dnaString.slice(3, 5)} month · ${dnaString.slice(5, 7)} day · ${genderCode} gender · ${countryCode} country · ${zipCode} zip`;
+
+    const existing = await db.select({ id: genomeSubmissions.id })
+      .from(genomeSubmissions)
+      .where(eq(genomeSubmissions.anonymousKey, anonymousKey))
+      .limit(1);
+
+    if (existing.length > 0) {
+      await db.update(genomeSubmissions)
+        .set({
+          dnaString,
+          demographicPrefix,
+          century, birthYear, birthMonth, birthDay,
+          gender, countryCode, zipCode,
+          beliefValues, dimensionsExplored,
+          isTestData: false,
+          updatedAt: new Date(),
+        })
+        .where(eq(genomeSubmissions.anonymousKey, anonymousKey));
+
+      return res.json({ status: 'updated', message: 'Your genome has been updated in the public database.' });
+    } else {
+      await db.insert(genomeSubmissions).values({
+        anonymousKey,
+        dnaString,
+        demographicPrefix,
+        century, birthYear, birthMonth, birthDay,
+        gender, countryCode, zipCode,
+        beliefValues, dimensionsExplored,
+        isTestData: false,
+      });
+
+      return res.json({ status: 'created', message: 'Your genome has been submitted to the public database. Thank you for contributing!' });
+    }
+  } catch (err: any) {
+    console.error('Submit public error:', err);
+    return res.status(500).json({ error: 'Failed to submit genome.' });
+  }
+});
+
+router.get('/submit-public/status', async (req: Request, res: Response) => {
+  try {
+    const { userId } = (req as any).genomeUser;
+    const [user] = await db.select().from(users).where(eq(users.id, userId));
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const anonymousKey = deriveAnonymousKey(user.email);
+    const existing = await db.select({
+      id: genomeSubmissions.id,
+      dimensionsExplored: genomeSubmissions.dimensionsExplored,
+      updatedAt: genomeSubmissions.updatedAt,
+    })
+      .from(genomeSubmissions)
+      .where(eq(genomeSubmissions.anonymousKey, anonymousKey))
+      .limit(1);
+
+    if (existing.length > 0) {
+      return res.json({
+        submitted: true,
+        dimensionsExplored: existing[0].dimensionsExplored,
+        lastUpdated: existing[0].updatedAt,
+      });
+    }
+    return res.json({ submitted: false });
+  } catch {
+    return res.json({ submitted: false });
   }
 });
 
