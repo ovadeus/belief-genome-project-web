@@ -168,22 +168,22 @@ function SubmitGenomeButton() {
       <button
         onClick={() => setShowPopup(true)}
         style={{
-          padding: '10px 20px', borderRadius: 10,
-          background: 'linear-gradient(135deg, #22c55e, #16a34a)',
-          border: 'none', color: '#fff', fontSize: 14, fontWeight: 600,
-          cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8,
-          boxShadow: '0 4px 16px rgba(34,197,94,0.3)',
+          padding: '10px 18px', borderRadius: 10, minHeight: 44,
+          background: 'rgba(34,197,94,0.2)',
+          border: '1px solid rgba(34,197,94,0.3)',
+          color: '#22c55e', fontSize: 14, fontWeight: 600,
+          cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6,
           transition: 'all 0.2s', fontFamily: 'inherit',
         }}
-        onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(34,197,94,0.4)'; }}
-        onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(34,197,94,0.3)'; }}
+        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(34,197,94,0.25)'; e.currentTarget.style.borderColor = 'rgba(34,197,94,0.45)'; }}
+        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(34,197,94,0.2)'; e.currentTarget.style.borderColor = 'rgba(34,197,94,0.3)'; }}
       >
-        <span style={{ fontSize: 16 }}>🧬</span>
+        <span style={{ fontSize: 15 }}>🧬</span>
         Submit Genome
         {publicStatus?.submitted && (
           <span style={{
             fontSize: 10, padding: '2px 6px', borderRadius: 6,
-            background: 'rgba(255,255,255,0.2)', marginLeft: 4,
+            background: 'rgba(34,197,94,0.2)', marginLeft: 4,
           }}>
             ✓ Live
           </span>
