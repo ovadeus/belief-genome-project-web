@@ -1,14 +1,19 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ChevronDown } from "lucide-react";
+import { Menu, X, ChevronDown, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useGenomeAuth } from "@/components/genome/GenomeAuthContext";
 
-const NAV_LINKS = [
+const TOP_LINKS = [
   { href: "/", label: "Home" },
   { href: "/app", label: "Participate" },
+  { href: "/explore", label: "Explore Beliefs" },
+];
+
+const MORE_LINKS: MoreItem[] = [
   { href: "/blog", label: "Blog" },
+  { href: "/support", label: "Support" },
   { href: "/book", label: "Book" },
   {
     label: "Process",
@@ -17,10 +22,14 @@ const NAV_LINKS = [
       { href: "/scoring", label: "Scoring & Weighting" },
     ],
   },
-  { href: "/explore", label: "Explore" },
-  { href: "/support", label: "Support" },
   { href: "/about", label: "About" },
 ];
+
+type MoreItem = { href?: string; label: string; children?: { href: string; label: string }[] };
+
+const ALL_MORE_HREFS = MORE_LINKS.flatMap(item =>
+  item.children ? item.children.map(c => c.href) : item.href ? [item.href] : []
+);
 
 function GenomeAuthButton() {
   const { user, logout } = useGenomeAuth();
@@ -65,16 +74,18 @@ function GenomeAuthButton() {
   );
 }
 
-function ProcessDropdown({ location }: { location: string }) {
+function MoreDropdown({ location }: { location: string }) {
   const [open, setOpen] = useState(false);
+  const [processOpen, setProcessOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-  const processLink = NAV_LINKS.find(l => l.label === "Process")!;
-  const children = (processLink as any).children as { href: string; label: string }[];
-  const isActive = children.some(c => location === c.href);
+  const isActive = ALL_MORE_HREFS.some(h => location === h);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+        setProcessOpen(false);
+      }
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -83,13 +94,13 @@ function ProcessDropdown({ location }: { location: string }) {
   return (
     <div ref={ref} className="relative">
       <button
-        onClick={() => setOpen(!open)}
+        onClick={() => { setOpen(!open); if (open) setProcessOpen(false); }}
         className={cn(
           "text-sm font-medium transition-colors hover:text-primary relative py-2 flex items-center gap-1",
           isActive ? "text-foreground" : "text-muted-foreground"
         )}
       >
-        Process
+        More
         <ChevronDown size={14} className={cn("transition-transform", open && "rotate-180")} />
         {isActive && (
           <motion.div
@@ -106,21 +117,68 @@ function ProcessDropdown({ location }: { location: string }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.15 }}
-            className="absolute top-full left-1/2 -translate-x-1/2 mt-2 min-w-[200px] bg-[#0c1025]/95 backdrop-blur-md border border-white/10 rounded-lg shadow-xl shadow-black/30 py-2 z-50"
+            className="absolute top-full right-0 mt-2 min-w-[200px] bg-[#0c1025]/95 backdrop-blur-md border border-white/10 rounded-lg shadow-xl shadow-black/30 py-2 z-50"
           >
-            {children.map(child => (
-              <Link
-                key={child.href}
-                href={child.href}
-                onClick={() => setOpen(false)}
-                className={cn(
-                  "block px-4 py-2.5 text-sm transition-colors hover:bg-white/5",
-                  location === child.href ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {child.label}
-              </Link>
-            ))}
+            {MORE_LINKS.map((item) => {
+              if (item.children) {
+                const subActive = item.children.some(c => location === c.href);
+                return (
+                  <div key={item.label} className="relative">
+                    <button
+                      onMouseEnter={() => setProcessOpen(true)}
+                      onClick={() => setProcessOpen(!processOpen)}
+                      className={cn(
+                        "w-full flex items-center justify-between px-4 py-2.5 text-sm transition-colors hover:bg-white/5",
+                        subActive ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      {item.label}
+                      <ChevronRight size={14} />
+                    </button>
+                    <AnimatePresence>
+                      {processOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, x: -8 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -8 }}
+                          transition={{ duration: 0.12 }}
+                          onMouseLeave={() => setProcessOpen(false)}
+                          className="absolute right-full top-0 mr-1 min-w-[200px] bg-[#0c1025]/95 backdrop-blur-md border border-white/10 rounded-lg shadow-xl shadow-black/30 py-2 z-50"
+                        >
+                          {item.children.map(child => (
+                            <Link
+                              key={child.href}
+                              href={child.href}
+                              onClick={() => { setOpen(false); setProcessOpen(false); }}
+                              className={cn(
+                                "block px-4 py-2.5 text-sm transition-colors hover:bg-white/5",
+                                location === child.href ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"
+                              )}
+                            >
+                              {child.label}
+                            </Link>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                );
+              }
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href!}
+                  onClick={() => setOpen(false)}
+                  className={cn(
+                    "block px-4 py-2.5 text-sm transition-colors hover:bg-white/5",
+                    location === item.href ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
           </motion.div>
         )}
       </AnimatePresence>
@@ -132,6 +190,7 @@ export function PublicNavbar() {
   const [location] = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileProcessOpen, setMobileProcessOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -143,6 +202,7 @@ export function PublicNavbar() {
 
   useEffect(() => {
     setMobileMenuOpen(false);
+    setMobileProcessOpen(false);
   }, [location]);
 
   return (
@@ -163,30 +223,26 @@ export function PublicNavbar() {
           </Link>
 
           <nav className="hidden md:flex items-center gap-8">
-            {NAV_LINKS.map((link) => {
-              if ("children" in link) {
-                return <ProcessDropdown key={link.label} location={location} />;
-              }
-              return (
-                <Link 
-                  key={link.href} 
-                  href={link.href!}
-                  className={cn(
-                    "text-sm font-medium transition-colors hover:text-primary relative py-2",
-                    location === link.href ? "text-foreground" : "text-muted-foreground"
-                  )}
-                >
-                  {link.label}
-                  {location === link.href && (
-                    <motion.div
-                      layoutId="navbar-indicator"
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"
-                      transition={{ type: "spring", bounce: 0.25, duration: 0.5 }}
-                    />
-                  )}
-                </Link>
-              );
-            })}
+            {TOP_LINKS.map((link) => (
+              <Link 
+                key={link.href} 
+                href={link.href}
+                className={cn(
+                  "text-sm font-medium transition-colors hover:text-primary relative py-2",
+                  location === link.href ? "text-foreground" : "text-muted-foreground"
+                )}
+              >
+                {link.label}
+                {location === link.href && (
+                  <motion.div
+                    layoutId="navbar-indicator"
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"
+                    transition={{ type: "spring", bounce: 0.25, duration: 0.5 }}
+                  />
+                )}
+              </Link>
+            ))}
+            <MoreDropdown location={location} />
             <Link 
               href="/subscribe"
               className="ml-4 px-5 py-2.5 rounded-full font-semibold text-sm bg-white/10 hover:bg-white/20 text-white transition-colors border border-white/10"
@@ -212,38 +268,79 @@ export function PublicNavbar() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-0 z-40 bg-background/95 backdrop-blur-xl pt-24 px-4 pb-8 flex flex-col md:hidden"
+            className="fixed inset-0 z-40 bg-background/95 backdrop-blur-xl pt-24 px-4 pb-8 flex flex-col md:hidden overflow-y-auto"
           >
-            <div className="flex flex-col gap-6 items-center justify-center h-full">
-              {NAV_LINKS.map((link) => {
-                if ("children" in link) {
-                  return (link as any).children.map((child: { href: string; label: string }) => (
-                    <Link 
-                      key={child.href} 
-                      href={child.href}
-                      className={cn(
-                        "text-2xl font-display font-semibold transition-colors",
-                        location === child.href ? "text-primary" : "text-foreground"
-                      )}
-                    >
-                      {child.label}
-                    </Link>
-                  ));
+            <div className="flex flex-col gap-5 items-center justify-center flex-1">
+              {TOP_LINKS.map((link) => (
+                <Link 
+                  key={link.href} 
+                  href={link.href}
+                  className={cn(
+                    "text-2xl font-display font-semibold transition-colors",
+                    location === link.href ? "text-primary" : "text-foreground"
+                  )}
+                >
+                  {link.label}
+                </Link>
+              ))}
+
+              <div className="w-12 h-px bg-border my-2" />
+
+              {MORE_LINKS.map((item) => {
+                if (item.children) {
+                  return (
+                    <div key={item.label} className="flex flex-col items-center gap-3">
+                      <button
+                        onClick={() => setMobileProcessOpen(!mobileProcessOpen)}
+                        className={cn(
+                          "text-2xl font-display font-semibold transition-colors flex items-center gap-2",
+                          item.children.some(c => location === c.href) ? "text-primary" : "text-foreground"
+                        )}
+                      >
+                        {item.label}
+                        <ChevronDown size={20} className={cn("transition-transform", mobileProcessOpen && "rotate-180")} />
+                      </button>
+                      <AnimatePresence>
+                        {mobileProcessOpen && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="flex flex-col items-center gap-3 overflow-hidden"
+                          >
+                            {item.children.map(child => (
+                              <Link
+                                key={child.href}
+                                href={child.href}
+                                className={cn(
+                                  "text-lg font-display transition-colors",
+                                  location === child.href ? "text-primary" : "text-muted-foreground"
+                                )}
+                              >
+                                {child.label}
+                              </Link>
+                            ))}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  );
                 }
                 return (
                   <Link 
-                    key={link.href} 
-                    href={link.href!}
+                    key={item.href} 
+                    href={item.href!}
                     className={cn(
                       "text-2xl font-display font-semibold transition-colors",
-                      location === link.href ? "text-primary" : "text-foreground"
+                      location === item.href ? "text-primary" : "text-foreground"
                     )}
                   >
-                    {link.label}
+                    {item.label}
                   </Link>
                 );
               })}
-              <div className="w-12 h-px bg-border my-4" />
+
+              <div className="w-12 h-px bg-border my-2" />
               <Link 
                 href="/subscribe"
                 className="px-8 py-3 rounded-full font-bold text-lg bg-primary text-primary-foreground shadow-lg shadow-primary/25"
