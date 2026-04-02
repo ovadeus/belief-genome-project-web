@@ -11,6 +11,7 @@ import blogAssetsRouter from "./blog-assets";
 import genomeAuthRouter, { genomeAuth } from "./genome-auth";
 import genomeProbesRouter from "./genome-probes";
 import genomeDataRouter from "./genome-data";
+import genomeSubmitRouter from "./genome-submit";
 
 const router: IRouter = Router();
 
@@ -24,6 +25,7 @@ router.use(settingsRouter);
 router.use(storageRouter);
 router.use(blogAssetsRouter);
 
+router.use("/genome", genomeSubmitRouter);
 router.use("/genome", genomeAuthRouter);
 router.use("/genome", genomeAuth, genomeDataRouter);
 router.use("/genome/probes", genomeAuth, genomeProbesRouter);

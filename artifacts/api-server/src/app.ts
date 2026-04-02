@@ -15,6 +15,10 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
       "http://localhost:5173",
     ].filter(Boolean);
 
+app.use("/api/genome/submit", cors());
+app.use("/api/genome/stats", cors());
+app.use("/api/genome/explore", cors());
+
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.some(o => origin.startsWith(o))) {
