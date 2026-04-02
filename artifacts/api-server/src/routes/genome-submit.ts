@@ -1,5 +1,4 @@
 import { Router, Request, Response } from 'express';
-import crypto from 'crypto';
 import { db } from '@workspace/db';
 import { genomeSubmissions } from '@workspace/db/schema';
 import { eq, sql, and, gte } from 'drizzle-orm';
@@ -87,10 +86,6 @@ function validateDnaPlausibility(dna: string): string | null {
   return null;
 }
 
-function computeSubmissionHash(dnaString: string, anonymousKey: string): string {
-  return crypto.createHash('sha256').update(`${dnaString}:${anonymousKey}:bgp-salt-2025`).digest('hex');
-}
-
 function parseDnaString(dna: string) {
   const century = parseInt(dna[0]) || 0;
   const yearInCentury = parseInt(dna.slice(1, 3)) || 0;
@@ -132,7 +127,7 @@ router.post('/submit', async (req: Request, res: Response) => {
       return res.status(429).json({ error: 'Too many submissions. Please try again later.' });
     }
 
-    const { dnaString, demographicPrefix, anonymousKey, checksum } = req.body;
+    const { dnaString, demographicPrefix, anonymousKey } = req.body;
 
     if (!dnaString || typeof dnaString !== 'string') {
       return res.status(400).json({ error: 'dnaString is required' });
@@ -149,13 +144,6 @@ router.post('/submit', async (req: Request, res: Response) => {
     const plausibilityError = validateDnaPlausibility(dnaString);
     if (plausibilityError) {
       return res.status(422).json({ error: plausibilityError, code: 'IMPLAUSIBLE_DATA' });
-    }
-
-    if (checksum) {
-      const expected = computeSubmissionHash(dnaString, anonymousKey);
-      if (checksum !== expected) {
-        return res.status(400).json({ error: 'Invalid checksum' });
-      }
     }
 
     const parsed = parseDnaString(dnaString);
@@ -238,12 +226,10 @@ const PRIVACY_MINIMUM = 5;
 
 router.get('/explore/dimensions', async (req: Request, res: Response) => {
   try {
-    const { country, gender, generationStart, generationEnd, includeTest } = req.query;
+    const { country, gender, generationStart, generationEnd } = req.query;
 
     let whereConditions: any[] = [];
-    if (includeTest !== 'true') {
-      whereConditions.push(eq(genomeSubmissions.isTestData, false));
-    }
+    whereConditions.push(eq(genomeSubmissions.isTestData, false));
     if (country && typeof country === 'string') {
       whereConditions.push(eq(genomeSubmissions.countryCode, country));
     }
@@ -296,10 +282,9 @@ router.get('/explore/dimensions', async (req: Request, res: Response) => {
   }
 });
 
-router.get('/explore/countries', async (req: Request, res: Response) => {
+router.get('/explore/countries', async (_req: Request, res: Response) => {
   try {
-    const { includeTest } = req.query;
-    const testFilter = includeTest === 'true' ? undefined : eq(genomeSubmissions.isTestData, false);
+    const testFilter = eq(genomeSubmissions.isTestData, false);
 
     const results = await db.select({
       countryCode: genomeSubmissions.countryCode,
@@ -320,9 +305,8 @@ router.get('/explore/countries', async (req: Request, res: Response) => {
   }
 });
 
-router.get('/explore/generations', async (req: Request, res: Response) => {
+router.get('/explore/generations', async (_req: Request, res: Response) => {
   try {
-    const { includeTest } = req.query;
     const generations = [
       { label: 'Silent Generation', start: 1928, end: 1945 },
       { label: 'Baby Boomers', start: 1946, end: 1964 },
@@ -337,10 +321,8 @@ router.get('/explore/generations', async (req: Request, res: Response) => {
       const conditions = [
         gte(genomeSubmissions.birthYear, gen.start),
         sql`${genomeSubmissions.birthYear} <= ${gen.end}`,
+        eq(genomeSubmissions.isTestData, false),
       ];
-      if (includeTest !== 'true') {
-        conditions.push(eq(genomeSubmissions.isTestData, false));
-      }
 
       const [countResult] = await db.select({ count: sql<number>`count(*)::int` })
         .from(genomeSubmissions)
@@ -381,10 +363,9 @@ router.get('/explore/generations', async (req: Request, res: Response) => {
   }
 });
 
-router.get('/explore/genders', async (req: Request, res: Response) => {
+router.get('/explore/genders', async (_req: Request, res: Response) => {
   try {
-    const { includeTest } = req.query;
-    const testFilter = includeTest === 'true' ? undefined : eq(genomeSubmissions.isTestData, false);
+    const testFilter = eq(genomeSubmissions.isTestData, false);
 
     const results = await db.select({
       gender: genomeSubmissions.gender,

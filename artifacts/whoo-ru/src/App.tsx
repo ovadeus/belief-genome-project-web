@@ -22,6 +22,8 @@ import AdminSubscribers from "./pages/admin/Subscribers";
 import AdminEarlyBird from "./pages/admin/EarlyBird";
 import AdminSettings from "./pages/admin/Settings";
 import MediaLibrary from "./pages/admin/MediaLibrary";
+import GenomeSubmissions from "./pages/admin/GenomeSubmissions";
+import ExploreBeliefs from "./pages/ExploreBeliefs";
 
 import { GenomeAuthProvider } from "./components/genome/GenomeAuthContext";
 import GenomeLayout from "./components/genome/GenomeLayout";
@@ -49,6 +51,7 @@ function Router() {
       <Route path="/scoring" component={ScoringWeighting} />
       <Route path="/support" component={Support} />
       <Route path="/subscribe" component={Subscribe} />
+      <Route path="/explore" component={ExploreBeliefs} />
       <Route path="/admin/login" component={AdminLogin} />
       <Route path="/admin/dashboard" component={Dashboard} />
       <Route path="/admin/blog" component={BlogList} />
@@ -58,6 +61,7 @@ function Router() {
       <Route path="/admin/earlybird" component={AdminEarlyBird} />
       <Route path="/admin/media" component={MediaLibrary} />
       <Route path="/admin/settings" component={AdminSettings} />
+      <Route path="/admin/genome" component={GenomeSubmissions} />
 
       <Route path="/genome/login">
         <GenomeLayout><LoginPage /></GenomeLayout>

@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, FileText, Users, Bookmark, Settings, LogOut, ImageIcon } from "lucide-react";
+import { LayoutDashboard, FileText, Users, Bookmark, Settings, LogOut, ImageIcon, Dna } from "lucide-react";
 import faviconImg from "/favicon.png";
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
@@ -11,6 +11,7 @@ const ADMIN_NAV = [
   { href: "/admin/media", label: "Media Library", icon: ImageIcon },
   { href: "/admin/subscribers", label: "Subscribers", icon: Users },
   { href: "/admin/earlybird", label: "Early Bird", icon: Bookmark },
+  { href: "/admin/genome", label: "Genome Data", icon: Dna },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
 

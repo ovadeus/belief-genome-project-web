@@ -57,6 +57,7 @@ Full-stack website for a psychometric self-knowledge framework, desktop app, and
 - **App** (`/app`): Desktop app showcase, features, FAQ accordion, download CTA
 - **Book** (`/book`): Book promo with 3D cover, early bird signup, chapter excerpt
 - **Subscribe** (`/subscribe`): Newsletter subscription form with benefit cards
+- **Explore Beliefs** (`/explore`): Public visualization page showing aggregated anonymous belief data from desktop app DNA submissions. Bar charts per category, radar chart across all categories, generation/gender/country breakdowns. Privacy enforced: min 5 submissions per group. Test data excluded from public view.
 
 ### Admin Panel (`/admin/*`)
 - **Login** (`/admin/login`): JWT cookie-based auth (separate from genome user auth)
@@ -66,6 +67,7 @@ Full-stack website for a psychometric self-knowledge framework, desktop app, and
 - **Media Library** (`/admin/media`): Upload/browse/delete media via object storage
 - **Subscribers** (`/admin/subscribers`): List with search/filter, CSV export, member status toggle (shield icon)
 - **Early Bird** (`/admin/earlybird`): List with CSV export
+- **Genome Data** (`/admin/genome`): View/search/filter genome submissions (real vs test), export CSV, purge test data, delete individual submissions
 - **Settings** (`/admin/settings`): Site settings, change password
 
 ### Admin Credentials
@@ -110,6 +112,7 @@ Pure domain logic package with no framework deps:
 - `siteSettings`: Key-value site configuration
 - `media`: Uploaded file metadata
 - `users`: Genome user accounts (email, password, demographics)
+- `genome_submissions`: Anonymous DNA submissions from desktop app (anonymousKey unique, dnaString, parsed demographics, beliefValues JSON, dimensionsExplored, isTestData flag)
 - `beliefResponses`: User probe responses with dimension weights
 - `probes`: Queued probes per user (bank + news sources)
 - `dimensionScores`: Aggregated dimension scores per user
@@ -131,6 +134,14 @@ Pure domain logic package with no framework deps:
 - `GET /api/genome/probes/next`, `POST /api/genome/probes/respond`
 - `POST /api/genome/analyze` (rebuild all dimension scores from scratch)
 - `GET /api/genome/sync/status`, `POST /api/genome/sync` (cross-platform sync)
+- `POST /api/genome/submit` (anonymous DNA submission from desktop app, CORS open, rate limited, validated)
+- `GET /api/genome/stats` (submission counts, country count, avg dimensions)
+- `GET /api/genome/explore/dimensions` (aggregated belief averages with filters)
+- `GET /api/genome/explore/countries|generations|genders` (demographic breakdowns)
+- `GET /api/genome/admin/submissions` (auth required, paginated list)
+- `DELETE /api/genome/admin/submissions/:id` (auth required)
+- `DELETE /api/genome/admin/purge-test` (auth required, delete all test data)
+- `GET /api/genome/admin/export` (auth required, CSV export)
 
 ### Key Dependencies
 - `@tanstack/react-query` for data fetching
