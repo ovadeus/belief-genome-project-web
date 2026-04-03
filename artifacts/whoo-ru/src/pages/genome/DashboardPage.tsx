@@ -341,6 +341,8 @@ export default function DashboardPage() {
   const [dimensions, setDimensions] = useState<any[]>([]);
   const [analysing, setAnalysing] = useState(false);
   const [analysis, setAnalysis] = useState('');
+  const [analysisTags, setAnalysisTags] = useState<string[]>([]);
+  const [analysisError, setAnalysisError] = useState('');
 
   const greeting = useMemo(() => getGreeting(user?.name), [user?.name]);
   const dailyQuote = useMemo(() => getDailyQuote(), []);
@@ -354,15 +356,37 @@ export default function DashboardPage() {
     }).catch(() => {});
   }, []);
 
+  useEffect(() => {
+    genomeApi('/analyse', { method: 'POST' })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data?.analysis) {
+          setAnalysis(data.analysis);
+          setAnalysisTags(data.tags || []);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   const runAnalysis = useCallback(async () => {
     setAnalysing(true);
+    setAnalysisError('');
     try {
-      const res = await genomeApi('/analyse', { method: 'POST' });
-      if (res.ok) {
-        const data = await res.json();
-        setAnalysis(data.analysis || 'Analysis complete.');
+      const res = await genomeApi('/analyse', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ force: true }),
+      });
+      const data = await res.json();
+      if (res.ok && data.analysis) {
+        setAnalysis(data.analysis);
+        setAnalysisTags(data.tags || []);
+      } else {
+        setAnalysisError(data.error || 'Analysis failed.');
       }
-    } catch {}
+    } catch {
+      setAnalysisError('Network error — please try again.');
+    }
     setAnalysing(false);
   }, []);
 
@@ -426,14 +450,57 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Analysis result */}
-      {analysis && (
+      {/* AI World View Analysis */}
+      {(analysis || analysisError) && (
         <div style={{
-          padding: 16, borderRadius: 8, marginBottom: 16,
-          background: 'rgba(108,143,255,0.06)', border: '1px solid rgba(108,143,255,0.15)',
-          fontSize: 13, color: 'rgba(255,255,255,0.75)', lineHeight: 1.6,
+          padding: 20, borderRadius: 12, marginBottom: 16,
+          background: 'rgba(108,143,255,0.04)', border: '1px solid rgba(108,143,255,0.12)',
         }}>
-          {analysis}
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12,
+            fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase',
+            color: 'rgba(167,139,250,0.8)',
+            fontFamily: "'Space Mono', monospace",
+          }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
+            AI World View Analysis
+          </div>
+          {analysisError ? (
+            <p style={{ fontSize: 13, color: 'rgba(255,100,100,0.8)', margin: 0 }}>{analysisError}</p>
+          ) : (
+            <>
+              <p style={{
+                fontSize: 13, color: 'rgba(255,255,255,0.75)', lineHeight: 1.7,
+                margin: 0,
+              }}>
+                {analysis}
+              </p>
+              {analysisTags.length > 0 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 14 }}>
+                  {analysisTags.map((tag, i) => {
+                    const colors = [
+                      'rgba(108, 99, 255, 0.2)',
+                      'rgba(68, 255, 136, 0.15)',
+                      'rgba(255, 170, 0, 0.15)',
+                      'rgba(255, 100, 100, 0.15)',
+                      'rgba(100, 200, 255, 0.15)',
+                    ];
+                    return (
+                      <span key={i} style={{
+                        padding: '4px 12px', borderRadius: 14,
+                        background: colors[i % colors.length],
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        fontSize: 11, color: 'rgba(255,255,255,0.6)',
+                        fontFamily: "'Space Mono', monospace",
+                      }}>
+                        {tag}
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
+            </>
+          )}
         </div>
       )}
 

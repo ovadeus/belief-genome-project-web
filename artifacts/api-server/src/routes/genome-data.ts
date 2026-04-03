@@ -4,7 +4,7 @@
 import { Router, Request, Response } from 'express';
 import crypto from 'crypto';
 import { db } from '@workspace/db';
-import { users, beliefResponses, dimensionScores, dnaSnapshots, genomeSubmissions } from '@workspace/db/schema';
+import { users, beliefResponses, dimensionScores, dnaSnapshots, genomeSubmissions, genomeAnalyses } from '@workspace/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { DIMENSIONS, CATEGORIES } from '@belief-genome/engine';
 import { buildDNAString, calcDimensionValue, calcConfidence } from '@belief-genome/engine';
@@ -492,61 +492,133 @@ router.post('/sync', async (req: Request, res: Response) => {
   return res.json({ merged });
 });
 
-// ── POST /analyse — AI world view summary ───────────────────
+// ── POST /analyse — AI world view portrait (Anthropic Claude) ─
+const analyseRateLimit: Record<number, number> = {};
+
+const CATEGORY_DIMENSIONS: Record<string, number[]> = {
+  'Philosophy':      [4, 5, 6, 7, 8, 9, 10],
+  'Religion':        [11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28],
+  'Morality':        [29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41],
+  'Life':            [42, 43],
+  'Politics':        [44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63],
+  'Family':          [64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78],
+  'Economics':       [79, 80, 81, 82, 83, 84, 85, 86, 87, 88],
+  'Science & Tech':  [89, 90, 91, 92, 93, 94, 95, 96, 97, 98],
+  'Education':       [99, 100, 101, 102, 103, 104],
+  'Health':          [105, 106, 107, 108],
+  'Psychology':      [109, 110, 111, 112, 113, 114, 115, 116, 117, 118],
+  'Relationships':   [119, 120, 121, 122, 123, 124, 125, 126, 127],
+};
+
 router.post('/analyse', async (req: Request, res: Response) => {
   const { userId } = (req as any).genomeUser;
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) return res.status(503).json({ error: 'AI not configured (no API key)' });
 
-  const history = await db
-    .select({ probeCategory: beliefResponses.probeCategory, value: beliefResponses.value })
-    .from(beliefResponses)
-    .where(eq(beliefResponses.userId, userId))
-    .orderBy(desc(beliefResponses.createdAt))
-    .limit(200);
-
-  if (history.length < 5) {
-    return res.status(400).json({ error: 'Need at least 5 responses for analysis.' });
+  const now = Date.now();
+  if (analyseRateLimit[userId] && now - analyseRateLimit[userId] < 60_000) {
+    const wait = Math.ceil((60_000 - (now - analyseRateLimit[userId])) / 1000);
+    return res.status(429).json({ error: `Rate limited — try again in ${wait}s` });
   }
 
-  const CAT_SHORT: Record<string,string> = {
-    philosophy:'Philosophy', religion:'Religion', psychology:'Psychology',
-    relationships:'Relationships', society:'Society', economics:'Economics',
-    science_tech:'Sci & Tech', politics:'Politics', life:'Life',
-  };
+  const { force } = req.body || {};
 
-  const buckets: Record<string, number[]> = {};
-  for (const h of history) {
-    const cat = h.probeCategory || 'life';
-    if (!buckets[cat]) buckets[cat] = [];
-    buckets[cat].push(h.value);
+  if (!force) {
+    const cached = await db.select().from(genomeAnalyses)
+      .where(eq(genomeAnalyses.userId, userId))
+      .orderBy(desc(genomeAnalyses.generatedAt))
+      .limit(1);
+
+    if (cached.length) {
+      return res.json({
+        status: 'ok',
+        analysis: cached[0].analysisText,
+        tags: cached[0].tags,
+        generatedAt: cached[0].generatedAt,
+        cached: true,
+      });
+    }
   }
 
-  const summary = Object.entries(buckets).map(([cat, vals]) => {
+  const scores = await db.select().from(dimensionScores).where(eq(dimensionScores.userId, userId));
+  const dimScores: Record<number, number> = {};
+  for (const s of scores) {
+    const accum: Accumulator = { sum: s.weightedSum, totalWeight: s.totalWeight, count: s.count };
+    const val = calcDimensionValue(accum);
+    if (val !== null) dimScores[s.dimensionId] = val;
+  }
+
+  const scoredCount = Object.keys(dimScores).length;
+  if (scoredCount < 5) {
+    return res.status(422).json({ error: 'Not enough data to analyse — explore at least 5 dimensions first.' });
+  }
+
+  const summaryParts: string[] = [];
+  for (const [catName, dimIds] of Object.entries(CATEGORY_DIMENSIONS)) {
+    const vals: number[] = [];
+    for (const dimId of dimIds) {
+      const v = dimScores[dimId];
+      if (v !== undefined && v !== 5) {
+        vals.push(v);
+      }
+    }
+    if (!vals.length) continue;
     const avg = vals.reduce((s, v) => s + v, 0) / vals.length;
-    const pct = Math.round(avg * 100);
+    const pct = Math.round((avg / 9) * 100);
     const lbl = pct >= 70 ? 'strongly agrees' : pct >= 55 ? 'leans true' : pct <= 30 ? 'strongly disagrees' : pct <= 45 ? 'leans false' : 'is neutral';
-    return `${CAT_SHORT[cat] || cat}: ${lbl} (${pct}%, ${vals.length} responses)`;
-  }).join('; ');
+    summaryParts.push(`${catName}: ${lbl} (${pct}%, ${vals.length} dimensions)`);
+  }
+
+  const summaryString = summaryParts.join('; ');
+
+  const prompt = `Based on these belief response averages across categories, write a 3-sentence world view portrait for this person. Be specific, insightful, and a little philosophical. Avoid generic observations.
+
+Data: ${summaryString}
+
+Total dimensions scored: ${scoredCount}
+
+End with 4-6 short descriptor tags (2-3 words each) that capture their world view, formatted as JSON at the end like: TAGS:["tag1","tag2","tag3"]`;
 
   try {
-    const aiRes = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        max_tokens: 400,
-        messages: [{
-          role: 'user',
-          content: `Based on these belief response averages across categories, write a 3-sentence world view portrait for this person. Be specific, insightful, and a little philosophical. Avoid generic observations.\n\n${summary}`,
-        }],
-      }),
+    const { anthropic } = await import('@workspace/integrations-anthropic-ai');
+    const message = await anthropic.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 8192,
+      messages: [{ role: 'user', content: prompt }],
     });
-    const aiData = await aiRes.json();
-    const analysis = aiData.choices?.[0]?.message?.content || 'Could not generate analysis.';
-    return res.json({ analysis });
+
+    const block = message.content[0];
+    const rawText = block.type === 'text' ? block.text : '';
+
+    let analysisText = rawText;
+    let tags: string[] = [];
+
+    const tagsMatch = rawText.match(/TAGS:\s*\[([^\]]+)\]/);
+    if (tagsMatch) {
+      analysisText = rawText.slice(0, rawText.indexOf('TAGS:')).trim();
+      try {
+        tags = JSON.parse(`[${tagsMatch[1]}]`);
+      } catch {
+        tags = tagsMatch[1].split(',').map(t => t.trim().replace(/^["']|["']$/g, ''));
+      }
+    }
+
+    analyseRateLimit[userId] = Date.now();
+
+    await db.insert(genomeAnalyses).values({
+      userId,
+      analysisText,
+      tags,
+    });
+
+    return res.json({
+      status: 'ok',
+      analysis: analysisText,
+      tags,
+      generatedAt: new Date().toISOString(),
+      cached: false,
+    });
   } catch (e: any) {
-    return res.status(500).json({ error: 'Analysis failed: ' + e.message });
+    console.error('Analyse error:', e);
+    return res.status(500).json({ error: 'Analysis failed: ' + (e.message || 'Unknown error') });
   }
 });
 

@@ -6,3 +6,4 @@ export * from "./siteSettings";
 export * from "./media";
 export * from "./users";
 export * from "./genomeSubmissions";
+export * from "./genomeAnalyses";
