@@ -296,6 +296,32 @@ export default function ExploreBeliefs() {
     };
   }, [countries]);
 
+  const tensionLinePlugin = useMemo(() => ({
+    id: 'tensionLine',
+    afterDraw(chart: any) {
+      const yScale = chart.scales.y;
+      if (!yScale) return;
+      const y = yScale.getPixelForValue(5);
+      const { left, right } = chart.chartArea;
+      const ctx = chart.ctx;
+      const color = CATEGORIES[selectedCategory]?.color || '#6c8fff';
+      ctx.save();
+      ctx.beginPath();
+      ctx.setLineDash([6, 4]);
+      ctx.strokeStyle = color + '88';
+      ctx.lineWidth = 1.5;
+      ctx.moveTo(left, y);
+      ctx.lineTo(right, y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = color + 'aa';
+      ctx.font = '10px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText('neutral', left + 4, y - 5);
+      ctx.restore();
+    },
+  }), [selectedCategory]);
+
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -553,7 +579,7 @@ export default function ExploreBeliefs() {
               </h3>
               <p className="text-xs text-muted-foreground mb-4">Based on {dimCount} submissions matching your filters</p>
               <div className="h-[350px]">
-                <Bar data={barChartData} options={chartOptions as any} />
+                <Bar data={barChartData} options={chartOptions as any} plugins={[tensionLinePlugin]} />
               </div>
             </motion.div>
 
@@ -577,7 +603,7 @@ export default function ExploreBeliefs() {
                 </h3>
                 <p className="text-xs text-muted-foreground mb-4">How beliefs shift across age groups</p>
                 <div className="h-[300px]">
-                  <Bar data={generationChartData} options={chartOptions as any} />
+                  <Bar data={generationChartData} options={chartOptions as any} plugins={[tensionLinePlugin]} />
                 </div>
               </motion.div>
             )}
