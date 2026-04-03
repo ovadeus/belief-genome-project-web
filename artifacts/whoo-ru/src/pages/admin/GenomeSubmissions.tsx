@@ -225,7 +225,29 @@ export default function GenomeSubmissions() {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [viewingSub, setViewingSub] = useState<Submission | null>(null);
+  const [sortCol, setSortCol] = useState<string>("submittedAt");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const limit = 20;
+
+  const handleSort = (col: string) => {
+    if (sortCol === col) {
+      setSortDir(d => d === "asc" ? "desc" : "asc");
+    } else {
+      setSortCol(col);
+      setSortDir("asc");
+    }
+  };
+
+  const sortedSubmissions = [...submissions].sort((a: any, b: any) => {
+    let av = a[sortCol], bv = b[sortCol];
+    if (sortCol === "submittedAt") { av = new Date(av).getTime(); bv = new Date(bv).getTime(); }
+    if (sortCol === "countryCode") { av = countryName(av); bv = countryName(bv); }
+    if (typeof av === "string") { av = av.toLowerCase(); bv = (bv || "").toLowerCase(); }
+    if (typeof av === "boolean") { av = av ? 1 : 0; bv = bv ? 1 : 0; }
+    if (av < bv) return sortDir === "asc" ? -1 : 1;
+    if (av > bv) return sortDir === "asc" ? 1 : -1;
+    return 0;
+  });
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -388,14 +410,24 @@ export default function GenomeSubmissions() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Key</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Country</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Zip</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Gender</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Birth Year</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Dims</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Type</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Date</th>
+                  {[
+                    { col: "anonymousKey", label: "Key" },
+                    { col: "countryCode", label: "Country" },
+                    { col: "zipCode", label: "Zip" },
+                    { col: "gender", label: "Gender" },
+                    { col: "birthYear", label: "Birth Year" },
+                    { col: "dimensionsExplored", label: "Dims" },
+                    { col: "isTestData", label: "Type" },
+                    { col: "submittedAt", label: "Date" },
+                  ].map(({ col, label }) => (
+                    <th
+                      key={col}
+                      onClick={() => handleSort(col)}
+                      className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors select-none"
+                    >
+                      {label} {sortCol === col ? (sortDir === "asc" ? "↑" : "↓") : ""}
+                    </th>
+                  ))}
                   <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider"></th>
                 </tr>
               </thead>
@@ -404,7 +436,7 @@ export default function GenomeSubmissions() {
                   <tr><td colSpan={9} className="px-4 py-12 text-center text-muted-foreground">Loading...</td></tr>
                 ) : submissions.length === 0 ? (
                   <tr><td colSpan={9} className="px-4 py-12 text-center text-muted-foreground">No submissions found</td></tr>
-                ) : submissions.map((sub) => (
+                ) : sortedSubmissions.map((sub) => (
                   <tr key={sub.id} className="border-b border-border/50 hover:bg-white/[0.02] transition-colors">
                     <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{sub.anonymousKey.slice(0, 12)}...</td>
                     <td className="px-4 py-3">{countryName(sub.countryCode)}</td>
