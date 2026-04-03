@@ -157,6 +157,17 @@ function wPick<T>(items: [T, number][]): T {
   return items[items.length - 1][0];
 }
 
+router.post('/promote-test', async (req: Request, res: Response) => {
+  try {
+    const result = await db.update(genomeSubmissions)
+      .set({ isTestData: false })
+      .where(eq(genomeSubmissions.isTestData, true));
+    return res.json({ success: true, message: 'Test data promoted to real submissions.' });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
 router.post('/seed-test', async (req: Request, res: Response) => {
   try {
     const count = Math.min(parseInt(req.body.count) || 350, 500);
