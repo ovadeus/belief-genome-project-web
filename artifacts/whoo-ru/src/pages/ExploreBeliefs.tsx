@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { motion } from "framer-motion";
-import { Globe, Users, BarChart3, Dna, Filter, ChevronDown, Info } from "lucide-react";
+import { Globe, Users, BarChart3, Dna, Filter, ChevronDown, ChevronUp, Info } from "lucide-react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -135,6 +135,7 @@ export default function ExploreBeliefs() {
   const [filterGender, setFilterGender] = useState("");
   const [filterGenIdx, setFilterGenIdx] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [breakdownOpen, setBreakdownOpen] = useState(true);
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
@@ -419,6 +420,97 @@ export default function ExploreBeliefs() {
           )}
         </motion.div>
 
+        {!loading && !insufficientData && dimCount >= 5 && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}
+            className="bg-[#0c1025]/80 border border-white/10 rounded-2xl p-6">
+            <button
+              onClick={() => setBreakdownOpen(o => !o)}
+              className="w-full flex items-center justify-between cursor-pointer"
+              style={{ background: 'none', border: 'none', padding: 0 }}
+            >
+              <div style={{
+                fontSize: 11, fontFamily: "'Space Mono', monospace", textTransform: 'uppercase',
+                letterSpacing: 1.5, color: 'rgba(255,255,255,0.5)',
+                display: 'flex', alignItems: 'center', gap: 8,
+              }}>
+                <BarChart3 size={14} style={{ opacity: 0.6 }} />
+                Category Breakdown
+              </div>
+              {breakdownOpen ? (
+                <ChevronUp size={16} className="text-muted-foreground" />
+              ) : (
+                <ChevronDown size={16} className="text-muted-foreground" />
+              )}
+            </button>
+
+            {breakdownOpen && (
+              <>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 20 }}>
+                {EXPLORE_CAT_ORDER.map(cat => {
+                  const data = categoryAvgs[cat];
+                  const hasData = !!data;
+                  const avg = data?.avg ?? 4.5;
+                  const pct = (avg / 9) * 100;
+                  const col = exploreCatColour(hasData ? avg : null);
+                  const lbl = hasData ? exploreDomainLabel(cat, avg) : '';
+                  const axis = EXPLORE_DOMAIN_AXES[cat] || { left: '', right: '', mid: '' };
+                  const name = EXPLORE_CAT_SHORT[cat] || cat;
+                  const cnt = data?.count ?? 0;
+
+                  return (
+                    <div key={cat} style={{ opacity: hasData ? 1 : 0.32 }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr 40px 130px', gap: 8, alignItems: 'center' }}>
+                        <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', textAlign: 'right' }}>{name}</span>
+                        <div style={{ position: 'relative', height: 14 }}>
+                          <div style={{
+                            position: 'absolute', inset: '3px 0', borderRadius: 4,
+                            background: 'linear-gradient(90deg, #dc3232, #ff7728 25%, #787891 50%, #3cb4b4 75%, #50b4ff)',
+                            opacity: 0.35,
+                          }} />
+                          <div style={{
+                            position: 'absolute', left: '50%', top: 0, width: 1, height: '100%',
+                            background: 'rgba(255,255,255,0.28)', zIndex: 3,
+                          }} />
+                          {hasData && (
+                            <div style={{
+                              position: 'absolute', left: `${pct}%`, top: '50%',
+                              transform: 'translate(-50%, -50%)',
+                              width: 15, height: 15, borderRadius: '50%',
+                              background: col, border: '2.5px solid rgba(255,255,255,0.92)',
+                              boxShadow: `0 0 8px ${col}, 0 0 2px rgba(0,0,0,0.8)`,
+                              zIndex: 4,
+                            }} />
+                          )}
+                        </div>
+                        <span style={{
+                          fontSize: 11, fontFamily: "'Space Mono', monospace",
+                          color: 'rgba(255,255,255,0.35)', textAlign: 'right',
+                        }}>
+                          {hasData ? `${cnt}\u00d7` : ''}
+                        </span>
+                        <span style={{ fontSize: 11, color: col, textAlign: 'right' }}>{lbl}</span>
+                      </div>
+                      <div style={{
+                        display: 'grid', gridTemplateColumns: '100px 1fr 40px 130px', gap: 8, marginTop: 2,
+                      }}>
+                        <span />
+                        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 4px' }}>
+                          <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)' }}>{axis.left}</span>
+                          <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)' }}>{axis.right}</span>
+                        </div>
+                        <span />
+                        <span />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-muted-foreground mt-4">Based on {dimCount} submissions matching your filters</p>
+              </>
+            )}
+          </motion.div>
+        )}
+
         <div className="flex flex-wrap gap-2 justify-center">
           {Object.entries(CATEGORIES).map(([key, cat]) => (
             <button
@@ -451,82 +543,6 @@ export default function ExploreBeliefs() {
             </p>
           </motion.div>
         ) : (
-          <>
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}
-            className="bg-[#0c1025]/80 border border-white/10 rounded-2xl p-6">
-            <div style={{
-              fontSize: 11, fontFamily: "'Space Mono', monospace", textTransform: 'uppercase',
-              letterSpacing: 1.5, color: 'rgba(255,255,255,0.5)', marginBottom: 20,
-              display: 'flex', alignItems: 'center', gap: 8,
-            }}>
-              <BarChart3 size={14} style={{ opacity: 0.6 }} />
-              Category Breakdown
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              {EXPLORE_CAT_ORDER.map(cat => {
-                const data = categoryAvgs[cat];
-                const hasData = !!data;
-                const avg = data?.avg ?? 4.5;
-                const pct = (avg / 9) * 100;
-                const col = exploreCatColour(hasData ? avg : null);
-                const lbl = hasData ? exploreDomainLabel(cat, avg) : '';
-                const axis = EXPLORE_DOMAIN_AXES[cat] || { left: '', right: '', mid: '' };
-                const name = EXPLORE_CAT_SHORT[cat] || cat;
-                const cnt = data?.count ?? 0;
-
-                return (
-                  <div key={cat} style={{ opacity: hasData ? 1 : 0.32 }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr 40px 130px', gap: 8, alignItems: 'center' }}>
-                      <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', textAlign: 'right' }}>{name}</span>
-                      <div style={{ position: 'relative', height: 14 }}>
-                        <div style={{
-                          position: 'absolute', inset: '3px 0', borderRadius: 4,
-                          background: 'linear-gradient(90deg, #dc3232, #ff7728 25%, #787891 50%, #3cb4b4 75%, #50b4ff)',
-                          opacity: 0.35,
-                        }} />
-                        <div style={{
-                          position: 'absolute', left: '50%', top: 0, width: 1, height: '100%',
-                          background: 'rgba(255,255,255,0.28)', zIndex: 3,
-                        }} />
-                        {hasData && (
-                          <div style={{
-                            position: 'absolute', left: `${pct}%`, top: '50%',
-                            transform: 'translate(-50%, -50%)',
-                            width: 15, height: 15, borderRadius: '50%',
-                            background: col, border: '2.5px solid rgba(255,255,255,0.92)',
-                            boxShadow: `0 0 8px ${col}, 0 0 2px rgba(0,0,0,0.8)`,
-                            zIndex: 4,
-                          }} />
-                        )}
-                      </div>
-                      <span style={{
-                        fontSize: 11, fontFamily: "'Space Mono', monospace",
-                        color: 'rgba(255,255,255,0.35)', textAlign: 'right',
-                      }}>
-                        {hasData ? `${cnt}\u00d7` : ''}
-                      </span>
-                      <span style={{ fontSize: 11, color: col, textAlign: 'right' }}>{lbl}</span>
-                    </div>
-                    <div style={{
-                      display: 'grid', gridTemplateColumns: '100px 1fr 40px 130px', gap: 8, marginTop: 2,
-                    }}>
-                      <span />
-                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 4px' }}>
-                        <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)' }}>{axis.left}</span>
-                        <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)' }}>{axis.right}</span>
-                      </div>
-                      <span />
-                      <span />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            <p className="text-xs text-muted-foreground mt-4">Based on {dimCount} submissions matching your filters</p>
-          </motion.div>
-
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
               className="bg-[#0c1025]/80 border border-white/10 rounded-2xl p-6">
@@ -583,7 +599,6 @@ export default function ExploreBeliefs() {
               </motion.div>
             )}
           </div>
-          </>
         )}
 
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
