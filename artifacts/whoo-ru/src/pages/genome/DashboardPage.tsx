@@ -488,7 +488,7 @@ export default function DashboardPage() {
               fontFamily: 'inherit',
             }}
           >
-            <span style={{ fontSize: 13, opacity: tab === t.key ? 1 : 0.6 }}>{TAB_ICONS[t.key]}</span>
+            <span style={{ fontSize: 16, opacity: tab === t.key ? 1 : 0.6 }}>{TAB_ICONS[t.key]}</span>
             {t.label}
           </button>
         ))}
