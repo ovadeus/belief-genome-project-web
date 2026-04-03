@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { AdminLayout } from "@/components/layout/AdminLayout";
-import { Dna, Download, Search, Trash2, Globe, Users, BarChart3, TestTube, Eye, X, Copy, Check } from "lucide-react";
+import { Dna, Download, Search, Trash2, Globe, Users, BarChart3, TestTube, Eye, X, Copy, Check, Pencil } from "lucide-react";
 
 const API_BASE = import.meta.env.VITE_API_URL || "/api";
 
@@ -266,6 +266,32 @@ export default function GenomeSubmissions() {
     } catch {}
   };
 
+  const handleToggleTest = async (id: number) => {
+    try {
+      const res = await fetch(`${API_BASE}/genome/admin/submissions/${id}/toggle-test`, {
+        method: "PATCH",
+        credentials: "include",
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setSubmissions(prev => prev.map(s =>
+          s.id === id ? { ...s, isTestData: data.isTestData } : s
+        ));
+      }
+    } catch {}
+  };
+
+  const handlePromoteAll = async () => {
+    if (!confirm("Promote ALL test submissions to Real? This will make them visible on the Explore Beliefs page.")) return;
+    try {
+      const res = await fetch(`${API_BASE}/genome/admin/promote-test`, {
+        method: "POST",
+        credentials: "include",
+      });
+      if (res.ok) fetchData();
+    } catch {}
+  };
+
   const handleExportCSV = () => {
     const params = new URLSearchParams();
     if (filter !== "all") params.set("filter", filter);
@@ -310,6 +336,12 @@ export default function GenomeSubmissions() {
               className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition-colors text-sm font-medium"
             >
               <Download size={16} /> Export CSV
+            </button>
+            <button
+              onClick={handlePromoteAll}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors text-sm font-medium"
+            >
+              <Pencil size={16} /> Promote All → Real
             </button>
             <button
               onClick={handlePurgeTest}
@@ -381,21 +413,34 @@ export default function GenomeSubmissions() {
                     <td className="px-4 py-3">{sub.birthYear}</td>
                     <td className="px-4 py-3">{sub.dimensionsExplored}</td>
                     <td className="px-4 py-3">
-                      {sub.isTestData ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">
-                          <TestTube size={10} /> Test
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-green-500/10 text-green-400 border border-green-500/20">
-                          Real
-                        </span>
-                      )}
+                      <button
+                        onClick={() => handleToggleTest(sub.id)}
+                        title={sub.isTestData ? "Click to mark as Real" : "Click to mark as Test"}
+                        className="cursor-pointer"
+                      >
+                        {sub.isTestData ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 hover:bg-yellow-500/20 transition-colors">
+                            <TestTube size={10} /> Test
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-green-500/10 text-green-400 border border-green-500/20 hover:bg-green-500/20 transition-colors">
+                            Real
+                          </span>
+                        )}
+                      </button>
                     </td>
                     <td className="px-4 py-3 text-muted-foreground text-xs">
                       {new Date(sub.submittedAt).toLocaleDateString()}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => handleToggleTest(sub.id)}
+                          className="p-1.5 rounded-lg hover:bg-blue-500/10 text-muted-foreground hover:text-blue-400 transition-colors"
+                          title={sub.isTestData ? "Mark as Real" : "Mark as Test"}
+                        >
+                          <Pencil size={14} />
+                        </button>
                         <button
                           onClick={() => setViewingSub(sub)}
                           className="p-1.5 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"

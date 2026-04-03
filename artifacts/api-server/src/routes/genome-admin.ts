@@ -79,6 +79,26 @@ router.delete('/submissions/:id', async (req: Request, res: Response) => {
   }
 });
 
+router.patch('/submissions/:id/toggle-test', async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID' });
+
+    const [existing] = await db.select({ isTestData: genomeSubmissions.isTestData })
+      .from(genomeSubmissions).where(eq(genomeSubmissions.id, id));
+    if (!existing) return res.status(404).json({ error: 'Not found' });
+
+    await db.update(genomeSubmissions)
+      .set({ isTestData: !existing.isTestData })
+      .where(eq(genomeSubmissions.id, id));
+
+    return res.json({ success: true, isTestData: !existing.isTestData });
+  } catch (err: any) {
+    console.error('Toggle test error:', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 router.delete('/purge-test', async (_req: Request, res: Response) => {
   try {
     const result = await db.delete(genomeSubmissions).where(eq(genomeSubmissions.isTestData, true));
