@@ -179,7 +179,8 @@ function SubmitGenomeButton() {
         onMouseEnter={e => { e.currentTarget.style.background = 'rgba(34,197,94,0.08)'; e.currentTarget.style.borderColor = 'rgba(34,197,94,0.6)'; }}
         onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'rgba(34,197,94,0.4)'; }}
       >
-        <span style={{ fontSize: 13 }}>🧬</span> Submit Genome
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"/><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.4"/><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.4"/><path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"/></svg>
+        Submit Genome
       </button>
 
       {showPopup && (
@@ -300,13 +301,22 @@ function SubmitGenomeButton() {
 
 type Tab = 'helix' | 'radar' | 'breakdown' | 'timeline' | 'history' | 'forecaster';
 
-const TABS: { key: Tab; icon: string; label: string }[] = [
-  { key: 'helix',      icon: '\u2728', label: 'Triple Helix' },
-  { key: 'radar',      icon: '\u25CE', label: 'Radar' },
-  { key: 'breakdown',  icon: '\u2502', label: 'Breakdown' },
-  { key: 'timeline',   icon: '\u223F', label: 'Timeline' },
-  { key: 'history',    icon: '\u2630', label: 'History' },
-  { key: 'forecaster', icon: '\u2699', label: 'Forecaster' },
+const TAB_ICONS: Record<Tab, string> = {
+  helix: '✦',
+  radar: '◎',
+  breakdown: '▐',
+  timeline: '∿',
+  history: '☰',
+  forecaster: '⚙',
+};
+
+const TABS: { key: Tab; label: string }[] = [
+  { key: 'helix',      label: 'Triple Helix' },
+  { key: 'radar',      label: 'Radar' },
+  { key: 'breakdown',  label: 'Breakdown' },
+  { key: 'timeline',   label: 'Timeline' },
+  { key: 'history',    label: 'History' },
+  { key: 'forecaster', label: 'Forecaster' },
 ];
 
 /* ── Helper: day streak ─────────────────────────────────────── */
@@ -379,21 +389,18 @@ export default function DashboardPage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <button
             onClick={() => setShowDnaModal(true)}
-            style={{
-              ...headerBtnStyle,
-            }}
+            style={{ ...headerBtnStyle }}
           >
-            <span style={{ fontSize: 13 }}>✦</span> DNA String
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 15c6.667-6 13.333 0 20-6"/><path d="M9 22c1.798-1.998 2.518-3.995 2.807-5.993"/><path d="M15 2c-1.798 1.998-2.518 3.995-2.807 5.993"/><path d="m17 6-2.5-2.5"/><path d="m14 8-1-1"/><path d="m7 18 2.5 2.5"/><path d="m3.5 14.5.5.5"/><path d="m20 9 .5.5"/><path d="m6.5 12.5 1 1"/><path d="m16.5 10.5 1 1"/><path d="m10 16 1.5 1.5"/></svg>
+            DNA String
           </button>
           <button
             onClick={runAnalysis}
             disabled={analysing}
-            style={{
-              ...headerBtnStyle,
-              opacity: analysing ? 0.5 : 1,
-            }}
+            style={{ ...headerBtnStyle, opacity: analysing ? 0.5 : 1 }}
           >
-            <span style={{ fontSize: 13 }}>✧</span> {analysing ? 'Analysing...' : 'Analyse'}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
+            {analysing ? 'Analysing...' : 'Refresh Analysis'}
           </button>
           <SubmitGenomeButton />
         </div>
@@ -470,25 +477,26 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* Tab bar */}
+      {/* Tab bar — pill buttons */}
       <div style={{
-        display: 'flex', gap: 6, marginBottom: 20, flexWrap: 'wrap',
+        display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap',
       }}>
         {TABS.map(t => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
             style={{
-              padding: '10px 18px', borderRadius: 10, minHeight: 44,
-              background: tab === t.key ? 'rgba(108,143,255,0.2)' : 'transparent',
+              padding: '8px 18px', borderRadius: 20,
+              background: tab === t.key ? 'rgba(108,143,255,0.15)' : 'transparent',
               color: tab === t.key ? '#6c8fff' : 'rgba(255,255,255,0.4)',
-              fontSize: 14, cursor: 'pointer', transition: 'all 0.2s',
+              fontSize: 13, cursor: 'pointer', transition: 'all 0.2s',
               display: 'flex', alignItems: 'center', gap: 6,
-              fontWeight: tab === t.key ? 600 : 400,
-              border: tab === t.key ? '1px solid rgba(108,143,255,0.3)' : '1px solid transparent',
+              fontWeight: tab === t.key ? 500 : 400,
+              border: tab === t.key ? '1px solid rgba(108,143,255,0.3)' : '1px solid rgba(255,255,255,0.08)',
+              fontFamily: 'inherit',
             }}
           >
-            <span style={{ fontSize: 15 }}>{t.icon}</span>
+            <span style={{ fontSize: 13, opacity: tab === t.key ? 1 : 0.6 }}>{TAB_ICONS[t.key]}</span>
             {t.label}
           </button>
         ))}
