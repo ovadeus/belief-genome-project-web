@@ -168,26 +168,18 @@ function SubmitGenomeButton() {
       <button
         onClick={() => setShowPopup(true)}
         style={{
-          padding: '10px 18px', borderRadius: 10, minHeight: 44,
-          background: 'rgba(34,197,94,0.2)',
-          border: '1px solid rgba(34,197,94,0.3)',
-          color: '#22c55e', fontSize: 14, fontWeight: 600,
+          padding: '8px 16px', borderRadius: 8,
+          background: 'transparent',
+          border: '1px solid rgba(34,197,94,0.4)',
+          color: '#22c55e', fontSize: 12, fontWeight: 400,
           cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6,
-          transition: 'all 0.2s', fontFamily: 'inherit',
+          transition: 'all 0.2s',
+          fontFamily: "'Space Mono', monospace",
         }}
-        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(34,197,94,0.25)'; e.currentTarget.style.borderColor = 'rgba(34,197,94,0.45)'; }}
-        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(34,197,94,0.2)'; e.currentTarget.style.borderColor = 'rgba(34,197,94,0.3)'; }}
+        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(34,197,94,0.08)'; e.currentTarget.style.borderColor = 'rgba(34,197,94,0.6)'; }}
+        onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'rgba(34,197,94,0.4)'; }}
       >
-        <span style={{ fontSize: 15 }}>🧬</span>
-        Submit Genome
-        {publicStatus?.submitted && (
-          <span style={{
-            fontSize: 10, padding: '2px 6px', borderRadius: 6,
-            background: 'rgba(34,197,94,0.2)', marginLeft: 4,
-          }}>
-            ✓ Live
-          </span>
-        )}
+        <span style={{ fontSize: 13 }}>🧬</span> Submit Genome
       </button>
 
       {showPopup && (
@@ -376,25 +368,52 @@ export default function DashboardPage() {
 
   return (
     <div style={{ maxWidth: 900, margin: '0 auto' }}>
-      {/* Greeting + Submit Genome */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 20, flexWrap: 'wrap' }}>
-      <div>
-        <h1 style={{ fontSize: 32, fontWeight: 700, color: '#fff', margin: 0 }}>
-          {greeting}
-        </h1>
+      {/* Header row: Title + action buttons */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 8, flexWrap: 'wrap' }}>
+        <div>
+          <h1 style={{ fontSize: 28, fontWeight: 700, color: '#fff', margin: 0 }}>Belief Genome</h1>
+          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', margin: '4px 0 0' }}>
+            Mapping your cognitive DNA — one reflection at a time
+          </p>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <button
+            onClick={() => setShowDnaModal(true)}
+            style={{
+              ...headerBtnStyle,
+            }}
+          >
+            <span style={{ fontSize: 13 }}>✦</span> DNA String
+          </button>
+          <button
+            onClick={runAnalysis}
+            disabled={analysing}
+            style={{
+              ...headerBtnStyle,
+              opacity: analysing ? 0.5 : 1,
+            }}
+          >
+            <span style={{ fontSize: 13 }}>✧</span> {analysing ? 'Analysing...' : 'Analyse'}
+          </button>
+          <SubmitGenomeButton />
+        </div>
+      </div>
+
+      {/* Greeting + Daily Quote */}
+      <div style={{ marginBottom: 20 }}>
         <div style={{
-          display: 'flex', alignItems: 'center', gap: 0, marginTop: 6, flexWrap: 'wrap',
+          display: 'flex', alignItems: 'center', gap: 0, flexWrap: 'wrap',
         }}>
           <span style={{
-            fontSize: 13, color: 'rgba(255,255,255,0.35)',
+            fontSize: 13, color: 'rgba(255,255,255,0.5)',
           }}>
-            {formattedDate}
+            {greeting}
           </span>
           <span style={{
             color: 'rgba(255,255,255,0.15)', margin: '0 12px', fontSize: 14, userSelect: 'none',
           }}>|</span>
           <span style={{
-            fontSize: 13, color: 'rgba(108,143,255,0.7)', fontStyle: 'italic',
+            fontSize: 12, color: 'rgba(108,143,255,0.7)', fontStyle: 'italic',
           }}>
             &ldquo;{dailyQuote.text}&rdquo;
           </span>
@@ -406,8 +425,6 @@ export default function DashboardPage() {
             {dailyQuote.author}
           </span>
         </div>
-      </div>
-      <SubmitGenomeButton />
       </div>
 
       {/* Analysis result */}
