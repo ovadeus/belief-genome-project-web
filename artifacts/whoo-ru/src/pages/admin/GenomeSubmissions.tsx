@@ -239,10 +239,10 @@ export default function GenomeSubmissions() {
   };
 
   const sortedSubmissions = [...submissions].sort((a: any, b: any) => {
-    let av = a[sortCol], bv = b[sortCol];
-    if (sortCol === "submittedAt") { av = new Date(av).getTime(); bv = new Date(bv).getTime(); }
-    if (sortCol === "countryCode") { av = countryName(av); bv = countryName(bv); }
-    if (typeof av === "string") { av = av.toLowerCase(); bv = (bv || "").toLowerCase(); }
+    let av = a[sortCol] ?? "", bv = b[sortCol] ?? "";
+    if (sortCol === "submittedAt") { av = new Date(av).getTime() || 0; bv = new Date(bv).getTime() || 0; }
+    if (sortCol === "countryCode") { av = countryName(String(av)) || String(av); bv = countryName(String(bv)) || String(bv); }
+    if (typeof av === "string") { av = av.toLowerCase(); bv = String(bv).toLowerCase(); }
     if (typeof av === "boolean") { av = av ? 1 : 0; bv = bv ? 1 : 0; }
     if (av < bv) return sortDir === "asc" ? -1 : 1;
     if (av > bv) return sortDir === "asc" ? 1 : -1;
