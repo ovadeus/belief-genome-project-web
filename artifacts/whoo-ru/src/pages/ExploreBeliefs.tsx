@@ -49,6 +49,50 @@ const DIM_NAMES: Record<string, string> = {
   "119":"Monogamy","120":"Marriage Sacred","121":"Two Parents","122":"Loyalty","123":"Cond. Forgiveness","124":"Competition","125":"Trust Strangers","126":"Civic Duty","127":"Suffering=Meaning",
 };
 
+const EXPLORE_CAT_ORDER = ['epistemology', 'spirituality', 'morality', 'politics', 'social', 'economics', 'science_tech', 'education', 'health', 'psychology', 'relationships'];
+
+const EXPLORE_CAT_SHORT: Record<string, string> = {
+  epistemology: 'Philosophy', spirituality: 'Religion', morality: 'Morality',
+  politics: 'Politics', social: 'Society', economics: 'Economics',
+  science_tech: 'Sci & Tech', education: 'Education', health: 'Health',
+  psychology: 'Psychology', relationships: 'Relationships',
+};
+
+const EXPLORE_DOMAIN_AXES: Record<string, { left: string; right: string; mid: string }> = {
+  epistemology:  { left: 'Relativist',   right: 'Absolutist',      mid: 'Mixed epistemic'  },
+  spirituality:  { left: 'Secular',      right: 'Spiritual',       mid: 'Open spiritual'   },
+  morality:      { left: 'Progressive',  right: 'Traditional',     mid: 'Mixed moral'      },
+  politics:      { left: 'Progressive',  right: 'Conservative',    mid: 'Centrist'         },
+  social:        { left: 'Progressive',  right: 'Traditionalist',  mid: 'Moderate'         },
+  economics:     { left: 'Progressive',  right: 'Market-oriented', mid: 'Mixed economic'   },
+  science_tech:  { left: 'Tech-skeptic', right: 'Techno-optimist', mid: 'Tech-pragmatist'  },
+  education:     { left: 'Reform',       right: 'Traditional',     mid: 'Balanced'         },
+  health:        { left: 'Alternative',  right: 'Conventional',    mid: 'Integrative'      },
+  psychology:    { left: 'Determinist',  right: 'Autonomous',      mid: 'Compatibilist'    },
+  relationships: { left: 'Fluid',        right: 'Traditional',     mid: 'Contextual'       },
+};
+
+function exploreCatColour(avg09: number | null): string {
+  if (avg09 == null) return '#787891';
+  const v = avg09 / 9;
+  if (v <= 0.22) return '#dc3232';
+  if (v <= 0.40) return '#ff7728';
+  if (v <= 0.60) return '#787891';
+  if (v <= 0.78) return '#3cb4b4';
+  return '#50b4ff';
+}
+
+function exploreDomainLabel(cat: string, avg09: number): string {
+  const axis = EXPLORE_DOMAIN_AXES[cat];
+  if (!axis) return '—';
+  const v = avg09 / 9;
+  if (v <= 0.22) return `Strongly ${axis.left}`;
+  if (v <= 0.40) return axis.left;
+  if (v <= 0.60) return axis.mid;
+  if (v <= 0.78) return axis.right;
+  return `Strongly ${axis.right}`;
+}
+
 const COUNTRY_NAMES: Record<string, string> = {
   "840":"United States","826":"United Kingdom","124":"Canada","036":"Australia","276":"Germany",
   "250":"France","356":"India","076":"Brazil","392":"Japan","410":"South Korea",
@@ -135,6 +179,19 @@ export default function ExploreBeliefs() {
       count: dimensions[String(id)]?.count ?? 0,
     }));
   }, [selectedCategory, dimensions]);
+
+  const categoryAvgs = useMemo(() => {
+    const result: Record<string, { avg: number; count: number }> = {};
+    for (const [catKey, cat] of Object.entries(CATEGORIES)) {
+      let sum = 0, count = 0;
+      for (const id of cat.dims) {
+        const d = dimensions[String(id)];
+        if (d) { sum += d.avg; count++; }
+      }
+      if (count > 0) result[catKey] = { avg: sum / count, count };
+    }
+    return result;
+  }, [dimensions]);
 
   const barChartData = useMemo(() => {
     const cat = CATEGORIES[selectedCategory];
@@ -394,6 +451,82 @@ export default function ExploreBeliefs() {
             </p>
           </motion.div>
         ) : (
+          <>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}
+            className="bg-[#0c1025]/80 border border-white/10 rounded-2xl p-6">
+            <div style={{
+              fontSize: 11, fontFamily: "'Space Mono', monospace", textTransform: 'uppercase',
+              letterSpacing: 1.5, color: 'rgba(255,255,255,0.5)', marginBottom: 20,
+              display: 'flex', alignItems: 'center', gap: 8,
+            }}>
+              <BarChart3 size={14} style={{ opacity: 0.6 }} />
+              Category Breakdown
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              {EXPLORE_CAT_ORDER.map(cat => {
+                const data = categoryAvgs[cat];
+                const hasData = !!data;
+                const avg = data?.avg ?? 4.5;
+                const pct = (avg / 9) * 100;
+                const col = exploreCatColour(hasData ? avg : null);
+                const lbl = hasData ? exploreDomainLabel(cat, avg) : '';
+                const axis = EXPLORE_DOMAIN_AXES[cat] || { left: '', right: '', mid: '' };
+                const name = EXPLORE_CAT_SHORT[cat] || cat;
+                const cnt = data?.count ?? 0;
+
+                return (
+                  <div key={cat} style={{ opacity: hasData ? 1 : 0.32 }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr 40px 130px', gap: 8, alignItems: 'center' }}>
+                      <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', textAlign: 'right' }}>{name}</span>
+                      <div style={{ position: 'relative', height: 14 }}>
+                        <div style={{
+                          position: 'absolute', inset: '3px 0', borderRadius: 4,
+                          background: 'linear-gradient(90deg, #dc3232, #ff7728 25%, #787891 50%, #3cb4b4 75%, #50b4ff)',
+                          opacity: 0.35,
+                        }} />
+                        <div style={{
+                          position: 'absolute', left: '50%', top: 0, width: 1, height: '100%',
+                          background: 'rgba(255,255,255,0.28)', zIndex: 3,
+                        }} />
+                        {hasData && (
+                          <div style={{
+                            position: 'absolute', left: `${pct}%`, top: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            width: 15, height: 15, borderRadius: '50%',
+                            background: col, border: '2.5px solid rgba(255,255,255,0.92)',
+                            boxShadow: `0 0 8px ${col}, 0 0 2px rgba(0,0,0,0.8)`,
+                            zIndex: 4,
+                          }} />
+                        )}
+                      </div>
+                      <span style={{
+                        fontSize: 11, fontFamily: "'Space Mono', monospace",
+                        color: 'rgba(255,255,255,0.35)', textAlign: 'right',
+                      }}>
+                        {hasData ? `${cnt}\u00d7` : ''}
+                      </span>
+                      <span style={{ fontSize: 11, color: col, textAlign: 'right' }}>{lbl}</span>
+                    </div>
+                    <div style={{
+                      display: 'grid', gridTemplateColumns: '100px 1fr 40px 130px', gap: 8, marginTop: 2,
+                    }}>
+                      <span />
+                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 4px' }}>
+                        <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)' }}>{axis.left}</span>
+                        <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)' }}>{axis.right}</span>
+                      </div>
+                      <span />
+                      <span />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <p className="text-xs text-muted-foreground mt-4">Based on {dimCount} submissions matching your filters</p>
+          </motion.div>
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
               className="bg-[#0c1025]/80 border border-white/10 rounded-2xl p-6">
@@ -450,6 +583,7 @@ export default function ExploreBeliefs() {
               </motion.div>
             )}
           </div>
+          </>
         )}
 
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
