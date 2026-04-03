@@ -227,7 +227,7 @@ export default function GenomeSubmissions() {
   const [viewingSub, setViewingSub] = useState<Submission | null>(null);
   const [sortCol, setSortCol] = useState<string>("submittedAt");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
-  const limit = 20;
+  const limit = 100;
 
   const handleSort = (col: string) => {
     if (sortCol === col) {
