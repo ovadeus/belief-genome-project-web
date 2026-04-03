@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ChevronDown, ChevronRight } from "lucide-react";
+import { Menu, X, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useGenomeAuth } from "@/components/genome/GenomeAuthContext";
 
@@ -9,27 +9,18 @@ const TOP_LINKS = [
   { href: "/", label: "Home" },
   { href: "/app", label: "Participate" },
   { href: "/explore", label: "Explore Beliefs" },
+  { href: "/blog", label: "Blog" },
+  { href: "/book", label: "Book" },
 ];
 
-const MORE_LINKS: MoreItem[] = [
-  { href: "/blog", label: "Blog" },
+const MORE_LINKS = [
   { href: "/support", label: "Support" },
-  { href: "/book", label: "Book" },
-  {
-    label: "Process",
-    children: [
-      { href: "/mindmap", label: "Mind Map" },
-      { href: "/scoring", label: "Scoring & Weighting" },
-    ],
-  },
+  { href: "/mindmap", label: "Mind Map" },
+  { href: "/scoring", label: "Scoring & Weights" },
   { href: "/about", label: "About" },
 ];
 
-type MoreItem = { href?: string; label: string; children?: { href: string; label: string }[] };
-
-const ALL_MORE_HREFS = MORE_LINKS.flatMap(item =>
-  item.children ? item.children.map(c => c.href) : item.href ? [item.href] : []
-);
+const ALL_MORE_HREFS = MORE_LINKS.map(item => item.href);
 
 function GenomeAuthButton() {
   const { user, logout } = useGenomeAuth();
@@ -76,7 +67,6 @@ function GenomeAuthButton() {
 
 function MoreDropdown({ location }: { location: string }) {
   const [open, setOpen] = useState(false);
-  const [processOpen, setProcessOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const isActive = ALL_MORE_HREFS.some(h => location === h);
 
@@ -84,7 +74,6 @@ function MoreDropdown({ location }: { location: string }) {
     const handler = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) {
         setOpen(false);
-        setProcessOpen(false);
       }
     };
     document.addEventListener("mousedown", handler);
@@ -94,7 +83,7 @@ function MoreDropdown({ location }: { location: string }) {
   return (
     <div ref={ref} className="relative">
       <button
-        onClick={() => { setOpen(!open); if (open) setProcessOpen(false); }}
+        onClick={() => setOpen(!open)}
         className={cn(
           "text-sm font-medium transition-colors hover:text-primary relative py-2 flex items-center gap-1",
           isActive ? "text-foreground" : "text-muted-foreground"
@@ -119,66 +108,19 @@ function MoreDropdown({ location }: { location: string }) {
             transition={{ duration: 0.15 }}
             className="absolute top-full right-0 mt-2 min-w-[200px] bg-[#0c1025]/95 backdrop-blur-md border border-white/10 rounded-lg shadow-xl shadow-black/30 py-2 z-50"
           >
-            {MORE_LINKS.map((item) => {
-              if (item.children) {
-                const subActive = item.children.some(c => location === c.href);
-                return (
-                  <div key={item.label} className="relative">
-                    <button
-                      onMouseEnter={() => setProcessOpen(true)}
-                      onClick={() => setProcessOpen(!processOpen)}
-                      className={cn(
-                        "w-full flex items-center justify-between px-4 py-2.5 text-sm transition-colors hover:bg-white/5",
-                        subActive ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"
-                      )}
-                    >
-                      {item.label}
-                      <ChevronRight size={14} />
-                    </button>
-                    <AnimatePresence>
-                      {processOpen && (
-                        <motion.div
-                          initial={{ opacity: 0, x: -8 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: -8 }}
-                          transition={{ duration: 0.12 }}
-                          onMouseLeave={() => setProcessOpen(false)}
-                          className="absolute right-full top-0 mr-1 min-w-[200px] bg-[#0c1025]/95 backdrop-blur-md border border-white/10 rounded-lg shadow-xl shadow-black/30 py-2 z-50"
-                        >
-                          {item.children.map(child => (
-                            <Link
-                              key={child.href}
-                              href={child.href}
-                              onClick={() => { setOpen(false); setProcessOpen(false); }}
-                              className={cn(
-                                "block px-4 py-2.5 text-sm transition-colors hover:bg-white/5",
-                                location === child.href ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"
-                              )}
-                            >
-                              {child.label}
-                            </Link>
-                          ))}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                );
-              }
-
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href!}
-                  onClick={() => setOpen(false)}
-                  className={cn(
-                    "block px-4 py-2.5 text-sm transition-colors hover:bg-white/5",
-                    location === item.href ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
+            {MORE_LINKS.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setOpen(false)}
+                className={cn(
+                  "block px-4 py-2.5 text-sm transition-colors hover:bg-white/5",
+                  location === item.href ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {item.label}
+              </Link>
+            ))}
           </motion.div>
         )}
       </AnimatePresence>
@@ -190,7 +132,6 @@ export function PublicNavbar() {
   const [location] = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [mobileProcessOpen, setMobileProcessOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -202,7 +143,6 @@ export function PublicNavbar() {
 
   useEffect(() => {
     setMobileMenuOpen(false);
-    setMobileProcessOpen(false);
   }, [location]);
 
   return (
@@ -280,59 +220,18 @@ export function PublicNavbar() {
 
               <div className="w-12 h-px bg-border my-2" />
 
-              {MORE_LINKS.map((item) => {
-                if (item.children) {
-                  return (
-                    <div key={item.label} className="flex flex-col items-center gap-3">
-                      <button
-                        onClick={() => setMobileProcessOpen(!mobileProcessOpen)}
-                        className={cn(
-                          "text-2xl font-display font-semibold transition-colors flex items-center gap-2",
-                          item.children.some(c => location === c.href) ? "text-primary" : "text-foreground"
-                        )}
-                      >
-                        {item.label}
-                        <ChevronDown size={20} className={cn("transition-transform", mobileProcessOpen && "rotate-180")} />
-                      </button>
-                      <AnimatePresence>
-                        {mobileProcessOpen && (
-                          <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
-                            exit={{ opacity: 0, height: 0 }}
-                            className="flex flex-col items-center gap-3 overflow-hidden"
-                          >
-                            {item.children.map(child => (
-                              <Link
-                                key={child.href}
-                                href={child.href}
-                                className={cn(
-                                  "text-lg font-display transition-colors",
-                                  location === child.href ? "text-primary" : "text-muted-foreground"
-                                )}
-                              >
-                                {child.label}
-                              </Link>
-                            ))}
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  );
-                }
-                return (
-                  <Link 
-                    key={item.href} 
-                    href={item.href!}
-                    className={cn(
-                      "text-2xl font-display font-semibold transition-colors",
-                      location === item.href ? "text-primary" : "text-foreground"
-                    )}
-                  >
-                    {item.label}
-                  </Link>
-                );
-              })}
+              {MORE_LINKS.map((item) => (
+                <Link 
+                  key={item.href} 
+                  href={item.href}
+                  className={cn(
+                    "text-2xl font-display font-semibold transition-colors",
+                    location === item.href ? "text-primary" : "text-foreground"
+                  )}
+                >
+                  {item.label}
+                </Link>
+              ))}
 
               <div className="w-12 h-px bg-border my-2" />
               <div className="mt-4">
