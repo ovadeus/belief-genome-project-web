@@ -228,6 +228,15 @@ export default function Home() {
           <Link href="/blog" className="sm:hidden mt-8 w-full py-4 bg-card border border-border rounded-xl text-center font-medium block">
             View All Posts
           </Link>
+
+          <div className="flex justify-center mt-12">
+            <Link
+              href="/subscribe"
+              className="px-8 py-3 rounded-full font-semibold text-sm bg-white/10 hover:bg-white/20 text-white transition-colors border border-white/10"
+            >
+              Subscribe to Updates
+            </Link>
+          </div>
         </div>
       </section>
 

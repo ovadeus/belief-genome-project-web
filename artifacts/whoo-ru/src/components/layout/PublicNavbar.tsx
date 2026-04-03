@@ -243,12 +243,6 @@ export function PublicNavbar() {
               </Link>
             ))}
             <MoreDropdown location={location} />
-            <Link 
-              href="/subscribe"
-              className="ml-4 px-5 py-2.5 rounded-full font-semibold text-sm bg-white/10 hover:bg-white/20 text-white transition-colors border border-white/10"
-            >
-              Subscribe
-            </Link>
             <GenomeAuthButton />
           </nav>
 
@@ -341,12 +335,6 @@ export function PublicNavbar() {
               })}
 
               <div className="w-12 h-px bg-border my-2" />
-              <Link 
-                href="/subscribe"
-                className="px-8 py-3 rounded-full font-bold text-lg bg-primary text-primary-foreground shadow-lg shadow-primary/25"
-              >
-                Subscribe
-              </Link>
               <div className="mt-4">
                 <GenomeAuthButton />
               </div>
