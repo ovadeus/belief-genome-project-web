@@ -435,6 +435,7 @@ export default function ExploreBeliefs() {
               }}>
                 <BarChart3 size={14} style={{ opacity: 0.6 }} />
                 Category Breakdown
+                <InfoTip text="Each row represents a belief category. The dot shows where the group average falls on a spectrum — left means the group leans toward one worldview (e.g. Secular, Progressive), right means the opposite (e.g. Spiritual, Conservative). A dot near the middle means opinions are mixed. The label on the right names the archetype for that position. Use the filters above to compare different groups." />
               </div>
               {breakdownOpen ? (
                 <ChevronUp size={16} className="text-muted-foreground" />
@@ -546,8 +547,9 @@ export default function ExploreBeliefs() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
               className="bg-[#0c1025]/80 border border-white/10 rounded-2xl p-6">
-              <h3 className="text-lg font-semibold text-foreground mb-1">
+              <h3 className="text-lg font-semibold text-foreground mb-1 flex items-center">
                 {CATEGORIES[selectedCategory]?.label} — Dimension Averages
+                <InfoTip text={`Each bar shows the average belief score for a specific topic within ${CATEGORIES[selectedCategory]?.label}. A score near 0 means most people disagree with the statement, near 9 means most agree, and around 4-5 means opinions are mixed or undecided. Taller bars = stronger collective conviction.`} />
               </h3>
               <p className="text-xs text-muted-foreground mb-4">Based on {dimCount} submissions matching your filters</p>
               <div className="h-[350px]">
@@ -557,7 +559,9 @@ export default function ExploreBeliefs() {
 
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
               className="bg-[#0c1025]/80 border border-white/10 rounded-2xl p-6">
-              <h3 className="text-lg font-semibold text-foreground mb-1">Belief Radar — All Categories</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-1 flex items-center">Belief Radar — All Categories
+                <InfoTip text="This radar chart shows the average belief score for each major category. Points closer to the edge (9) mean people in this group tend to agree with statements in that category. Points near the center (0) mean they tend to disagree. The shape reveals the group's overall belief 'fingerprint' — where they lean and where they're neutral." />
+              </h3>
               <p className="text-xs text-muted-foreground mb-4">Average score across each category (0-9 scale)</p>
               <div className="h-[350px]">
                 <Radar data={radarChartData} options={radarOptions as any} />
@@ -567,8 +571,9 @@ export default function ExploreBeliefs() {
             {generationChartData && (
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
                 className="bg-[#0c1025]/80 border border-white/10 rounded-2xl p-6">
-                <h3 className="text-lg font-semibold text-foreground mb-1">
+                <h3 className="text-lg font-semibold text-foreground mb-1 flex items-center">
                   {CATEGORIES[selectedCategory]?.label} by Generation
+                  <InfoTip text={`Compares how different age groups feel about ${CATEGORIES[selectedCategory]?.label} topics. Higher bars mean that generation tends to agree more with those beliefs. You can see how values shift between older and younger generations — for example, Boomers may score high on tradition while Gen Z scores low.`} />
                 </h3>
                 <p className="text-xs text-muted-foreground mb-4">How beliefs shift across age groups</p>
                 <div className="h-[300px]">
@@ -580,7 +585,9 @@ export default function ExploreBeliefs() {
             {genderChartData && (
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
                 className="bg-[#0c1025]/80 border border-white/10 rounded-2xl p-6">
-                <h3 className="text-lg font-semibold text-foreground mb-1">Participants by Gender</h3>
+                <h3 className="text-lg font-semibold text-foreground mb-1 flex items-center">Participants by Gender
+                  <InfoTip text="Shows how many people of each gender have submitted their Belief DNA. This helps you understand the makeup of the data — if one group is much larger, it will have more influence on the overall averages." />
+                </h3>
                 <p className="text-xs text-muted-foreground mb-4">Distribution of submissions</p>
                 <div className="h-[300px] flex items-center justify-center">
                   <Doughnut data={genderChartData} options={doughnutOptions as any} />
@@ -591,7 +598,9 @@ export default function ExploreBeliefs() {
             {countryChartData && (
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
                 className="lg:col-span-2 bg-[#0c1025]/80 border border-white/10 rounded-2xl p-6">
-                <h3 className="text-lg font-semibold text-foreground mb-1">Top Countries by Submissions</h3>
+                <h3 className="text-lg font-semibold text-foreground mb-1 flex items-center">Top Countries by Submissions
+                  <InfoTip text="Shows which countries have the most Belief DNA submissions. Longer bars mean more participants from that country. Use the country filter above to drill into a specific country's belief profile." />
+                </h3>
                 <p className="text-xs text-muted-foreground mb-4">Geographic distribution of participants</p>
                 <div className="h-[300px]">
                   <Bar data={countryChartData} options={countBarOptions as any} />
@@ -614,6 +623,21 @@ export default function ExploreBeliefs() {
         </motion.div>
       </div>
     </PublicLayout>
+  );
+}
+
+function InfoTip({ text }: { text: string }) {
+  const [show, setShow] = useState(false);
+  return (
+    <span className="relative inline-flex ml-1.5" onMouseEnter={() => setShow(true)} onMouseLeave={() => setShow(false)}>
+      <Info size={14} className="text-muted-foreground/60 hover:text-primary cursor-help transition-colors" />
+      {show && (
+        <span className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 px-3 py-2.5 rounded-xl bg-[#1a1f3a] border border-white/15 text-xs text-[#c8cfe0] leading-relaxed shadow-xl pointer-events-none">
+          {text}
+          <span className="absolute top-full left-1/2 -translate-x-1/2 -mt-px w-0 h-0 border-x-[6px] border-x-transparent border-t-[6px] border-t-[#1a1f3a]" />
+        </span>
+      )}
+    </span>
   );
 }
 
