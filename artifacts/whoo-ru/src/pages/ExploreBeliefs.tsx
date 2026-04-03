@@ -656,7 +656,7 @@ function InfoTip({ text }: { text: string }) {
   const [show, setShow] = useState(false);
   return (
     <span className="relative inline-flex ml-1.5" onMouseEnter={() => setShow(true)} onMouseLeave={() => setShow(false)}>
-      <Info size={14} className="text-muted-foreground/60 hover:text-primary cursor-help transition-colors" />
+      <Info size={18} className="text-muted-foreground/60 hover:text-primary transition-colors" />
       {show && (
         <span className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 px-3 py-2.5 rounded-xl bg-[#1a1f3a] border border-white/15 text-xs text-[#c8cfe0] leading-relaxed shadow-xl pointer-events-none">
           {text}
