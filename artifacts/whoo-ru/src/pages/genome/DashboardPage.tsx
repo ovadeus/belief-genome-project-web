@@ -339,7 +339,6 @@ export default function DashboardPage() {
   const [dna, setDna] = useState<any>(null);
   const [history, setHistory] = useState<any[]>([]);
   const [dimensions, setDimensions] = useState<any[]>([]);
-  const [showDnaModal, setShowDnaModal] = useState(false);
   const [analysing, setAnalysing] = useState(false);
   const [analysis, setAnalysis] = useState('');
 
@@ -387,13 +386,6 @@ export default function DashboardPage() {
           </p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <button
-            onClick={() => setShowDnaModal(true)}
-            style={{ ...headerBtnStyle }}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 15c6.667-6 13.333 0 20-6"/><path d="M9 22c1.798-1.998 2.518-3.995 2.807-5.993"/><path d="M15 2c-1.798 1.998-2.518 3.995-2.807 5.993"/><path d="m17 6-2.5-2.5"/><path d="m14 8-1-1"/><path d="m7 18 2.5 2.5"/><path d="m3.5 14.5.5.5"/><path d="m20 9 .5.5"/><path d="m6.5 12.5 1 1"/><path d="m16.5 10.5 1 1"/><path d="m10 16 1.5 1.5"/></svg>
-            DNA String
-          </button>
           <button
             onClick={runAnalysis}
             disabled={analysing}
@@ -531,38 +523,6 @@ export default function DashboardPage() {
         )}
       </div>
 
-      {/* DNA String Modal */}
-      {showDnaModal && dna && (
-        <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          zIndex: 1000, padding: 20,
-        }} onClick={() => setShowDnaModal(false)}>
-          <div
-            style={{
-              maxWidth: 700, width: '100%', padding: 32, borderRadius: 16,
-              background: '#0a0a0f', border: '1px solid rgba(108,143,255,0.2)',
-            }}
-            onClick={e => e.stopPropagation()}
-          >
-            <div style={{
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20,
-            }}>
-              <h2 style={{ fontSize: 18, color: '#fff', margin: 0 }}>Belief DNA String</h2>
-              <button onClick={() => setShowDnaModal(false)} style={{
-                background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)',
-                fontSize: 20, cursor: 'pointer',
-              }}>&times;</button>
-            </div>
-            <DnaString
-              dnaString={dna.dnaString}
-              dimensionsCovered={dna.dimensionsCovered}
-              totalResponses={dna.totalResponses}
-              overallConfidence={dna.overallConfidence}
-            />
-          </div>
-        </div>
-      )}
     </div>
   );
 }
