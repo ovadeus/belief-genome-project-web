@@ -200,14 +200,11 @@ router.post('/submit', async (req: Request, res: Response) => {
 router.get('/stats', async (_req: Request, res: Response) => {
   try {
     const [totalResult] = await db.select({ count: sql<number>`count(*)::int` })
-      .from(genomeSubmissions)
-      .where(eq(genomeSubmissions.isTestData, false));
+      .from(genomeSubmissions);
     const [countryResult] = await db.select({ count: sql<number>`count(distinct country_code)::int` })
-      .from(genomeSubmissions)
-      .where(eq(genomeSubmissions.isTestData, false));
+      .from(genomeSubmissions);
     const [avgDims] = await db.select({ avg: sql<number>`round(avg(dimensions_explored))::int` })
-      .from(genomeSubmissions)
-      .where(eq(genomeSubmissions.isTestData, false));
+      .from(genomeSubmissions);
     const [totalAll] = await db.select({ count: sql<number>`count(*)::int` }).from(genomeSubmissions);
 
     return res.json({
@@ -229,7 +226,6 @@ router.get('/explore/dimensions', async (req: Request, res: Response) => {
     const { country, gender, generationStart, generationEnd } = req.query;
 
     let whereConditions: any[] = [];
-    whereConditions.push(eq(genomeSubmissions.isTestData, false));
     if (country && typeof country === 'string') {
       whereConditions.push(eq(genomeSubmissions.countryCode, country));
     }
@@ -284,14 +280,11 @@ router.get('/explore/dimensions', async (req: Request, res: Response) => {
 
 router.get('/explore/countries', async (_req: Request, res: Response) => {
   try {
-    const testFilter = eq(genomeSubmissions.isTestData, false);
-
     const results = await db.select({
       countryCode: genomeSubmissions.countryCode,
       count: sql<number>`count(*)::int`,
     })
     .from(genomeSubmissions)
-    .where(testFilter)
     .groupBy(genomeSubmissions.countryCode);
 
     const countries = results
@@ -321,7 +314,6 @@ router.get('/explore/generations', async (_req: Request, res: Response) => {
       const conditions = [
         gte(genomeSubmissions.birthYear, gen.start),
         sql`${genomeSubmissions.birthYear} <= ${gen.end}`,
-        eq(genomeSubmissions.isTestData, false),
       ];
 
       const [countResult] = await db.select({ count: sql<number>`count(*)::int` })
@@ -365,14 +357,11 @@ router.get('/explore/generations', async (_req: Request, res: Response) => {
 
 router.get('/explore/genders', async (_req: Request, res: Response) => {
   try {
-    const testFilter = eq(genomeSubmissions.isTestData, false);
-
     const results = await db.select({
       gender: genomeSubmissions.gender,
       count: sql<number>`count(*)::int`,
     })
     .from(genomeSubmissions)
-    .where(testFilter)
     .groupBy(genomeSubmissions.gender);
 
     const genders = results
