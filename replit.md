@@ -81,7 +81,8 @@ All genome pages wrapped in `GenomeLayout` which provides sticky `GenomeNav` bar
 - **Register** (`/genome/register`): Create genome user account (no nav shown). Styled with molecular dot logo, glassmorphism card, "Join the Project" heading. Redirects to Dashboard.
 - **Login** (`/genome/login`): Sign in to genome (no nav shown). Styled with molecular dot logo, glassmorphism card, "Secure Access" heading, blue-to-violet gradient button. Redirects to Dashboard.
 - **Reflections** (`/genome/probe`): Answer belief probes (core interaction) — renamed from "Probe"
-- **Dashboard** (`/genome/dashboard`): Personalized time-of-day greeting + daily rotating quote (100 curated quotes). 6-tab dashboard — Triple Helix, Radar, Breakdown, Timeline, History, Forecaster
+- **Dashboard** (`/genome/dashboard`): Personalized time-of-day greeting + daily rotating quote (100 curated quotes). 7-tab dashboard — Triple Helix, Neuromap, Radar, Breakdown, Timeline, History, Forecaster
+- **Neuromap** (`/neuromap/:key`): Public shareable 3D neural belief map. Loads `bgp_brain_3d.html` (Three.js) in an iframe and sends genome data via postMessage. Brain nodes colored by ideology spectrum. API: `GET /api/genome/lookup/:anonymousKey`
 - **Belief DNA** (`/genome/dna`): Full 140-char DNA string viewer with copy button and how-it-works legend
 - **Analyze** (`/genome/analyze`): Full DNA rebuild from all responses, shows dimensions covered and confidence
 - **Sync Data** (`/genome/sync`): Sync status (Chrome extension, website, desktop counts) + manual sync trigger

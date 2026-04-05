@@ -375,4 +375,44 @@ router.get('/explore/genders', async (_req: Request, res: Response) => {
   }
 });
 
+router.get('/lookup/:anonymousKey', async (req: Request, res: Response) => {
+  try {
+    const { anonymousKey } = req.params;
+    if (!anonymousKey || anonymousKey.length < 16) {
+      return res.status(400).json({ error: 'Invalid key' });
+    }
+
+    const [submission] = await db
+      .select({
+        dnaString: genomeSubmissions.dnaString,
+        submittedAt: genomeSubmissions.submittedAt,
+      })
+      .from(genomeSubmissions)
+      .where(eq(genomeSubmissions.anonymousKey, anonymousKey))
+      .limit(1);
+
+    if (!submission) {
+      return res.status(404).json({ error: 'Genome not found' });
+    }
+
+    const beliefChars = (submission.dnaString || '').slice(16);
+    let dimensionsCovered = 0;
+    for (let i = 0; i < 124; i++) {
+      const ch = beliefChars[i];
+      if (ch && ch !== '·' && ch !== '.') dimensionsCovered++;
+    }
+
+    return res.json({
+      dnaString: submission.dnaString,
+      totalResponses: 0,
+      dimensionsCovered,
+      overallConfidence: dimensionsCovered > 0 ? Math.round((dimensionsCovered / 124) * 100) : 0,
+      submittedAt: submission.submittedAt,
+    });
+  } catch (err: any) {
+    console.error('Genome lookup error:', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 export default router;

@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Belief Genome Project — Neural Map</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html,body { width:100%; height:100%; background:#080810; overflow:hidden; margin:0; }
+#wrap { width:100%; height:100%; position:relative; }
+canvas { display:block; cursor:grab; }
+canvas:active { cursor:grabbing; }
+
+.node-label {
+  position:absolute;
+  font-family:'Space Mono',monospace;
+  font-size:8px; font-weight:400; letter-spacing:2.2px;
+  text-transform:uppercase;
+  color:inherit;
+  background:rgba(8,8,16,0.78);
+  padding:3px 8px;
+  border-radius:4px;
+  pointer-events:none; white-space:nowrap;
+  transform:translate(-50%,-50%);
+  transition:opacity 0.3s;
+}
+#tooltip {
+  position:absolute;
+  background:rgba(15,15,26,0.97);
+  border:1px solid #1e1e35;
+  border-radius:10px; padding:12px 16px;
+  color:#e8e8f0; font-family:'DM Sans',sans-serif;
+  font-size:11.5px; line-height:1.6;
+  pointer-events:none; display:none;
+  max-width:255px;
+  box-shadow:0 0 40px rgba(91,106,245,0.12), 0 0 80px rgba(91,106,245,0.06);
+  z-index:100;
+}
+#dna-bar {
+  position:absolute;
+  top:58px; left:50%;
+  transform:translateX(-50%);
+  font-family:'Space Mono',monospace;
+  pointer-events:none;
+  text-align:center;
+  white-space:nowrap;
+}
+#dna-bar .dna-title {
+  font-family:'Space Mono',monospace;
+  font-size:8px; letter-spacing:3px; text-transform:uppercase;
+  color:#8188a7; opacity:0.4; margin-bottom:6px;
+}
+#dna-bar .dna-stats {
+  display:flex; justify-content:center; gap:28px;
+  margin-bottom:7px;
+}
+#dna-bar .stat-val {
+  font-family:'DM Sans',sans-serif;
+  font-size:15px; font-weight:600; line-height:1;
+}
+#dna-bar .stat-lbl {
+  font-family:'Space Mono',monospace;
+  font-size:7px; letter-spacing:2px; text-transform:uppercase;
+  color:#8188a7; opacity:0.45; margin-top:3px;
+}
+#dna-bar .dna-string {
+  font-size:9.5px; letter-spacing:4px; line-height:2.0;
+  color:rgba(129,136,167,0.32);
+}
+#dna-bar span.ident  { color:rgba(91,106,245,0.75); }
+#dna-bar span.country{ color:rgba(91,106,245,0.75); }
+#dna-bar span.zip    { color:rgba(115,201,172,0.75); }
+#dna-bar span.scored { color:rgba(115,201,172,0.75); }
+#dna-bar span.dot    { color:rgba(129,136,167,0.28); }
+#legend {
+  position:absolute; bottom:38px; left:50%;
+  transform:translateX(-50%);
+  display:flex; align-items:center; gap:2px; pointer-events:none;
+}
+.ls { width:13px; height:5px; border-radius:2px; }
+.ll { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:1px; color:#8188a7; opacity:0.4; margin:0 5px; }
+#hud {
+  position:absolute; bottom:0; width:100%;
+  padding:10px 24px; display:flex;
+  justify-content:space-between; align-items:flex-end; pointer-events:none;
+}
+.hh { font-family:'Space Mono',monospace; font-size:8.5px; letter-spacing:2.5px; text-transform:uppercase; color:rgba(91,106,245,0.25); }
+#ch { font-family:'Space Mono',monospace; font-size:8px; color:rgba(129,136,167,0.22); letter-spacing:1.5px; text-align:center; flex:1; }
+.ctrl-btn {
+  font-family:'Space Mono',monospace;
+  font-size:8.5px; letter-spacing:1.8px; text-transform:uppercase;
+  color:#8188a7;
+  background:rgba(15,15,26,0.80);
+  border:1px solid #1e1e35;
+  border-radius:6px; padding:5px 14px;
+  cursor:pointer; transition:all 0.2s ease;
+  user-select:none; pointer-events:all;
+}
+.ctrl-btn:hover { color:#e8e8f0; border-color:#5b6af5; background:rgba(91,106,245,0.12); }
+.ctrl-btn.paused { color:#ffaa00; border-color:rgba(255,170,0,0.45); }
+.orient-label {
+  position:absolute;
+  font-family:'Space Mono',monospace;
+  font-size:8px; font-weight:400; letter-spacing:3px; text-transform:uppercase;
+  color:rgba(129,136,167,0.30);
+  background:rgba(8,8,16,0.50);
+  padding:2px 7px; border-radius:4px;
+  pointer-events:none; white-space:nowrap;
+  transform:translate(-50%,-50%);
+  transition:opacity 0.3s;
+}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="c"></canvas>
+  <div id="tooltip"></div>
+  <div id="legend">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:5px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span class="ll">Progressive</span>
+        <div style="width:220px;height:4px;border-radius:2px;background:linear-gradient(to right,#ff2200,#ff5500,#ff8c00,#ffbb00,#ffe899,#ffffff,#aac4ff,#6677ee,#3344cc,#5511aa);box-shadow:0 0 8px rgba(255,255,255,0.2);"></div>
+        <span class="ll">Conservative</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;width:340px;padding:0 2px;">
+        <span style="font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1px;color:rgba(255,80,0,0.4);">Far Left</span>
+        <span style="font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1px;color:rgba(129,136,167,0.4);">Independent</span>
+        <span style="font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1px;color:rgba(100,100,220,0.4);">Far Right</span>
+      </div>
+    </div>
+  </div>
+  <div id="hud">
+    <div class="hh">◀ Analytical · Logical</div>
+    <div id="ch">drag · scroll · hover · shift to pause</div>
+    <div class="hh">Intuitive · Emotional ▶</div>
+  </div>
+  <!-- Centered control buttons -->
+  <div style="position:absolute;top:16px;left:50%;transform:translateX(-50%);display:flex;gap:8px;pointer-events:all;">
+    <button class="ctrl-btn" id="btn-toggle">▶ Play</button>
+    <button class="ctrl-btn" id="btn-2x">2×</button>
+    <button class="ctrl-btn" id="btn-3x">3×</button>
+    <button class="ctrl-btn" id="btn-reset">↺ Reset</button>
+  </div>
+  <!-- DNA string centered below buttons -->
+  <div id="dna-bar"></div>
+  <!-- Floating orientation labels — positioned by JS each frame -->
+  <div class="orient-label" id="ol-front">Front</div>
+  <div class="orient-label" id="ol-back">Back</div>
+  <div class="orient-label" id="ol-left">Left</div>
+  <div class="orient-label" id="ol-right">Right</div>
+</div>
+<script src="./three.min.js"></script>
+<script>
+(function(){
+
+// ── GENOME (populated from live app data via postMessage) ─────────────────────
+// Neuromap category layout:
+//   epistemology  → dim IDs 4-13   (10 dims)
+//   spirituality  → dim IDs 14-28  (15 dims)
+//   morality      → dim IDs 29-43  (15 dims)
+//   politics      → dim IDs 44-63  (20 dims)
+//   social        → dim IDs 64-78  (15 dims)
+//   economics     → dim IDs 79-88  (10 dims)
+//   science       → dim IDs 89-98  (10 dims)
+//   education     → dim IDs 99-103 (5 dims)
+//   health        → dim IDs 104-108(5 dims)
+//   psychology    → dim IDs 109-118(10 dims)
+//   relationships → dim IDs 119-127(9 dims)
+// Total: 124 dimensions, positions 16+ in DNA string (prefix is 16 chars: 8 ident + 3 country + 5 zip)
+
+// Default neutral — will be replaced by live data
+let BELIEF = new Array(124).fill(5);
+let _dnaRaw = '';
+let _totalResponses = 0;
+let _dimsCovered = 0;
+let _confidence = 0;
+
+const CAT_IDS=['epistemology','spirituality','morality','politics','social',
+               'economics','science','education','health','psychology','relationships'];
+const CAT_N=[10,15,15,20,15,10,10,5,5,10,9];
+// Ideology spectrum: 0=Far Progressive (hot red) → 5=Unresolved (white) → 9=Far Conservative (deep violet)
+const SHEX=['#ff2200','#ff5500','#ff8c00','#ffbb00','#ffe899',
+            '#f8f8ff','#aac4ff','#6677ee','#3344cc','#5511aa'];
+const SINT=SHEX.map(h=>parseInt(h.slice(1),16));
+const SLBL=['Far Progressive','Progressive','Leaning Progressive','Center-Left','Soft Center-Left',
+            'Unresolved · Independent','Soft Center-Right','Center-Right','Leaning Conservative','Conservative'];
+
+function getScores(id){const ci=CAT_IDS.indexOf(id);if(ci<0)return[];const off=CAT_N.slice(0,ci).reduce((a,b)=>a+b,0);return BELIEF.slice(off,off+CAT_N[ci]);}
+function avgS(id){const s=getScores(id);return s.length?(s.reduce((a,b)=>a+b,0)/s.length).toFixed(1):'5.0';}
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+const wrap=document.getElementById('wrap'),canvas=document.getElementById('c'),tip=document.getElementById('tooltip');
+let W=wrap.clientWidth,H=wrap.clientHeight;
+const scene=new THREE.Scene();
+scene.fog=new THREE.FogExp2(0x080810,0.035);
+const camera=new THREE.PerspectiveCamera(52,W/H,0.1,120);
+// Top-down view: position above, look down at brain centre
+camera.position.set(0,6.5,0.01); // tiny z offset prevents gimbal lock
+camera.lookAt(0,0,0);
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+renderer.setSize(W,H);renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setClearColor(0x080810);
+
+// ── LIGHTS ───────────────────────────────────────────────────────────────────
+scene.add(new THREE.AmbientLight(0x0a0f20,1.0));
+const LD=[
+  {c:0x0066ff,b:1.2,x:-4,y:4,z:4,s:0.5,p:0},
+  {c:0xff0077,b:0.9,x:4,y:-2,z:3,s:0.4,p:1.3},
+  {c:0x00ffcc,b:0.6,x:0,y:4,z:-4,s:0.6,p:2.5},
+  {c:0xffffff,b:0.5,x:0,y:0,z:7,s:0,p:0},
+];
+const PL=LD.map(l=>{const pl=new THREE.PointLight(l.c,l.b,18);pl.position.set(l.x,l.y,l.z);scene.add(pl);return pl;});
+
+// ── BRAIN GROUP ──────────────────────────────────────────────────────────────
+const brain=new THREE.Group();scene.add(brain);
+
+// ── LOW-POLY BRAIN WIREFRAME ──────────────────────────────────────────────────
+function distortGeo(geo, sx, sy, sz) {
+  const pos=geo.attributes.position;
+  for(let i=0;i<pos.count;i++){
+    const x=pos.getX(i),y=pos.getY(i),z=pos.getZ(i);
+    const len=Math.sqrt(x*x+y*y+z*z)||1;
+    const nx=x/len,ny=y/len,nz=z/len;
+    // slight gyri noise
+    const n=(Math.sin(nx*4.5*Math.PI+0.4)*Math.cos(ny*4.5*Math.PI+0.9)+Math.cos(nz*5.0*Math.PI+1.6)*Math.sin(nx*3.7*Math.PI))*0.055;
+    const r=len+n;
+    pos.setXYZ(i,nx*r*sx,ny*r*sy,nz*r*sz);
+  }
+  geo.computeVertexNormals();
+}
+
+function buildHemiWire(side){
+  const geo=new THREE.IcosahedronGeometry(1.28,3); // detail=3: 1280 tris, dense mesh
+  distortGeo(geo,0.62,0.835,1.06); // real brain: width≈0.85×depth, height≈0.79×depth
+
+  // Very subtle face fill
+  const faceMesh=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({
+    color:side<0?0x001122:0x120008,transparent:true,opacity:0.02,
+    side:THREE.DoubleSide,depthWrite:false
+  }));
+  faceMesh.position.x=side*0.35; if(side>0) faceMesh.scale.x=-1;
+
+  // Primary dense edge mesh
+  const edges=new THREE.EdgesGeometry(geo);
+  const edgeColor=0x445e78; // neutral steel — nodes carry the ideological color
+  const edgeMesh=new THREE.LineSegments(edges,new THREE.LineBasicMaterial({
+    color:edgeColor,transparent:true,opacity:0.55,
+    blending:THREE.AdditiveBlending,depthWrite:false
+  }));
+  edgeMesh.position.x=side*0.35; if(side>0) edgeMesh.scale.x=-1;
+
+  // Wider soft glow layer behind edges
+  const edgeMesh2=new THREE.LineSegments(new THREE.EdgesGeometry(geo),new THREE.LineBasicMaterial({
+    color:edgeColor,transparent:true,opacity:0.15,
+    blending:THREE.AdditiveBlending,depthWrite:false
+  }));
+  edgeMesh2.position.x=side*0.35; if(side>0) edgeMesh2.scale.x=-1;
+  edgeMesh2.scale.multiplyScalar(1.018);
+
+  return[faceMesh,edgeMesh,edgeMesh2];
+}
+const[lf,le,le2]=buildHemiWire(-1);
+const[rf,re,re2]=buildHemiWire(1);
+brain.add(lf,le,le2,rf,re,re2);
+
+// Brain stem (wire)
+const stGeo=new THREE.CylinderGeometry(0.10,0.16,0.55,8);
+const stEdges=new THREE.EdgesGeometry(stGeo);
+const stWire=new THREE.LineSegments(stEdges,new THREE.LineBasicMaterial({color:0x2244aa,transparent:true,opacity:0.35,blending:THREE.AdditiveBlending}));
+stWire.position.set(0,-1.06,-0.06);brain.add(stWire);
+
+// ── BACKGROUND PARTICLES ─────────────────────────────────────────────────────
+{const N=1800,pa=new Float32Array(N*3);for(let i=0;i<N;i++){pa[i*3]=(Math.random()-.5)*22;pa[i*3+1]=(Math.random()-.5)*16;pa[i*3+2]=(Math.random()-.5)*14-2;}const pg=new THREE.BufferGeometry();pg.setAttribute('position',new THREE.BufferAttribute(pa,3));scene.add(new THREE.Points(pg,new THREE.PointsMaterial({color:0x1a2a44,size:0.018,transparent:true,opacity:0.55,sizeAttenuation:true})));}
+
+// ── GLOW SPRITE ───────────────────────────────────────────────────────────────
+function h2rgb(h){return{r:parseInt(h.slice(1,3),16),g:parseInt(h.slice(3,5),16),b:parseInt(h.slice(5,7),16)};}
+function makeGlow(hex,size,inner=0.9,mid=0.55,outer=0.0){
+  const{r,g,b}=h2rgb(hex);const c=document.createElement('canvas');c.width=c.height=256;
+  const ctx=c.getContext('2d'),gr=ctx.createRadialGradient(128,128,0,128,128,128);
+  gr.addColorStop(0,`rgba(${r},${g},${b},${inner})`);
+  gr.addColorStop(0.12,`rgba(${r},${g},${b},${(inner+mid)/2})`);
+  gr.addColorStop(0.35,`rgba(${r},${g},${b},${mid})`);
+  gr.addColorStop(0.65,`rgba(${r},${g},${b},${mid*0.25})`);
+  gr.addColorStop(1,`rgba(${r},${g},${b},${outer})`);
+  ctx.fillStyle=gr;ctx.fillRect(0,0,256,256);
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));
+  sp.scale.setScalar(size);return sp;
+}
+
+// ── DNA STRING DISPLAY ────────────────────────────────────────────────────────
+function renderDNABar() {
+  const dnaStr = _dnaRaw || '';
+  const chars = dnaStr.split('');
+
+  const statsHtml=`<div class="dna-stats">
+    <div><div class="stat-val" style="color:rgba(91,106,245,0.85);">${_totalResponses}</div><div class="stat-lbl">Responses</div></div>
+    <div><div class="stat-val" style="color:rgba(115,201,172,0.85);">${_dimsCovered}/124</div><div class="stat-lbl">Dimensions</div></div>
+    <div><div class="stat-val" style="color:rgba(255,170,0,0.85);">${_confidence}%</div><div class="stat-lbl">Confidence</div></div>
+  </div>`;
+
+  const LINE=70;
+  let strHtml='<div class="dna-string">';
+  for(let i=0;i<chars.length;i+=LINE){
+    const chunk=chars.slice(i,i+LINE);
+    let lineHtml='';
+    chunk.forEach((ch,j)=>{
+      const pos=i+j;
+      if(pos<8)        lineHtml+=`<span class="ident">${ch}</span>`;
+      else if(pos<11)  lineHtml+=`<span class="country">${ch}</span>`;
+      else if(pos<16)  lineHtml+=`<span class="zip">${ch}</span>`;
+      else if(ch==='·')lineHtml+=`<span class="dot">·</span>`;
+      else             lineHtml+=`<span class="scored">${ch}</span>`;
+    });
+    strHtml+=`<div>${lineHtml}</div>`;
+  }
+  strHtml+='</div>';
+
+  document.getElementById('dna-bar').innerHTML=
+    `<div class="dna-title">Your Belief Genome Serial</div>`+statsHtml+strHtml;
+}
+renderDNABar(); // initial render with defaults
+
+// ── LIVE DATA LISTENER ───────────────────────────────────────────────────────
+window.addEventListener('message', function(evt) {
+  if (!evt.data || evt.data.type !== 'BGP_DNA_UPDATE') return;
+  const d = evt.data;
+  _dnaRaw = d.dnaString || '';
+  _totalResponses = d.totalResponses || 0;
+  _dimsCovered = d.dimensionsCovered || 0;
+  _confidence = d.overallConfidence || 0;
+
+  // Parse belief scores from DNA string (positions 16+ map to 124 dimensions)
+  const beliefChars = _dnaRaw.slice(16);
+  for (let i = 0; i < 124; i++) {
+    const ch = beliefChars[i];
+    if (ch && ch !== '·') {
+      BELIEF[i] = parseInt(ch) || 5;
+    } else {
+      BELIEF[i] = 5;
+    }
+  }
+
+  // Re-render DNA bar with live data
+  renderDNABar();
+
+  // Update node colors based on new scores
+  CAT_IDS.forEach((catId, ci) => {
+    const catAvg = parseFloat(avgS(catId));
+    const idx = Math.min(9, Math.round(catAvg));
+    const mesh = catMeshes[catId];
+    if (mesh) {
+      mesh.material.color.set(SINT[idx]);
+    }
+  });
+});
+const CATS=[
+  {id:'epistemology',name:'Epistemology',hex:'#a78bfa',color:0xa78bfa,hemi:'Left',region:'Left Prefrontal Cortex',why:'Logic, rational inference & knowledge evaluation',pos:[-0.94,0.74,0.82],
+   dims:['Obj. Reality','Abs. Truth','Sci. Authority','Intuition','Multi-Truth','Experience>Data','Uncertainty OK','Patterns','Tradition Wise','Trust Experts']},
+  {id:'science',name:'Science & Tech',hex:'#34d399',color:0x34d399,hemi:'Left',region:'Left Parietal Lobe',why:'Systematic reasoning, causal inference & analysis',pos:[-1.06,0.47,-0.26],
+   dims:['Tech Optimism','AI Positive','Gene Editing','Space Priority','Nuclear Power','Vaccines','Social Media OK','Privacy>Security','Auto. Threat','Enhancement']},
+  {id:'economics',name:'Economics',hex:'#fbbf24',color:0xfbbf24,hemi:'Left',region:'Left Orbitofrontal Cortex',why:'Rational planning, calculation & sequential logic',pos:[-0.90,-0.12,0.86],
+   dims:['Capitalism OK','Labor Rights','Unions','UBI','Corp. Duty','Min. Wage','Redistribution','Inheritance','Profit=Progress','Work=Worth']},
+  {id:'politics',name:'Politics',hex:'#f87171',color:0xf87171,hemi:'Left',region:'Left Anterior Cingulate Cortex',why:'Conflict monitoring, ambiguity tolerance & civic framing',pos:[-0.22,0.48,0.36],
+   dims:['Small Govt','Democracy','Free Markets','Equality>Freedom','Border Security','Nationalism','Military','Welfare State','Gun Rights','Tax is Theft','Govt Climate','Pro-Immigration','Strong Police','Regulation','Meritocracy','Patriotism','Revolution','Originalism','Free Speech','Vote Duty']},
+  {id:'education',name:'Education',hex:'#2dd4bf',color:0x2dd4bf,hemi:'Left',region:'Left Hippocampus · Medial Temporal',why:'Episodic memory, sequential learning & belief context',pos:[-0.40,-0.28,-0.18],
+   dims:['College Needed','Trust Teachers','Std. Testing','School Choice','Critical Think']},
+  {id:'spirituality',name:'Spirituality',hex:'#fcd34d',color:0xfcd34d,hemi:'Right',region:'Right Posterior Cingulate · Medial Temporal',why:'Mystical experience & self-transcendence',pos:[0.26,-0.20,-0.52],
+   dims:['God Exists','Religion Value','Afterlife','Soul Exists','Prayer Works','Fate/Destiny','Karma','Supernatural','Literal Texts','Miracles','Consciousness','Life Force','Astrology','Reincarnation','Spiritual Practice']},
+  {id:'relationships',name:'Relationships',hex:'#38bdf8',color:0x38bdf8,hemi:'Right',region:'Right Lateral Frontal Lobe',why:'Social bonding, empathy & interpersonal emotion',pos:[0.80,0.46,0.85],
+   dims:['Monogamy','Marriage Sacred','Two Parents','Loyalty','Cond. Forgiveness','Competition','Trust Strangers','Civic Duty','Suffering=Meaning']},
+  {id:'morality',name:'Morality',hex:'#f472b6',color:0xf472b6,hemi:'Right',region:'Medial Prefrontal Cortex (right)',why:'Moral emotion, somatic markers & compassionate judgment',pos:[0.20,0.58,0.52],
+   dims:['Moral Absolutes','Individual>Collective','Intent>Outcome','Trad. Morality','Punishment Deters','Inequality Unjust','Abortion OK','Death Penalty','Animal Rights','Env. Duty','Sexual Morality','Situational Honesty','Self-Interest','Suffering Builds','Forgiveness']},
+  {id:'psychology',name:'Psychology',hex:'#818cf8',color:0x818cf8,hemi:'Right',region:'Right Precuneus · Posterior Cingulate',why:'Self-model, identity & introspection',pos:[0.24,0.32,-0.44],
+   dims:['Free Will','Fixed Personality','Emotion>Reason','Therapy Works','Positive Think','Trauma Shapes','Meditation','IQ Fixed','Conscious.>Death','Human Goodness']},
+  {id:'social',name:'Social',hex:'#fb923c',color:0xfb923c,hemi:'Right',region:'Right Superior Temporal Sulcus',why:'Theory of mind, social cognition & empathy networks',pos:[0.94,-0.16,0.64],
+   dims:['Trad. Family','Bio. Gender','Assimilation','Merit=Success','Systemic Racism','Feminism','LGBTQ+ Rights','Gender Roles','PC Culture','Diversity','Colorblindness','Cancel Culture','Privilege','Cultural Trad.','Community']},
+  {id:'health',name:'Health',hex:'#86efac',color:0x86efac,hemi:'Right',region:'Right Insula · Somatosensory',why:'Interoception, body awareness & somatic processing',pos:[0.90,0.06,-0.76],
+   dims:['Western Med.','Mental Health','Body Autonomy','Natural>Synth.','Healthcare Right']},
+];
+
+// ── BUILD NODES ───────────────────────────────────────────────────────────────
+const hitNodes=[],catMeshes={},rings=[];
+const allNodePos=[]; // for plexus mesh
+const φ=(1+Math.sqrt(5))/2;
+
+CATS.forEach((cat,ci)=>{
+  const cp=new THREE.Vector3(...cat.pos);
+  const catScores=getScores(cat.id);
+
+  // Ideology color from average belief score of this category
+  const catAvgRaw=parseFloat(avgS(cat.id));
+  const catScoreIdx=Math.min(9,Math.round(catAvgRaw));
+  const catIdeHex=SHEX[catScoreIdx];
+  const catIdeInt=SINT[catScoreIdx];
+
+  // Category core sphere
+  const cMesh=new THREE.Mesh(
+    new THREE.SphereGeometry(0.078,16,12),
+    new THREE.MeshBasicMaterial({color:catIdeInt,transparent:true,opacity:0.75})
+  );
+  cMesh.position.copy(cp); brain.add(cMesh);
+  catMeshes[cat.id]=cMesh;
+  hitNodes.push({mesh:cMesh,type:'cat',data:cat});
+  allNodePos.push({pos:cp.clone(),hex:catIdeHex});
+
+  // Glow halo in ideology color
+  const bigGlow=makeGlow(catIdeHex,0.55,0.55,0.12,0);
+  bigGlow.position.copy(cp); brain.add(bigGlow);
+
+  // Dotted orbital ring — small dots arranged in a circle, orbiting on a random axis
+  const orbitGroup=new THREE.Group();
+  orbitGroup.position.copy(cp);
+  const NDOTS=14, ORBITR=0.145;
+  for(let d=0;d<NDOTS;d++){
+    const a=(d/NDOTS)*Math.PI*2;
+    const dot=new THREE.Mesh(
+      new THREE.SphereGeometry(0.004,4,3),
+      new THREE.MeshBasicMaterial({color:catIdeInt,transparent:true,opacity:0.55})
+    );
+    dot.position.set(Math.cos(a)*ORBITR,0,Math.sin(a)*ORBITR);
+    orbitGroup.add(dot);
+  }
+  orbitGroup.rotation.x=Math.random()*Math.PI;
+  orbitGroup.rotation.y=Math.random()*Math.PI;
+  brain.add(orbitGroup);
+  const oAxis=new THREE.Vector3((Math.random()-0.5),Math.random()*0.4,(Math.random()-0.5)).normalize();
+  rings.push({group:orbitGroup,axis:oAxis,speed:0.006+Math.random()*0.005});
+
+  // Dimension nodes — volumetric placement: varying depth simulates subcortical→cortical range
+  // Deep nodes (r≈0.06): amygdala, hippocampus, insula, ACC, ventral striatum
+  // Mid nodes (r≈0.20): association cortex, white matter tracts
+  // Surface nodes (r≈0.40): primary cortical regions
+  cat.dims.forEach((dname,di)=>{
+    const score=catScores[di]??5;
+    const sHex=SHEX[score],sInt=SINT[score];
+    const conviction=Math.abs(score-5)/4;
+
+    // Fibonacci sphere for angular distribution, golden-ratio radius for depth variation
+    const θ=Math.acos(1-2*(di+0.5)/cat.dims.length);
+    const φi=2*Math.PI*di/φ;
+    // Deterministic depth: pseudo-random per (category, dimension) pair — 0.06 deep → 0.44 surface
+    const r=0.06+((di*0.618034+ci*0.381966)%1)*0.38;
+    const dp=new THREE.Vector3(
+      cat.pos[0]+Math.sin(θ)*Math.cos(φi)*r,
+      cat.pos[1]+Math.cos(θ)*r*0.80,
+      cat.pos[2]+Math.sin(θ)*Math.sin(φi)*r*0.88
+    );
+
+    // Dim sphere (tiny, raycasting only)
+    const dm=new THREE.Mesh(
+      new THREE.SphereGeometry(0.022+conviction*0.012,8,6),
+      new THREE.MeshBasicMaterial({color:sInt,transparent:true,opacity:0.75})
+    );
+    dm.position.copy(dp); brain.add(dm);
+    hitNodes.push({mesh:dm,type:'dim',data:{name:dname,category:cat.name,catHex:cat.hex,score,sHex,label:SLBL[score]}});
+    allNodePos.push({pos:dp.clone(),hex:sHex});
+
+    // Score-colored glow (subtle)
+    const dimGlow=makeGlow(sHex,0.12+conviction*0.08,0.65,0.18,0);
+    dimGlow.position.copy(dp); brain.add(dimGlow);
+  });
+});
+
+// ── PROXIMITY PLEXUS MESH ─────────────────────────────────────────────────────
+// Single draw call for all proximity connections (core aesthetic element)
+const THRESH=0.78;
+const lineVerts=[];
+for(let i=0;i<allNodePos.length;i++){
+  for(let j=i+1;j<allNodePos.length;j++){
+    const d=allNodePos[i].pos.distanceTo(allNodePos[j].pos);
+    if(d<THRESH){
+      const{x:ax,y:ay,z:az}=allNodePos[i].pos;
+      const{x:bx,y:by,z:bz}=allNodePos[j].pos;
+      lineVerts.push(ax,ay,az,bx,by,bz);
+    }
+  }
+}
+const plexGeo=new THREE.BufferGeometry();
+plexGeo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(lineVerts),3));
+// Two layers for glow effect
+brain.add(new THREE.LineSegments(plexGeo,new THREE.LineBasicMaterial({color:0x3a6688,transparent:true,opacity:0.42,blending:THREE.AdditiveBlending,depthWrite:false})));
+brain.add(new THREE.LineSegments(plexGeo,new THREE.LineBasicMaterial({color:0x88bbdd,transparent:true,opacity:0.10,blending:THREE.AdditiveBlending,depthWrite:false})));
+
+// ── SAME-HEMISPHERE SEMANTIC LINKS (dim, internal) ───────────────────────────
+[['epistemology','science'],['epistemology','political'],['epistemology','education'],
+ ['science','economics'],['science','education'],['economics','political'],['political','education'],['education','economics'],
+ ['social','relationships'],['social','morality'],['relationships','psychology'],
+ ['relationships','health'],['morality','spirituality'],['morality','psychology'],
+ ['psychology','health'],['psychology','spirituality'],['spirituality','health'],['spirituality','relationships'],['health','social']
+].forEach(([a,b])=>{
+  const ma=catMeshes[a],mb=catMeshes[b]; if(!ma||!mb) return;
+  const mid=ma.position.clone().add(mb.position).multiplyScalar(0.5).multiplyScalar(0.45);
+  const pts=new THREE.QuadraticBezierCurve3(ma.position,mid,mb.position).getPoints(28);
+  brain.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),
+    new THREE.LineBasicMaterial({color:0x334466,transparent:true,opacity:0.18,blending:THREE.AdditiveBlending,depthWrite:false})));
+});
+
+// ── CORPUS CALLOSUM — CROSS-HEMISPHERE CONNECTIONS ────────────────────────────
+// Bright arcs routed through the corpus callosum region (anatomical top-centre, y≈0.78)
+// Colour: cool white-blue = resonance (similar scores), warm amber = tension (divergent scores)
+const CC_LINKS=[
+  ['epistemology','morality',    'Reasoning ↔ Moral intuition'],
+  ['epistemology','psychology',  'Knowledge ↔ Self-model'],
+  ['epistemology','relationships','Truth-seeking ↔ Social trust'],
+  ['science','health',           'Evidence ↔ Body belief'],
+  ['science','spirituality',     'Empiricism ↔ Transcendence'],
+  ['political','social',         'Ideology ↔ Social cognition'],
+  ['political','morality',       'Civic framing ↔ Ethics'],
+  ['political','relationships',  'Authority ↔ Bonding'],
+  ['economics','psychology',     'Scarcity ↔ Loss aversion'],
+  ['economics','social',         'Markets ↔ Collective behaviour'],
+  ['education','morality',       'Values formation ↔ Ethics'],
+  ['education','relationships',  'Learning ↔ Attachment'],
+];
+const callosalLines=[];
+
+CC_LINKS.forEach(([a,b,lbl])=>{
+  const ma=catMeshes[a],mb=catMeshes[b]; if(!ma||!mb) return;
+
+  // Tension/resonance: how far apart are the avg ideology scores?
+  const aAvg=parseFloat(avgS(a)), bAvg=parseFloat(avgS(b));
+  const div=Math.abs(aAvg-bAvg);
+  const tT=Math.min(1,div/3.5); // 0=resonance, 1=strong tension
+  // Resonance → cool white (#c8d8ff), Tension → warm amber (#ffaa44)
+  const rC=Math.round(200+tT*55), gC=Math.round(216-tT*100), bC=Math.round(255-tT*145);
+  const hexInt=(rC<<16)|(gC<<8)|bC;
+
+  // Arc lifts to corpus callosum height at top midline
+  const ccY=0.80, zMid=(ma.position.z+mb.position.z)*0.32;
+  const c1=new THREE.Vector3(ma.position.x*0.28,ccY,zMid);
+  const c2=new THREE.Vector3(mb.position.x*0.28,ccY,zMid);
+  const pts=new THREE.CubicBezierCurve3(ma.position,c1,c2,mb.position).getPoints(64);
+  const geo=new THREE.BufferGeometry().setFromPoints(pts);
+
+  const coreMat=new THREE.LineBasicMaterial({color:hexInt,transparent:true,opacity:0.72,blending:THREE.AdditiveBlending,depthWrite:false});
+  const glowMat=new THREE.LineBasicMaterial({color:hexInt,transparent:true,opacity:0.18,blending:THREE.AdditiveBlending,depthWrite:false});
+  const core=new THREE.Line(geo,coreMat);
+  const glow=new THREE.Line(geo.clone(),glowMat);
+  glow.scale.setScalar(1.012);
+  brain.add(core);brain.add(glow);
+  callosalLines.push({core,glow,phase:Math.random()*Math.PI*2,label:lbl,tension:tT});
+});
+
+// ── HTML LABELS ───────────────────────────────────────────────────────────────
+const labelEls={};
+CATS.forEach(cat=>{
+  const el=document.createElement('div'); el.className='node-label';
+  const idx=Math.min(9,Math.round(parseFloat(avgS(cat.id))));
+  el.style.color=SHEX[idx]; el.textContent=cat.name;
+  wrap.appendChild(el); labelEls[cat.id]=el;
+});
+
+// ── HOVER GLOW SPRITE ────────────────────────────────────────────────────────
+// Reusable spotlight that snaps to hovered node
+const hoverGlowSprite=makeGlow('#ffffff',1.8,0.75,0.25,0);
+hoverGlowSprite.visible=false;
+brain.add(hoverGlowSprite);
+const hoverGlowCore=makeGlow('#ffffff',0.55,0.95,0.55,0);
+hoverGlowCore.visible=false;
+brain.add(hoverGlowCore);
+let hoveredNode=null;
+
+// ── SHIFT PAUSE ───────────────────────────────────────────────────────────────
+let shiftPaused=true; // paused by default
+window.addEventListener('keydown',e=>{
+  if(e.key==='Shift'){
+    shiftPaused=true; e.preventDefault();
+    btnToggle.textContent='▶ Play'; btnToggle.classList.add('paused');
+    document.getElementById('ch').textContent='paused · shift held · release to resume';
+  }
+});
+window.addEventListener('keyup',e=>{
+  if(e.key==='Shift'){
+    shiftPaused=false;
+    btnToggle.textContent='⏸ Pause'; btnToggle.classList.remove('paused');
+    document.getElementById('ch').textContent='drag · scroll · hover · shift to pause';
+  }
+});
+
+// ── TOGGLE & RESET BUTTONS ────────────────────────────────────────────────────
+const btnToggle=document.getElementById('btn-toggle');
+const btn2x=document.getElementById('btn-2x');
+const btn3x=document.getElementById('btn-3x');
+const btnReset=document.getElementById('btn-reset');
+
+const DEFAULT_Z=6.5;
+
+// Sync initial UI state to paused=true
+btnToggle.textContent='▶ Play';
+btnToggle.classList.add('paused');
+document.getElementById('ch').textContent='paused — click Play to begin rotation';
+
+btnToggle.addEventListener('click',()=>{
+  shiftPaused=!shiftPaused;
+  btnToggle.textContent=shiftPaused?'▶ Play':'⏸ Pause';
+  btnToggle.classList.toggle('paused',shiftPaused);
+  document.getElementById('ch').textContent=shiftPaused
+    ?'paused — click Play or Shift to resume'
+    :'drag · scroll · hover · shift to pause';
+});
+
+function setZoomActive(btn){
+  [btn2x,btn3x].forEach(b=>b.classList.remove('paused'));
+  if(btn) btn.classList.add('paused');
+}
+btn2x.addEventListener('click',()=>{
+  targetCameraZ=DEFAULT_Z/2;
+  setZoomActive(btn2x);
+});
+btn3x.addEventListener('click',()=>{
+  targetCameraZ=DEFAULT_Z/3;
+  setZoomActive(btn3x);
+});
+
+btnReset.addEventListener('click',()=>{
+  vx=0; vy=0;
+  brain.rotation.set(0,0,0);
+  // Return to top-down view
+  camera.position.set(0,DEFAULT_Z,0.01);
+  camera.lookAt(0,0,0);
+  targetCameraZ=DEFAULT_Z;
+  setZoomActive(null);
+  shiftPaused=true;
+  btnToggle.textContent='▶ Play';
+  btnToggle.classList.add('paused');
+  document.getElementById('ch').textContent='paused — click Play to begin rotation';
+});
+
+// ── CONTROLS ─────────────────────────────────────────────────────────────────
+let drag=false,vx=0,vy=0,px=0,py=0,touching=false;
+let targetCameraZ=6.5; // tracks distance from origin regardless of axis
+canvas.addEventListener('mousedown',e=>{drag=true;px=e.clientX;py=e.clientY;vx=vy=0;});
+window.addEventListener('mousemove',e=>{
+  if(drag){vy=(e.clientX-px)*0.009;vx=(e.clientY-py)*0.009;
+    brain.rotation.y+=vy;brain.rotation.x=Math.max(-1.15,Math.min(1.15,brain.rotation.x+vx));px=e.clientX;py=e.clientY;}
+  doHover(e);
+});
+window.addEventListener('mouseup',()=>{drag=false;});
+canvas.addEventListener('wheel',e=>{
+  e.preventDefault();
+  targetCameraZ=Math.max(0.4,Math.min(12,targetCameraZ+e.deltaY*0.008));
+  setZoomActive(null);
+},{passive:false});
+let tx=0,ty=0;
+canvas.addEventListener('touchstart',e=>{touching=true;tx=e.touches[0].clientX;ty=e.touches[0].clientY;vx=vy=0;},{passive:false});
+canvas.addEventListener('touchmove',e=>{e.preventDefault();vy=(e.touches[0].clientX-tx)*0.009;vx=(e.touches[0].clientY-ty)*0.009;brain.rotation.y+=vy;brain.rotation.x=Math.max(-1.15,Math.min(1.15,brain.rotation.x+vx));tx=e.touches[0].clientX;ty=e.touches[0].clientY;},{passive:false});
+canvas.addEventListener('touchend',()=>{touching=false;});
+
+// ── RAYCASTING ───────────────────────────────────────────────────────────────
+const rc=new THREE.Raycaster(),m2=new THREE.Vector2();
+function doHover(e){
+  if(drag) return;
+  const r=canvas.getBoundingClientRect();
+  m2.x=((e.clientX-r.left)/W)*2-1; m2.y=-((e.clientY-r.top)/H)*2+1;
+  rc.setFromCamera(m2,camera);
+  const hits=rc.intersectObjects(hitNodes.map(n=>n.mesh));
+  if(hits.length){
+    const node=hitNodes.find(n=>n.mesh===hits[0].object); if(!node) return;
+    hoveredNode=node;
+
+    // Position hover glow at node (world space inside brain group)
+    const np=node.mesh.position;
+    const isCat=node.type==='cat';
+    const glowSize=isCat?1.8:0.9;
+    const coreSize=isCat?0.60:0.28;
+    hoverGlowSprite.scale.setScalar(glowSize);
+    hoverGlowCore.scale.setScalar(coreSize);
+    hoverGlowSprite.position.copy(np);
+    hoverGlowCore.position.copy(np);
+    hoverGlowSprite.visible=true;
+    hoverGlowCore.visible=true;
+
+    tip.style.display='block';
+    tip.style.left=Math.min(e.clientX-r.left+18,W-268)+'px';
+    tip.style.top=Math.max(e.clientY-r.top-14,5)+'px';
+    if(node.type==='cat'){
+      const d=node.data,scores=getScores(d.id),avg=avgS(d.id);
+      const ai=Math.min(9,Math.round(parseFloat(avg)));
+      const ideHex=SHEX[ai], ideLbl=SLBL[ai];
+      tip.innerHTML=`<div style="color:${ideHex};font-weight:bold;font-size:14px;margin-bottom:5px;">${d.name}</div>
+        <div style="color:#446688;font-size:9px;text-transform:uppercase;letter-spacing:1.8px;margin-bottom:4px;">${d.hemi} · ${d.region}</div>
+        <div style="color:#99aacc;font-style:italic;font-size:11px;margin-bottom:8px;">${d.why}</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+          <div style="width:10px;height:10px;border-radius:50%;background:${ideHex};box-shadow:0 0 8px ${ideHex};"></div>
+          <span style="color:${ideHex};font-weight:bold;font-size:13px;">${ideLbl}</span>
+          <span style="color:#445566;font-size:9px;">avg ${avg}</span>
+        </div>
+        <div style="display:flex;gap:2px;flex-wrap:wrap;margin-bottom:5px;">
+          ${scores.map((s,i)=>`<div title="${d.dims[i]||''}: ${SLBL[s]}" style="width:9px;height:9px;border-radius:2px;background:${SHEX[s]};box-shadow:0 0 4px ${SHEX[s]}66;cursor:help"></div>`).join('')}
+        </div>`;
+    } else {
+      const d=node.data;
+      tip.innerHTML=`<div style="color:${d.catHex};font-size:9px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px;">${d.category}</div>
+        <div style="font-weight:bold;font-size:13px;margin-bottom:8px;">${d.name}</div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:24px;height:24px;border-radius:6px;background:${d.sHex};box-shadow:0 0 15px ${d.sHex};"></div>
+          <div><div style="color:${d.sHex};font-weight:bold;font-size:16px;line-height:1;">${d.label}</div>
+          <div style="color:#556677;font-size:9px;margin-top:2px;">score ${d.score} · ${d.score<5?'progressive lean':d.score>5?'conservative lean':'unresolved'}</div></div>
+        </div>`;
+    }
+  } else {
+    hoveredNode=null;
+    hoverGlowSprite.visible=false;
+    hoverGlowCore.visible=false;
+    tip.style.display='none';
+  }
+}
+
+// ── ANIMATE ──────────────────────────────────────────────────────────────────
+const clock=new THREE.Clock(),_v=new THREE.Vector3();
+function animate(){
+  requestAnimationFrame(animate);
+  const t=clock.getElapsedTime();
+  if(!drag&&!touching&&!shiftPaused){
+    brain.rotation.y+=vy;brain.rotation.x=Math.max(-1.15,Math.min(1.15,brain.rotation.x+vx));
+    vx*=0.88;vy*=0.88;
+    if(Math.abs(vx)<0.0003&&Math.abs(vy)<0.0003) brain.rotation.y+=0.0018;
+  }
+  LD.forEach((l,i)=>PL[i].intensity=l.b+Math.sin(t*l.s+l.p)*l.b*0.22);
+  // Smooth zoom — scale distance from origin preserving direction
+  const camDist=camera.position.length();
+  if(Math.abs(camDist-targetCameraZ)>0.001){
+    const scale=1+(targetCameraZ-camDist)*0.07/camDist;
+    camera.position.multiplyScalar(scale);
+    camera.lookAt(0,0,0);
+  }
+  rings.forEach(({group,axis,speed})=>{
+    group.rotateOnAxis(axis,speed);
+  });
+  // Corpus callosum arcs — gentle pulse to draw the eye
+  callosalLines.forEach(({core,glow,phase})=>{
+    core.material.opacity=0.55+0.22*Math.sin(t*1.4+phase);
+    glow.material.opacity=0.10+0.10*Math.sin(t*1.4+phase);
+  });
+  // Hover glow pulse
+  if(hoveredNode){
+    const pulse=1+0.12*Math.sin(t*4.5);
+    hoverGlowSprite.scale.setScalar(hoverGlowSprite.scale.x*pulse/pulse); // keep base
+    hoverGlowSprite.material.opacity=0.82+0.18*Math.sin(t*4.5);
+    hoverGlowCore.material.opacity=0.90+0.10*Math.sin(t*6.0);
+  }
+  // Label projection — push radially outward from brain centre
+  brain.updateMatrixWorld();
+  const camDir=camera.position.clone().normalize();
+  // Brain centre in screen space
+  const _bc=new THREE.Vector3(0,0,0).applyMatrix4(brain.matrixWorld).project(camera);
+  const bcx=(_bc.x+1)/2*W, bcy=(-_bc.y+1)/2*H;
+  CATS.forEach(cat=>{
+    const wp=catMeshes[cat.id].position.clone().applyMatrix4(brain.matrixWorld);
+    const ndc=wp.clone().project(camera);
+    const sx=(ndc.x+1)/2*W, sy=(-ndc.y+1)/2*H;
+    // Direction from brain centre → node on screen
+    const dx=sx-bcx, dy=sy-bcy;
+    const len=Math.sqrt(dx*dx+dy*dy)||1;
+    const push=58; // pixels outward beyond the projected node
+    const el=labelEls[cat.id];
+    el.style.left=(sx+dx/len*push)+'px';
+    el.style.top =(sy+dy/len*push)+'px';
+    _v.copy(wp).normalize();
+    el.style.opacity=Math.max(0,Math.min(1,_v.dot(camDir)*3.2)).toFixed(2);
+  });
+  // Orientation labels — project 4 cardinal brain-space points each frame
+  // Brain anatomical axes: +Z = anterior (front), -Z = posterior (back), -X = left, +X = right
+  // R=1.55 places labels just beyond the brain surface edge
+  const OL_R=1.55;
+  const orientPts=[
+    {id:'ol-front', pos:new THREE.Vector3(0,0, OL_R)},
+    {id:'ol-back',  pos:new THREE.Vector3(0,0,-OL_R)},
+    {id:'ol-left',  pos:new THREE.Vector3(-OL_R,0,0)},
+    {id:'ol-right', pos:new THREE.Vector3( OL_R,0,0)},
+  ];
+  orientPts.forEach(({id,pos})=>{
+    const wp=pos.clone().applyMatrix4(brain.matrixWorld);
+    const ndc=wp.clone().project(camera);
+    // Only show if not behind camera
+    if(ndc.z>1){ document.getElementById(id).style.opacity='0'; return; }
+    const sx=(ndc.x+1)/2*W, sy=(-ndc.y+1)/2*H;
+    const el=document.getElementById(id);
+    el.style.left=sx+'px'; el.style.top=sy+'px';
+    // Fade based on how far behind the brain (dot with cam direction)
+    const facing=wp.clone().normalize().dot(camDir);
+    el.style.opacity=Math.max(0,Math.min(0.65,facing*1.8+0.15)).toFixed(2);
+  });
+
+  renderer.render(scene,camera);
+}
+animate();
+
+window.addEventListener('keydown',e=>{
+  if(e.key==='Shift'){
+    document.getElementById('ch').textContent='paused · shift held · release to resume';
+  }
+});
+window.addEventListener('keyup',e=>{
+  if(e.key==='Shift'){
+    document.getElementById('ch').textContent='drag · scroll · hover · shift to pause';
+  }
+});
+window.addEventListener('resize',()=>{W=wrap.clientWidth;H=wrap.clientHeight;camera.aspect=W/H;camera.updateProjectionMatrix();renderer.setSize(W,H);});
+
+})();
+</script>
+</body>
+</html>

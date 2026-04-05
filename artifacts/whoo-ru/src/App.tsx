@@ -24,6 +24,7 @@ import AdminSettings from "./pages/admin/Settings";
 import MediaLibrary from "./pages/admin/MediaLibrary";
 import GenomeSubmissions from "./pages/admin/GenomeSubmissions";
 import ExploreBeliefs from "./pages/ExploreBeliefs";
+import NeuromapPage from "./pages/NeuromapPage";
 
 import { GenomeAuthProvider } from "./components/genome/GenomeAuthContext";
 import GenomeLayout from "./components/genome/GenomeLayout";
@@ -52,6 +53,7 @@ function Router() {
       <Route path="/support" component={Support} />
       <Route path="/subscribe" component={Subscribe} />
       <Route path="/explore" component={ExploreBeliefs} />
+      <Route path="/neuromap/:key" component={NeuromapPage} />
       <Route path="/admin/login" component={AdminLogin} />
       <Route path="/admin/dashboard" component={Dashboard} />
       <Route path="/admin/blog" component={BlogList} />

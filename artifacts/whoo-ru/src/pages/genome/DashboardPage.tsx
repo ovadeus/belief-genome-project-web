@@ -9,6 +9,7 @@ import BreakdownBars from '../../components/genome/BreakdownBars';
 import Timeline from '../../components/genome/Timeline';
 import HistoryList from '../../components/genome/HistoryList';
 import Forecaster from '../../components/genome/Forecaster';
+import Neuromap from '../../components/genome/Neuromap';
 import DnaString from '../../components/genome/DnaString';
 
 /* ── 100 curated quotes on self-knowledge ─────────────────── */
@@ -299,10 +300,11 @@ function SubmitGenomeButton() {
   );
 }
 
-type Tab = 'helix' | 'radar' | 'breakdown' | 'timeline' | 'history' | 'forecaster';
+type Tab = 'helix' | 'neuromap' | 'radar' | 'breakdown' | 'timeline' | 'history' | 'forecaster';
 
 const TAB_ICONS: Record<Tab, string> = {
   helix: '✦',
+  neuromap: '⊛',
   radar: '◎',
   breakdown: '▐',
   timeline: '∿',
@@ -312,6 +314,7 @@ const TAB_ICONS: Record<Tab, string> = {
 
 const TABS: { key: Tab; label: string }[] = [
   { key: 'helix',      label: 'Triple Helix' },
+  { key: 'neuromap',   label: 'Neuromap' },
   { key: 'radar',      label: 'Radar' },
   { key: 'breakdown',  label: 'Breakdown' },
   { key: 'timeline',   label: 'Timeline' },
@@ -579,6 +582,14 @@ export default function DashboardPage() {
                 dimensions={dimensions}
                 dimensionScores={dna?.dimensionScores || {}}
                 confidence={dna?.confidence || {}}
+              />
+            )}
+            {tab === 'neuromap' && dna && (
+              <Neuromap
+                dnaString={dna.dnaString || ''}
+                totalResponses={dna.totalResponses || 0}
+                dimensionsCovered={dna.dimensionsCovered || 0}
+                overallConfidence={dna.overallConfidence || 0}
               />
             )}
             {tab === 'radar' && <RadarChart history={history} />}
