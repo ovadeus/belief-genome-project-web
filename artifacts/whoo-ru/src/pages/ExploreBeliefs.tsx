@@ -430,8 +430,8 @@ export default function ExploreBeliefs() {
           label: (ctx: any) => {
             const val = ctx.parsed?.y;
             if (val === null || val === undefined) return '';
-            const diff = val - 4.5;
-            const direction = diff > 0.2 ? '↑ Traditional' : diff < -0.2 ? '↓ Progressive' : '→ Independent';
+            const diff = val - 5;
+            const direction = diff > 0.3 ? '↑ Traditional' : diff < -0.3 ? '↓ Progressive' : '→ Independent';
             return ` ${ctx.dataset.label}: ${val.toFixed(1)} ${direction}`;
           },
         },
@@ -448,15 +448,15 @@ export default function ExploreBeliefs() {
           color: '#64748b',
           stepSize: 1,
           callback: (v: any) => {
-            if (v === 0) return '0 — Progressive';
-            if (v === 4.5) return '4.5 — Independent';
+            if (v === 1) return '1 — Progressive';
+            if (v === 5) return '5 — Independent';
             if (v === 9) return '9 — Traditional';
             return v;
           },
         },
         grid: {
-          color: (ctx: any) => ctx.tick?.value === 4.5 ? '#ffffff40' : '#ffffff08',
-          lineWidth: (ctx: any) => ctx.tick?.value === 4.5 ? 2 : 1,
+          color: (ctx: any) => ctx.tick?.value === 5 ? '#ffffff40' : '#ffffff08',
+          lineWidth: (ctx: any) => ctx.tick?.value === 5 ? 2 : 1,
         },
       },
     },
@@ -652,7 +652,7 @@ export default function ExploreBeliefs() {
             {timelineOpen && (
               <>
                 <div className="flex items-center justify-between mt-4 mb-2">
-                  <p className="text-xs text-muted-foreground">How collective beliefs shift over time — midline = Independent (4.5)</p>
+                  <p className="text-xs text-muted-foreground">How collective beliefs shift over time — midline = Independent (5)</p>
                   <div className="flex gap-1">
                     {TIMELINE_INTERVALS.map(ti => (
                       <button
@@ -675,7 +675,7 @@ export default function ExploreBeliefs() {
                     afterDraw(chart: any) {
                       const yScale = chart.scales.y;
                       if (!yScale) return;
-                      const y = yScale.getPixelForValue(4.5);
+                      const y = yScale.getPixelForValue(5);
                       const { left, right } = chart.chartArea;
                       const ctx = chart.ctx;
                       ctx.save();

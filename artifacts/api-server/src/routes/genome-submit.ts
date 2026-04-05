@@ -254,22 +254,27 @@ router.get('/explore/dimensions', async (req: Request, res: Response) => {
       });
     }
 
-    const dimSums: Record<string, { sum: number; count: number }> = {};
+    const NEUTRAL = 5;
+    const dimSums: Record<string, { sum: number; total: number; answered: number }> = {};
     for (const sub of submissions) {
       const values = sub.beliefValues as Record<string, number | null> | null;
       if (!values) continue;
       for (const [dimId, val] of Object.entries(values)) {
-        if (val === null) continue;
-        if (!dimSums[dimId]) dimSums[dimId] = { sum: 0, count: 0 };
-        dimSums[dimId].sum += val;
-        dimSums[dimId].count += 1;
+        if (!dimSums[dimId]) dimSums[dimId] = { sum: 0, total: 0, answered: 0 };
+        dimSums[dimId].sum += val !== null ? val : NEUTRAL;
+        dimSums[dimId].total += 1;
+        if (val !== null) dimSums[dimId].answered += 1;
       }
     }
 
-    const dimensions: Record<string, { avg: number; count: number }> = {};
-    for (const [dimId, { sum, count }] of Object.entries(dimSums)) {
-      if (count >= PRIVACY_MINIMUM) {
-        dimensions[dimId] = { avg: Math.round((sum / count) * 100) / 100, count };
+    const dimensions: Record<string, { avg: number; count: number; confidence: number }> = {};
+    for (const [dimId, { sum, total, answered }] of Object.entries(dimSums)) {
+      if (total >= PRIVACY_MINIMUM) {
+        dimensions[dimId] = {
+          avg: Math.round((sum / total) * 100) / 100,
+          count: total,
+          confidence: Math.round((answered / total) * 100),
+        };
       }
     }
 
@@ -302,6 +307,7 @@ router.get('/explore/timeline', async (req: Request, res: Response) => {
 
     const buckets: Record<string, { sums: Record<string, number>; counts: Record<string, number>; total: number }> = {};
 
+    const NEUTRAL = 5;
     for (const row of rows) {
       const period = (row as any).period;
       if (!period) continue;
@@ -310,9 +316,8 @@ router.get('/explore/timeline', async (req: Request, res: Response) => {
       const values = row.beliefValues as Record<string, number | null> | null;
       if (!values) continue;
       for (const [dimId, val] of Object.entries(values)) {
-        if (val === null) continue;
         if (!buckets[period].sums[dimId]) { buckets[period].sums[dimId] = 0; buckets[period].counts[dimId] = 0; }
-        buckets[period].sums[dimId] += val;
+        buckets[period].sums[dimId] += val !== null ? val : NEUTRAL;
         buckets[period].counts[dimId]++;
       }
     }
@@ -390,14 +395,14 @@ router.get('/explore/generations', async (req: Request, res: Response) => {
           .from(genomeSubmissions)
           .where(combinedWhere);
 
+        const NEUTRAL = 5;
         const dimSums: Record<string, { sum: number; count: number }> = {};
         for (const sub of submissions) {
           const values = sub.beliefValues as Record<string, number | null> | null;
           if (!values) continue;
           for (const [dimId, val] of Object.entries(values)) {
-            if (val === null) continue;
             if (!dimSums[dimId]) dimSums[dimId] = { sum: 0, count: 0 };
-            dimSums[dimId].sum += val;
+            dimSums[dimId].sum += val !== null ? val : NEUTRAL;
             dimSums[dimId].count += 1;
           }
         }
