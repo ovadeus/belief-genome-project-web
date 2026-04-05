@@ -59,6 +59,9 @@ Full-stack website for a psychometric self-knowledge framework, desktop app, and
 - **Book** (`/book`): Book promo with 3D cover, early bird signup, chapter excerpt
 - **Subscribe** (`/subscribe`): Newsletter subscription form with benefit cards
 - **Explore Beliefs** (`/explore`): Public visualization page showing aggregated anonymous belief data from desktop app DNA submissions. Bar charts per category, radar chart across all categories, generation/gender/country breakdowns. Privacy enforced: min 5 submissions per group. Test data excluded from public view. Dimension bar chart tooltips include plain-language interpretation statements (from `belief-interpretations.ts`) with 3 intensity bands.
+- **Privacy Policy** (`/privacy`): Full privacy policy with green callout box for core principle, all 11 sections
+- **Terms of Service** (`/terms`): Full terms of service, 15 sections
+- **Support** (`/support`): Help & support docs page with left-side sticky table of contents (desktop), FAQ, agent table, widget grid, Gmail setup guide, ecosystem cards
 
 ### Admin Panel (`/admin/*`)
 - **Login** (`/admin/login`): JWT cookie-based auth (separate from genome user auth)
