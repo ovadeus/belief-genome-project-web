@@ -100,6 +100,8 @@ canvas:active { cursor:grabbing; }
 }
 .ctrl-btn:hover { color:#e8e8f0; border-color:#5b6af5; background:rgba(91,106,245,0.12); }
 .ctrl-btn.paused { color:#ffaa00; border-color:rgba(255,170,0,0.45); }
+#zoom-slider::-webkit-slider-thumb { appearance:none;-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#6c8fff;border:2px solid #0c1025;box-shadow:0 0 6px rgba(108,143,255,0.5);cursor:pointer; }
+#zoom-slider::-moz-range-thumb { width:14px;height:14px;border-radius:50%;background:#6c8fff;border:2px solid #0c1025;cursor:pointer; }
 .orient-label {
   position:absolute;
   font-family:'Space Mono',monospace;
@@ -133,15 +135,21 @@ canvas:active { cursor:grabbing; }
   </div>
   <div id="hud">
     <div class="hh">◀ Analytical · Logical</div>
-    <div id="ch">drag · scroll · hover · shift to pause</div>
+    <div id="ch">drag · hover · shift to pause</div>
     <div class="hh">Intuitive · Emotional ▶</div>
   </div>
   <!-- Centered control buttons -->
   <div style="position:absolute;top:16px;left:50%;transform:translateX(-50%);display:flex;gap:8px;pointer-events:all;">
     <button class="ctrl-btn" id="btn-toggle">▶ Play</button>
-    <button class="ctrl-btn" id="btn-2x">2×</button>
-    <button class="ctrl-btn" id="btn-3x">3×</button>
     <button class="ctrl-btn" id="btn-reset">↺ Reset</button>
+  </div>
+  <!-- Zoom slider bar -->
+  <div id="zoom-bar" style="position:absolute;bottom:60px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;pointer-events:all;background:rgba(12,16,37,0.80);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:6px 14px;">
+    <button class="ctrl-btn" id="btn-zoom-out" style="padding:4px 8px;font-size:12px;line-height:1;">−</button>
+    <input type="range" id="zoom-slider" min="0.8" max="12" step="0.2" value="6.5" dir="rtl"
+      style="width:180px;height:6px;appearance:none;-webkit-appearance:none;background:linear-gradient(90deg,#1a1f3a,#2a3050);border-radius:4px;cursor:pointer;outline:none;" />
+    <button class="ctrl-btn" id="btn-zoom-in" style="padding:4px 8px;font-size:12px;line-height:1;">+</button>
+    <span id="zoom-level" style="font-family:'Space Mono',monospace;font-size:9px;color:#64748b;letter-spacing:1px;min-width:28px;">1.0x</span>
   </div>
   <!-- DNA string centered below buttons -->
   <div id="dna-bar"></div>
@@ -606,9 +614,11 @@ window.addEventListener('keyup',e=>{
 
 // ── TOGGLE & RESET BUTTONS ────────────────────────────────────────────────────
 const btnToggle=document.getElementById('btn-toggle');
-const btn2x=document.getElementById('btn-2x');
-const btn3x=document.getElementById('btn-3x');
 const btnReset=document.getElementById('btn-reset');
+const zoomSlider=document.getElementById('zoom-slider');
+const zoomLabel=document.getElementById('zoom-level');
+const btnZoomIn=document.getElementById('btn-zoom-in');
+const btnZoomOut=document.getElementById('btn-zoom-out');
 
 const DEFAULT_Z=6.5;
 
@@ -623,20 +633,25 @@ btnToggle.addEventListener('click',()=>{
   btnToggle.classList.toggle('paused',shiftPaused);
   document.getElementById('ch').textContent=shiftPaused
     ?'paused — click Play or Shift to resume'
-    :'drag · scroll · hover · shift to pause';
+    :'drag · hover · shift to pause';
 });
 
-function setZoomActive(btn){
-  [btn2x,btn3x].forEach(b=>b.classList.remove('paused'));
-  if(btn) btn.classList.add('paused');
+function updateZoomUI(){
+  var ratio=DEFAULT_Z/targetCameraZ;
+  zoomLabel.textContent=ratio.toFixed(1)+'x';
+  zoomSlider.value=String(targetCameraZ);
 }
-btn2x.addEventListener('click',()=>{
-  targetCameraZ=DEFAULT_Z/2;
-  setZoomActive(btn2x);
+zoomSlider.addEventListener('input',function(){
+  targetCameraZ=parseFloat(this.value);
+  updateZoomUI();
 });
-btn3x.addEventListener('click',()=>{
-  targetCameraZ=DEFAULT_Z/3;
-  setZoomActive(btn3x);
+btnZoomIn.addEventListener('click',function(){
+  targetCameraZ=Math.max(0.8,targetCameraZ-0.8);
+  updateZoomUI();
+});
+btnZoomOut.addEventListener('click',function(){
+  targetCameraZ=Math.min(12,targetCameraZ+0.8);
+  updateZoomUI();
 });
 
 btnReset.addEventListener('click',()=>{
@@ -646,7 +661,7 @@ btnReset.addEventListener('click',()=>{
   camera.position.set(0,DEFAULT_Z,0.01);
   camera.lookAt(0,0,0);
   targetCameraZ=DEFAULT_Z;
-  setZoomActive(null);
+  updateZoomUI();
   shiftPaused=true;
   btnToggle.textContent='▶ Play';
   btnToggle.classList.add('paused');
@@ -664,10 +679,8 @@ window.addEventListener('mousemove',e=>{
 });
 window.addEventListener('mouseup',()=>{drag=false;});
 canvas.addEventListener('wheel',e=>{
-  e.preventDefault();
-  targetCameraZ=Math.max(0.4,Math.min(12,targetCameraZ+e.deltaY*0.008));
-  setZoomActive(null);
-},{passive:false});
+  // Let page scroll through — zoom via slider only
+},{passive:true});
 let tx=0,ty=0;
 canvas.addEventListener('touchstart',e=>{touching=true;tx=e.touches[0].clientX;ty=e.touches[0].clientY;vx=vy=0;},{passive:false});
 canvas.addEventListener('touchmove',e=>{e.preventDefault();vy=(e.touches[0].clientX-tx)*0.009;vx=(e.touches[0].clientY-ty)*0.009;brain.rotation.y+=vy;brain.rotation.x=Math.max(-1.15,Math.min(1.15,brain.rotation.x+vx));tx=e.touches[0].clientX;ty=e.touches[0].clientY;},{passive:false});
