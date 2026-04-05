@@ -419,8 +419,12 @@ export default function ExploreBeliefs() {
         borderColor: '#ffffff20',
         borderWidth: 1,
         titleColor: '#fff',
+        titleFont: { size: 13, weight: 'bold' as const },
+        titleMarginBottom: 10,
         bodyColor: '#94a3b8',
-        padding: 12,
+        bodyFont: { size: 12 },
+        bodySpacing: 6,
+        padding: { top: 14, bottom: 14, left: 14, right: 14 },
         cornerRadius: 8,
         callbacks: {
           label: (ctx: any) => {
@@ -428,7 +432,7 @@ export default function ExploreBeliefs() {
             if (val === null || val === undefined) return '';
             const diff = val - 4.5;
             const direction = diff > 0.2 ? '↑ Traditional' : diff < -0.2 ? '↓ Progressive' : '→ Independent';
-            return `${ctx.dataset.label}: ${val.toFixed(1)} ${direction}`;
+            return ` ${ctx.dataset.label}: ${val.toFixed(1)} ${direction}`;
           },
         },
       },
