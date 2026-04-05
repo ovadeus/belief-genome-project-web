@@ -197,19 +197,35 @@ router.post('/submit', async (req: Request, res: Response) => {
   }
 });
 
-router.get('/stats', async (_req: Request, res: Response) => {
+function buildExploreFilters(query: any) {
+  const conditions: any[] = [];
+  if (query.country && typeof query.country === 'string') {
+    conditions.push(eq(genomeSubmissions.countryCode, query.country));
+  }
+  if (query.gender && typeof query.gender === 'string') {
+    conditions.push(eq(genomeSubmissions.gender, query.gender));
+  }
+  if (query.generationStart && query.generationEnd) {
+    conditions.push(gte(genomeSubmissions.birthYear, parseInt(query.generationStart as string)));
+    conditions.push(sql`${genomeSubmissions.birthYear} <= ${parseInt(query.generationEnd as string)}`);
+  }
+  return conditions.length > 0 ? and(...conditions) : undefined;
+}
+
+router.get('/stats', async (req: Request, res: Response) => {
   try {
+    const whereClause = buildExploreFilters(req.query);
+
     const [totalResult] = await db.select({ count: sql<number>`count(*)::int` })
-      .from(genomeSubmissions);
+      .from(genomeSubmissions).where(whereClause);
     const [countryResult] = await db.select({ count: sql<number>`count(distinct country_code)::int` })
-      .from(genomeSubmissions);
+      .from(genomeSubmissions).where(whereClause);
     const [avgDims] = await db.select({ avg: sql<number>`round(avg(dimensions_explored))::int` })
-      .from(genomeSubmissions);
-    const [totalAll] = await db.select({ count: sql<number>`count(*)::int` }).from(genomeSubmissions);
+      .from(genomeSubmissions).where(whereClause);
 
     return res.json({
       totalSubmissions: totalResult?.count ?? 0,
-      totalWithTest: totalAll?.count ?? 0,
+      totalWithTest: totalResult?.count ?? 0,
       uniqueCountries: countryResult?.count ?? 0,
       avgDimensionsExplored: avgDims?.avg ?? 0,
     });
@@ -223,21 +239,7 @@ const PRIVACY_MINIMUM = 5;
 
 router.get('/explore/dimensions', async (req: Request, res: Response) => {
   try {
-    const { country, gender, generationStart, generationEnd } = req.query;
-
-    let whereConditions: any[] = [];
-    if (country && typeof country === 'string') {
-      whereConditions.push(eq(genomeSubmissions.countryCode, country));
-    }
-    if (gender && typeof gender === 'string') {
-      whereConditions.push(eq(genomeSubmissions.gender, gender));
-    }
-    if (generationStart && generationEnd) {
-      whereConditions.push(gte(genomeSubmissions.birthYear, parseInt(generationStart as string)));
-      whereConditions.push(sql`${genomeSubmissions.birthYear} <= ${parseInt(generationEnd as string)}`);
-    }
-
-    const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;
+    const whereClause = buildExploreFilters(req.query);
 
     const submissions = await db.select({
       beliefValues: genomeSubmissions.beliefValues,
@@ -278,14 +280,16 @@ router.get('/explore/dimensions', async (req: Request, res: Response) => {
   }
 });
 
-router.get('/explore/countries', async (_req: Request, res: Response) => {
+router.get('/explore/countries', async (req: Request, res: Response) => {
   try {
-    const results = await db.select({
+    const whereClause = buildExploreFilters(req.query);
+    const query = db.select({
       countryCode: genomeSubmissions.countryCode,
       count: sql<number>`count(*)::int`,
     })
-    .from(genomeSubmissions)
-    .groupBy(genomeSubmissions.countryCode);
+    .from(genomeSubmissions);
+    if (whereClause) query.where(whereClause);
+    const results = await query.groupBy(genomeSubmissions.countryCode);
 
     const countries = results
       .filter(r => r.count >= PRIVACY_MINIMUM)
@@ -298,8 +302,9 @@ router.get('/explore/countries', async (_req: Request, res: Response) => {
   }
 });
 
-router.get('/explore/generations', async (_req: Request, res: Response) => {
+router.get('/explore/generations', async (req: Request, res: Response) => {
   try {
+    const baseFilters = buildExploreFilters(req.query);
     const generations = [
       { label: 'Silent Generation', start: 1928, end: 1945 },
       { label: 'Baby Boomers', start: 1946, end: 1964 },
@@ -311,19 +316,21 @@ router.get('/explore/generations', async (_req: Request, res: Response) => {
 
     const result = [];
     for (const gen of generations) {
-      const conditions = [
+      const genConditions = [
         gte(genomeSubmissions.birthYear, gen.start),
         sql`${genomeSubmissions.birthYear} <= ${gen.end}`,
       ];
+      if (baseFilters) genConditions.push(baseFilters);
+      const combinedWhere = and(...genConditions);
 
       const [countResult] = await db.select({ count: sql<number>`count(*)::int` })
         .from(genomeSubmissions)
-        .where(and(...conditions));
+        .where(combinedWhere);
 
       if ((countResult?.count ?? 0) >= PRIVACY_MINIMUM) {
         const submissions = await db.select({ beliefValues: genomeSubmissions.beliefValues })
           .from(genomeSubmissions)
-          .where(and(...conditions));
+          .where(combinedWhere);
 
         const dimSums: Record<string, { sum: number; count: number }> = {};
         for (const sub of submissions) {
@@ -355,14 +362,16 @@ router.get('/explore/generations', async (_req: Request, res: Response) => {
   }
 });
 
-router.get('/explore/genders', async (_req: Request, res: Response) => {
+router.get('/explore/genders', async (req: Request, res: Response) => {
   try {
-    const results = await db.select({
+    const whereClause = buildExploreFilters(req.query);
+    const query = db.select({
       gender: genomeSubmissions.gender,
       count: sql<number>`count(*)::int`,
     })
-    .from(genomeSubmissions)
-    .groupBy(genomeSubmissions.gender);
+    .from(genomeSubmissions);
+    if (whereClause) query.where(whereClause);
+    const results = await query.groupBy(genomeSubmissions.gender);
 
     const genders = results
       .filter(r => r.count >= PRIVACY_MINIMUM)

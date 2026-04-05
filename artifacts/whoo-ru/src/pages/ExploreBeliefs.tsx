@@ -147,11 +147,11 @@ export default function ExploreBeliefs() {
       if (gen.start) { qp.set("generationStart", gen.start); qp.set("generationEnd", gen.end); }
 
       const [statsRes, dimsRes, gensRes, gendersRes, countriesRes] = await Promise.all([
-        fetch(`${API_BASE}/genome/stats`),
+        fetch(`${API_BASE}/genome/stats?${qp}`),
         fetch(`${API_BASE}/genome/explore/dimensions?${qp}`),
-        fetch(`${API_BASE}/genome/explore/generations`),
-        fetch(`${API_BASE}/genome/explore/genders`),
-        fetch(`${API_BASE}/genome/explore/countries`),
+        fetch(`${API_BASE}/genome/explore/generations?${qp}`),
+        fetch(`${API_BASE}/genome/explore/genders?${qp}`),
+        fetch(`${API_BASE}/genome/explore/countries?${qp}`),
       ]);
 
       if (statsRes.ok) setStats(await statsRes.json());
