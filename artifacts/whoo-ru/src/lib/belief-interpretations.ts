@@ -510,6 +510,67 @@ function getIntensity(displayVal: number): string {
   return "strongly lean toward the view that";
 }
 
+const CATEGORY_INTERPRETATIONS: Record<string, Interpretation> = {
+  epistemology: {
+    pos: "knowledge comes from established authorities, tradition, and clear absolutes",
+    neg: "knowledge is subjective, experiential, and open to multiple perspectives",
+  },
+  spirituality: {
+    pos: "spiritual and religious beliefs play a meaningful role in life",
+    neg: "secular, materialist views over spiritual or religious frameworks",
+  },
+  morality: {
+    pos: "traditional, absolute moral standards and personal responsibility",
+    neg: "progressive, contextual ethics and collective moral frameworks",
+  },
+  politics: {
+    pos: "conservative governance, free markets, strong national identity, and individual liberty",
+    neg: "progressive governance, regulation, social programs, and collective equality",
+  },
+  social: {
+    pos: "traditional social structures, cultural preservation, and conventional norms",
+    neg: "progressive social change, diversity initiatives, and evolving cultural norms",
+  },
+  economics: {
+    pos: "free-market capitalism, limited regulation, and merit-based outcomes",
+    neg: "economic regulation, worker protections, and wealth redistribution",
+  },
+  science_tech: {
+    pos: "technology optimism, embracing innovation, and scientific progress",
+    neg: "caution toward technology, concern about risks, and skepticism of tech solutions",
+  },
+  education: {
+    pos: "traditional education models, standardized measures, and institutional trust",
+    neg: "educational reform, critical thinking emphasis, and alternative approaches",
+  },
+  health: {
+    pos: "conventional medicine, institutional healthcare, and established treatments",
+    neg: "holistic health approaches, body autonomy, and alternative wellness",
+  },
+  psychology: {
+    pos: "fixed traits, free will, positive thinking, and spiritual consciousness",
+    neg: "growth mindset, determinism, evidence-based therapy, and material consciousness",
+  },
+  relationships: {
+    pos: "traditional relationship structures, loyalty, and conventional family values",
+    neg: "flexible relationship models, conditional commitments, and individualism",
+  },
+};
+
+export function getCategoryInterpretation(categoryKey: string, displayVal: number, groupLabel: string): string {
+  const cat = CATEGORY_INTERPRETATIONS[categoryKey];
+  if (!cat) return "";
+
+  const abs = Math.abs(displayVal);
+  if (abs < 0.6) {
+    return `${groupLabel} is fairly split on these topics — no clear lean in either direction.`;
+  }
+
+  const intensity = getIntensity(displayVal);
+  const statement = displayVal > 0 ? cat.pos : cat.neg;
+  return `${groupLabel} ${intensity} ${statement}.`;
+}
+
 export function getBeliefInterpretation(dimId: string, displayVal: number): string {
   const override = OVERRIDES[dimId];
   if (!override) return "";

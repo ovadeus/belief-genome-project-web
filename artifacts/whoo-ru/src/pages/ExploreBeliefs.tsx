@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Globe, Users, BarChart3, Dna, Filter, ChevronDown, ChevronUp, Info } from "lucide-react";
 import { lazy, Suspense } from "react";
 import { rawToDisplay, formatDisplay, displayBarColor, displayBarBorder, DISPLAY_MIN, DISPLAY_MAX, DISPLAY_NEUTRAL, RAW_NEUTRAL } from "@/lib/belief-scale";
-import { getBeliefInterpretation } from "@/lib/belief-interpretations";
+import { getBeliefInterpretation, getCategoryInterpretation } from "@/lib/belief-interpretations";
 const WorldBeliefMap = lazy(() => import("@/components/explore/WorldBeliefMap"));
 import {
   Chart as ChartJS,
@@ -464,14 +464,29 @@ export default function ExploreBeliefs() {
       ...baseChartOptions.plugins,
       tooltip: {
         ...baseTooltipStyle,
+        bodyFont: { size: 12 },
+        padding: 14,
         displayColors: false,
         callbacks: {
+          title: (items: any[]) => {
+            if (!items.length) return '';
+            return items[0].label || '';
+          },
           label: (ctx: any) => {
             const val = ctx.parsed?.y;
             if (val === null || val === undefined) return '';
             const sign = val > 0 ? '+' : '';
             const direction = val > 0.3 ? '↑ Belief' : val < -0.3 ? '↓ Disbelief' : '→ Neutral';
             return `${ctx.dataset.label}: ${sign}${val.toFixed(2)} ${direction}`;
+          },
+          afterBody: (items: any[]) => {
+            if (!items.length) return '';
+            const val = items[0].parsed?.y;
+            if (val === null || val === undefined) return '';
+            const genLabel = items[0].label || '';
+            const interp = getCategoryInterpretation(selectedCategory, val, genLabel);
+            if (!interp) return '';
+            return wrapText(interp);
           },
         },
       },
