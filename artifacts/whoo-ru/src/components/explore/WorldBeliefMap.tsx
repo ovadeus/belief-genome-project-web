@@ -34,9 +34,17 @@ function lerp(a: number, b: number, t: number): number {
 function beliefColor(avg: number): string {
   const clamped = Math.max(1, Math.min(9, avg));
   const t = (clamped - 1) / 8;
-  const r = Math.round(lerp(220, 48, t));
-  const g = Math.round(lerp(50, 160, t));
-  const b = Math.round(lerp(50, 255, t));
+  if (t <= 0.5) {
+    const u = t / 0.5;
+    const r = Math.round(lerp(53, 255, u));
+    const g = Math.round(lerp(228, 255, u));
+    const b = Math.round(lerp(207, 255, u));
+    return `rgb(${r},${g},${b})`;
+  }
+  const u = (t - 0.5) / 0.5;
+  const r = Math.round(lerp(255, 82, u));
+  const g = Math.round(lerp(255, 168, u));
+  const b = Math.round(lerp(255, 255, u));
   return `rgb(${r},${g},${b})`;
 }
 
@@ -208,14 +216,14 @@ export default function WorldBeliefMap({ countryBeliefs }: WorldBeliefMapProps) 
       )}
 
       <div className="flex items-center justify-center gap-1 mt-2">
-        <span className="text-[10px] text-[#64748b]">−4 Disbelief</span>
+        <span className="text-[10px] text-[#35E4CF]">−4 Progressive</span>
         <div className="flex gap-0">
           {Array.from({ length: 9 }, (_, i) => {
             const score = 1 + i;
             return <div key={i} className="w-5 h-2.5" style={{ backgroundColor: beliefColor(score), borderRadius: i === 0 ? '3px 0 0 3px' : i === 8 ? '0 3px 3px 0' : '0' }} />;
           })}
         </div>
-        <span className="text-[10px] text-[#64748b]">+4 Belief</span>
+        <span className="text-[10px] text-[#52A8FF]">+4 Traditional</span>
         <span className="text-[10px] text-[#64748b] ml-3">■</span>
         <span className="text-[10px] text-[#64748b]">No data</span>
       </div>

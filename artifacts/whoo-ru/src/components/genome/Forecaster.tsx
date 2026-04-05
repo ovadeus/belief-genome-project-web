@@ -126,7 +126,7 @@ export default function Forecaster({ history }: Props) {
       </div>
 
       {error && (
-        <div style={{ color: '#ff4444', fontSize: 13, padding: 16, marginBottom: 16,
+        <div style={{ color: '#ff6b6b', fontSize: 13, padding: 16, marginBottom: 16,
           background: 'rgba(255,68,68,0.1)', borderRadius: 8 }}>
           {error}
         </div>
@@ -164,10 +164,10 @@ export default function Forecaster({ history }: Props) {
             <div style={{
               display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8,
             }}>
-              <span style={{ fontSize: 10, color: '#dc3232', whiteSpace: 'nowrap' }}>False to me</span>
+              <span style={{ fontSize: 10, color: '#35E4CF', whiteSpace: 'nowrap' }}>False to me</span>
               <div style={{
                 flex: 1, position: 'relative', height: 8, borderRadius: 4,
-                background: 'linear-gradient(90deg, #dc3232, #ff7728 20%, #787891 50%, #3cb4b4 75%, #50b4ff)',
+                background: 'linear-gradient(90deg, #35E4CF, #a0f2e7 20%, #ffffff 50%, #a8d4ff 75%, #52A8FF)',
               }}>
                 {/* Tick marks */}
                 {[5, 20, 38, 50, 63, 80, 94].map(p => (
@@ -186,7 +186,7 @@ export default function Forecaster({ history }: Props) {
                   transition: 'left 0.4s ease',
                 }} />
               </div>
-              <span style={{ fontSize: 10, color: '#50b4ff', whiteSpace: 'nowrap' }}>True to me</span>
+              <span style={{ fontSize: 10, color: '#52A8FF', whiteSpace: 'nowrap' }}>True to me</span>
             </div>
 
             {/* Verdict */}

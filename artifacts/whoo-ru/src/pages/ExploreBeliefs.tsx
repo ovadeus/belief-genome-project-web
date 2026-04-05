@@ -78,13 +78,13 @@ const EXPLORE_DOMAIN_AXES: Record<string, { left: string; right: string; mid: st
 };
 
 function exploreCatColour(avg09: number | null): string {
-  if (avg09 == null) return '#787891';
+  if (avg09 == null) return '#ffffff';
   const v = avg09 / 9;
-  if (v <= 0.22) return '#dc3232';
-  if (v <= 0.40) return '#ff7728';
-  if (v <= 0.60) return '#787891';
-  if (v <= 0.78) return '#3cb4b4';
-  return '#50b4ff';
+  if (v <= 0.22) return '#35E4CF';
+  if (v <= 0.40) return '#5EECD8';
+  if (v <= 0.60) return '#ffffff';
+  if (v <= 0.78) return '#6FB8FF';
+  return '#52A8FF';
 }
 
 function exploreDomainLabel(cat: string, avg09: number): string {
@@ -686,7 +686,7 @@ export default function ExploreBeliefs() {
                         <div style={{ position: 'relative', height: 14 }}>
                           <div style={{
                             position: 'absolute', inset: '3px 0', borderRadius: 4,
-                            background: 'linear-gradient(90deg, #dc3232, #ff7728 25%, #787891 50%, #3cb4b4 75%, #50b4ff)',
+                            background: 'linear-gradient(90deg, #35E4CF, #a0f2e7 25%, #ffffff 50%, #a8d4ff 75%, #52A8FF)',
                             opacity: 0.35,
                           }} />
                           <div style={{
@@ -831,7 +831,7 @@ export default function ExploreBeliefs() {
 
             {mapOpen && (
               <>
-                <p className="text-xs text-muted-foreground mt-3 mb-2">Geographic belief distribution — red = disbelief (−), blue = belief (+)</p>
+                <p className="text-xs text-muted-foreground mt-3 mb-2">Geographic belief distribution — green = progressive (−), blue = traditional (+)</p>
                 <Suspense fallback={
                   <div className="flex items-center justify-center h-[300px]">
                     <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />

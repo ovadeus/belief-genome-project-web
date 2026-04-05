@@ -46,8 +46,8 @@ function domainLabel(cat: string, avg: number): string {
 function scoreColor(score: number | null, alpha = 1): string {
   if (score === null || score === undefined) return `rgba(110,110,145,${alpha * 0.38})`;
   const stops: [number, number[]][] = [
-    [0, [220, 50, 50]], [2, [255, 120, 40]], [4, [200, 160, 60]],
-    [5, [120, 120, 145]], [6, [60, 180, 180]], [8, [60, 130, 255]], [9, [80, 180, 255]],
+    [0, [53, 228, 207]], [2, [94, 236, 216]], [4, [160, 242, 231]],
+    [5, [255, 255, 255]], [6, [168, 212, 255]], [8, [111, 184, 255]], [9, [82, 168, 255]],
   ];
   const s = Math.max(0, Math.min(9, score));
   let lo = stops[0], hi = stops[stops.length - 1];
@@ -270,7 +270,7 @@ export default function TripleHelix({ dimensions, dimensionScores, confidence }:
       tooltip.innerHTML = `
         <div style="font-size:10px;font-family:'Space Mono',monospace;color:${h.strand.color};margin-bottom:2px;">${h.strand.name} · ${h.node.dim.cat}</div>
         <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:6px;">${h.node.dim.name}</div>
-        <div style="position:relative;height:6px;border-radius:3px;background:linear-gradient(90deg,#dc3232,#ff7728 25%,#787891 50%,#3cb4b4 75%,#50b4ff);margin:6px 0 4px;">
+        <div style="position:relative;height:6px;border-radius:3px;background:linear-gradient(90deg,#35E4CF,#a0f2e7 25%,#ffffff 50%,#a8d4ff 75%,#52A8FF);margin:6px 0 4px;">
           ${score !== null ? `<div style="position:absolute;left:${barW}%;top:50%;transform:translate(-50%,-50%);width:10px;height:10px;border-radius:50%;background:${col};border:2px solid white;"></div>` : ''}
         </div>
         <div style="font-size:12px;">
@@ -390,11 +390,11 @@ export default function TripleHelix({ dimensions, dimensionScores, confidence }:
         display: 'flex', justifyContent: 'center', gap: 20, marginTop: 12,
         fontSize: 10, color: 'rgba(255,255,255,0.4)', flexWrap: 'wrap',
       }}>
-        <span><span style={{ color: '#ff4444' }}>&#8226;</span> False to me (0-2)</span>
-        <span><span style={{ color: '#ff7728' }}>&#8226;</span> Unlikely true (3-4)</span>
-        <span><span style={{ color: '#787891' }}>&#8226;</span> Uncertain (5)</span>
-        <span><span style={{ color: '#3cb4b4' }}>&#8226;</span> Likely true (6-7)</span>
-        <span><span style={{ color: '#50b4ff' }}>&#8226;</span> True to me (8-9)</span>
+        <span><span style={{ color: '#35E4CF' }}>&#8226;</span> False to me (0-2)</span>
+        <span><span style={{ color: '#5EECD8' }}>&#8226;</span> Unlikely true (3-4)</span>
+        <span><span style={{ color: '#ffffff' }}>&#8226;</span> Uncertain (5)</span>
+        <span><span style={{ color: '#6FB8FF' }}>&#8226;</span> Likely true (6-7)</span>
+        <span><span style={{ color: '#52A8FF' }}>&#8226;</span> True to me (8-9)</span>
         <span style={{ marginLeft: 16 }}>
           <span style={{ color: '#ff5050' }}>—</span> Tension
           <span style={{ marginLeft: 8, color: '#44cc88' }}>—</span> Aligned

@@ -106,11 +106,11 @@ export default function DnaPage() {
           fontSize: 11, color: 'rgba(255,255,255,0.4)', lineHeight: 1.6,
         }}>
           <strong style={{ color: '#6c8fff' }}>Scoring Scale:</strong>{' '}
-          <span style={{ color: '#dc3232' }}>0 = False to me</span> {' → '}
-          <span style={{ color: '#ff7728' }}>3 = Unlikely true</span> {' → '}
-          <span style={{ color: '#787891' }}>5 = Uncertain</span> {' → '}
-          <span style={{ color: '#3cb4b4' }}>7 = Likely true</span> {' → '}
-          <span style={{ color: '#50b4ff' }}>9 = Deeply true to me</span>
+          <span style={{ color: '#35E4CF' }}>0 = False to me</span> {' → '}
+          <span style={{ color: '#5EECD8' }}>3 = Unlikely true</span> {' → '}
+          <span style={{ color: '#ffffff' }}>5 = Uncertain</span> {' → '}
+          <span style={{ color: '#6FB8FF' }}>7 = Likely true</span> {' → '}
+          <span style={{ color: '#52A8FF' }}>9 = Deeply true to me</span>
         </div>
       </div>
     </div>

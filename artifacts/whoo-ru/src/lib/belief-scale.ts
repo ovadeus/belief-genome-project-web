@@ -24,32 +24,40 @@ export const DISPLAY_MAX = 4;
 export const DISPLAY_NEUTRAL = 0;
 export const RAW_NEUTRAL = 5;
 
-export function displayBarColor(displayVal: number): string {
-  if (displayVal === 0) return '#787891';
-  const t = Math.min(Math.abs(displayVal) / 4, 1);
-  if (displayVal > 0) {
-    const r = Math.round(120 - t * 72);
-    const g = Math.round(143 + t * 17);
-    const b = Math.round(145 + t * 110);
-    return `rgb(${r},${g},${b})`;
-  }
-  const r = Math.round(120 + t * 100);
-  const g = Math.round(143 - t * 93);
-  const b = Math.round(145 - t * 95);
+export const COLOR_PROGRESSIVE = '#35E4CF';
+export const COLOR_NEUTRAL = '#FFFFFF';
+export const COLOR_TRADITIONAL = '#52A8FF';
+
+function hexToRgb(hex: string): [number, number, number] {
+  const h = hex.replace('#', '');
+  return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
+}
+
+function lerpColor(from: string, to: string, t: number): string {
+  const [r1, g1, b1] = hexToRgb(from);
+  const [r2, g2, b2] = hexToRgb(to);
+  const r = Math.round(r1 + (r2 - r1) * t);
+  const g = Math.round(g1 + (g2 - g1) * t);
+  const b = Math.round(b1 + (b2 - b1) * t);
   return `rgb(${r},${g},${b})`;
 }
 
-export function displayBarBorder(displayVal: number): string {
-  if (displayVal === 0) return '#9999aa';
+export function displayBarColor(displayVal: number): string {
+  if (displayVal === 0) return COLOR_NEUTRAL;
   const t = Math.min(Math.abs(displayVal) / 4, 1);
-  if (displayVal > 0) {
-    const r = Math.round(80 - t * 32);
-    const g = Math.round(120 + t * 40);
-    const b = Math.round(180 + t * 75);
-    return `rgb(${r},${g},${b})`;
+  if (displayVal < 0) {
+    return lerpColor(COLOR_NEUTRAL, COLOR_PROGRESSIVE, t);
   }
-  const r = Math.round(180 + t * 40);
-  const g = Math.round(80 - t * 30);
-  const b = Math.round(80 - t * 30);
-  return `rgb(${r},${g},${b})`;
+  return lerpColor(COLOR_NEUTRAL, COLOR_TRADITIONAL, t);
 }
+
+export function displayBarBorder(displayVal: number): string {
+  if (displayVal === 0) return '#cccccc';
+  const t = Math.min(Math.abs(displayVal) / 4, 1);
+  if (displayVal < 0) {
+    return lerpColor('#cccccc', '#2BC4B0', t);
+  }
+  return lerpColor('#cccccc', '#3A8FE0', t);
+}
+
+export const BELIEF_GRADIENT_CSS = `linear-gradient(90deg, ${COLOR_PROGRESSIVE}, #a0f2e7 25%, ${COLOR_NEUTRAL} 50%, #a8d4ff 75%, ${COLOR_TRADITIONAL})`;

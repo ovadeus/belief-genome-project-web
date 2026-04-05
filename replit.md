@@ -46,6 +46,7 @@ Full-stack website for a psychometric self-knowledge framework, desktop app, and
 
 ### Design
 - Dark premium aesthetic: `#0a0a0f` background, `#6c8fff` electric blue primary, `#a78bfa` violet, `#22d3ee` cyan
+- Belief spectrum: `#35E4CF` green (progressive/disbelief) → `#FFFFFF` white (neutral) → `#52A8FF` blue (traditional/belief) — politically neutral palette
 - Font: Space Grotesk (display), Inter (body)
 - CSS animated triple helix in hero section
 

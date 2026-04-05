@@ -39,20 +39,20 @@ export function beliefLabel(v: number): string {
 }
 
 export function beliefColor(v: number): string {
-  if (v <= 10)  return '#dc3232';
-  if (v <= 30)  return '#ff7728';
-  if (v <= 45)  return '#c8a03c';
-  if (v <= 55)  return '#787891';
-  if (v <= 70)  return '#3cb4b4';
-  if (v <= 88)  return '#3c82ff';
-  return '#50b4ff';
+  if (v <= 10)  return '#35E4CF';
+  if (v <= 30)  return '#5EECD8';
+  if (v <= 45)  return '#a0f2e7';
+  if (v <= 55)  return '#ffffff';
+  if (v <= 70)  return '#a8d4ff';
+  if (v <= 88)  return '#6FB8FF';
+  return '#52A8FF';
 }
 
 export function catColour(v: number | null): string {
-  if (v == null) return '#787891';
-  if (v <= 0.22) return '#dc3232';
-  if (v <= 0.40) return '#ff7728';
-  if (v <= 0.60) return '#787891';
-  if (v <= 0.78) return '#3cb4b4';
-  return '#50b4ff';
+  if (v == null) return '#ffffff';
+  if (v <= 0.22) return '#35E4CF';
+  if (v <= 0.40) return '#5EECD8';
+  if (v <= 0.60) return '#ffffff';
+  if (v <= 0.78) return '#6FB8FF';
+  return '#52A8FF';
 }
