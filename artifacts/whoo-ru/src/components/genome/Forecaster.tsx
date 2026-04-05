@@ -167,7 +167,7 @@ export default function Forecaster({ history }: Props) {
               <span style={{ fontSize: 10, color: '#35E4CF', whiteSpace: 'nowrap' }}>False to me</span>
               <div style={{
                 flex: 1, position: 'relative', height: 8, borderRadius: 4,
-                background: 'linear-gradient(90deg, #35E4CF, #a0f2e7 20%, #ffffff 50%, #a8d4ff 75%, #52A8FF)',
+                background: 'linear-gradient(90deg, #35E4CF, #35E4CF 20%, #b0f0e8 45%, #ffffff 50%, #a8d4ff 55%, #52A8FF 80%, #52A8FF)',
               }}>
                 {/* Tick marks */}
                 {[5, 20, 38, 50, 63, 80, 94].map(p => (

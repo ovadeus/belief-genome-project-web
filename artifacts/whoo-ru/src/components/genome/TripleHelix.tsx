@@ -270,7 +270,7 @@ export default function TripleHelix({ dimensions, dimensionScores, confidence }:
       tooltip.innerHTML = `
         <div style="font-size:10px;font-family:'Space Mono',monospace;color:${h.strand.color};margin-bottom:2px;">${h.strand.name} · ${h.node.dim.cat}</div>
         <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:6px;">${h.node.dim.name}</div>
-        <div style="position:relative;height:6px;border-radius:3px;background:linear-gradient(90deg,#35E4CF,#a0f2e7 25%,#ffffff 50%,#a8d4ff 75%,#52A8FF);margin:6px 0 4px;">
+        <div style="position:relative;height:6px;border-radius:3px;background:linear-gradient(90deg,#35E4CF,#35E4CF 20%,#b0f0e8 45%,#ffffff 50%,#a8d4ff 55%,#52A8FF 80%,#52A8FF);margin:6px 0 4px;">
           ${score !== null ? `<div style="position:absolute;left:${barW}%;top:50%;transform:translate(-50%,-50%);width:10px;height:10px;border-radius:50%;background:${col};border:2px solid white;"></div>` : ''}
         </div>
         <div style="font-size:12px;">
