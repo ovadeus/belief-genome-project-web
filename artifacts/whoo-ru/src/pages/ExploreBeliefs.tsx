@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Globe, Users, BarChart3, Dna, Filter, ChevronDown, ChevronUp, Info } from "lucide-react";
 import { lazy, Suspense } from "react";
 import { rawToDisplay, formatDisplay, displayBarColor, displayBarBorder, DISPLAY_MIN, DISPLAY_MAX, DISPLAY_NEUTRAL, RAW_NEUTRAL } from "@/lib/belief-scale";
+import { getBeliefInterpretation } from "@/lib/belief-interpretations";
 const WorldBeliefMap = lazy(() => import("@/components/explore/WorldBeliefMap"));
 import {
   Chart as ChartJS,
@@ -363,20 +364,22 @@ export default function ExploreBeliefs() {
     },
   }), [selectedCategory]);
 
-  const chartOptions = {
+  const baseTooltipStyle = {
+    backgroundColor: '#0c1025',
+    borderColor: '#ffffff20',
+    borderWidth: 1,
+    titleColor: '#fff',
+    bodyColor: '#94a3b8',
+    padding: 12,
+    cornerRadius: 8,
+  };
+
+  const baseChartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
       legend: { display: false },
-      tooltip: {
-        backgroundColor: '#0c1025',
-        borderColor: '#ffffff20',
-        borderWidth: 1,
-        titleColor: '#fff',
-        bodyColor: '#94a3b8',
-        padding: 12,
-        cornerRadius: 8,
-      },
+      tooltip: baseTooltipStyle,
     },
     scales: {
       x: {
@@ -401,11 +404,88 @@ export default function ExploreBeliefs() {
     },
   };
 
+  const wrapText = (text: string, maxLen = 50): string[] => {
+    const lines: string[] = [''];
+    const words = text.split(' ');
+    let line = '';
+    for (const w of words) {
+      if ((line + ' ' + w).trim().length > maxLen && line) {
+        lines.push(line.trim());
+        line = w;
+      } else {
+        line = line ? line + ' ' + w : w;
+      }
+    }
+    if (line) lines.push(line.trim());
+    return lines;
+  };
+
+  const dimChartOptions = {
+    ...baseChartOptions,
+    plugins: {
+      ...baseChartOptions.plugins,
+      tooltip: {
+        ...baseTooltipStyle,
+        bodyFont: { size: 12 },
+        padding: 14,
+        displayColors: false,
+        callbacks: {
+          title: (items: any[]) => {
+            if (!items.length) return '';
+            return items[0].label || '';
+          },
+          label: (ctx: any) => {
+            const val = ctx.parsed?.y;
+            if (val === null || val === undefined) return '';
+            const sign = val > 0 ? '+' : '';
+            const direction = val > 0.3 ? '↑ Belief' : val < -0.3 ? '↓ Disbelief' : '→ Neutral';
+            return `Score: ${sign}${val.toFixed(2)} ${direction}`;
+          },
+          afterBody: (items: any[]) => {
+            if (!items.length) return '';
+            const idx = items[0].dataIndex;
+            const cat = CATEGORIES[selectedCategory];
+            if (!cat) return '';
+            const dimId = String(cat.dims[idx]);
+            const val = items[0].parsed?.y;
+            if (val === null || val === undefined) return '';
+            const interp = getBeliefInterpretation(dimId, val);
+            if (!interp) return '';
+            return wrapText(interp);
+          },
+        },
+      },
+    },
+  };
+
+  const genChartOptions = {
+    ...baseChartOptions,
+    plugins: {
+      ...baseChartOptions.plugins,
+      tooltip: {
+        ...baseTooltipStyle,
+        displayColors: false,
+        callbacks: {
+          label: (ctx: any) => {
+            const val = ctx.parsed?.y;
+            if (val === null || val === undefined) return '';
+            const sign = val > 0 ? '+' : '';
+            const direction = val > 0.3 ? '↑ Belief' : val < -0.3 ? '↓ Disbelief' : '→ Neutral';
+            return `${ctx.dataset.label}: ${sign}${val.toFixed(2)} ${direction}`;
+          },
+        },
+      },
+    },
+  };
+
   const countBarOptions = {
-    ...chartOptions,
+    ...baseChartOptions,
     indexAxis: 'y' as const,
+    plugins: {
+      ...baseChartOptions.plugins,
+      tooltip: baseTooltipStyle,
+    },
     scales: {
-      ...chartOptions.scales,
       y: { ticks: { color: '#94a3b8', font: { size: 11 } }, grid: { display: false } },
       x: { ticks: { color: '#64748b' }, grid: { color: '#ffffff08' } },
     },
@@ -790,7 +870,7 @@ export default function ExploreBeliefs() {
               </h3>
               <p className="text-xs text-muted-foreground mb-4">Based on {dimCount} submissions matching your filters</p>
               <div className="h-[350px]">
-                <Bar data={barChartData} options={chartOptions as any} plugins={[tensionLinePlugin]} />
+                <Bar data={barChartData} options={dimChartOptions as any} plugins={[tensionLinePlugin]} />
               </div>
             </motion.div>
 
@@ -803,7 +883,7 @@ export default function ExploreBeliefs() {
                 </h3>
                 <p className="text-xs text-muted-foreground mb-4">How beliefs shift across age groups</p>
                 <div className="h-[300px]">
-                  <Bar data={generationChartData} options={chartOptions as any} plugins={[tensionLinePlugin]} />
+                  <Bar data={generationChartData} options={genChartOptions as any} plugins={[tensionLinePlugin]} />
                 </div>
               </motion.div>
             )}
