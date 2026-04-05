@@ -184,11 +184,11 @@ const CAT_N=[10,15,15,20,15,10,10,5,5,10,9];
 const SHEX=['#ff2200','#ff5500','#ff8c00','#ffbb00','#ffe899',
             '#f8f8ff','#aac4ff','#6677ee','#3344cc','#5511aa'];
 const SINT=SHEX.map(h=>parseInt(h.slice(1),16));
-const SLBL=['Far Progressive','Progressive','Leaning Progressive','Center-Left','Soft Center-Left',
-            'Unresolved · Independent','Soft Center-Right','Center-Right','Leaning Conservative','Conservative'];
+const SLBL=['Strong Disbelief (−4)','Disbelief (−3)','Leaning Disbelief (−2)','Mild Disbelief (−1)','Slight Disbelief',
+            'Neutral (0)','Slight Belief','Mild Belief (+1)','Leaning Belief (+2)','Belief (+3)'];
 
 function getScores(id){const ci=CAT_IDS.indexOf(id);if(ci<0)return[];const off=CAT_N.slice(0,ci).reduce((a,b)=>a+b,0);return BELIEF.slice(off,off+CAT_N[ci]);}
-function avgS(id){const s=getScores(id);return s.length?(s.reduce((a,b)=>a+b,0)/s.length).toFixed(1):'5.0';}
+function avgS(id){const s=getScores(id);if(!s.length)return '0.0';const raw=s.reduce((a,b)=>a+b,0)/s.length;const d=raw-5;return (d>=0?'+':'')+d.toFixed(1);}
 
 // ── INIT ─────────────────────────────────────────────────────────────────────
 const wrap=document.getElementById('wrap'),canvas=document.getElementById('c'),tip=document.getElementById('tooltip');
@@ -697,7 +697,7 @@ function doHover(e){
         <div style="display:flex;align-items:center;gap:12px;">
           <div style="width:24px;height:24px;border-radius:6px;background:${d.sHex};box-shadow:0 0 15px ${d.sHex};"></div>
           <div><div style="color:${d.sHex};font-weight:bold;font-size:16px;line-height:1;">${d.label}</div>
-          <div style="color:#556677;font-size:9px;margin-top:2px;">score ${d.score} · ${d.score<5?'progressive lean':d.score>5?'conservative lean':'unresolved'}</div></div>
+          <div style="color:#556677;font-size:9px;margin-top:2px;">score ${d.score-5>0?'+':''}${d.score-5} · ${d.score<5?'disbelief':d.score>5?'belief':'neutral'}</div></div>
         </div>`;
     }
   } else {

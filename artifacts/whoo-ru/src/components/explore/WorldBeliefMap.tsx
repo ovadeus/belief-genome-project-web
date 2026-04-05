@@ -5,6 +5,7 @@ import {
   Geography,
   ZoomableGroup,
 } from "react-simple-maps";
+import { rawToDisplay, formatDisplay } from "@/lib/belief-scale";
 
 const GEO_URL = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 
@@ -36,12 +37,12 @@ function beliefColor(avg: number): string {
 }
 
 function beliefLabel(avg: number): string {
-  const v = avg / 9;
-  if (v <= 0.22) return 'Strongly Progressive';
-  if (v <= 0.40) return 'Progressive';
-  if (v <= 0.60) return 'Independent / Mixed';
-  if (v <= 0.78) return 'Traditional';
-  return 'Strongly Traditional';
+  const d = rawToDisplay(avg);
+  if (d <= -3) return 'Strong Disbelief';
+  if (d <= -1) return 'Disbelief';
+  if (d <= 1) return 'Neutral / Mixed';
+  if (d <= 3) return 'Belief';
+  return 'Strong Belief';
 }
 
 interface CountryBelief {
@@ -143,21 +144,21 @@ export default function WorldBeliefMap({ countryBeliefs }: WorldBeliefMapProps) 
             <span style={{ color: beliefColor(tooltip.avg) }}>
               {beliefLabel(tooltip.avg)}
             </span>
-            <span className="text-[#64748b]">({tooltip.avg.toFixed(2)})</span>
+            <span className="text-[#64748b]">({formatDisplay(tooltip.avg)})</span>
           </div>
           <div className="text-[#64748b] mt-0.5">{tooltip.count} participants</div>
         </div>
       )}
 
       <div className="flex items-center justify-center gap-1 mt-3">
-        <span className="text-[10px] text-[#64748b]">Progressive</span>
+        <span className="text-[10px] text-[#64748b]">−4 Disbelief</span>
         <div className="flex gap-0">
           {Array.from({ length: 9 }, (_, i) => {
             const score = 1 + i;
             return <div key={i} className="w-5 h-2.5" style={{ backgroundColor: beliefColor(score), borderRadius: i === 0 ? '3px 0 0 3px' : i === 8 ? '0 3px 3px 0' : '0' }} />;
           })}
         </div>
-        <span className="text-[10px] text-[#64748b]">Traditional</span>
+        <span className="text-[10px] text-[#64748b]">+4 Belief</span>
         <span className="text-[10px] text-[#64748b] ml-3">■</span>
         <span className="text-[10px] text-[#64748b]">No data</span>
       </div>

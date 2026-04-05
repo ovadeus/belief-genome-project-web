@@ -3,6 +3,7 @@ import { PublicLayout } from "@/components/layout/PublicLayout";
 import { motion } from "framer-motion";
 import { Globe, Users, BarChart3, Dna, Filter, ChevronDown, ChevronUp, Info } from "lucide-react";
 import { lazy, Suspense } from "react";
+import { rawToDisplay, formatDisplay, DISPLAY_MIN, DISPLAY_MAX, DISPLAY_NEUTRAL, RAW_NEUTRAL } from "@/lib/belief-scale";
 const WorldBeliefMap = lazy(() => import("@/components/explore/WorldBeliefMap"));
 import {
   Chart as ChartJS,
@@ -223,7 +224,7 @@ export default function ExploreBeliefs() {
       labels: categoryDims.map(d => d.name),
       datasets: [{
         label: `Average Score (${cat?.label})`,
-        data: categoryDims.map(d => d.avg ?? 0),
+        data: categoryDims.map(d => d.avg !== null ? rawToDisplay(d.avg) : null),
         backgroundColor: `${cat?.color}88`,
         borderColor: cat?.color,
         borderWidth: 2,
@@ -258,7 +259,7 @@ export default function ExploreBeliefs() {
           const val = t.avgs[String(dimId)];
           if (val !== undefined) { sum += val; count++; }
         }
-        return count > 0 ? Math.round((sum / count) * 100) / 100 : null;
+        return count > 0 ? Math.round(rawToDisplay(sum / count) * 100) / 100 : null;
       });
 
       return {
@@ -298,7 +299,7 @@ export default function ExploreBeliefs() {
             const val = g.avgBeliefs[String(id)];
             if (val !== undefined) { sum += val; count++; }
           }
-          return count > 0 ? Math.round((sum / count) * 100) / 100 : 0;
+          return count > 0 ? Math.round(rawToDisplay(sum / count) * 100) / 100 : null;
         }),
         backgroundColor: `${cat.color}66`,
         borderColor: cat.color,
@@ -343,7 +344,7 @@ export default function ExploreBeliefs() {
     afterDraw(chart: any) {
       const yScale = chart.scales.y;
       if (!yScale) return;
-      const y = yScale.getPixelForValue(5);
+      const y = yScale.getPixelForValue(DISPLAY_NEUTRAL);
       const { left, right } = chart.chartArea;
       const ctx = chart.ctx;
       const color = CATEGORIES[selectedCategory]?.color || '#6c8fff';
@@ -381,9 +382,19 @@ export default function ExploreBeliefs() {
         grid: { color: '#ffffff08' },
       },
       y: {
-        min: 0, max: 9,
-        ticks: { color: '#64748b', stepSize: 1 },
-        grid: { color: '#ffffff08' },
+        min: DISPLAY_MIN, max: DISPLAY_MAX,
+        ticks: {
+          color: '#64748b',
+          stepSize: 1,
+          callback: (v: any) => {
+            if (v > 0) return `+${v}`;
+            return v;
+          },
+        },
+        grid: {
+          color: (ctx: any) => ctx.tick?.value === 0 ? '#ffffff30' : '#ffffff08',
+          lineWidth: (ctx: any) => ctx.tick?.value === 0 ? 1.5 : 1,
+        },
       },
     },
   };
@@ -432,9 +443,9 @@ export default function ExploreBeliefs() {
           label: (ctx: any) => {
             const val = ctx.parsed?.y;
             if (val === null || val === undefined) return '';
-            const diff = val - 5;
-            const direction = diff > 0.3 ? '↑ Traditional' : diff < -0.3 ? '↓ Progressive' : '→ Independent';
-            return ` ${ctx.dataset.label}: ${val.toFixed(1)} ${direction}`;
+            const direction = val > 0.3 ? '↑ Belief' : val < -0.3 ? '↓ Disbelief' : '→ Neutral';
+            const sign = val > 0 ? '+' : '';
+            return ` ${ctx.dataset.label}: ${sign}${val.toFixed(1)} ${direction}`;
           },
         },
       },
@@ -445,15 +456,18 @@ export default function ExploreBeliefs() {
         grid: { color: '#ffffff08' },
       },
       y: {
-        min: 0, max: 9,
+        min: DISPLAY_MIN, max: DISPLAY_MAX,
         ticks: {
           color: '#64748b',
           stepSize: 1,
-          callback: (v: any) => v,
+          callback: (v: any) => {
+            if (v > 0) return `+${v}`;
+            return v;
+          },
         },
         grid: {
-          color: (ctx: any) => ctx.tick?.value === 5 ? '#ffffff40' : '#ffffff08',
-          lineWidth: (ctx: any) => ctx.tick?.value === 5 ? 2 : 1,
+          color: (ctx: any) => ctx.tick?.value === 0 ? '#ffffff40' : '#ffffff08',
+          lineWidth: (ctx: any) => ctx.tick?.value === 0 ? 2 : 1,
         },
       },
     },
@@ -637,7 +651,7 @@ export default function ExploreBeliefs() {
               }}>
                 <BarChart3 size={14} style={{ opacity: 0.6 }} />
                 Belief Evolution Timeline
-                <InfoTip text="Tracks how belief category averages shift over time. Each line represents one of the 11 belief categories. The dashed center line at 4.5 represents 'Independent' — a perfectly balanced position. Lines above trend Traditional/Conservative; lines below trend Progressive. Use the interval buttons to zoom in (week) or out (year). Filters apply here too." />
+                <InfoTip text="Tracks how belief category averages shift over time. Each line represents one of the 11 belief categories. The dashed center line at 0 represents 'Neutral'. Positive values (+1 to +4) indicate belief; negative values (−1 to −4) indicate disbelief. Use the interval buttons to zoom in (week) or out (year). Filters apply here too." />
               </div>
               {timelineOpen ? (
                 <ChevronUp size={16} className="text-muted-foreground" />
@@ -649,7 +663,7 @@ export default function ExploreBeliefs() {
             {timelineOpen && (
               <>
                 <div className="flex items-center justify-between mt-4 mb-2">
-                  <p className="text-xs text-muted-foreground">How collective beliefs shift over time — midline = Independent (5)</p>
+                  <p className="text-xs text-muted-foreground">How collective beliefs shift over time — midline = Neutral (0)</p>
                   <div className="flex gap-1">
                     {TIMELINE_INTERVALS.map(ti => (
                       <button
@@ -672,7 +686,7 @@ export default function ExploreBeliefs() {
                     afterDraw(chart: any) {
                       const yScale = chart.scales.y;
                       if (!yScale) return;
-                      const y = yScale.getPixelForValue(5);
+                      const y = yScale.getPixelForValue(DISPLAY_NEUTRAL);
                       const { left, right } = chart.chartArea;
                       const ctx = chart.ctx;
                       ctx.save();
@@ -709,7 +723,7 @@ export default function ExploreBeliefs() {
               }}>
                 <Globe size={14} style={{ opacity: 0.6 }} />
                 World Belief Heatmap
-                <InfoTip text="A global view of how beliefs lean across countries. Red tones indicate progressive-leaning populations, blue tones indicate traditional-leaning, and grey means mixed/independent. Only countries with 5+ participants are shown. Hover over a country to see its average score and participant count. Filters for generation and gender apply here too." />
+                <InfoTip text="A global view of how beliefs lean across countries. Red tones indicate disbelief-leaning (negative), blue tones indicate belief-leaning (positive), and grey means neutral/mixed (near 0). Only countries with 5+ participants are shown. Hover over a country to see its average score and participant count. Filters for generation and gender apply here too." />
               </div>
               {mapOpen ? (
                 <ChevronUp size={16} className="text-muted-foreground" />
@@ -720,7 +734,7 @@ export default function ExploreBeliefs() {
 
             {mapOpen && (
               <>
-                <p className="text-xs text-muted-foreground mt-3 mb-2">Geographic belief distribution — red = progressive, blue = traditional</p>
+                <p className="text-xs text-muted-foreground mt-3 mb-2">Geographic belief distribution — red = disbelief (−), blue = belief (+)</p>
                 <Suspense fallback={
                   <div className="flex items-center justify-center h-[300px]">
                     <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
