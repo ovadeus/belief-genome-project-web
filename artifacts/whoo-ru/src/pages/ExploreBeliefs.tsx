@@ -147,6 +147,7 @@ export default function ExploreBeliefs() {
   const [filterGenIdx, setFilterGenIdx] = useState(0);
   const [loading, setLoading] = useState(true);
   const [breakdownOpen, setBreakdownOpen] = useState(true);
+  const [timelineOpen, setTimelineOpen] = useState(true);
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
@@ -619,6 +620,81 @@ export default function ExploreBeliefs() {
           </motion.div>
         )}
 
+        {!loading && !insufficientData && dimCount >= 5 && timelineChartData && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+            className="bg-[#0c1025]/80 border border-white/10 rounded-2xl p-6">
+            <button
+              onClick={() => setTimelineOpen(o => !o)}
+              className="w-full flex items-center justify-between cursor-pointer"
+              style={{ background: 'none', border: 'none', padding: 0 }}
+            >
+              <div style={{
+                fontSize: 11, fontFamily: "'Space Mono', monospace", textTransform: 'uppercase',
+                letterSpacing: 1.5, color: 'rgba(255,255,255,0.5)',
+                display: 'flex', alignItems: 'center', gap: 8,
+              }}>
+                <BarChart3 size={14} style={{ opacity: 0.6 }} />
+                Belief Evolution Timeline
+                <InfoTip text="Tracks how belief category averages shift over time. Each line represents one of the 11 belief categories. The dashed center line at 4.5 represents 'Independent' — a perfectly balanced position. Lines above trend Traditional/Conservative; lines below trend Progressive. Use the interval buttons to zoom in (week) or out (year). Filters apply here too." />
+              </div>
+              {timelineOpen ? (
+                <ChevronUp size={16} className="text-muted-foreground" />
+              ) : (
+                <ChevronDown size={16} className="text-muted-foreground" />
+              )}
+            </button>
+
+            {timelineOpen && (
+              <>
+                <div className="flex items-center justify-between mt-4 mb-2">
+                  <p className="text-xs text-muted-foreground">How collective beliefs shift over time — midline = Independent (4.5)</p>
+                  <div className="flex gap-1">
+                    {TIMELINE_INTERVALS.map(ti => (
+                      <button
+                        key={ti.value}
+                        onClick={() => setTimelineInterval(ti.value)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all border ${
+                          timelineInterval === ti.value
+                            ? 'bg-primary/20 border-primary/40 text-primary'
+                            : 'border-white/10 text-muted-foreground hover:text-foreground hover:border-white/20'
+                        }`}
+                      >
+                        {ti.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="h-[420px]">
+                  <Line data={timelineChartData} options={timelineOptions as any} plugins={[{
+                    id: 'independentLine',
+                    afterDraw(chart: any) {
+                      const yScale = chart.scales.y;
+                      if (!yScale) return;
+                      const y = yScale.getPixelForValue(4.5);
+                      const { left, right } = chart.chartArea;
+                      const ctx = chart.ctx;
+                      ctx.save();
+                      ctx.beginPath();
+                      ctx.setLineDash([8, 4]);
+                      ctx.strokeStyle = '#ffffff50';
+                      ctx.lineWidth = 1.5;
+                      ctx.moveTo(left, y);
+                      ctx.lineTo(right, y);
+                      ctx.stroke();
+                      ctx.setLineDash([]);
+                      ctx.fillStyle = '#ffffff60';
+                      ctx.font = '10px sans-serif';
+                      ctx.textAlign = 'right';
+                      ctx.fillText('Independent', right - 4, y - 6);
+                      ctx.restore();
+                    },
+                  }]} />
+                </div>
+              </>
+            )}
+          </motion.div>
+        )}
+
         <div className="flex flex-wrap gap-2 justify-center">
           {Object.entries(CATEGORIES).map(([key, cat]) => (
             <button
@@ -663,62 +739,6 @@ export default function ExploreBeliefs() {
                 <Bar data={barChartData} options={chartOptions as any} plugins={[tensionLinePlugin]} />
               </div>
             </motion.div>
-
-            {timelineChartData && (
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
-                className="lg:col-span-2 bg-[#0c1025]/80 border border-white/10 rounded-2xl p-6">
-                <div className="flex items-start justify-between flex-wrap gap-3 mb-1">
-                  <div>
-                    <h3 className="text-lg font-semibold text-foreground flex items-center">
-                      Belief Evolution Timeline
-                      <InfoTip text="Tracks how belief category averages shift over time. Each line represents one of the 11 belief categories. The dashed center line at 4.5 represents 'Independent' — a perfectly balanced position. Lines above trend Traditional/Conservative; lines below trend Progressive. Use the interval buttons to zoom in (week) or out (year). Filters apply here too." />
-                    </h3>
-                    <p className="text-xs text-muted-foreground">How collective beliefs shift over time — midline = Independent (4.5)</p>
-                  </div>
-                  <div className="flex gap-1">
-                    {TIMELINE_INTERVALS.map(ti => (
-                      <button
-                        key={ti.value}
-                        onClick={() => setTimelineInterval(ti.value)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all border ${
-                          timelineInterval === ti.value
-                            ? 'bg-primary/20 border-primary/40 text-primary'
-                            : 'border-white/10 text-muted-foreground hover:text-foreground hover:border-white/20'
-                        }`}
-                      >
-                        {ti.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div className="h-[420px] mt-4">
-                  <Line data={timelineChartData} options={timelineOptions as any} plugins={[{
-                    id: 'independentLine',
-                    afterDraw(chart: any) {
-                      const yScale = chart.scales.y;
-                      if (!yScale) return;
-                      const y = yScale.getPixelForValue(4.5);
-                      const { left, right } = chart.chartArea;
-                      const ctx = chart.ctx;
-                      ctx.save();
-                      ctx.beginPath();
-                      ctx.setLineDash([8, 4]);
-                      ctx.strokeStyle = '#ffffff50';
-                      ctx.lineWidth = 1.5;
-                      ctx.moveTo(left, y);
-                      ctx.lineTo(right, y);
-                      ctx.stroke();
-                      ctx.setLineDash([]);
-                      ctx.fillStyle = '#ffffff60';
-                      ctx.font = '10px sans-serif';
-                      ctx.textAlign = 'right';
-                      ctx.fillText('Independent', right - 4, y - 6);
-                      ctx.restore();
-                    },
-                  }]} />
-                </div>
-              </motion.div>
-            )}
 
             {generationChartData && (
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
