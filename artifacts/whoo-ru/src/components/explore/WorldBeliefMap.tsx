@@ -70,10 +70,15 @@ export default function WorldBeliefMap({ countryBeliefs }: WorldBeliefMapProps) 
     <div className="relative">
       <ComposableMap
         projection="geoEqualEarth"
-        projectionConfig={{ scale: 160, center: [0, 0] }}
-        style={{ width: '100%', height: 'auto', maxHeight: 420 }}
+        projectionConfig={{ scale: 220, center: [10, 10] }}
+        style={{ width: '100%', height: 'auto' }}
+        height={480}
       >
-        <ZoomableGroup>
+        <ZoomableGroup
+          minZoom={0.6}
+          maxZoom={5}
+          center={[10, 10]}
+        >
           <Geographies geography={GEO_URL}>
             {({ geographies }: { geographies: any[] }) =>
               geographies.map((geo) => {
