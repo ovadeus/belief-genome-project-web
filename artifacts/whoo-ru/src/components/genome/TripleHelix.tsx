@@ -46,8 +46,9 @@ function domainLabel(cat: string, avg: number): string {
 function scoreColor(score: number | null, alpha = 1): string {
   if (score === null || score === undefined) return `rgba(110,110,145,${alpha * 0.38})`;
   const stops: [number, number[]][] = [
-    [0, [53, 228, 207]], [2, [94, 236, 216]], [4, [160, 242, 231]],
-    [5, [255, 255, 255]], [6, [168, 212, 255]], [8, [111, 184, 255]], [9, [82, 168, 255]],
+    [0, [26, 201, 181]], [1, [35, 216, 195]], [2, [53, 228, 207]], [3, [70, 234, 215]],
+    [4, [120, 240, 225]], [5, [220, 245, 242]], [6, [140, 210, 255]],
+    [7, [100, 188, 255]], [8, [82, 168, 255]], [9, [58, 143, 224]],
   ];
   const s = Math.max(0, Math.min(9, score));
   let lo = stops[0], hi = stops[stops.length - 1];
