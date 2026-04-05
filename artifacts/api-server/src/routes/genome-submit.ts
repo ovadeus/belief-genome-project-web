@@ -280,6 +280,64 @@ router.get('/explore/dimensions', async (req: Request, res: Response) => {
   }
 });
 
+router.get('/explore/timeline', async (req: Request, res: Response) => {
+  try {
+    const whereClause = buildExploreFilters(req.query);
+    const { interval } = req.query;
+
+    let truncFn: string;
+    switch (interval) {
+      case 'week': truncFn = 'week'; break;
+      case 'quarter': truncFn = 'quarter'; break;
+      case 'year': truncFn = 'year'; break;
+      default: truncFn = 'month'; break;
+    }
+
+    const query = db.select({
+      period: sql<string>`date_trunc(${sql.raw(`'${truncFn}'`)}, ${genomeSubmissions.submittedAt})::text`.as('period'),
+      beliefValues: genomeSubmissions.beliefValues,
+    }).from(genomeSubmissions);
+    if (whereClause) query.where(whereClause);
+    const rows = await query.orderBy(sql`period`);
+
+    const buckets: Record<string, { sums: Record<string, number>; counts: Record<string, number>; total: number }> = {};
+
+    for (const row of rows) {
+      const period = (row as any).period;
+      if (!period) continue;
+      if (!buckets[period]) buckets[period] = { sums: {}, counts: {}, total: 0 };
+      buckets[period].total++;
+      const values = row.beliefValues as Record<string, number | null> | null;
+      if (!values) continue;
+      for (const [dimId, val] of Object.entries(values)) {
+        if (val === null) continue;
+        if (!buckets[period].sums[dimId]) { buckets[period].sums[dimId] = 0; buckets[period].counts[dimId] = 0; }
+        buckets[period].sums[dimId] += val;
+        buckets[period].counts[dimId]++;
+      }
+    }
+
+    const timeline = Object.entries(buckets)
+      .filter(([_, b]) => b.total >= PRIVACY_MINIMUM)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([period, b]) => {
+        const avgs: Record<string, number> = {};
+        for (const [dimId, sum] of Object.entries(b.sums)) {
+          const cnt = b.counts[dimId];
+          if (cnt >= PRIVACY_MINIMUM) {
+            avgs[dimId] = Math.round((sum / cnt) * 100) / 100;
+          }
+        }
+        return { period, count: b.total, avgs };
+      });
+
+    return res.json({ timeline });
+  } catch (err: any) {
+    console.error('Explore timeline error:', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 router.get('/explore/countries', async (req: Request, res: Response) => {
   try {
     const whereClause = buildExploreFilters(req.query);

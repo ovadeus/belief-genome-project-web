@@ -14,10 +14,11 @@ import {
   Tooltip,
   Legend,
   ArcElement,
+  TimeScale,
 } from 'chart.js';
-import { Bar, Radar, Doughnut } from 'react-chartjs-2';
+import { Bar, Line, Doughnut } from 'react-chartjs-2';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend, ArcElement);
+ChartJS.register(CategoryScale, LinearScale, BarElement, RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend, ArcElement, TimeScale);
 
 const API_BASE = import.meta.env.VITE_API_URL || "/api";
 
@@ -121,6 +122,14 @@ interface StatsData { totalSubmissions: number; totalWithTest: number; uniqueCou
 interface GenerationData { label: string; start: number; end: number; count: number; avgBeliefs: Record<string, number>; }
 interface GenderData { gender: string; count: number; }
 interface CountryData { countryCode: string; count: number; }
+interface TimelinePoint { period: string; count: number; avgs: Record<string, number>; }
+
+const TIMELINE_INTERVALS = [
+  { label: 'Week', value: 'week' },
+  { label: 'Month', value: 'month' },
+  { label: 'Quarter', value: 'quarter' },
+  { label: 'Year', value: 'year' },
+];
 
 export default function ExploreBeliefs() {
   const [stats, setStats] = useState<StatsData | null>(null);
@@ -130,6 +139,8 @@ export default function ExploreBeliefs() {
   const [generations, setGenerations] = useState<GenerationData[]>([]);
   const [genders, setGenders] = useState<GenderData[]>([]);
   const [countries, setCountries] = useState<CountryData[]>([]);
+  const [timeline, setTimeline] = useState<TimelinePoint[]>([]);
+  const [timelineInterval, setTimelineInterval] = useState("month");
   const [selectedCategory, setSelectedCategory] = useState("epistemology");
   const [filterCountry, setFilterCountry] = useState("");
   const [filterGender, setFilterGender] = useState("");
@@ -146,12 +157,16 @@ export default function ExploreBeliefs() {
       const gen = GENERATION_OPTIONS[filterGenIdx];
       if (gen.start) { qp.set("generationStart", gen.start); qp.set("generationEnd", gen.end); }
 
-      const [statsRes, dimsRes, gensRes, gendersRes, countriesRes] = await Promise.all([
+      const tlQp = new URLSearchParams(qp);
+      tlQp.set("interval", timelineInterval);
+
+      const [statsRes, dimsRes, gensRes, gendersRes, countriesRes, tlRes] = await Promise.all([
         fetch(`${API_BASE}/genome/stats?${qp}`),
         fetch(`${API_BASE}/genome/explore/dimensions?${qp}`),
         fetch(`${API_BASE}/genome/explore/generations?${qp}`),
         fetch(`${API_BASE}/genome/explore/genders?${qp}`),
         fetch(`${API_BASE}/genome/explore/countries?${qp}`),
+        fetch(`${API_BASE}/genome/explore/timeline?${tlQp}`),
       ]);
 
       if (statsRes.ok) setStats(await statsRes.json());
@@ -164,9 +179,10 @@ export default function ExploreBeliefs() {
       if (gensRes.ok) { const d = await gensRes.json(); setGenerations(d.generations || []); }
       if (gendersRes.ok) { const d = await gendersRes.json(); setGenders(d.genders || []); }
       if (countriesRes.ok) { const d = await countriesRes.json(); setCountries(d.countries || []); }
+      if (tlRes.ok) { const d = await tlRes.json(); setTimeline(d.timeline || []); }
     } catch (err) { console.error("Failed to load explore data:", err); }
     setLoading(false);
-  }, [filterCountry, filterGender, filterGenIdx]);
+  }, [filterCountry, filterGender, filterGenIdx, timelineInterval]);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
@@ -209,36 +225,54 @@ export default function ExploreBeliefs() {
     };
   }, [categoryDims, selectedCategory]);
 
-  const radarChartData = useMemo(() => {
-    const catKeys = Object.keys(CATEGORIES);
-    const labels = catKeys.map(k => CATEGORIES[k].label);
-    const colors = catKeys.map(k => CATEGORIES[k].color);
+  const timelineChartData = useMemo(() => {
+    if (timeline.length === 0) return null;
 
-    const avgPerCat = catKeys.map(k => {
-      const dims = CATEGORIES[k].dims;
-      let sum = 0, count = 0;
-      for (const id of dims) {
-        const d = dimensions[String(id)];
-        if (d) { sum += d.avg; count++; }
+    const catEntries = Object.entries(CATEGORIES);
+
+    const formatPeriod = (p: string) => {
+      const d = new Date(p);
+      if (isNaN(d.getTime())) return p;
+      if (timelineInterval === 'year') return d.getFullYear().toString();
+      if (timelineInterval === 'quarter') {
+        const q = Math.ceil((d.getMonth() + 1) / 3);
+        return `Q${q} ${d.getFullYear()}`;
       }
-      return count > 0 ? sum / count : 0;
+      if (timelineInterval === 'week') return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' });
+      return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    };
+
+    const labels = timeline.map(t => formatPeriod(t.period));
+
+    const datasets = catEntries.map(([catKey, cat]) => {
+      const data = timeline.map(t => {
+        let sum = 0, count = 0;
+        for (const dimId of cat.dims) {
+          const val = t.avgs[String(dimId)];
+          if (val !== undefined) { sum += val; count++; }
+        }
+        return count > 0 ? Math.round((sum / count) * 100) / 100 : null;
+      });
+
+      return {
+        label: cat.label,
+        data,
+        borderColor: cat.color,
+        backgroundColor: cat.color + '20',
+        borderWidth: 2,
+        pointRadius: 3,
+        pointHoverRadius: 6,
+        pointBackgroundColor: cat.color,
+        pointBorderColor: '#0c1025',
+        pointBorderWidth: 1.5,
+        tension: 0.3,
+        fill: false,
+        spanGaps: true,
+      };
     });
 
-    return {
-      labels,
-      datasets: [{
-        label: 'Category Averages',
-        data: avgPerCat,
-        backgroundColor: 'rgba(108, 143, 255, 0.15)',
-        borderColor: '#6c8fff',
-        borderWidth: 2,
-        pointBackgroundColor: colors,
-        pointBorderColor: '#fff',
-        pointBorderWidth: 1,
-        pointRadius: 5,
-      }],
-    };
-  }, [dimensions]);
+    return { labels, datasets };
+  }, [timeline, timelineInterval]);
 
   const generationChartData = useMemo(() => {
     if (generations.length === 0) return null;
@@ -360,17 +394,64 @@ export default function ExploreBeliefs() {
     },
   };
 
-  const radarOptions = {
+  const timelineOptions = {
     responsive: true,
     maintainAspectRatio: false,
-    plugins: { legend: { display: false } },
+    interaction: {
+      mode: 'index' as const,
+      intersect: false,
+    },
+    plugins: {
+      legend: {
+        position: 'bottom' as const,
+        labels: {
+          color: '#94a3b8',
+          padding: 12,
+          font: { size: 11 },
+          usePointStyle: true,
+          pointStyle: 'circle',
+        },
+      },
+      tooltip: {
+        backgroundColor: '#0c1025',
+        borderColor: '#ffffff20',
+        borderWidth: 1,
+        titleColor: '#fff',
+        bodyColor: '#94a3b8',
+        padding: 12,
+        cornerRadius: 8,
+        callbacks: {
+          label: (ctx: any) => {
+            const val = ctx.parsed?.y;
+            if (val === null || val === undefined) return '';
+            const diff = val - 4.5;
+            const direction = diff > 0.2 ? '↑ Traditional' : diff < -0.2 ? '↓ Progressive' : '→ Independent';
+            return `${ctx.dataset.label}: ${val.toFixed(1)} ${direction}`;
+          },
+        },
+      },
+    },
     scales: {
-      r: {
+      x: {
+        ticks: { color: '#64748b', font: { size: 10 }, maxRotation: 45, minRotation: 0 },
+        grid: { color: '#ffffff08' },
+      },
+      y: {
         min: 0, max: 9,
-        ticks: { display: false, stepSize: 1 },
-        grid: { color: '#ffffff15' },
-        angleLines: { color: '#ffffff10' },
-        pointLabels: { color: '#94a3b8', font: { size: 10 } },
+        ticks: {
+          color: '#64748b',
+          stepSize: 1,
+          callback: (v: any) => {
+            if (v === 0) return '0 — Progressive';
+            if (v === 4.5) return '4.5 — Independent';
+            if (v === 9) return '9 — Traditional';
+            return v;
+          },
+        },
+        grid: {
+          color: (ctx: any) => ctx.tick?.value === 4.5 ? '#ffffff40' : '#ffffff08',
+          lineWidth: (ctx: any) => ctx.tick?.value === 4.5 ? 2 : 1,
+        },
       },
     },
   };
@@ -572,7 +653,7 @@ export default function ExploreBeliefs() {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-              className="bg-[#0c1025]/80 border border-white/10 rounded-2xl p-6">
+              className="lg:col-span-2 bg-[#0c1025]/80 border border-white/10 rounded-2xl p-6">
               <h3 className="text-lg font-semibold text-foreground mb-1 flex items-center">
                 {CATEGORIES[selectedCategory]?.label} — Dimension Averages
                 <InfoTip text={`Each bar shows the average belief score for a specific topic within ${CATEGORIES[selectedCategory]?.label}. A score near 0 means most people disagree with the statement, near 9 means most agree, and around 4-5 means opinions are mixed or undecided. Taller bars = stronger collective conviction.`} />
@@ -583,16 +664,61 @@ export default function ExploreBeliefs() {
               </div>
             </motion.div>
 
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
-              className="bg-[#0c1025]/80 border border-white/10 rounded-2xl p-6">
-              <h3 className="text-lg font-semibold text-foreground mb-1 flex items-center">Belief Radar — All Categories
-                <InfoTip text="This radar chart shows the average belief score for each major category. Points closer to the edge (9) mean people in this group tend to agree with statements in that category. Points near the center (0) mean they tend to disagree. The shape reveals the group's overall belief 'fingerprint' — where they lean and where they're neutral." />
-              </h3>
-              <p className="text-xs text-muted-foreground mb-4">Average score across each category (0-9 scale)</p>
-              <div className="h-[350px]">
-                <Radar data={radarChartData} options={radarOptions as any} />
-              </div>
-            </motion.div>
+            {timelineChartData && (
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
+                className="lg:col-span-2 bg-[#0c1025]/80 border border-white/10 rounded-2xl p-6">
+                <div className="flex items-start justify-between flex-wrap gap-3 mb-1">
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground flex items-center">
+                      Belief Evolution Timeline
+                      <InfoTip text="Tracks how belief category averages shift over time. Each line represents one of the 11 belief categories. The dashed center line at 4.5 represents 'Independent' — a perfectly balanced position. Lines above trend Traditional/Conservative; lines below trend Progressive. Use the interval buttons to zoom in (week) or out (year). Filters apply here too." />
+                    </h3>
+                    <p className="text-xs text-muted-foreground">How collective beliefs shift over time — midline = Independent (4.5)</p>
+                  </div>
+                  <div className="flex gap-1">
+                    {TIMELINE_INTERVALS.map(ti => (
+                      <button
+                        key={ti.value}
+                        onClick={() => setTimelineInterval(ti.value)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all border ${
+                          timelineInterval === ti.value
+                            ? 'bg-primary/20 border-primary/40 text-primary'
+                            : 'border-white/10 text-muted-foreground hover:text-foreground hover:border-white/20'
+                        }`}
+                      >
+                        {ti.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="h-[420px] mt-4">
+                  <Line data={timelineChartData} options={timelineOptions as any} plugins={[{
+                    id: 'independentLine',
+                    afterDraw(chart: any) {
+                      const yScale = chart.scales.y;
+                      if (!yScale) return;
+                      const y = yScale.getPixelForValue(4.5);
+                      const { left, right } = chart.chartArea;
+                      const ctx = chart.ctx;
+                      ctx.save();
+                      ctx.beginPath();
+                      ctx.setLineDash([8, 4]);
+                      ctx.strokeStyle = '#ffffff50';
+                      ctx.lineWidth = 1.5;
+                      ctx.moveTo(left, y);
+                      ctx.lineTo(right, y);
+                      ctx.stroke();
+                      ctx.setLineDash([]);
+                      ctx.fillStyle = '#ffffff60';
+                      ctx.font = '10px sans-serif';
+                      ctx.textAlign = 'right';
+                      ctx.fillText('Independent', right - 4, y - 6);
+                      ctx.restore();
+                    },
+                  }]} />
+                </div>
+              </motion.div>
+            )}
 
             {generationChartData && (
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
