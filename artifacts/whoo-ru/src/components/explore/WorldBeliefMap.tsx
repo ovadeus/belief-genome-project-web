@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import {
   ComposableMap,
   Geographies,
@@ -6,6 +6,7 @@ import {
   ZoomableGroup,
 } from "react-simple-maps";
 import { rawToDisplay, formatDisplay } from "@/lib/belief-scale";
+import { ZoomIn, ZoomOut } from "lucide-react";
 
 const GEO_URL = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 
@@ -22,6 +23,9 @@ const COUNTRY_NAMES: Record<string, string> = {
   "620":"Portugal","300":"Greece","203":"Czech Republic","642":"Romania","348":"Hungary",
   "804":"Ukraine","792":"Turkey","682":"Saudi Arabia","784":"UAE","376":"Israel",
 };
+
+const MIN_ZOOM = 0.6;
+const MAX_ZOOM = 5;
 
 function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * t;
@@ -56,6 +60,8 @@ interface WorldBeliefMapProps {
 
 export default function WorldBeliefMap({ countryBeliefs }: WorldBeliefMapProps) {
   const [tooltip, setTooltip] = useState<{ name: string; avg: number; count: number; x: number; y: number } | null>(null);
+  const [zoom, setZoom] = useState(1);
+  const [center, setCenter] = useState<[number, number]>([10, 10]);
 
   const numericToData = useMemo(() => {
     const map: Record<string, CountryBelief> = {};
@@ -67,6 +73,23 @@ export default function WorldBeliefMap({ countryBeliefs }: WorldBeliefMapProps) 
     return map;
   }, [countryBeliefs]);
 
+  const handleMoveEnd = useCallback((position: { coordinates: [number, number]; zoom: number }) => {
+    setCenter(position.coordinates);
+    setZoom(position.zoom);
+  }, []);
+
+  const handleSliderChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setZoom(parseFloat(e.target.value));
+  }, []);
+
+  const handleZoomIn = useCallback(() => {
+    setZoom(prev => Math.min(MAX_ZOOM, prev + 0.5));
+  }, []);
+
+  const handleZoomOut = useCallback(() => {
+    setZoom(prev => Math.max(MIN_ZOOM, prev - 0.5));
+  }, []);
+
   return (
     <div className="relative">
       <ComposableMap
@@ -76,9 +99,15 @@ export default function WorldBeliefMap({ countryBeliefs }: WorldBeliefMapProps) 
         height={480}
       >
         <ZoomableGroup
-          minZoom={0.6}
-          maxZoom={5}
-          center={[10, 10]}
+          zoom={zoom}
+          center={center}
+          onMoveEnd={handleMoveEnd}
+          minZoom={MIN_ZOOM}
+          maxZoom={MAX_ZOOM}
+          filterZoomEvent={(evt) => {
+            if (evt instanceof WheelEvent) return false;
+            return true;
+          }}
         >
           <Geographies geography={GEO_URL}>
             {({ geographies }: { geographies: any[] }) =>
@@ -125,6 +154,34 @@ export default function WorldBeliefMap({ countryBeliefs }: WorldBeliefMapProps) 
         </ZoomableGroup>
       </ComposableMap>
 
+      <div className="flex items-center justify-center gap-3 mt-2 mb-1">
+        <button
+          onClick={handleZoomOut}
+          className="p-1.5 rounded-lg border border-white/10 bg-[#0c1025]/80 hover:bg-[#1a1f3a] text-[#64748b] hover:text-white transition-colors"
+          aria-label="Zoom out"
+        >
+          <ZoomOut size={14} />
+        </button>
+        <input
+          type="range"
+          min={MIN_ZOOM}
+          max={MAX_ZOOM}
+          step={0.1}
+          value={zoom}
+          onChange={handleSliderChange}
+          className="w-48 h-1.5 appearance-none rounded-full bg-[#1a1f3a] cursor-pointer accent-[#6c8fff] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#6c8fff] [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-[#0c1025] [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:w-3.5 [&::-moz-range-thumb]:h-3.5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-[#6c8fff] [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-[#0c1025] [&::-moz-range-thumb]:cursor-pointer"
+          aria-label="Map zoom level"
+        />
+        <button
+          onClick={handleZoomIn}
+          className="p-1.5 rounded-lg border border-white/10 bg-[#0c1025]/80 hover:bg-[#1a1f3a] text-[#64748b] hover:text-white transition-colors"
+          aria-label="Zoom in"
+        >
+          <ZoomIn size={14} />
+        </button>
+        <span className="text-[10px] text-[#64748b] ml-1">{zoom.toFixed(1)}x</span>
+      </div>
+
       {tooltip && (
         <div
           className="fixed z-[9999] pointer-events-none px-3 py-2 rounded-xl border text-xs shadow-xl"
@@ -150,7 +207,7 @@ export default function WorldBeliefMap({ countryBeliefs }: WorldBeliefMapProps) 
         </div>
       )}
 
-      <div className="flex items-center justify-center gap-1 mt-3">
+      <div className="flex items-center justify-center gap-1 mt-2">
         <span className="text-[10px] text-[#64748b]">−4 Disbelief</span>
         <div className="flex gap-0">
           {Array.from({ length: 9 }, (_, i) => {
