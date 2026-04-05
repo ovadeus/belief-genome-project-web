@@ -3,7 +3,7 @@ import { PublicLayout } from "@/components/layout/PublicLayout";
 import { motion } from "framer-motion";
 import { Globe, Users, BarChart3, Dna, Filter, ChevronDown, ChevronUp, Info } from "lucide-react";
 import { lazy, Suspense } from "react";
-import { rawToDisplay, formatDisplay, DISPLAY_MIN, DISPLAY_MAX, DISPLAY_NEUTRAL, RAW_NEUTRAL } from "@/lib/belief-scale";
+import { rawToDisplay, formatDisplay, displayBarColor, displayBarBorder, DISPLAY_MIN, DISPLAY_MAX, DISPLAY_NEUTRAL, RAW_NEUTRAL } from "@/lib/belief-scale";
 const WorldBeliefMap = lazy(() => import("@/components/explore/WorldBeliefMap"));
 import {
   Chart as ChartJS,
@@ -220,13 +220,14 @@ export default function ExploreBeliefs() {
 
   const barChartData = useMemo(() => {
     const cat = CATEGORIES[selectedCategory];
+    const displayVals = categoryDims.map(d => d.avg !== null ? rawToDisplay(d.avg) : null);
     return {
       labels: categoryDims.map(d => d.name),
       datasets: [{
         label: `Average Score (${cat?.label})`,
-        data: categoryDims.map(d => d.avg !== null ? rawToDisplay(d.avg) : null),
-        backgroundColor: `${cat?.color}88`,
-        borderColor: cat?.color,
+        data: displayVals,
+        backgroundColor: displayVals.map(v => v !== null ? displayBarColor(v) + 'aa' : '#787891'),
+        borderColor: displayVals.map(v => v !== null ? displayBarBorder(v) : '#787891'),
         borderWidth: 2,
         borderRadius: 6,
       }],
@@ -289,20 +290,21 @@ export default function ExploreBeliefs() {
     const cat = CATEGORIES[catKey];
     const dimIds = cat.dims;
 
+    const genDisplayVals = generations.map(g => {
+      let sum = 0, count = 0;
+      for (const id of dimIds) {
+        const val = g.avgBeliefs[String(id)];
+        if (val !== undefined) { sum += val; count++; }
+      }
+      return count > 0 ? Math.round(rawToDisplay(sum / count) * 100) / 100 : null;
+    });
     return {
       labels: generations.map(g => g.label.replace('Generation ', 'Gen ')),
       datasets: [{
         label: `${cat.label} Avg`,
-        data: generations.map(g => {
-          let sum = 0, count = 0;
-          for (const id of dimIds) {
-            const val = g.avgBeliefs[String(id)];
-            if (val !== undefined) { sum += val; count++; }
-          }
-          return count > 0 ? Math.round(rawToDisplay(sum / count) * 100) / 100 : null;
-        }),
-        backgroundColor: `${cat.color}66`,
-        borderColor: cat.color,
+        data: genDisplayVals,
+        backgroundColor: genDisplayVals.map(v => v !== null ? displayBarColor(v) + 'aa' : '#787891'),
+        borderColor: genDisplayVals.map(v => v !== null ? displayBarBorder(v) : '#787891'),
         borderWidth: 2,
         borderRadius: 6,
       }],
