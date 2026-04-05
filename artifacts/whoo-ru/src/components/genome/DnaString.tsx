@@ -14,11 +14,10 @@ function charColor(ch: string, pos: number): string {
   if (ch === '\u00B7' || ch === '.' || ch === '_') return 'rgba(255,255,255,0.15)';
   const n = parseInt(ch);
   if (isNaN(n)) return 'rgba(255,255,255,0.4)';
-  // Spectrum: 0=red → 5=neutral → 9=green
   const colors = [
-    '#ff4757', '#ff6348', '#ff7f50', '#ffa502', '#f5a623',
-    'rgba(255,255,255,0.5)',
-    '#7bed9f', '#2ed573', '#26de81', '#20bf6b',
+    '#1ac9b5', '#24d0bc', '#2dd8c4', '#35E4CF', '#70ede0',
+    'rgba(200,240,235,0.6)',
+    '#90c8ff', '#6FB8FF', '#52A8FF', '#3a8fe0',
   ];
   return colors[n] || 'rgba(255,255,255,0.4)';
 }
@@ -35,7 +34,7 @@ export default function DnaString({ dnaString, dimensionsCovered, totalResponses
           <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase' }}>Responses</div>
         </div>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 20, fontFamily: 'monospace', color: '#2ed573' }}>{dimensionsCovered}/124</div>
+          <div style={{ fontSize: 20, fontFamily: 'monospace', color: '#35E4CF' }}>{dimensionsCovered}/124</div>
           <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase' }}>Dimensions</div>
         </div>
         <div style={{ textAlign: 'center' }}>
@@ -86,9 +85,9 @@ export default function DnaString({ dnaString, dimensionsCovered, totalResponses
         display: 'flex', justifyContent: 'center', gap: 16, marginTop: 8,
         fontSize: 10, color: 'rgba(255,255,255,0.4)',
       }}>
-        <span><span style={{ color: '#ff4757' }}>0</span> Strongly False</span>
-        <span><span style={{ color: 'rgba(255,255,255,0.5)' }}>5</span> Neutral</span>
-        <span><span style={{ color: '#20bf6b' }}>9</span> Strongly True</span>
+        <span><span style={{ color: '#1ac9b5' }}>0</span> Strongly False</span>
+        <span><span style={{ color: 'rgba(200,240,235,0.6)' }}>5</span> Neutral</span>
+        <span><span style={{ color: '#3a8fe0' }}>9</span> Strongly True</span>
         <span><span style={{ color: 'rgba(255,255,255,0.15)' }}>{'\u00B7'}</span> Unexplored</span>
       </div>
     </div>

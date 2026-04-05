@@ -144,7 +144,7 @@ export default function SyncPage() {
             background: message.includes('fail') || message.includes('Could not')
               ? 'rgba(255,71,87,0.08)' : 'rgba(46,213,115,0.08)',
             color: message.includes('fail') || message.includes('Could not')
-              ? '#ff4757' : '#2ed573',
+              ? '#ff6b6b' : '#35E4CF',
             fontSize: 12,
           }}>
             {message}

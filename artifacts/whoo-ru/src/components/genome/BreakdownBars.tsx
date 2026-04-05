@@ -66,7 +66,7 @@ export default function BreakdownBars({ history }: Props) {
                   <div style={{
                     position: 'absolute', inset: '3px 0', borderRadius: 4,
                     background: 'linear-gradient(90deg, #35E4CF, #35E4CF 20%, #b0f0e8 45%, #ffffff 50%, #a8d4ff 55%, #52A8FF 80%, #52A8FF)',
-                    opacity: 0.35,
+                    opacity: 0.85,
                   }} />
                   {/* Center line */}
                   <div style={{

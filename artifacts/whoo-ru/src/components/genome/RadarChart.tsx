@@ -49,12 +49,12 @@ export default function RadarChart({ history }: Props) {
     datasets: [{
       label: 'Your Position',
       data: radarData,
-      backgroundColor: 'rgba(108, 99, 255, 0.15)',
-      borderColor: 'rgba(108, 99, 255, 0.8)',
+      backgroundColor: 'rgba(82, 168, 255, 0.12)',
+      borderColor: 'rgba(82, 168, 255, 0.8)',
       pointBackgroundColor: CAT_ORDER.map(c => {
         const v = avgs[c];
         if (v == null) return 'rgba(255,255,255,0.15)';
-        return v >= 0.6 ? '#44ff88' : v <= 0.4 ? '#ff4444' : '#aaaaaa';
+        return v >= 0.6 ? '#52A8FF' : v <= 0.4 ? '#35E4CF' : '#b8f0ea';
       }),
       pointRadius: 5,
       pointHoverRadius: 7,
@@ -100,7 +100,7 @@ export default function RadarChart({ history }: Props) {
         backgroundColor: 'rgba(20,20,40,0.95)',
         titleColor: '#fff',
         bodyColor: 'rgba(255,255,255,0.7)',
-        borderColor: 'rgba(108,99,255,0.4)',
+        borderColor: 'rgba(82,168,255,0.4)',
         borderWidth: 1,
       },
     },

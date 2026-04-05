@@ -34,8 +34,8 @@ const CATEGORIES: { key: string; label: string; color: string; dims: number[] }[
   { key: 'economics',     label: 'Economics',       color: '#e1b12c', dims: [79,80,81,82,83,84,85,86,87,88] },
   { key: 'science_tech',  label: 'Science & Tech',  color: '#00d2d3', dims: [89,90,91,92,93,94,95,96,97,98] },
   { key: 'education',     label: 'Education',       color: '#c56cf0', dims: [99,100,101,102,103] },
-  { key: 'health',        label: 'Health',          color: '#ff4757', dims: [104,105,106,107,108] },
-  { key: 'psychology',    label: 'Psychology',      color: '#2ed573', dims: [109,110,111,112,113,114,115,116,117,118] },
+  { key: 'health',        label: 'Health',          color: '#35E4CF', dims: [104,105,106,107,108] },
+  { key: 'psychology',    label: 'Psychology',      color: '#52A8FF', dims: [109,110,111,112,113,114,115,116,117,118] },
   { key: 'relationships', label: 'Relationships',   color: '#ff6b81', dims: [119,120,121,122,123,124,125,126,127] },
 ];
 

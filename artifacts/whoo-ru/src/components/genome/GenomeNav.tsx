@@ -115,7 +115,7 @@ export default function GenomeNav() {
           }}
           onMouseEnter={e => {
             e.currentTarget.style.borderColor = 'rgba(255,71,87,0.4)';
-            e.currentTarget.style.color = '#ff4757';
+            e.currentTarget.style.color = '#ff6b6b';
           }}
           onMouseLeave={e => {
             e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)';

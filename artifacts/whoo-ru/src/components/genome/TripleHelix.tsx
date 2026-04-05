@@ -6,7 +6,7 @@ import { useRef, useEffect, useCallback } from 'react';
 const STRAND_DEFS = [
   { id: 'logos',  name: 'LOGOS',  sub: 'How you reason', color: '#5599ff', phase: 0,
     cats: ['epistemology', 'politics', 'science_tech', 'education'] },
-  { id: 'pathos', name: 'PATHOS', sub: 'How you feel',   color: '#ff5566', phase: (2 * Math.PI) / 3,
+  { id: 'pathos', name: 'PATHOS', sub: 'How you feel',   color: '#a78bfa', phase: (2 * Math.PI) / 3,
     cats: ['spirituality', 'psychology', 'relationships', 'health'] },
   { id: 'ethos',  name: 'ETHOS',  sub: 'How you act',    color: '#34d399', phase: (4 * Math.PI) / 3,
     cats: ['morality', 'social', 'economics'] },
@@ -362,7 +362,7 @@ export default function TripleHelix({ dimensions, dimensionScores, confidence }:
         </span>
         <div style={{ display: 'flex', gap: 16, fontSize: 11, fontFamily: "'Space Mono', monospace" }}>
           <span style={{ color: '#5599ff' }}>&#9679; LOGOS · How you reason</span>
-          <span style={{ color: '#ff5566' }}>&#9679; PATHOS · How you feel</span>
+          <span style={{ color: '#a78bfa' }}>&#9679; PATHOS · How you feel</span>
           <span style={{ color: '#34d399' }}>&#9679; ETHOS · How you act</span>
         </div>
       </div>

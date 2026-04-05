@@ -39,20 +39,24 @@ export function beliefLabel(v: number): string {
 }
 
 export function beliefColor(v: number): string {
-  if (v <= 10)  return '#35E4CF';
-  if (v <= 30)  return '#5EECD8';
-  if (v <= 45)  return '#a0f2e7';
-  if (v <= 55)  return '#ffffff';
-  if (v <= 70)  return '#a8d4ff';
-  if (v <= 88)  return '#6FB8FF';
-  return '#52A8FF';
+  if (v <= 10)  return '#1ac9b5';
+  if (v <= 25)  return '#28d6c2';
+  if (v <= 40)  return '#35E4CF';
+  if (v <= 48)  return '#70ede0';
+  if (v <= 52)  return '#b8f0ea';
+  if (v <= 60)  return '#7abcff';
+  if (v <= 75)  return '#52A8FF';
+  if (v <= 88)  return '#3a8fe0';
+  return '#2a7acc';
 }
 
 export function catColour(v: number | null): string {
-  if (v == null) return '#ffffff';
-  if (v <= 0.22) return '#35E4CF';
-  if (v <= 0.40) return '#5EECD8';
-  if (v <= 0.60) return '#ffffff';
-  if (v <= 0.78) return '#6FB8FF';
-  return '#52A8FF';
+  if (v == null) return '#b8f0ea';
+  if (v <= 0.15) return '#1ac9b5';
+  if (v <= 0.30) return '#28d6c2';
+  if (v <= 0.45) return '#35E4CF';
+  if (v <= 0.55) return '#b8f0ea';
+  if (v <= 0.70) return '#52A8FF';
+  if (v <= 0.85) return '#3a8fe0';
+  return '#2a7acc';
 }

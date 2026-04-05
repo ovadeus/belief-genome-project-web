@@ -44,7 +44,7 @@ export default function DnaPage() {
           padding: '8px 16px', borderRadius: 8,
           background: copying ? 'rgba(46,213,115,0.15)' : 'transparent',
           border: `1px solid ${copying ? 'rgba(46,213,115,0.3)' : 'rgba(108,143,255,0.3)'}`,
-          color: copying ? '#2ed573' : 'rgba(255,255,255,0.6)',
+          color: copying ? '#35E4CF' : 'rgba(255,255,255,0.6)',
           fontSize: 12, cursor: 'pointer',
           fontFamily: "'Space Mono', monospace",
         }}>

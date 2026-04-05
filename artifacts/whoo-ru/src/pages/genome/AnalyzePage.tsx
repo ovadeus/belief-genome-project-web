@@ -65,7 +65,7 @@ export default function AnalyzePage() {
           padding: 16, borderRadius: 10,
           background: 'rgba(255,71,87,0.08)',
           border: '1px solid rgba(255,71,87,0.2)',
-          color: '#ff4757', fontSize: 13, marginBottom: 20,
+          color: '#ff6b6b', fontSize: 13, marginBottom: 20,
         }}>
           {error}
         </div>
@@ -80,7 +80,7 @@ export default function AnalyzePage() {
         }}>
           <h3 style={{
             fontSize: 12, textTransform: 'uppercase', letterSpacing: 1,
-            color: '#2ed573', marginBottom: 16,
+            color: '#35E4CF', marginBottom: 16,
             fontFamily: "'Space Mono', monospace",
           }}>
             Analysis Complete

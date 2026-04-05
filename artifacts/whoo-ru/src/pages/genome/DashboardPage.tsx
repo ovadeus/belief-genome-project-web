@@ -250,7 +250,7 @@ function SubmitGenomeButton() {
               <div style={{
                 padding: 10, borderRadius: 8, marginBottom: 16,
                 background: 'rgba(255,71,87,0.1)', border: '1px solid rgba(255,71,87,0.2)',
-                fontSize: 13, color: '#ff4757', textAlign: 'center',
+                fontSize: 13, color: '#ff6b6b', textAlign: 'center',
               }}>
                 {error}
               </div>
@@ -482,7 +482,7 @@ export default function DashboardPage() {
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 14 }}>
                   {analysisTags.map((tag, i) => {
                     const colors = [
-                      'rgba(108, 99, 255, 0.2)',
+                      'rgba(82, 168, 255, 0.2)',
                       'rgba(68, 255, 136, 0.15)',
                       'rgba(255, 170, 0, 0.15)',
                       'rgba(255, 100, 100, 0.15)',
