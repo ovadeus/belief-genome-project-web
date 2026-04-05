@@ -43,15 +43,21 @@ function lerpColor(from: string, to: string, t: number): string {
 }
 
 export function displayBarColor(displayVal: number): string {
-  if (displayVal === 0) return '#8ec8c0';
-  if (displayVal < 0) return COLOR_PROGRESSIVE;
-  return COLOR_TRADITIONAL;
+  if (displayVal === 0) return '#7ec8c0';
+  const t = Math.min(Math.abs(displayVal) / 4, 1);
+  const minT = 0.55;
+  const adjT = minT + t * (1 - minT);
+  if (displayVal < 0) return lerpColor('#a0e8e0', COLOR_PROGRESSIVE, adjT);
+  return lerpColor('#a0c8f0', COLOR_TRADITIONAL, adjT);
 }
 
 export function displayBarBorder(displayVal: number): string {
   if (displayVal === 0) return '#6aaa9e';
-  if (displayVal < 0) return '#2BC4B0';
-  return '#3A8FE0';
+  const t = Math.min(Math.abs(displayVal) / 4, 1);
+  const minT = 0.55;
+  const adjT = minT + t * (1 - minT);
+  if (displayVal < 0) return lerpColor('#70c8bc', '#2BC4B0', adjT);
+  return lerpColor('#70a0e0', '#3A8FE0', adjT);
 }
 
 export const BELIEF_GRADIENT_CSS = `linear-gradient(90deg, ${COLOR_PROGRESSIVE}, ${COLOR_PROGRESSIVE} 20%, #b0f0e8 45%, #ffffff 50%, #a8d4ff 55%, ${COLOR_TRADITIONAL} 80%, ${COLOR_TRADITIONAL})`;
