@@ -8,36 +8,31 @@ import {
 
 const GEO_URL = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 
-const NUMERIC_TO_ISO3: Record<string, string> = {
-  "840":"USA","826":"GBR","124":"CAN","036":"AUS","276":"DEU",
-  "250":"FRA","356":"IND","076":"BRA","392":"JPN","410":"KOR",
-  "484":"MEX","380":"ITA","724":"ESP","528":"NLD","752":"SWE",
-  "616":"POL","710":"ZAF","156":"CHN","643":"RUS",
-  "032":"ARG","152":"CHL","170":"COL","604":"PER","862":"VEN",
-  "818":"EGY","566":"NGA","404":"KEN","288":"GHA","834":"TZA",
-  "764":"THA","360":"IDN","608":"PHL","704":"VNM","458":"MYS",
-  "702":"SGP","158":"TWN","344":"HKG","554":"NZL","578":"NOR",
-  "208":"DNK","246":"FIN","756":"CHE","040":"AUT","056":"BEL",
-  "620":"PRT","300":"GRC","203":"CZE","642":"ROU","348":"HUN",
-  "804":"UKR","792":"TUR","682":"SAU","784":"ARE","376":"ISR",
-};
-
 const COUNTRY_NAMES: Record<string, string> = {
   "840":"United States","826":"United Kingdom","124":"Canada","036":"Australia","276":"Germany",
   "250":"France","356":"India","076":"Brazil","392":"Japan","410":"South Korea",
   "484":"Mexico","380":"Italy","724":"Spain","528":"Netherlands","752":"Sweden",
-  "616":"Poland","710":"South Africa",
+  "616":"Poland","710":"South Africa","156":"China","643":"Russia",
+  "032":"Argentina","152":"Chile","170":"Colombia","604":"Peru","862":"Venezuela",
+  "818":"Egypt","566":"Nigeria","404":"Kenya","288":"Ghana","834":"Tanzania",
+  "764":"Thailand","360":"Indonesia","608":"Philippines","704":"Vietnam","458":"Malaysia",
+  "702":"Singapore","158":"Taiwan","344":"Hong Kong","554":"New Zealand","578":"Norway",
+  "208":"Denmark","246":"Finland","756":"Switzerland","040":"Austria","056":"Belgium",
+  "620":"Portugal","300":"Greece","203":"Czech Republic","642":"Romania","348":"Hungary",
+  "804":"Ukraine","792":"Turkey","682":"Saudi Arabia","784":"UAE","376":"Israel",
 };
 
+function lerp(a: number, b: number, t: number): number {
+  return a + (b - a) * t;
+}
+
 function beliefColor(avg: number): string {
-  const v = avg / 9;
-  if (v <= 0.22) return '#dc3232';
-  if (v <= 0.35) return '#ff5544';
-  if (v <= 0.45) return '#ff7728';
-  if (v <= 0.55) return '#787891';
-  if (v <= 0.65) return '#5a9e9e';
-  if (v <= 0.78) return '#3cb4b4';
-  return '#50b4ff';
+  const clamped = Math.max(1, Math.min(9, avg));
+  const t = (clamped - 1) / 8;
+  const r = Math.round(lerp(220, 48, t));
+  const g = Math.round(lerp(50, 160, t));
+  const b = Math.round(lerp(50, 255, t));
+  return `rgb(${r},${g},${b})`;
 }
 
 function beliefLabel(avg: number): string {
@@ -61,13 +56,12 @@ interface WorldBeliefMapProps {
 export default function WorldBeliefMap({ countryBeliefs }: WorldBeliefMapProps) {
   const [tooltip, setTooltip] = useState<{ name: string; avg: number; count: number; x: number; y: number } | null>(null);
 
-  const iso3ToData = useMemo(() => {
-    const map: Record<string, CountryBelief & { numericCode: string }> = {};
+  const numericToData = useMemo(() => {
+    const map: Record<string, CountryBelief> = {};
     for (const [numCode, data] of Object.entries(countryBeliefs)) {
-      const iso3 = NUMERIC_TO_ISO3[numCode];
-      if (iso3) {
-        map[iso3] = { ...data, numericCode: numCode };
-      }
+      map[numCode] = data;
+      const padded = numCode.padStart(3, '0');
+      if (padded !== numCode) map[padded] = data;
     }
     return map;
   }, [countryBeliefs]);
@@ -83,8 +77,8 @@ export default function WorldBeliefMap({ countryBeliefs }: WorldBeliefMapProps) 
           <Geographies geography={GEO_URL}>
             {({ geographies }: { geographies: any[] }) =>
               geographies.map((geo) => {
-                const iso3 = geo.properties?.ISO_A3 || geo.id;
-                const data = iso3ToData[iso3];
+                const geoId = String(geo.id);
+                const data = numericToData[geoId];
                 const fill = data ? beliefColor(data.avg) : '#1a1f3a';
                 const strokeColor = data ? '#ffffff20' : '#ffffff0a';
 
@@ -102,7 +96,7 @@ export default function WorldBeliefMap({ countryBeliefs }: WorldBeliefMapProps) 
                     }}
                     onMouseEnter={(e) => {
                       if (!data) return;
-                      const name = COUNTRY_NAMES[data.numericCode] || geo.properties?.NAME || iso3;
+                      const name = COUNTRY_NAMES[geoId] || geo.properties?.name || geoId;
                       setTooltip({
                         name,
                         avg: data.avg,
@@ -152,10 +146,11 @@ export default function WorldBeliefMap({ countryBeliefs }: WorldBeliefMapProps) 
 
       <div className="flex items-center justify-center gap-1 mt-3">
         <span className="text-[10px] text-[#64748b]">Progressive</span>
-        <div className="flex gap-0.5">
-          {['#dc3232','#ff5544','#ff7728','#787891','#5a9e9e','#3cb4b4','#50b4ff'].map((c, i) => (
-            <div key={i} className="w-6 h-2.5 rounded-sm" style={{ backgroundColor: c }} />
-          ))}
+        <div className="flex gap-0">
+          {Array.from({ length: 9 }, (_, i) => {
+            const score = 1 + i;
+            return <div key={i} className="w-5 h-2.5" style={{ backgroundColor: beliefColor(score), borderRadius: i === 0 ? '3px 0 0 3px' : i === 8 ? '0 3px 3px 0' : '0' }} />;
+          })}
         </div>
         <span className="text-[10px] text-[#64748b]">Traditional</span>
         <span className="text-[10px] text-[#64748b] ml-3">■</span>
