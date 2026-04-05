@@ -20,7 +20,6 @@ interface Submission {
 
 interface Stats {
   totalSubmissions: number;
-  totalWithTest: number;
   uniqueCountries: number;
   avgDimensionsExplored: number;
 }
@@ -376,8 +375,7 @@ export default function GenomeSubmissions() {
 
         {stats && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <StatCard icon={Dna} label="Real Submissions" value={stats.totalSubmissions} />
-            <StatCard icon={TestTube} label="Total (incl. test)" value={stats.totalWithTest} />
+            <StatCard icon={Dna} label="Total Submissions" value={stats.totalSubmissions} />
             <StatCard icon={Globe} label="Countries" value={stats.uniqueCountries} />
             <StatCard icon={BarChart3} label="Avg Dimensions" value={stats.avgDimensionsExplored} />
           </div>

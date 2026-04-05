@@ -198,7 +198,9 @@ router.post('/submit', async (req: Request, res: Response) => {
 });
 
 function buildExploreFilters(query: any) {
-  const conditions: any[] = [];
+  const conditions: any[] = [
+    eq(genomeSubmissions.isTestData, false),
+  ];
   if (query.country && typeof query.country === 'string') {
     conditions.push(eq(genomeSubmissions.countryCode, query.country));
   }
@@ -209,7 +211,7 @@ function buildExploreFilters(query: any) {
     conditions.push(gte(genomeSubmissions.birthYear, parseInt(query.generationStart as string)));
     conditions.push(sql`${genomeSubmissions.birthYear} <= ${parseInt(query.generationEnd as string)}`);
   }
-  return conditions.length > 0 ? and(...conditions) : undefined;
+  return and(...conditions);
 }
 
 router.get('/stats', async (req: Request, res: Response) => {
@@ -225,7 +227,6 @@ router.get('/stats', async (req: Request, res: Response) => {
 
     return res.json({
       totalSubmissions: totalResult?.count ?? 0,
-      totalWithTest: totalResult?.count ?? 0,
       uniqueCountries: countryResult?.count ?? 0,
       avgDimensionsExplored: avgDims?.avg ?? 0,
     });

@@ -122,7 +122,7 @@ const GENDER_OPTIONS = [
 ];
 
 interface DimData { avg: number; count: number; }
-interface StatsData { totalSubmissions: number; totalWithTest: number; uniqueCountries: number; avgDimensionsExplored: number; }
+interface StatsData { totalSubmissions: number; uniqueCountries: number; avgDimensionsExplored: number; }
 interface GenerationData { label: string; start: number; end: number; count: number; avgBeliefs: Record<string, number>; }
 interface GenderData { gender: string; count: number; }
 interface CountryData { countryCode: string; count: number; }

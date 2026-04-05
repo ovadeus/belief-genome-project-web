@@ -213,3 +213,10 @@ Generated React Query hooks and fetch client.
 
 Utility scripts. Run via `pnpm --filter @workspace/scripts run <script>`.
 - `seed` — seeds database with admin user, sample blog posts, subscribers
+
+## Security Hardening (Applied)
+
+- **CORS**: Exact origin matching via `URL.origin` comparison (no `startsWith` prefix bypass)
+- **Neuromap iframe**: `postMessage` uses specific `targetOrigin` (not `*`); receiver validates `evt.origin` against `document.referrer`; all DNA/stat values sanitized and HTML-escaped before `innerHTML`
+- **Test data isolation**: `buildExploreFilters()` always includes `isTestData = false` — all public explore/stats endpoints exclude test submissions
+- **DB indexes**: `genome_submissions` indexed on `is_test_data`, `country_code`, `gender`, `birth_year`, `submitted_at`

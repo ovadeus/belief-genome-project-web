@@ -21,9 +21,18 @@ app.use("/api/genome/explore", cors());
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.some(o => origin.startsWith(o))) {
-      callback(null, true);
-    } else {
+    if (!origin) return callback(null, true);
+    try {
+      const parsed = new URL(origin);
+      const originHost = parsed.origin;
+      if (allowedOrigins.some(o => {
+        try { return new URL(o).origin === originHost; } catch { return false; }
+      })) {
+        callback(null, true);
+      } else {
+        callback(null, false);
+      }
+    } catch {
       callback(null, false);
     }
   },

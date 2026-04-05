@@ -17,13 +17,20 @@ export default function Neuromap({ dnaString, totalResponses, dimensionsCovered,
 
   const sendData = () => {
     if (!iframeRef.current?.contentWindow || sentRef.current || !dnaString) return;
+    const iframeSrc = iframeRef.current.src;
+    let targetOrigin: string;
+    try {
+      targetOrigin = new URL(iframeSrc).origin;
+    } catch {
+      targetOrigin = window.location.origin;
+    }
     iframeRef.current.contentWindow.postMessage({
       type: 'BGP_DNA_UPDATE',
-      dnaString,
-      totalResponses,
-      dimensionsCovered,
-      overallConfidence,
-    }, '*');
+      dnaString: String(dnaString).replace(/[^0-9a-zA-Z·.]/g, ''),
+      totalResponses: Number(totalResponses) || 0,
+      dimensionsCovered: Number(dimensionsCovered) || 0,
+      overallConfidence: Number(overallConfidence) || 0,
+    }, targetOrigin);
     sentRef.current = true;
   };
 

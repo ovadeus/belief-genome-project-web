@@ -290,46 +290,54 @@ function makeGlow(hex,size,inner=0.9,mid=0.55,outer=0.0){
 }
 
 // ── DNA STRING DISPLAY ────────────────────────────────────────────────────────
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[c]||c;});}
 function renderDNABar() {
-  const dnaStr = _dnaRaw || '';
+  const dnaStr = String(_dnaRaw || '').replace(/[^0-9a-zA-Z·.]/g,'');
   const chars = dnaStr.split('');
+  const safeResponses = parseInt(_totalResponses)||0;
+  const safeDims = parseInt(_dimsCovered)||0;
+  const safeConf = parseInt(_confidence)||0;
 
-  const statsHtml=`<div class="dna-stats">
-    <div><div class="stat-val" style="color:rgba(91,106,245,0.85);">${_totalResponses}</div><div class="stat-lbl">Responses</div></div>
-    <div><div class="stat-val" style="color:rgba(115,201,172,0.85);">${_dimsCovered}/124</div><div class="stat-lbl">Dimensions</div></div>
-    <div><div class="stat-val" style="color:rgba(255,170,0,0.85);">${_confidence}%</div><div class="stat-lbl">Confidence</div></div>
-  </div>`;
+  const statsHtml='<div class="dna-stats">'+
+    '<div><div class="stat-val" style="color:rgba(91,106,245,0.85);">'+esc(safeResponses)+'</div><div class="stat-lbl">Responses</div></div>'+
+    '<div><div class="stat-val" style="color:rgba(115,201,172,0.85);">'+esc(safeDims)+'/124</div><div class="stat-lbl">Dimensions</div></div>'+
+    '<div><div class="stat-val" style="color:rgba(255,170,0,0.85);">'+esc(safeConf)+'%</div><div class="stat-lbl">Confidence</div></div>'+
+  '</div>';
 
   const LINE=70;
   let strHtml='<div class="dna-string">';
   for(let i=0;i<chars.length;i+=LINE){
     const chunk=chars.slice(i,i+LINE);
     let lineHtml='';
-    chunk.forEach((ch,j)=>{
+    chunk.forEach(function(ch,j){
       const pos=i+j;
-      if(pos<8)        lineHtml+=`<span class="ident">${ch}</span>`;
-      else if(pos<11)  lineHtml+=`<span class="country">${ch}</span>`;
-      else if(pos<16)  lineHtml+=`<span class="zip">${ch}</span>`;
-      else if(ch==='·')lineHtml+=`<span class="dot">·</span>`;
-      else             lineHtml+=`<span class="scored">${ch}</span>`;
+      const safe=esc(ch);
+      if(pos<8)        lineHtml+='<span class="ident">'+safe+'</span>';
+      else if(pos<11)  lineHtml+='<span class="country">'+safe+'</span>';
+      else if(pos<16)  lineHtml+='<span class="zip">'+safe+'</span>';
+      else if(ch==='·')lineHtml+='<span class="dot">&middot;</span>';
+      else             lineHtml+='<span class="scored">'+safe+'</span>';
     });
-    strHtml+=`<div>${lineHtml}</div>`;
+    strHtml+='<div>'+lineHtml+'</div>';
   }
   strHtml+='</div>';
 
   document.getElementById('dna-bar').innerHTML=
-    `<div class="dna-title">Your Belief Genome Serial</div>`+statsHtml+strHtml;
+    '<div class="dna-title">Your Belief Genome Serial</div>'+statsHtml+strHtml;
 }
-renderDNABar(); // initial render with defaults
+renderDNABar();
 
 // ── LIVE DATA LISTENER ───────────────────────────────────────────────────────
 window.addEventListener('message', function(evt) {
   if (!evt.data || evt.data.type !== 'BGP_DNA_UPDATE') return;
-  const d = evt.data;
-  _dnaRaw = d.dnaString || '';
-  _totalResponses = d.totalResponses || 0;
-  _dimsCovered = d.dimensionsCovered || 0;
-  _confidence = d.overallConfidence || 0;
+  var parentOrigin;
+  try { parentOrigin = new URL(document.referrer).origin; } catch(e){ parentOrigin = ''; }
+  if (parentOrigin && evt.origin !== parentOrigin) return;
+  var d = evt.data;
+  _dnaRaw = String(d.dnaString || '').replace(/[^0-9a-zA-Z·.]/g,'');
+  _totalResponses = parseInt(d.totalResponses)||0;
+  _dimsCovered = parseInt(d.dimensionsCovered)||0;
+  _confidence = parseInt(d.overallConfidence)||0;
 
   // Parse belief scores from DNA string (positions 16+ map to 124 dimensions)
   const beliefChars = _dnaRaw.slice(16);
