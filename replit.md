@@ -218,5 +218,5 @@ Utility scripts. Run via `pnpm --filter @workspace/scripts run <script>`.
 
 - **CORS**: Exact origin matching via `URL.origin` comparison (no `startsWith` prefix bypass)
 - **Neuromap iframe**: `postMessage` uses specific `targetOrigin` (not `*`); receiver validates `evt.origin` against `document.referrer`; all DNA/stat values sanitized and HTML-escaped before `innerHTML`
-- **Test data isolation**: `buildExploreFilters()` always includes `isTestData = false` — all public explore/stats endpoints exclude test submissions
+- **Test data isolation**: `buildExploreFilters()` supports `EXCLUDE_TEST_DATA` flag (currently `false` to populate visualizations during early launch; flip to `true` in `genome-submit.ts` when real submissions reach critical mass)
 - **DB indexes**: `genome_submissions` indexed on `is_test_data`, `country_code`, `gender`, `birth_year`, `submitted_at`

@@ -197,10 +197,13 @@ router.post('/submit', async (req: Request, res: Response) => {
   }
 });
 
+const EXCLUDE_TEST_DATA = false;
+
 function buildExploreFilters(query: any) {
-  const conditions: any[] = [
-    eq(genomeSubmissions.isTestData, false),
-  ];
+  const conditions: any[] = [];
+  if (EXCLUDE_TEST_DATA) {
+    conditions.push(eq(genomeSubmissions.isTestData, false));
+  }
   if (query.country && typeof query.country === 'string') {
     conditions.push(eq(genomeSubmissions.countryCode, query.country));
   }
@@ -211,7 +214,7 @@ function buildExploreFilters(query: any) {
     conditions.push(gte(genomeSubmissions.birthYear, parseInt(query.generationStart as string)));
     conditions.push(sql`${genomeSubmissions.birthYear} <= ${parseInt(query.generationEnd as string)}`);
   }
-  return and(...conditions);
+  return conditions.length > 0 ? and(...conditions) : undefined;
 }
 
 router.get('/stats', async (req: Request, res: Response) => {
