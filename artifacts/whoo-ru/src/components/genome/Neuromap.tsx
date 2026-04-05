@@ -17,10 +17,9 @@ export default function Neuromap({ dnaString, totalResponses, dimensionsCovered,
 
   const sendData = () => {
     if (!iframeRef.current?.contentWindow || sentRef.current || !dnaString) return;
-    const iframeSrc = iframeRef.current.src;
     let targetOrigin: string;
     try {
-      targetOrigin = new URL(iframeSrc).origin;
+      targetOrigin = new URL(iframeRef.current.src).origin;
     } catch {
       targetOrigin = window.location.origin;
     }

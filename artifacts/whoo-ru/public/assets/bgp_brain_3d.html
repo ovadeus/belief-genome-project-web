@@ -188,7 +188,9 @@ const SLBL=['Strong Disbelief (−4)','Disbelief (−3)','Leaning Disbelief (−
             'Neutral (0)','Slight Belief','Mild Belief (+1)','Leaning Belief (+2)','Belief (+3)'];
 
 function getScores(id){const ci=CAT_IDS.indexOf(id);if(ci<0)return[];const off=CAT_N.slice(0,ci).reduce((a,b)=>a+b,0);return BELIEF.slice(off,off+CAT_N[ci]);}
-function avgS(id){const s=getScores(id);if(!s.length)return '0.0';const raw=s.reduce((a,b)=>a+b,0)/s.length;const d=raw-5;return (d>=0?'+':'')+d.toFixed(1);}
+function avgRaw(id){const s=getScores(id);if(!s.length)return 5;return s.reduce((a,b)=>a+b,0)/s.length;}
+function avgS(id){const raw=avgRaw(id);const d=raw-5;return (d>=0?'+':'')+d.toFixed(1);}
+function scoreIdx(id){return Math.max(0,Math.min(9,Math.round(avgRaw(id))));}
 
 // ── INIT ─────────────────────────────────────────────────────────────────────
 const wrap=document.getElementById('wrap'),canvas=document.getElementById('c'),tip=document.getElementById('tooltip');
@@ -353,13 +355,30 @@ window.addEventListener('message', function(evt) {
   // Re-render DNA bar with live data
   renderDNABar();
 
-  // Update node colors based on new scores
+  // Update node colors and labels based on new scores
   CAT_IDS.forEach((catId, ci) => {
-    const catAvg = parseFloat(avgS(catId));
-    const idx = Math.min(9, Math.round(catAvg));
+    const idx = scoreIdx(catId);
     const mesh = catMeshes[catId];
     if (mesh) {
       mesh.material.color.set(SINT[idx]);
+    }
+    if (labelEls[catId]) {
+      labelEls[catId].style.color = SHEX[idx];
+    }
+  });
+
+  // Update dimension node colors and hitNode data with live scores
+  hitNodes.forEach(function(node) {
+    if (node.type === 'dim' && node.data && node.data._catId !== undefined) {
+      var ci = CAT_IDS.indexOf(node.data._catId);
+      if (ci < 0) return;
+      var off = CAT_N.slice(0, ci).reduce(function(a,b){return a+b;}, 0);
+      var score = BELIEF[off + node.data._dimIdx] || 5;
+      node.data.score = score;
+      node.data.sHex = SHEX[score];
+      node.data.label = SLBL[score];
+      node.data.catHex = SHEX[scoreIdx(node.data._catId)];
+      node.mesh.material.color.set(SINT[score]);
     }
   });
 });
@@ -398,8 +417,7 @@ CATS.forEach((cat,ci)=>{
   const catScores=getScores(cat.id);
 
   // Ideology color from average belief score of this category
-  const catAvgRaw=parseFloat(avgS(cat.id));
-  const catScoreIdx=Math.min(9,Math.round(catAvgRaw));
+  const catScoreIdx=scoreIdx(cat.id);
   const catIdeHex=SHEX[catScoreIdx];
   const catIdeInt=SINT[catScoreIdx];
 
@@ -462,7 +480,7 @@ CATS.forEach((cat,ci)=>{
       new THREE.MeshBasicMaterial({color:sInt,transparent:true,opacity:0.75})
     );
     dm.position.copy(dp); brain.add(dm);
-    hitNodes.push({mesh:dm,type:'dim',data:{name:dname,category:cat.name,catHex:catIdeHex,score,sHex,label:SLBL[score]}});
+    hitNodes.push({mesh:dm,type:'dim',data:{name:dname,category:cat.name,catHex:catIdeHex,score,sHex,label:SLBL[score],_catId:cat.id,_dimIdx:di}});
     allNodePos.push({pos:dp.clone(),hex:sHex});
 
     // Score-colored glow (subtle)
@@ -555,8 +573,7 @@ CC_LINKS.forEach(([a,b,lbl])=>{
 const labelEls={};
 CATS.forEach(cat=>{
   const el=document.createElement('div'); el.className='node-label';
-  const idx=Math.min(9,Math.round(parseFloat(avgS(cat.id))));
-  el.style.color=SHEX[idx]; el.textContent=cat.name;
+  el.style.color=SHEX[scoreIdx(cat.id)]; el.textContent=cat.name;
   wrap.appendChild(el); labelEls[cat.id]=el;
 });
 
@@ -685,7 +702,7 @@ function doHover(e){
     tip.style.top=Math.max(e.clientY-r.top-14,5)+'px';
     if(node.type==='cat'){
       const d=node.data,scores=getScores(d.id),avg=avgS(d.id);
-      const ai=Math.min(9,Math.round(parseFloat(avg)));
+      const ai=scoreIdx(d.id);
       const ideHex=SHEX[ai], ideLbl=SLBL[ai];
       tip.innerHTML=`<div style="color:${ideHex};font-weight:bold;font-size:14px;margin-bottom:5px;">${d.name}</div>
         <div style="color:#446688;font-size:9px;text-transform:uppercase;letter-spacing:1.8px;margin-bottom:4px;">${d.hemi} · ${d.region}</div>
