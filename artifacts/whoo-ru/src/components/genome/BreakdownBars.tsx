@@ -70,8 +70,8 @@ export default function BreakdownBars({ history }: Props) {
                   }} />
                   {/* Center line */}
                   <div style={{
-                    position: 'absolute', left: '50%', top: 0, width: 1, height: '100%',
-                    background: 'rgba(255,255,255,0.28)', zIndex: 3,
+                    position: 'absolute', left: '50%', top: 0, width: 2, height: '100%',
+                    background: '#ffffff', zIndex: 3,
                   }} />
                   {/* Dot */}
                   {hasData && (
