@@ -207,7 +207,7 @@ renderer.setClearColor(0x080810);
 scene.add(new THREE.AmbientLight(0x0a0f20,1.0));
 const LD=[
   {c:0x0066ff,b:1.2,x:-4,y:4,z:4,s:0.5,p:0},
-  {c:0xff0077,b:0.9,x:4,y:-2,z:3,s:0.4,p:1.3},
+  {c:0x35E4CF,b:0.9,x:4,y:-2,z:3,s:0.4,p:1.3},
   {c:0x00ffcc,b:0.6,x:0,y:4,z:-4,s:0.6,p:2.5},
   {c:0xffffff,b:0.5,x:0,y:0,z:7,s:0,p:0},
 ];
@@ -237,7 +237,7 @@ function buildHemiWire(side){
 
   // Very subtle face fill
   const faceMesh=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({
-    color:side<0?0x001122:0x120008,transparent:true,opacity:0.02,
+    color:side<0?0x001122:0x001218,transparent:true,opacity:0.02,
     side:THREE.DoubleSide,depthWrite:false
   }));
   faceMesh.position.x=side*0.35; if(side>0) faceMesh.scale.x=-1;
@@ -364,27 +364,27 @@ window.addEventListener('message', function(evt) {
   });
 });
 const CATS=[
-  {id:'epistemology',name:'Epistemology',hex:'#a78bfa',color:0xa78bfa,hemi:'Left',region:'Left Prefrontal Cortex',why:'Logic, rational inference & knowledge evaluation',pos:[-0.94,0.74,0.82],
+  {id:'epistemology',name:'Epistemology',hemi:'Left',region:'Left Prefrontal Cortex',why:'Logic, rational inference & knowledge evaluation',pos:[-0.94,0.74,0.82],
    dims:['Obj. Reality','Abs. Truth','Sci. Authority','Intuition','Multi-Truth','Experience>Data','Uncertainty OK','Patterns','Tradition Wise','Trust Experts']},
-  {id:'science',name:'Science & Tech',hex:'#34d399',color:0x34d399,hemi:'Left',region:'Left Parietal Lobe',why:'Systematic reasoning, causal inference & analysis',pos:[-1.06,0.47,-0.26],
+  {id:'science',name:'Science & Tech',hemi:'Left',region:'Left Parietal Lobe',why:'Systematic reasoning, causal inference & analysis',pos:[-1.06,0.47,-0.26],
    dims:['Tech Optimism','AI Positive','Gene Editing','Space Priority','Nuclear Power','Vaccines','Social Media OK','Privacy>Security','Auto. Threat','Enhancement']},
-  {id:'economics',name:'Economics',hex:'#fbbf24',color:0xfbbf24,hemi:'Left',region:'Left Orbitofrontal Cortex',why:'Rational planning, calculation & sequential logic',pos:[-0.90,-0.12,0.86],
+  {id:'economics',name:'Economics',hemi:'Left',region:'Left Orbitofrontal Cortex',why:'Rational planning, calculation & sequential logic',pos:[-0.90,-0.12,0.86],
    dims:['Capitalism OK','Labor Rights','Unions','UBI','Corp. Duty','Min. Wage','Redistribution','Inheritance','Profit=Progress','Work=Worth']},
-  {id:'politics',name:'Politics',hex:'#f87171',color:0xf87171,hemi:'Left',region:'Left Anterior Cingulate Cortex',why:'Conflict monitoring, ambiguity tolerance & civic framing',pos:[-0.22,0.48,0.36],
+  {id:'politics',name:'Politics',hemi:'Left',region:'Left Anterior Cingulate Cortex',why:'Conflict monitoring, ambiguity tolerance & civic framing',pos:[-0.22,0.48,0.36],
    dims:['Small Govt','Democracy','Free Markets','Equality>Freedom','Border Security','Nationalism','Military','Welfare State','Gun Rights','Tax is Theft','Govt Climate','Pro-Immigration','Strong Police','Regulation','Meritocracy','Patriotism','Revolution','Originalism','Free Speech','Vote Duty']},
-  {id:'education',name:'Education',hex:'#2dd4bf',color:0x2dd4bf,hemi:'Left',region:'Left Hippocampus · Medial Temporal',why:'Episodic memory, sequential learning & belief context',pos:[-0.40,-0.28,-0.18],
+  {id:'education',name:'Education',hemi:'Left',region:'Left Hippocampus · Medial Temporal',why:'Episodic memory, sequential learning & belief context',pos:[-0.40,-0.28,-0.18],
    dims:['College Needed','Trust Teachers','Std. Testing','School Choice','Critical Think']},
-  {id:'spirituality',name:'Spirituality',hex:'#fcd34d',color:0xfcd34d,hemi:'Right',region:'Right Posterior Cingulate · Medial Temporal',why:'Mystical experience & self-transcendence',pos:[0.26,-0.20,-0.52],
+  {id:'spirituality',name:'Spirituality',hemi:'Right',region:'Right Posterior Cingulate · Medial Temporal',why:'Mystical experience & self-transcendence',pos:[0.26,-0.20,-0.52],
    dims:['God Exists','Religion Value','Afterlife','Soul Exists','Prayer Works','Fate/Destiny','Karma','Supernatural','Literal Texts','Miracles','Consciousness','Life Force','Astrology','Reincarnation','Spiritual Practice']},
-  {id:'relationships',name:'Relationships',hex:'#38bdf8',color:0x38bdf8,hemi:'Right',region:'Right Lateral Frontal Lobe',why:'Social bonding, empathy & interpersonal emotion',pos:[0.80,0.46,0.85],
+  {id:'relationships',name:'Relationships',hemi:'Right',region:'Right Lateral Frontal Lobe',why:'Social bonding, empathy & interpersonal emotion',pos:[0.80,0.46,0.85],
    dims:['Monogamy','Marriage Sacred','Two Parents','Loyalty','Cond. Forgiveness','Competition','Trust Strangers','Civic Duty','Suffering=Meaning']},
-  {id:'morality',name:'Morality',hex:'#f472b6',color:0xf472b6,hemi:'Right',region:'Medial Prefrontal Cortex (right)',why:'Moral emotion, somatic markers & compassionate judgment',pos:[0.20,0.58,0.52],
+  {id:'morality',name:'Morality',hemi:'Right',region:'Medial Prefrontal Cortex (right)',why:'Moral emotion, somatic markers & compassionate judgment',pos:[0.20,0.58,0.52],
    dims:['Moral Absolutes','Individual>Collective','Intent>Outcome','Trad. Morality','Punishment Deters','Inequality Unjust','Abortion OK','Death Penalty','Animal Rights','Env. Duty','Sexual Morality','Situational Honesty','Self-Interest','Suffering Builds','Forgiveness']},
-  {id:'psychology',name:'Psychology',hex:'#818cf8',color:0x818cf8,hemi:'Right',region:'Right Precuneus · Posterior Cingulate',why:'Self-model, identity & introspection',pos:[0.24,0.32,-0.44],
+  {id:'psychology',name:'Psychology',hemi:'Right',region:'Right Precuneus · Posterior Cingulate',why:'Self-model, identity & introspection',pos:[0.24,0.32,-0.44],
    dims:['Free Will','Fixed Personality','Emotion>Reason','Therapy Works','Positive Think','Trauma Shapes','Meditation','IQ Fixed','Conscious.>Death','Human Goodness']},
-  {id:'social',name:'Social',hex:'#fb923c',color:0xfb923c,hemi:'Right',region:'Right Superior Temporal Sulcus',why:'Theory of mind, social cognition & empathy networks',pos:[0.94,-0.16,0.64],
+  {id:'social',name:'Social',hemi:'Right',region:'Right Superior Temporal Sulcus',why:'Theory of mind, social cognition & empathy networks',pos:[0.94,-0.16,0.64],
    dims:['Trad. Family','Bio. Gender','Assimilation','Merit=Success','Systemic Racism','Feminism','LGBTQ+ Rights','Gender Roles','PC Culture','Diversity','Colorblindness','Cancel Culture','Privilege','Cultural Trad.','Community']},
-  {id:'health',name:'Health',hex:'#86efac',color:0x86efac,hemi:'Right',region:'Right Insula · Somatosensory',why:'Interoception, body awareness & somatic processing',pos:[0.90,0.06,-0.76],
+  {id:'health',name:'Health',hemi:'Right',region:'Right Insula · Somatosensory',why:'Interoception, body awareness & somatic processing',pos:[0.90,0.06,-0.76],
    dims:['Western Med.','Mental Health','Body Autonomy','Natural>Synth.','Healthcare Right']},
 ];
 
@@ -462,7 +462,7 @@ CATS.forEach((cat,ci)=>{
       new THREE.MeshBasicMaterial({color:sInt,transparent:true,opacity:0.75})
     );
     dm.position.copy(dp); brain.add(dm);
-    hitNodes.push({mesh:dm,type:'dim',data:{name:dname,category:cat.name,catHex:cat.hex,score,sHex,label:SLBL[score]}});
+    hitNodes.push({mesh:dm,type:'dim',data:{name:dname,category:cat.name,catHex:catIdeHex,score,sHex,label:SLBL[score]}});
     allNodePos.push({pos:dp.clone(),hex:sHex});
 
     // Score-colored glow (subtle)
@@ -507,7 +507,7 @@ brain.add(new THREE.LineSegments(plexGeo,new THREE.LineBasicMaterial({color:0x88
 
 // ── CORPUS CALLOSUM — CROSS-HEMISPHERE CONNECTIONS ────────────────────────────
 // Bright arcs routed through the corpus callosum region (anatomical top-centre, y≈0.78)
-// Colour: cool white-blue = resonance (similar scores), warm amber = tension (divergent scores)
+// Colour: cool white-blue = resonance (similar scores), teal-blue = tension (divergent scores)
 const CC_LINKS=[
   ['epistemology','morality',    'Reasoning ↔ Moral intuition'],
   ['epistemology','psychology',  'Knowledge ↔ Self-model'],
@@ -531,8 +531,8 @@ CC_LINKS.forEach(([a,b,lbl])=>{
   const aAvg=parseFloat(avgS(a)), bAvg=parseFloat(avgS(b));
   const div=Math.abs(aAvg-bAvg);
   const tT=Math.min(1,div/3.5); // 0=resonance, 1=strong tension
-  // Resonance → cool white (#c8d8ff), Tension → warm amber (#ffaa44)
-  const rC=Math.round(200+tT*55), gC=Math.round(216-tT*100), bC=Math.round(255-tT*145);
+  // Resonance → cool white (#c8d8ff), Tension → teal-blue (#35a8cf)
+  const rC=Math.round(200-tT*147), gC=Math.round(216-tT*48), bC=Math.round(255-tT*48);
   const hexInt=(rC<<16)|(gC<<8)|bC;
 
   // Arc lifts to corpus callosum height at top midline
