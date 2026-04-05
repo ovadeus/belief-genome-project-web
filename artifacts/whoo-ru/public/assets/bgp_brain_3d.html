@@ -121,13 +121,13 @@ canvas:active { cursor:grabbing; }
     <div style="display:flex;flex-direction:column;align-items:center;gap:5px;">
       <div style="display:flex;align-items:center;gap:10px;">
         <span class="ll">Progressive</span>
-        <div style="width:220px;height:4px;border-radius:2px;background:linear-gradient(to right,#ff2200,#ff5500,#ff8c00,#ffbb00,#ffe899,#ffffff,#aac4ff,#6677ee,#3344cc,#5511aa);box-shadow:0 0 8px rgba(255,255,255,0.2);"></div>
-        <span class="ll">Conservative</span>
+        <div style="width:220px;height:4px;border-radius:2px;background:linear-gradient(to right,#35E4CF,#35E4CF 20%,#b0f0e8 45%,#ffffff 50%,#a8d4ff 55%,#52A8FF 80%,#52A8FF);box-shadow:0 0 8px rgba(255,255,255,0.2);"></div>
+        <span class="ll">Traditional</span>
       </div>
       <div style="display:flex;justify-content:space-between;width:340px;padding:0 2px;">
-        <span style="font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1px;color:rgba(255,80,0,0.4);">Far Left</span>
-        <span style="font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1px;color:rgba(129,136,167,0.4);">Independent</span>
-        <span style="font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1px;color:rgba(100,100,220,0.4);">Far Right</span>
+        <span style="font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1px;color:rgba(53,228,207,0.5);">−4 Disbelief</span>
+        <span style="font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1px;color:rgba(129,136,167,0.4);">Neutral</span>
+        <span style="font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1px;color:rgba(82,168,255,0.5);">+4 Belief</span>
       </div>
     </div>
   </div>
@@ -180,9 +180,9 @@ let _confidence = 0;
 const CAT_IDS=['epistemology','spirituality','morality','politics','social',
                'economics','science','education','health','psychology','relationships'];
 const CAT_N=[10,15,15,20,15,10,10,5,5,10,9];
-// Ideology spectrum: 0=Far Progressive (hot red) → 5=Unresolved (white) → 9=Far Conservative (deep violet)
-const SHEX=['#ff2200','#ff5500','#ff8c00','#ffbb00','#ffe899',
-            '#f8f8ff','#aac4ff','#6677ee','#3344cc','#5511aa'];
+// Belief spectrum: 1=Strong Progressive (green) → 5=Neutral (white) → 9=Strong Traditional (blue)
+const SHEX=['#1ac9b5','#28d6c2','#35E4CF','#7af0e2','#b0f0e8',
+            '#f8f8ff','#a8d4ff','#7abcff','#52A8FF','#3a8fe0'];
 const SINT=SHEX.map(h=>parseInt(h.slice(1),16));
 const SLBL=['Strong Disbelief (−4)','Disbelief (−3)','Leaning Disbelief (−2)','Mild Disbelief (−1)','Slight Disbelief',
             'Neutral (0)','Slight Belief','Mild Belief (+1)','Leaning Belief (+2)','Belief (+3)'];
