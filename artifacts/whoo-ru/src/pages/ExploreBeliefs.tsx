@@ -2,6 +2,8 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { motion } from "framer-motion";
 import { Globe, Users, BarChart3, Dna, Filter, ChevronDown, ChevronUp, Info } from "lucide-react";
+import { lazy, Suspense } from "react";
+const WorldBeliefMap = lazy(() => import("@/components/explore/WorldBeliefMap"));
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -141,6 +143,8 @@ export default function ExploreBeliefs() {
   const [countries, setCountries] = useState<CountryData[]>([]);
   const [timeline, setTimeline] = useState<TimelinePoint[]>([]);
   const [timelineInterval, setTimelineInterval] = useState("month");
+  const [countryBeliefs, setCountryBeliefs] = useState<Record<string, { avg: number; count: number }>>({});
+  const [mapOpen, setMapOpen] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("epistemology");
   const [filterCountry, setFilterCountry] = useState("");
   const [filterGender, setFilterGender] = useState("");
@@ -161,13 +165,14 @@ export default function ExploreBeliefs() {
       const tlQp = new URLSearchParams(qp);
       tlQp.set("interval", timelineInterval);
 
-      const [statsRes, dimsRes, gensRes, gendersRes, countriesRes, tlRes] = await Promise.all([
+      const [statsRes, dimsRes, gensRes, gendersRes, countriesRes, tlRes, cbRes] = await Promise.all([
         fetch(`${API_BASE}/genome/stats?${qp}`),
         fetch(`${API_BASE}/genome/explore/dimensions?${qp}`),
         fetch(`${API_BASE}/genome/explore/generations?${qp}`),
         fetch(`${API_BASE}/genome/explore/genders?${qp}`),
         fetch(`${API_BASE}/genome/explore/countries?${qp}`),
         fetch(`${API_BASE}/genome/explore/timeline?${tlQp}`),
+        fetch(`${API_BASE}/genome/explore/country-beliefs?${qp}`),
       ]);
 
       if (statsRes.ok) setStats(await statsRes.json());
@@ -181,6 +186,7 @@ export default function ExploreBeliefs() {
       if (gendersRes.ok) { const d = await gendersRes.json(); setGenders(d.genders || []); }
       if (countriesRes.ok) { const d = await countriesRes.json(); setCountries(d.countries || []); }
       if (tlRes.ok) { const d = await tlRes.json(); setTimeline(d.timeline || []); }
+      if (cbRes.ok) { const d = await cbRes.json(); setCountryBeliefs(d.countryBeliefs || {}); }
     } catch (err) { console.error("Failed to load explore data:", err); }
     setLoading(false);
   }, [filterCountry, filterGender, filterGenIdx, timelineInterval]);
@@ -695,6 +701,45 @@ export default function ExploreBeliefs() {
                     },
                   }]} />
                 </div>
+              </>
+            )}
+          </motion.div>
+        )}
+
+        {!loading && !insufficientData && dimCount >= 5 && Object.keys(countryBeliefs).length > 0 && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 }}
+            className="bg-[#0c1025]/80 border border-white/10 rounded-2xl p-6">
+            <button
+              onClick={() => setMapOpen(o => !o)}
+              className="w-full flex items-center justify-between cursor-pointer"
+              style={{ background: 'none', border: 'none', padding: 0 }}
+            >
+              <div style={{
+                fontSize: 11, fontFamily: "'Space Mono', monospace", textTransform: 'uppercase',
+                letterSpacing: 1.5, color: 'rgba(255,255,255,0.5)',
+                display: 'flex', alignItems: 'center', gap: 8,
+              }}>
+                <Globe size={14} style={{ opacity: 0.6 }} />
+                World Belief Heatmap
+                <InfoTip text="A global view of how beliefs lean across countries. Red tones indicate progressive-leaning populations, blue tones indicate traditional-leaning, and grey means mixed/independent. Only countries with 5+ participants are shown. Hover over a country to see its average score and participant count. Filters for generation and gender apply here too." />
+              </div>
+              {mapOpen ? (
+                <ChevronUp size={16} className="text-muted-foreground" />
+              ) : (
+                <ChevronDown size={16} className="text-muted-foreground" />
+              )}
+            </button>
+
+            {mapOpen && (
+              <>
+                <p className="text-xs text-muted-foreground mt-3 mb-2">Geographic belief distribution — red = progressive, blue = traditional</p>
+                <Suspense fallback={
+                  <div className="flex items-center justify-center h-[300px]">
+                    <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                  </div>
+                }>
+                  <WorldBeliefMap countryBeliefs={countryBeliefs} />
+                </Suspense>
               </>
             )}
           </motion.div>

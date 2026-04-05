@@ -47,6 +47,7 @@
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "@types/react-simple-maps": "^3.0.6",
     "@vitejs/plugin-react": "catalog:",
     "@workspace/api-client-react": "workspace:*",
     "class-variance-authority": "catalog:",
@@ -82,6 +83,7 @@
     "react-chartjs-2": "^5.3.1",
     "react-markdown": "^10.1.0",
     "react-quill": "^2.0.0",
+    "react-simple-maps": "^3.0.0",
     "rehype-raw": "^7.0.0",
     "three": "^0.183.2"
   }

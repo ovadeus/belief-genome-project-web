@@ -343,6 +343,54 @@ router.get('/explore/timeline', async (req: Request, res: Response) => {
   }
 });
 
+router.get('/explore/country-beliefs', async (req: Request, res: Response) => {
+  try {
+    const whereClause = buildExploreFilters(req.query);
+    const query = db.select({
+      countryCode: genomeSubmissions.countryCode,
+      beliefValues: genomeSubmissions.beliefValues,
+    }).from(genomeSubmissions);
+    if (whereClause) query.where(whereClause);
+    const rows = await query;
+
+    const NEUTRAL = 5;
+    const countryBuckets: Record<string, { sum: number; count: number; total: number }> = {};
+
+    for (const row of rows) {
+      const cc = row.countryCode;
+      if (!cc) continue;
+      if (!countryBuckets[cc]) countryBuckets[cc] = { sum: 0, count: 0, total: 0 };
+      countryBuckets[cc].total++;
+      const values = row.beliefValues as Record<string, number | null> | null;
+      if (!values) continue;
+      let dimSum = 0, dimCount = 0;
+      for (const val of Object.values(values)) {
+        dimSum += val !== null ? val : NEUTRAL;
+        dimCount++;
+      }
+      if (dimCount > 0) {
+        countryBuckets[cc].sum += dimSum / dimCount;
+        countryBuckets[cc].count++;
+      }
+    }
+
+    const countryBeliefs: Record<string, { avg: number; count: number }> = {};
+    for (const [cc, bucket] of Object.entries(countryBuckets)) {
+      if (bucket.count >= PRIVACY_MINIMUM) {
+        countryBeliefs[cc] = {
+          avg: Math.round((bucket.sum / bucket.count) * 100) / 100,
+          count: bucket.total,
+        };
+      }
+    }
+
+    return res.json({ countryBeliefs });
+  } catch (err: any) {
+    console.error('Explore country-beliefs error:', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 router.get('/explore/countries', async (req: Request, res: Response) => {
   try {
     const whereClause = buildExploreFilters(req.query);
