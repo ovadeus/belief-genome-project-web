@@ -356,10 +356,6 @@ export default function ExploreBeliefs() {
       ctx.lineTo(right, y);
       ctx.stroke();
       ctx.setLineDash([]);
-      ctx.fillStyle = color + 'aa';
-      ctx.font = '10px sans-serif';
-      ctx.textAlign = 'left';
-      ctx.fillText('neutral', left + 4, y - 5);
       ctx.restore();
     },
   }), [selectedCategory]);
@@ -453,12 +449,7 @@ export default function ExploreBeliefs() {
         ticks: {
           color: '#64748b',
           stepSize: 1,
-          callback: (v: any) => {
-            if (v === 1) return '1 — Progressive';
-            if (v === 5) return '5 — Independent';
-            if (v === 9) return '9 — Traditional';
-            return v;
-          },
+          callback: (v: any) => v,
         },
         grid: {
           color: (ctx: any) => ctx.tick?.value === 5 ? '#ffffff40' : '#ffffff08',
@@ -694,9 +685,6 @@ export default function ExploreBeliefs() {
                       ctx.stroke();
                       ctx.setLineDash([]);
                       ctx.fillStyle = '#ffffff60';
-                      ctx.font = '10px sans-serif';
-                      ctx.textAlign = 'right';
-                      ctx.fillText('Independent', right - 4, y - 6);
                       ctx.restore();
                     },
                   }]} />
