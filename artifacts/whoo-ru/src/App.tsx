@@ -25,9 +25,11 @@ import AdminEarlyBird from "./pages/admin/EarlyBird";
 import AdminSettings from "./pages/admin/Settings";
 import MediaLibrary from "./pages/admin/MediaLibrary";
 import GenomeSubmissions from "./pages/admin/GenomeSubmissions";
+import AdminAnalytics from "./pages/admin/Analytics";
 import ExploreBeliefs from "./pages/ExploreBeliefs";
 import NeuromapPage from "./pages/NeuromapPage";
 
+import { usePageTracker } from "./hooks/use-page-tracker";
 import { GenomeAuthProvider } from "./components/genome/GenomeAuthContext";
 import GenomeLayout from "./components/genome/GenomeLayout";
 import LoginPage from "./pages/genome/LoginPage";
@@ -42,6 +44,7 @@ import ProfilePage from "./pages/genome/ProfilePage";
 const queryClient = new QueryClient();
 
 function Router() {
+  usePageTracker();
   return (
     <Switch>
       <Route path="/" component={Home} />
@@ -68,6 +71,7 @@ function Router() {
       <Route path="/admin/media" component={MediaLibrary} />
       <Route path="/admin/settings" component={AdminSettings} />
       <Route path="/admin/genome" component={GenomeSubmissions} />
+      <Route path="/admin/analytics" component={AdminAnalytics} />
 
       <Route path="/genome/login">
         <GenomeLayout><LoginPage /></GenomeLayout>

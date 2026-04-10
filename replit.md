@@ -72,6 +72,7 @@ Full-stack website for a psychometric self-knowledge framework, desktop app, and
 - **Subscribers** (`/admin/subscribers`): List with search/filter, CSV export, member status toggle (shield icon)
 - **Early Bird** (`/admin/earlybird`): List with CSV export
 - **Genome Data** (`/admin/genome`): View/search/filter genome submissions (real vs test), export CSV, purge test data, delete individual submissions
+- **Analytics** (`/admin/analytics`): Page view & visitor tracking dashboard with traffic-over-time area chart, top pages bar breakdown, device pie chart, referrer list, and 7d/30d/90d range filters. Tracks via `page_views` table (public pages only, admin excluded).
 - **Settings** (`/admin/settings`): Site settings, change password
 
 ### Admin Credentials

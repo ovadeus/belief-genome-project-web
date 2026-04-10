@@ -7,3 +7,4 @@ export * from "./media";
 export * from "./users";
 export * from "./genomeSubmissions";
 export * from "./genomeAnalyses";
+export * from "./pageViews";

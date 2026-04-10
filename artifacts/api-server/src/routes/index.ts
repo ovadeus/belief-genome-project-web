@@ -13,6 +13,7 @@ import genomeProbesRouter from "./genome-probes";
 import genomeDataRouter from "./genome-data";
 import genomeSubmitRouter from "./genome-submit";
 import genomeAdminRouter from "./genome-admin";
+import analyticsRouter from "./analytics";
 import { requireAuth } from "../middlewares/auth";
 
 const router: IRouter = Router();
@@ -26,6 +27,7 @@ router.use(adminRouter);
 router.use(settingsRouter);
 router.use(storageRouter);
 router.use(blogAssetsRouter);
+router.use(analyticsRouter);
 
 router.use("/genome", genomeSubmitRouter);
 router.use("/genome/admin", requireAuth, genomeAdminRouter);
