@@ -8,7 +8,7 @@ export function Footer() {
   return (
     <footer className="border-t border-border bg-card/50 mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-12 md:gap-8">
           
           <div className="md:col-span-2 space-y-6">
             <Link href="/" className="group inline-block">
@@ -55,6 +55,16 @@ export function Footer() {
               <li><Link href="/blog" className="text-muted-foreground hover:text-primary transition-colors">Read the Blog</Link></li>
               <li><Link href="/subscribe" className="text-muted-foreground hover:text-primary transition-colors">Newsletter</Link></li>
               <li><Link href="/admin/login" className="text-muted-foreground hover:text-primary transition-colors">Admin Login</Link></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-semibold text-foreground mb-6 font-display uppercase tracking-wider text-sm">Help</h4>
+            <ul className="space-y-4">
+              <li><Link href="/support#scoring" className="text-muted-foreground hover:text-primary transition-colors">Belief Scale</Link></li>
+              <li><Link href="/support#visualizations" className="text-muted-foreground hover:text-primary transition-colors">Visualizations</Link></li>
+              <li><Link href="/support#probes-nudges" className="text-muted-foreground hover:text-primary transition-colors">Probes & Nudges</Link></li>
+              <li><Link href="/support#sync" className="text-muted-foreground hover:text-primary transition-colors">Sync Setup</Link></li>
             </ul>
           </div>
 

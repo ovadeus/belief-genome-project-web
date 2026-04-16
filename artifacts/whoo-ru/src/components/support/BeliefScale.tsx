@@ -1,57 +1,86 @@
-const BANDS = [
-  { range: '0–11',  label: 'Absolute False', color: '#dc2626', desc: 'Deep red' },
-  { range: '12–22', label: 'Deeply False',   color: '#ef4444', desc: 'Red' },
-  { range: '23–33', label: 'False',          color: '#f87171', desc: 'Light red' },
-  { range: '34–44', label: 'Leaning False',  color: '#fca5a5', desc: 'Pale red' },
-  { range: '45–55', label: 'Uncertain',      color: '#22c55e', desc: 'Green' },
-  { range: '56–66', label: 'Leaning True',   color: '#93c5fd', desc: 'Light blue' },
-  { range: '67–77', label: 'True',           color: '#60a5fa', desc: 'Blue' },
-  { range: '78–88', label: 'Deeply True',    color: '#3b82f6', desc: 'Blue' },
-  { range: '89–100',label: 'Absolute True',  color: '#2563eb', desc: 'Deep blue' },
-];
+import {
+  BELIEF_COLORS, BELIEF_LABELS,
+  beliefIndexFromValue, beliefLabelFromValue,
+} from '@/lib/beliefScale';
 
-const GRADIENT = 'linear-gradient(90deg, #dc2626, #fca5a5 25%, #22c55e 50%, #93c5fd 75%, #2563eb)';
+type Variant = 'gradient' | 'swatches' | 'compact';
 
-interface Props {
-  compact?: boolean;
+interface BeliefScaleProps {
+  variant?: Variant;
+  value?: number;
+  showLabels?: boolean;
+  className?: string;
 }
 
-export default function BeliefScale({ compact }: Props) {
-  return (
-    <div className="space-y-4">
-      <div
-        className="h-4 rounded-full w-full"
-        style={{ background: GRADIENT }}
-      />
+const GRADIENT = `linear-gradient(to right, ${BELIEF_COLORS.join(', ')})`;
 
-      {!compact && (
+export function BeliefScale({
+  variant = 'gradient', value, showLabels = true, className = '',
+}: BeliefScaleProps) {
+
+  if (variant === 'swatches') {
+    return (
+      <div className={className}>
         <div className="grid grid-cols-9 gap-1">
-          {BANDS.map((b) => (
-            <div key={b.label} className="text-center">
-              <div
-                className="w-full h-6 rounded-md mb-1.5"
-                style={{ backgroundColor: b.color }}
-              />
-              <div className="text-[10px] font-mono text-muted-foreground leading-tight">
-                {b.range}
-              </div>
-              <div className="text-[10px] font-medium text-foreground leading-tight mt-0.5">
-                {b.label}
-              </div>
+          {BELIEF_COLORS.map((c, i) => (
+            <div key={i} className="flex flex-col items-center">
+              <div className="h-6 w-full rounded" style={{ background: c }} />
+              {showLabels && (
+                <span className="mt-1.5 text-center font-mono text-[10px] leading-tight text-white/60">
+                  {BELIEF_LABELS[i]}
+                </span>
+              )}
             </div>
           ))}
         </div>
-      )}
+      </div>
+    );
+  }
 
-      {compact && (
-        <div className="flex justify-between text-[10px] font-mono text-muted-foreground">
-          <span style={{ color: '#dc2626' }}>Absolute False</span>
-          <span style={{ color: '#22c55e' }}>Uncertain</span>
-          <span style={{ color: '#2563eb' }}>Absolute True</span>
+  if (variant === 'compact') {
+    return (
+      <div className={`inline-flex h-2 w-32 overflow-hidden rounded-full ${className}`}>
+        {BELIEF_COLORS.map((c, i) => (
+          <div key={i} className="h-full flex-1" style={{ background: c }} />
+        ))}
+      </div>
+    );
+  }
+
+  const hasPointer = typeof value === 'number';
+  const markerPct = hasPointer ? Math.max(0, Math.min(100, value!)) : 0;
+  const markerLabel = hasPointer ? beliefLabelFromValue(value!) : '';
+  const markerColor = hasPointer ? BELIEF_COLORS[beliefIndexFromValue(value!)] : '';
+
+  return (
+    <div className={className}>
+      <div className="relative">
+        <div className="h-3 w-full rounded-full" style={{ background: GRADIENT }} />
+        {hasPointer && (
+          <div
+            className="absolute -top-1 flex flex-col items-center"
+            style={{ left: `${markerPct}%`, transform: 'translateX(-50%)' }}
+          >
+            <div
+              className="h-5 w-5 rounded-full border-2 border-white shadow-lg"
+              style={{ background: markerColor }}
+            />
+            <div className="mt-1 whitespace-nowrap rounded bg-black/80 px-2 py-0.5 font-mono text-[10px] text-white">
+              {markerLabel} · {markerPct}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {showLabels && (
+        <div className="mt-3 flex justify-between font-mono text-[10px]">
+          <span style={{ color: BELIEF_COLORS[0] }}>Absolute False</span>
+          <span style={{ color: BELIEF_COLORS[4] }}>Uncertain</span>
+          <span style={{ color: BELIEF_COLORS[8] }}>Absolute True</span>
         </div>
       )}
     </div>
   );
 }
 
-export { BANDS, GRADIENT };
+export default BeliefScale;
