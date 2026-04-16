@@ -28,35 +28,53 @@ export function domainLabel(cat: string, avg: number): string {
   return `Strongly ${axis.right}`;
 }
 
+export const SHEX: string[] = [
+  '#dc2626', '#ef4444', '#f87171', '#fca5a5', '#86efac',
+  '#22c55e', '#93c5fd', '#60a5fa', '#3b82f6', '#2563eb',
+];
+
+export const BELIEF_LABELS_10 = [
+  'Absolute False', 'Deeply False', 'False', 'Leaning False', 'Near Neutral',
+  'Uncertain', 'Leaning True', 'True', 'Deeply True', 'Absolute True',
+];
+
+export const BELIEF_GRADIENT = 'linear-gradient(90deg, #dc2626, #fca5a5 25%, #22c55e 50%, #93c5fd 75%, #2563eb)';
+
 export function beliefLabel(v: number): string {
-  if (v <= 10)  return 'False to me';
-  if (v <= 30)  return 'Unlikely true';
-  if (v <= 45)  return 'Leaning false';
-  if (v <= 55)  return 'Uncertain';
-  if (v <= 70)  return 'Leaning true';
-  if (v <= 88)  return 'Likely true';
-  return 'Deeply true to me';
+  if (v <= 5)   return 'Absolute False';
+  if (v <= 15)  return 'Deeply False';
+  if (v <= 28)  return 'False';
+  if (v <= 42)  return 'Leaning False';
+  if (v <= 52)  return 'Near Neutral';
+  if (v <= 58)  return 'Uncertain';
+  if (v <= 72)  return 'Leaning True';
+  if (v <= 85)  return 'True';
+  if (v <= 95)  return 'Deeply True';
+  return 'Absolute True';
 }
 
 export function beliefColor(v: number): string {
-  if (v <= 10)  return '#1ac9b5';
-  if (v <= 25)  return '#28d6c2';
-  if (v <= 40)  return '#35E4CF';
-  if (v <= 48)  return '#70ede0';
-  if (v <= 52)  return '#b8f0ea';
-  if (v <= 60)  return '#7abcff';
-  if (v <= 75)  return '#52A8FF';
-  if (v <= 88)  return '#3a8fe0';
-  return '#2a7acc';
+  if (v <= 5)   return '#dc2626';
+  if (v <= 15)  return '#ef4444';
+  if (v <= 28)  return '#f87171';
+  if (v <= 42)  return '#fca5a5';
+  if (v <= 52)  return '#86efac';
+  if (v <= 58)  return '#22c55e';
+  if (v <= 72)  return '#93c5fd';
+  if (v <= 85)  return '#60a5fa';
+  if (v <= 95)  return '#3b82f6';
+  return '#2563eb';
 }
 
 export function catColour(v: number | null): string {
-  if (v == null) return '#b8f0ea';
-  if (v <= 0.15) return '#1ac9b5';
-  if (v <= 0.30) return '#28d6c2';
-  if (v <= 0.45) return '#35E4CF';
-  if (v <= 0.55) return '#b8f0ea';
-  if (v <= 0.70) return '#52A8FF';
-  if (v <= 0.85) return '#3a8fe0';
-  return '#2a7acc';
+  if (v == null) return '#86efac';
+  if (v <= 0.11) return '#dc2626';
+  if (v <= 0.22) return '#ef4444';
+  if (v <= 0.33) return '#f87171';
+  if (v <= 0.44) return '#fca5a5';
+  if (v <= 0.55) return '#86efac';
+  if (v <= 0.66) return '#93c5fd';
+  if (v <= 0.77) return '#60a5fa';
+  if (v <= 0.88) return '#3b82f6';
+  return '#2563eb';
 }

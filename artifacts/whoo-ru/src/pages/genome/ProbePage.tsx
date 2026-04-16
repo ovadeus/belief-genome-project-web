@@ -118,9 +118,9 @@ export default function ProbePage() {
           display: 'flex', justifyContent: 'space-between',
           fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 4,
         }}>
-          <span>False to me</span>
+          <span>Absolute False</span>
           <span>Uncertain</span>
-          <span>Deeply true to me</span>
+          <span>Absolute True</span>
         </div>
       </div>
 

@@ -24,9 +24,14 @@ export const DISPLAY_MAX = 4;
 export const DISPLAY_NEUTRAL = 0;
 export const RAW_NEUTRAL = 5;
 
-export const COLOR_PROGRESSIVE = '#35E4CF';
-export const COLOR_NEUTRAL = '#FFFFFF';
-export const COLOR_TRADITIONAL = '#52A8FF';
+export const COLOR_PROGRESSIVE = '#dc2626';
+export const COLOR_NEUTRAL = '#22c55e';
+export const COLOR_TRADITIONAL = '#2563eb';
+
+export const SHEX: string[] = [
+  '#dc2626', '#ef4444', '#f87171', '#fca5a5', '#86efac',
+  '#22c55e', '#93c5fd', '#60a5fa', '#3b82f6', '#2563eb',
+];
 
 function hexToRgb(hex: string): [number, number, number] {
   const h = hex.replace('#', '');
@@ -43,21 +48,21 @@ function lerpColor(from: string, to: string, t: number): string {
 }
 
 export function displayBarColor(displayVal: number): string {
-  if (displayVal === 0) return '#7ec8c0';
+  if (displayVal === 0) return '#86efac';
   const t = Math.min(Math.abs(displayVal) / 4, 1);
   const minT = 0.55;
   const adjT = minT + t * (1 - minT);
-  if (displayVal < 0) return lerpColor('#a0e8e0', COLOR_PROGRESSIVE, adjT);
-  return lerpColor('#a0c8f0', COLOR_TRADITIONAL, adjT);
+  if (displayVal < 0) return lerpColor('#fca5a5', COLOR_PROGRESSIVE, adjT);
+  return lerpColor('#93c5fd', COLOR_TRADITIONAL, adjT);
 }
 
 export function displayBarBorder(displayVal: number): string {
-  if (displayVal === 0) return '#6aaa9e';
+  if (displayVal === 0) return '#4ade80';
   const t = Math.min(Math.abs(displayVal) / 4, 1);
   const minT = 0.55;
   const adjT = minT + t * (1 - minT);
-  if (displayVal < 0) return lerpColor('#70c8bc', '#2BC4B0', adjT);
-  return lerpColor('#70a0e0', '#3A8FE0', adjT);
+  if (displayVal < 0) return lerpColor('#f87171', '#dc2626', adjT);
+  return lerpColor('#60a5fa', '#2563eb', adjT);
 }
 
-export const BELIEF_GRADIENT_CSS = `linear-gradient(90deg, ${COLOR_PROGRESSIVE}, ${COLOR_PROGRESSIVE} 20%, #b0f0e8 45%, #ffffff 50%, #a8d4ff 55%, ${COLOR_TRADITIONAL} 80%, ${COLOR_TRADITIONAL})`;
+export const BELIEF_GRADIENT_CSS = `linear-gradient(90deg, #dc2626, #fca5a5 25%, #22c55e 50%, #93c5fd 75%, #2563eb)`;

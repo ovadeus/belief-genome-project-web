@@ -80,7 +80,7 @@ export default function AnalyzePage() {
         }}>
           <h3 style={{
             fontSize: 12, textTransform: 'uppercase', letterSpacing: 1,
-            color: '#35E4CF', marginBottom: 16,
+            color: '#22c55e', marginBottom: 16,
             fontFamily: "'Space Mono', monospace",
           }}>
             Analysis Complete

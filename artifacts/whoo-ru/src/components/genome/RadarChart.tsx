@@ -1,5 +1,3 @@
-// World View Radar — Chart.js radar with 9 category axes
-// Matches desktop: same categories, same colors, same tooltips
 import { Radar } from 'react-chartjs-2';
 import {
   Chart as ChartJS, RadialLinearScale, PointElement, LineElement, Filler, Tooltip,
@@ -19,7 +17,6 @@ interface Props {
 }
 
 export default function RadarChart({ history }: Props) {
-  // Compute category averages from history (value 0-1 scale)
   const buckets: Record<string, number[]> = {};
   for (const h of history) {
     const cat = h.probeCategory || 'life';
@@ -49,12 +46,12 @@ export default function RadarChart({ history }: Props) {
     datasets: [{
       label: 'Your Position',
       data: radarData,
-      backgroundColor: 'rgba(82, 168, 255, 0.12)',
-      borderColor: 'rgba(82, 168, 255, 0.8)',
+      backgroundColor: 'rgba(59, 130, 246, 0.12)',
+      borderColor: 'rgba(59, 130, 246, 0.8)',
       pointBackgroundColor: CAT_ORDER.map(c => {
         const v = avgs[c];
         if (v == null) return 'rgba(255,255,255,0.15)';
-        return v >= 0.6 ? '#52A8FF' : v <= 0.4 ? '#35E4CF' : '#b8f0ea';
+        return v >= 0.6 ? '#3b82f6' : v <= 0.4 ? '#f87171' : '#86efac';
       }),
       pointRadius: 5,
       pointHoverRadius: 7,
@@ -100,7 +97,7 @@ export default function RadarChart({ history }: Props) {
         backgroundColor: 'rgba(20,20,40,0.95)',
         titleColor: '#fff',
         bodyColor: 'rgba(255,255,255,0.7)',
-        borderColor: 'rgba(82,168,255,0.4)',
+        borderColor: 'rgba(59,130,246,0.4)',
         borderWidth: 1,
       },
     },

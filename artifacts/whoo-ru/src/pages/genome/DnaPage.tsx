@@ -44,7 +44,7 @@ export default function DnaPage() {
           padding: '8px 16px', borderRadius: 8,
           background: copying ? 'rgba(46,213,115,0.15)' : 'transparent',
           border: `1px solid ${copying ? 'rgba(46,213,115,0.3)' : 'rgba(108,143,255,0.3)'}`,
-          color: copying ? '#35E4CF' : 'rgba(255,255,255,0.6)',
+          color: copying ? '#22c55e' : 'rgba(255,255,255,0.6)',
           fontSize: 12, cursor: 'pointer',
           fontFamily: "'Space Mono', monospace",
         }}>
@@ -106,11 +106,11 @@ export default function DnaPage() {
           fontSize: 11, color: 'rgba(255,255,255,0.4)', lineHeight: 1.6,
         }}>
           <strong style={{ color: '#6c8fff' }}>Scoring Scale:</strong>{' '}
-          <span style={{ color: '#35E4CF' }}>0 = False to me</span> {' → '}
-          <span style={{ color: '#5EECD8' }}>3 = Unlikely true</span> {' → '}
-          <span style={{ color: '#ffffff' }}>5 = Uncertain</span> {' → '}
-          <span style={{ color: '#6FB8FF' }}>7 = Likely true</span> {' → '}
-          <span style={{ color: '#52A8FF' }}>9 = Deeply true to me</span>
+          <span style={{ color: '#dc2626' }}>0 = Absolute False</span> {' → '}
+          <span style={{ color: '#fca5a5' }}>3 = Leaning False</span> {' → '}
+          <span style={{ color: '#22c55e' }}>5 = Uncertain</span> {' → '}
+          <span style={{ color: '#60a5fa' }}>7 = True</span> {' → '}
+          <span style={{ color: '#2563eb' }}>9 = Absolute True</span>
         </div>
       </div>
     </div>

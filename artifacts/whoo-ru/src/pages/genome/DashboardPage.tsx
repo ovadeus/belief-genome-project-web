@@ -11,6 +11,8 @@ import HistoryList from '../../components/genome/HistoryList';
 import Forecaster from '../../components/genome/Forecaster';
 import Neuromap from '../../components/genome/Neuromap';
 import DnaString from '../../components/genome/DnaString';
+import DnaStrip from '../../components/genome/DnaStrip';
+import { Minus, Plus, Maximize2, X } from 'lucide-react';
 
 /* ── 100 curated quotes on self-knowledge ─────────────────── */
 const QUOTES = [
@@ -300,10 +302,11 @@ function SubmitGenomeButton() {
   );
 }
 
-type Tab = 'helix' | 'neuromap' | 'radar' | 'breakdown' | 'timeline' | 'history' | 'forecaster';
+type Tab = 'dnastrip' | 'helix' | 'neuromap' | 'radar' | 'breakdown' | 'timeline' | 'history' | 'forecaster';
 
 const TAB_ICONS: Record<Tab, string> = {
-  helix: '✦',
+  dnastrip: '🧬',
+  helix: '⟳',
   neuromap: '⊛',
   radar: '◎',
   breakdown: '▐',
@@ -313,6 +316,7 @@ const TAB_ICONS: Record<Tab, string> = {
 };
 
 const TABS: { key: Tab; label: string }[] = [
+  { key: 'dnastrip',   label: 'Belief DNA' },
   { key: 'helix',      label: 'Triple Helix' },
   { key: 'neuromap',   label: 'Neuromap' },
   { key: 'radar',      label: 'Radar' },
@@ -321,6 +325,9 @@ const TABS: { key: Tab; label: string }[] = [
   { key: 'history',    label: 'History' },
   { key: 'forecaster', label: 'Forecaster' },
 ];
+
+const UI_ZOOM_STEPS = [1.0, 1.04, 1.08, 1.12, 1.16, 1.20, 1.24, 1.28];
+const FULLSCREEN_TABS: Tab[] = ['dnastrip', 'helix', 'neuromap'];
 
 /* ── Helper: day streak ─────────────────────────────────────── */
 function calcStreak(history: any[]): number {
@@ -338,7 +345,7 @@ function calcStreak(history: any[]): number {
 
 export default function DashboardPage() {
   const { user } = useGenomeAuth();
-  const [tab, setTab] = useState<Tab>('helix');
+  const [tab, setTab] = useState<Tab>('dnastrip');
   const [dna, setDna] = useState<any>(null);
   const [history, setHistory] = useState<any[]>([]);
   const [dimensions, setDimensions] = useState<any[]>([]);
@@ -346,6 +353,8 @@ export default function DashboardPage() {
   const [analysis, setAnalysis] = useState('');
   const [analysisTags, setAnalysisTags] = useState<string[]>([]);
   const [analysisError, setAnalysisError] = useState('');
+  const [zoomIndex, setZoomIndex] = useState(0);
+  const [fullscreen, setFullscreen] = useState(false);
 
   const greeting = useMemo(() => getGreeting(user?.name), [user?.name]);
   const dailyQuote = useMemo(() => getDailyQuote(), []);
@@ -402,8 +411,69 @@ export default function DashboardPage() {
     ? Math.round((history.reduce((s: number, h: any) => s + h.value, 0) / totalResponses) * 100)
     : 0;
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && fullscreen) setFullscreen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [fullscreen]);
+
+  const zoomVal = UI_ZOOM_STEPS[zoomIndex];
+  const zoomStyle: React.CSSProperties = zoomIndex > 0 ? {
+    transform: `scale(${zoomVal})`,
+    transformOrigin: 'top center',
+    width: `${100 / zoomVal}%`,
+    marginLeft: 'auto',
+    marginRight: 'auto',
+  } : {};
+
+  const renderTabContent = () => {
+    if (!dna && tab !== 'forecaster') {
+      return (
+        <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.3)', padding: 60 }}>
+          Loading...
+        </div>
+      );
+    }
+    return (
+      <>
+        {tab === 'dnastrip' && dna && (
+          <DnaStrip
+            dimensions={dimensions}
+            dimensionScores={dna?.dimensionScores || {}}
+            confidence={dna?.confidence || {}}
+            totalResponses={dna?.totalResponses || 0}
+            dimensionsCovered={dna?.dimensionsCovered || 0}
+            overallConfidence={dna?.overallConfidence || 0}
+          />
+        )}
+        {tab === 'helix' && (
+          <TripleHelix
+            dimensions={dimensions}
+            dimensionScores={dna?.dimensionScores || {}}
+            confidence={dna?.confidence || {}}
+          />
+        )}
+        {tab === 'neuromap' && dna && (
+          <Neuromap
+            dnaString={dna.dnaString || ''}
+            totalResponses={dna.totalResponses || 0}
+            dimensionsCovered={dna.dimensionsCovered || 0}
+            overallConfidence={dna.overallConfidence || 0}
+          />
+        )}
+        {tab === 'radar' && <RadarChart history={history} />}
+        {tab === 'breakdown' && <BreakdownBars history={history} />}
+        {tab === 'timeline' && <Timeline history={history} />}
+        {tab === 'history' && <HistoryList history={history} />}
+        {tab === 'forecaster' && <Forecaster history={history} />}
+      </>
+    );
+  };
+
   return (
-    <div style={{ maxWidth: 900, margin: '0 auto' }}>
+    <div style={{ maxWidth: 900, margin: '0 auto', ...zoomStyle }}>
       {/* Header row: Title + action buttons */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 8, flexWrap: 'wrap' }}>
         <div>
@@ -422,6 +492,42 @@ export default function DashboardPage() {
             {analysing ? 'Analysing...' : 'Refresh Analysis'}
           </button>
           <SubmitGenomeButton />
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 2, marginLeft: 4,
+          }}>
+            <button
+              onClick={() => setZoomIndex(i => Math.max(0, i - 1))}
+              disabled={zoomIndex <= 0}
+              style={{
+                width: 24, height: 24, borderRadius: '50%',
+                border: '1px solid rgba(255,255,255,0.10)',
+                background: 'rgba(15,15,26,0.55)', color: 'rgba(255,255,255,0.4)',
+                cursor: zoomIndex <= 0 ? 'default' : 'pointer',
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                opacity: zoomIndex <= 0 ? 0.25 : 1,
+                backdropFilter: 'blur(4px)',
+              }}
+              title="Decrease text size"
+            >
+              <Minus size={11} />
+            </button>
+            <button
+              onClick={() => setZoomIndex(i => Math.min(UI_ZOOM_STEPS.length - 1, i + 1))}
+              disabled={zoomIndex >= UI_ZOOM_STEPS.length - 1}
+              style={{
+                width: 24, height: 24, borderRadius: '50%',
+                border: '1px solid rgba(255,255,255,0.10)',
+                background: 'rgba(15,15,26,0.55)', color: 'rgba(255,255,255,0.4)',
+                cursor: zoomIndex >= UI_ZOOM_STEPS.length - 1 ? 'default' : 'pointer',
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                opacity: zoomIndex >= UI_ZOOM_STEPS.length - 1 ? 0.25 : 1,
+                backdropFilter: 'blur(4px)',
+              }}
+              title="Increase text size"
+            >
+              <Plus size={11} />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -565,41 +671,71 @@ export default function DashboardPage() {
       </div>
 
       {/* Tab content */}
-      <div style={{
-        padding: 24, borderRadius: 12,
-        background: 'rgba(255,255,255,0.02)',
-        border: '1px solid rgba(255,255,255,0.06)',
-        minHeight: 300,
-      }}>
-        {!dna && tab !== 'forecaster' ? (
-          <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.3)', padding: 60 }}>
-            Loading...
+      {!fullscreen && (
+        <div style={{
+          padding: 24, borderRadius: 12,
+          background: 'rgba(255,255,255,0.02)',
+          border: '1px solid rgba(255,255,255,0.06)',
+          minHeight: 300,
+          position: 'relative',
+        }}>
+          {FULLSCREEN_TABS.includes(tab) && (
+            <button
+              onClick={() => setFullscreen(true)}
+              style={{
+                position: 'absolute', top: 12, right: 12, zIndex: 5,
+                width: 32, height: 32, borderRadius: 8,
+                background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)',
+                color: 'rgba(255,255,255,0.4)', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+              title="Fullscreen"
+            >
+              <Maximize2 size={14} />
+            </button>
+          )}
+          {renderTabContent()}
+        </div>
+      )}
+
+      {fullscreen && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 5000,
+          background: 'rgba(8,8,16,0.97)',
+          display: 'flex', flexDirection: 'column',
+          animation: 'vizFadeIn 0.25s ease',
+        }}>
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: '16px 24px', borderBottom: '1px solid rgba(255,255,255,0.08)',
+          }}>
+            <div style={{
+              fontFamily: "'Space Grotesk', sans-serif", fontSize: 16, fontWeight: 600,
+              color: '#fff', display: 'flex', alignItems: 'center', gap: 8,
+            }}>
+              <span>{TAB_ICONS[tab]}</span>
+              {TABS.find(t => t.key === tab)?.label || tab}
+            </div>
+            <button
+              onClick={() => setFullscreen(false)}
+              style={{
+                background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)',
+                borderRadius: 8, color: 'rgba(255,255,255,0.5)',
+                fontFamily: "'Space Mono', monospace", fontSize: 12,
+                padding: '6px 14px', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: 6,
+              }}
+            >
+              <X size={14} /> Close
+            </button>
           </div>
-        ) : (
-          <>
-            {tab === 'helix' && (
-              <TripleHelix
-                dimensions={dimensions}
-                dimensionScores={dna?.dimensionScores || {}}
-                confidence={dna?.confidence || {}}
-              />
-            )}
-            {tab === 'neuromap' && dna && (
-              <Neuromap
-                dnaString={dna.dnaString || ''}
-                totalResponses={dna.totalResponses || 0}
-                dimensionsCovered={dna.dimensionsCovered || 0}
-                overallConfidence={dna.overallConfidence || 0}
-              />
-            )}
-            {tab === 'radar' && <RadarChart history={history} />}
-            {tab === 'breakdown' && <BreakdownBars history={history} />}
-            {tab === 'timeline' && <Timeline history={history} />}
-            {tab === 'history' && <HistoryList history={history} />}
-            {tab === 'forecaster' && <Forecaster history={history} />}
-          </>
-        )}
-      </div>
+          <div style={{ flex: 1, overflow: 'auto', padding: 24 }}>
+            {renderTabContent()}
+          </div>
+        </div>
+      )}
+
+      <style>{`@keyframes vizFadeIn { from { opacity: 0 } to { opacity: 1 } }`}</style>
 
     </div>
   );

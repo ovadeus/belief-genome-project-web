@@ -1,14 +1,6 @@
-// Belief Forecaster — AI-powered prediction engine
-// User enters a probe statement, AI predicts their slider position based on history
 import { useState } from 'react';
 import { genomeApi } from './GenomeAuthContext';
-
-import { beliefLabel, beliefColor } from './genome-utils';
-
-const ZONE_LABELS = [
-  'False to me', 'Unlikely true', 'Leaning false', 'Uncertain',
-  'Leaning true', 'Likely true', 'Deeply true to me',
-];
+import { beliefLabel, beliefColor, BELIEF_LABELS_10, BELIEF_GRADIENT } from './genome-utils';
 
 interface ForecastResult {
   value: number;
@@ -67,7 +59,6 @@ export default function Forecaster({ history }: Props) {
 
   return (
     <div>
-      {/* Header */}
       <div style={{
         display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16,
       }}>
@@ -85,14 +76,12 @@ export default function Forecaster({ history }: Props) {
         </span>
       </div>
 
-      {/* Description */}
       <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginBottom: 20, lineHeight: 1.6 }}>
         Write a belief statement below — in the same style as your Quantum Reflection probes.
         The AI will read your complete response history, belief dimensions, worldview position,
         and drift patterns to forecast where you would place the slider.
       </p>
 
-      {/* Input */}
       <div style={{ marginBottom: 20 }}>
         <label style={{
           fontSize: 10, fontFamily: "'Space Mono', monospace", textTransform: 'uppercase',
@@ -132,10 +121,8 @@ export default function Forecaster({ history }: Props) {
         </div>
       )}
 
-      {/* Result */}
       {result && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-          {/* AI Analysis */}
           <div style={{
             padding: 16, borderRadius: 8,
             background: 'rgba(108,143,255,0.06)', border: '1px solid rgba(108,143,255,0.15)',
@@ -151,7 +138,6 @@ export default function Forecaster({ history }: Props) {
             </p>
           </div>
 
-          {/* Forecasted Position */}
           <div>
             <div style={{
               fontSize: 10, fontFamily: "'Space Mono', monospace", textTransform: 'uppercase',
@@ -160,23 +146,20 @@ export default function Forecaster({ history }: Props) {
               Forecasted Position
             </div>
 
-            {/* Slider track */}
             <div style={{
               display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8,
             }}>
-              <span style={{ fontSize: 10, color: '#35E4CF', whiteSpace: 'nowrap' }}>False to me</span>
+              <span style={{ fontSize: 10, color: '#dc2626', whiteSpace: 'nowrap' }}>Absolute False</span>
               <div style={{
                 flex: 1, position: 'relative', height: 8, borderRadius: 4,
-                background: 'linear-gradient(90deg, #35E4CF, #35E4CF 20%, #b0f0e8 45%, #ffffff 50%, #a8d4ff 55%, #52A8FF 80%, #52A8FF)',
+                background: BELIEF_GRADIENT,
               }}>
-                {/* Tick marks */}
                 {[5, 20, 38, 50, 63, 80, 94].map(p => (
                   <div key={p} style={{
                     position: 'absolute', left: `${p}%`, top: -2, width: 1, height: 12,
                     background: 'rgba(255,255,255,0.2)',
                   }} />
                 ))}
-                {/* Thumb */}
                 <div style={{
                   position: 'absolute', left: `${pct}%`, top: '50%',
                   transform: 'translate(-50%, -50%)',
@@ -186,10 +169,9 @@ export default function Forecaster({ history }: Props) {
                   transition: 'left 0.4s ease',
                 }} />
               </div>
-              <span style={{ fontSize: 10, color: '#52A8FF', whiteSpace: 'nowrap' }}>True to me</span>
+              <span style={{ fontSize: 10, color: '#2563eb', whiteSpace: 'nowrap' }}>Absolute True</span>
             </div>
 
-            {/* Verdict */}
             <div style={{
               display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8,
             }}>
@@ -199,18 +181,15 @@ export default function Forecaster({ history }: Props) {
               </span>
             </div>
 
-            {/* Zone strip */}
             <div style={{
               display: 'flex', justifyContent: 'space-between', fontSize: 8,
               fontFamily: "'Space Mono', monospace", color: 'rgba(255,255,255,0.25)',
             }}>
-              {ZONE_LABELS.map(z => <span key={z}>{z}</span>)}
+              {BELIEF_LABELS_10.map(z => <span key={z}>{z}</span>)}
             </div>
           </div>
 
-          {/* Meta row: Confidence + Key Factors + Data Depth */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
-            {/* Confidence */}
             <div>
               <div style={metaLabelStyle}>Confidence</div>
               <div style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
@@ -226,7 +205,6 @@ export default function Forecaster({ history }: Props) {
               <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>{result.confidenceLabel}</span>
             </div>
 
-            {/* Key Factors */}
             <div>
               <div style={metaLabelStyle}>Key Factors</div>
               {result.keyFactors.map((f, i) => (
@@ -236,7 +214,6 @@ export default function Forecaster({ history }: Props) {
               ))}
             </div>
 
-            {/* Data Depth */}
             <div>
               <div style={metaLabelStyle}>Data Depth</div>
               {(() => {

@@ -1,6 +1,4 @@
-// Category Breakdown — Spectrum bars with dot slider, axis labels, domain labels
-// Matches desktop exactly: same categories, same axes, same colors, same labels
-import { CAT_ORDER, CAT_SHORT, DOMAIN_AXES, domainLabel, catColour } from './genome-utils';
+import { CAT_ORDER, CAT_SHORT, DOMAIN_AXES, domainLabel, catColour, BELIEF_GRADIENT } from './genome-utils';
 
 interface HistoryEntry {
   probeCategory: string;
@@ -12,7 +10,6 @@ interface Props {
 }
 
 export default function BreakdownBars({ history }: Props) {
-  // Compute category averages from history (value 0-1)
   const buckets: Record<string, number[]> = {};
   for (const h of history) {
     const cat = h.probeCategory || 'life';
@@ -57,23 +54,18 @@ export default function BreakdownBars({ history }: Props) {
           return (
             <div key={cat} style={{ opacity: hasData ? 1 : 0.32 }}>
               <div style={{ display: 'grid', gridTemplateColumns: '110px 1fr auto', gap: 8, alignItems: 'center' }}>
-                {/* Category name */}
                 <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', textAlign: 'right' }}>{name}</span>
 
-                {/* Track */}
                 <div style={{ position: 'relative', height: 14 }}>
-                  {/* Background gradient */}
                   <div style={{
                     position: 'absolute', inset: '3px 0', borderRadius: 4,
-                    background: 'linear-gradient(90deg, #35E4CF, #35E4CF 20%, #b0f0e8 45%, #ffffff 50%, #a8d4ff 55%, #52A8FF 80%, #52A8FF)',
+                    background: BELIEF_GRADIENT,
                     opacity: 0.85,
                   }} />
-                  {/* Center line */}
                   <div style={{
                     position: 'absolute', left: '50%', top: 0, width: 2, height: '100%',
                     background: '#ffffff', zIndex: 3,
                   }} />
-                  {/* Dot */}
                   {hasData && (
                     <div style={{
                       position: 'absolute', left: `${pct}%`, top: '50%',
@@ -86,7 +78,6 @@ export default function BreakdownBars({ history }: Props) {
                   )}
                 </div>
 
-                {/* Count */}
                 <span style={{
                   fontSize: 11, fontFamily: "'Space Mono', monospace",
                   color: 'rgba(255,255,255,0.35)', minWidth: 30, textAlign: 'right',
@@ -95,7 +86,6 @@ export default function BreakdownBars({ history }: Props) {
                 </span>
               </div>
 
-              {/* Axis labels + domain label */}
               {hasData && (
                 <div style={{
                   display: 'grid', gridTemplateColumns: '110px 1fr auto', gap: 8, marginTop: 2,

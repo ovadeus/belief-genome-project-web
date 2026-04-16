@@ -1,5 +1,4 @@
-// Belief Drift Over Time — Chart.js line chart with D/W/M/Q/Y navigation
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement,
@@ -70,7 +69,6 @@ export default function Timeline({ history }: Props) {
 
   const win = getTimelineWindow(period, offset);
 
-  // Filter to window, oldest first
   const allSorted = [...history].reverse();
   const windowed = allSorted.filter(h => {
     const d = new Date(h.createdAt);
@@ -101,7 +99,6 @@ export default function Timeline({ history }: Props) {
     new Date(h.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
   );
 
-  // Rolling 5-point average
   const rolling = raw.map((_, i) => {
     const w = raw.slice(Math.max(0, i - 4), i + 1);
     return Math.round(w.reduce((s, v) => s + v, 0) / w.length);
@@ -113,18 +110,18 @@ export default function Timeline({ history }: Props) {
       {
         label: 'Each Response',
         data: raw,
-        borderColor: 'rgba(82,168,255,0.3)',
+        borderColor: 'rgba(59,130,246,0.3)',
         backgroundColor: 'transparent',
         pointRadius: 3,
-        pointBackgroundColor: raw.map(v => v >= 60 ? '#52A8FF' : v <= 40 ? '#35E4CF' : '#b8f0ea'),
+        pointBackgroundColor: raw.map(v => v >= 60 ? '#3b82f6' : v <= 40 ? '#f87171' : '#86efac'),
         borderWidth: 1,
         tension: 0.3,
       },
       {
         label: 'Rolling Avg',
         data: rolling,
-        borderColor: 'rgba(82,168,255,0.9)',
-        backgroundColor: 'rgba(82,168,255,0.08)',
+        borderColor: 'rgba(59,130,246,0.9)',
+        backgroundColor: 'rgba(59,130,246,0.08)',
         pointRadius: 0,
         borderWidth: 2.5,
         tension: 0.4,
@@ -166,7 +163,7 @@ export default function Timeline({ history }: Props) {
           },
           label: (ctx: any) => {
             const v = ctx.parsed.y;
-            const lbl = v >= 65 ? 'Likely true' : v <= 35 ? 'Unlikely true' : 'Uncertain';
+            const lbl = v >= 65 ? 'Leaning True' : v <= 35 ? 'Leaning False' : 'Uncertain';
             return ` ${ctx.dataset.label}: ${v}% — ${lbl}`;
           },
         },
@@ -184,7 +181,6 @@ export default function Timeline({ history }: Props) {
   );
 }
 
-/* ── Toolbar sub-component ─────────────────────────────────── */
 function TimelineToolbar({ period, onPeriod, label, count, offset, onBack, onForward }: {
   period: Period; onPeriod: (p: Period) => void;
   label: string; count: number; offset: number;
@@ -207,7 +203,6 @@ function TimelineToolbar({ period, onPeriod, label, count, offset, onBack, onFor
         Belief Drift Over Time
       </span>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        {/* Period tabs */}
         <div style={{
           display: 'flex', gap: 2, background: 'rgba(255,255,255,0.06)', borderRadius: 6, padding: 2,
         }}>
@@ -227,7 +222,6 @@ function TimelineToolbar({ period, onPeriod, label, count, offset, onBack, onFor
           ))}
         </div>
 
-        {/* Navigation */}
         <button onClick={onBack} style={navBtnStyle}>&#8592;</button>
         <span style={{
           fontSize: 11, fontFamily: "'Space Mono', monospace", color: 'rgba(255,255,255,0.5)',

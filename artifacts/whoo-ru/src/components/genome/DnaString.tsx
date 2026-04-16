@@ -1,4 +1,4 @@
-// 140-character Belief DNA string with color-coded segments
+import { SHEX, BELIEF_LABELS_10, BELIEF_GRADIENT } from './genome-utils';
 
 interface Props {
   dnaString: string;
@@ -8,24 +8,18 @@ interface Props {
 }
 
 function charColor(ch: string, pos: number): string {
-  if (pos <= 7) return '#3dd68c';      // Identity (0-7)
-  if (pos <= 10) return '#00d2d3';     // Country (8-10)
-  if (pos <= 15) return '#f5a623';     // Zip (11-15)
+  if (pos <= 7) return '#3dd68c';
+  if (pos <= 10) return '#00d2d3';
+  if (pos <= 15) return '#f5a623';
   if (ch === '\u00B7' || ch === '.' || ch === '_') return 'rgba(255,255,255,0.15)';
   const n = parseInt(ch);
   if (isNaN(n)) return 'rgba(255,255,255,0.4)';
-  const colors = [
-    '#1ac9b5', '#24d0bc', '#2dd8c4', '#35E4CF', '#70ede0',
-    'rgba(200,240,235,0.6)',
-    '#90c8ff', '#6FB8FF', '#52A8FF', '#3a8fe0',
-  ];
-  return colors[n] || 'rgba(255,255,255,0.4)';
+  return SHEX[n] || 'rgba(255,255,255,0.4)';
 }
 
 export default function DnaString({ dnaString, dimensionsCovered, totalResponses, overallConfidence }: Props) {
   return (
     <div>
-      {/* Stats */}
       <div style={{
         display: 'flex', gap: 24, marginBottom: 20, justifyContent: 'center', flexWrap: 'wrap',
       }}>
@@ -34,7 +28,7 @@ export default function DnaString({ dnaString, dimensionsCovered, totalResponses
           <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase' }}>Responses</div>
         </div>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 20, fontFamily: 'monospace', color: '#35E4CF' }}>{dimensionsCovered}/124</div>
+          <div style={{ fontSize: 20, fontFamily: 'monospace', color: '#22c55e' }}>{dimensionsCovered}/124</div>
           <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase' }}>Dimensions</div>
         </div>
         <div style={{ textAlign: 'center' }}>
@@ -43,7 +37,6 @@ export default function DnaString({ dnaString, dimensionsCovered, totalResponses
         </div>
       </div>
 
-      {/* DNA String display */}
       <div style={{
         fontFamily: 'monospace', fontSize: 15, letterSpacing: 3,
         wordBreak: 'break-all', lineHeight: 2.2, textAlign: 'center',
@@ -70,7 +63,6 @@ export default function DnaString({ dnaString, dimensionsCovered, totalResponses
         ))}
       </div>
 
-      {/* Legend */}
       <div style={{
         display: 'flex', justifyContent: 'center', gap: 12, marginTop: 10,
         fontSize: 9, color: 'rgba(255,255,255,0.4)', flexWrap: 'wrap',
@@ -85,9 +77,9 @@ export default function DnaString({ dnaString, dimensionsCovered, totalResponses
         display: 'flex', justifyContent: 'center', gap: 16, marginTop: 8,
         fontSize: 10, color: 'rgba(255,255,255,0.4)',
       }}>
-        <span><span style={{ color: '#1ac9b5' }}>0</span> Strongly False</span>
-        <span><span style={{ color: 'rgba(200,240,235,0.6)' }}>5</span> Neutral</span>
-        <span><span style={{ color: '#3a8fe0' }}>9</span> Strongly True</span>
+        <span><span style={{ color: '#dc2626' }}>0</span> Absolute False</span>
+        <span><span style={{ color: '#22c55e' }}>5</span> Uncertain</span>
+        <span><span style={{ color: '#2563eb' }}>9</span> Absolute True</span>
         <span><span style={{ color: 'rgba(255,255,255,0.15)' }}>{'\u00B7'}</span> Unexplored</span>
       </div>
     </div>

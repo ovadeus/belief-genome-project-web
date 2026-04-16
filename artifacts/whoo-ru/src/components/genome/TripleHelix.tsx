@@ -1,14 +1,11 @@
-// Triple Helix — 3-strand animated DNA visualization
-// Logos (blue) = How you reason, Pathos (red) = How you feel, Ethos (green) = How you act
 import { useRef, useEffect, useCallback } from 'react';
 
-/* ── Strand definitions ────────────────────────────────────── */
 const STRAND_DEFS = [
-  { id: 'logos',  name: 'LOGOS',  sub: 'How you reason', color: '#5599ff', phase: 0,
+  { id: 'logos',  name: 'LOGOS',  sub: 'How you reason', color: '#6c8fff', phase: 0,
     cats: ['epistemology', 'politics', 'science_tech', 'education'] },
   { id: 'pathos', name: 'PATHOS', sub: 'How you feel',   color: '#a78bfa', phase: (2 * Math.PI) / 3,
     cats: ['spirituality', 'psychology', 'relationships', 'health'] },
-  { id: 'ethos',  name: 'ETHOS',  sub: 'How you act',    color: '#34d399', phase: (4 * Math.PI) / 3,
+  { id: 'ethos',  name: 'ETHOS',  sub: 'How you act',    color: '#22d3ee', phase: (4 * Math.PI) / 3,
     cats: ['morality', 'social', 'economics'] },
 ];
 
@@ -17,7 +14,6 @@ const CFG = {
   nodeBaseR: 5.5, crossEvery: 3, marginX: 72, height: 360,
 };
 
-/* ── Domain axes for tooltip labels ─────────────────────────── */
 const DOMAIN_AXES: Record<string, { left: string; right: string; mid: string }> = {
   epistemology:  { left: 'Relativist',   right: 'Absolutist',      mid: 'Mixed epistemic'  },
   spirituality:  { left: 'Secular',      right: 'Spiritual',       mid: 'Open spiritual'   },
@@ -42,13 +38,12 @@ function domainLabel(cat: string, avg: number): string {
   return `Strongly ${axis.right}`;
 }
 
-/* ── Color helpers ──────────────────────────────────────────── */
 function scoreColor(score: number | null, alpha = 1): string {
   if (score === null || score === undefined) return `rgba(110,110,145,${alpha * 0.38})`;
   const stops: [number, number[]][] = [
-    [0, [26, 201, 181]], [1, [35, 216, 195]], [2, [53, 228, 207]], [3, [70, 234, 215]],
-    [4, [120, 240, 225]], [5, [220, 245, 242]], [6, [140, 210, 255]],
-    [7, [100, 188, 255]], [8, [82, 168, 255]], [9, [58, 143, 224]],
+    [0, [220, 38, 38]],   [1, [239, 68, 68]],   [2, [248, 113, 113]], [3, [252, 165, 165]],
+    [4, [134, 239, 172]],  [5, [34, 197, 94]],   [6, [147, 197, 253]],
+    [7, [96, 165, 250]],  [8, [59, 130, 246]],  [9, [37, 99, 235]],
   ];
   const s = Math.max(0, Math.min(9, score));
   let lo = stops[0], hi = stops[stops.length - 1];
@@ -64,14 +59,16 @@ function scoreColor(score: number | null, alpha = 1): string {
 
 function scoreLabel(score: number | null): string {
   if (score === null || score === undefined) return 'Not yet explored';
-  if (score <= 1) return 'False to me';
-  if (score <= 3) return 'Unlikely true';
-  if (score <= 4) return 'Leaning false';
+  if (score === 0) return 'Absolute False';
+  if (score <= 1) return 'Deeply False';
+  if (score <= 2) return 'False';
+  if (score <= 3) return 'Leaning False';
+  if (score === 4) return 'Near Neutral';
   if (score === 5) return 'Uncertain';
-  if (score <= 6) return 'Leaning true';
-  if (score <= 7) return 'Likely true';
-  if (score <= 8) return 'True to me';
-  return 'Deeply true to me';
+  if (score <= 6) return 'Leaning True';
+  if (score <= 7) return 'True';
+  if (score <= 8) return 'Deeply True';
+  return 'Absolute True';
 }
 
 function tensionColor(s1: number | null, s2: number | null): string {
@@ -83,7 +80,6 @@ function tensionColor(s1: number | null, s2: number | null): string {
   return 'rgba(70,220,110,0.32)';
 }
 
-/* ── Position math ──────────────────────────────────────────── */
 function helixPos(strandIdx: number, nodeIdx: number, total: number, time: number, W: number, H: number) {
   const def = STRAND_DEFS[strandIdx];
   const t = (nodeIdx / (total - 1)) * CFG.numTurns * 2 * Math.PI;
@@ -94,7 +90,6 @@ function helixPos(strandIdx: number, nodeIdx: number, total: number, time: numbe
   return { x, y, z, angle };
 }
 
-/* ── Types ──────────────────────────────────────────────────── */
 interface DimDef { id: number; name: string; cat: string; desc?: string; }
 interface HelixNode { dim: DimDef; score: number | null; confidence: number; }
 interface Strand { id: string; name: string; sub: string; color: string; phase: number; cats: string[]; nodes: HelixNode[]; }
@@ -135,7 +130,6 @@ export default function TripleHelix({ dimensions, dimensionScores, confidence }:
 
     ctx.clearRect(0, 0, W, H);
 
-    // Draw strand backbones
     for (let s = 0; s < st.strands.length; s++) {
       const strand = st.strands[s];
       ctx.beginPath();
@@ -149,10 +143,8 @@ export default function TripleHelix({ dimensions, dimensionScores, confidence }:
       ctx.stroke();
     }
 
-    // Collect items for painter sort
     const items: any[] = [];
 
-    // Cross-connections
     for (let i = 0; i < st.maxLen; i += CFG.crossEvery) {
       for (let s1 = 0; s1 < 3; s1++) {
         for (let s2 = s1 + 1; s2 < 3; s2++) {
@@ -166,7 +158,6 @@ export default function TripleHelix({ dimensions, dimensionScores, confidence }:
       }
     }
 
-    // Nodes
     for (let s = 0; s < 3; s++) {
       for (let i = 0; i < st.strands[s].nodes.length; i++) {
         const p = helixPos(s, i, st.maxLen, st.time, W, H);
@@ -182,7 +173,6 @@ export default function TripleHelix({ dimensions, dimensionScores, confidence }:
 
     for (const item of items) {
       if (item.type === 'conn') {
-        // Connection
         const col = tensionColor(item.score1, item.score2);
         const depthA = 0.25 + 0.65 * ((item.z + 1) / 2);
         ctx.save();
@@ -199,7 +189,6 @@ export default function TripleHelix({ dimensions, dimensionScores, confidence }:
         ctx.setLineDash([]);
         ctx.restore();
       } else {
-        // Node
         const { p, node, strand, hov, z } = item;
         const depth = (z + 1) / 2;
         const conf = node.confidence / 100;
@@ -239,7 +228,6 @@ export default function TripleHelix({ dimensions, dimensionScores, confidence }:
       }
     }
 
-    // Strand name labels
     for (let s = 0; s < 3; s++) {
       const strand = st.strands[s];
       const pFirst = helixPos(s, 0, st.maxLen, st.time, W, H);
@@ -252,7 +240,6 @@ export default function TripleHelix({ dimensions, dimensionScores, confidence }:
       ctx.globalAlpha = 1;
     }
 
-    // Tooltip
     const tooltip = tooltipRef.current;
     if (tooltip && st.hovered) {
       const h = st.hovered;
@@ -271,7 +258,7 @@ export default function TripleHelix({ dimensions, dimensionScores, confidence }:
       tooltip.innerHTML = `
         <div style="font-size:10px;font-family:'Space Mono',monospace;color:${h.strand.color};margin-bottom:2px;">${h.strand.name} · ${h.node.dim.cat}</div>
         <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:6px;">${h.node.dim.name}</div>
-        <div style="position:relative;height:6px;border-radius:3px;background:linear-gradient(90deg,#35E4CF,#35E4CF 20%,#b0f0e8 45%,#ffffff 50%,#a8d4ff 55%,#52A8FF 80%,#52A8FF);margin:6px 0 4px;">
+        <div style="position:relative;height:6px;border-radius:3px;background:linear-gradient(90deg,#dc2626,#fca5a5 25%,#22c55e 50%,#93c5fd 75%,#2563eb);margin:6px 0 4px;">
           ${score !== null ? `<div style="position:absolute;left:${barW}%;top:50%;transform:translate(-50%,-50%);width:10px;height:10px;border-radius:50%;background:${col};border:2px solid white;"></div>` : ''}
         </div>
         <div style="font-size:12px;">
@@ -349,7 +336,6 @@ export default function TripleHelix({ dimensions, dimensionScores, confidence }:
 
   return (
     <div>
-      {/* Header */}
       <div style={{
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         marginBottom: 12, flexWrap: 'wrap', gap: 8,
@@ -361,13 +347,12 @@ export default function TripleHelix({ dimensions, dimensionScores, confidence }:
           Belief Genome — Triple Helix
         </span>
         <div style={{ display: 'flex', gap: 16, fontSize: 11, fontFamily: "'Space Mono', monospace" }}>
-          <span style={{ color: '#5599ff' }}>&#9679; LOGOS · How you reason</span>
+          <span style={{ color: '#6c8fff' }}>&#9679; LOGOS · How you reason</span>
           <span style={{ color: '#a78bfa' }}>&#9679; PATHOS · How you feel</span>
-          <span style={{ color: '#34d399' }}>&#9679; ETHOS · How you act</span>
+          <span style={{ color: '#22d3ee' }}>&#9679; ETHOS · How you act</span>
         </div>
       </div>
 
-      {/* Canvas */}
       <div style={{ position: 'relative' }}>
         <canvas
           ref={canvasRef}
@@ -386,16 +371,15 @@ export default function TripleHelix({ dimensions, dimensionScores, confidence }:
         />
       </div>
 
-      {/* Legend */}
       <div style={{
         display: 'flex', justifyContent: 'center', gap: 20, marginTop: 12,
         fontSize: 10, color: 'rgba(255,255,255,0.4)', flexWrap: 'wrap',
       }}>
-        <span><span style={{ color: '#35E4CF' }}>&#8226;</span> False to me (0-2)</span>
-        <span><span style={{ color: '#5EECD8' }}>&#8226;</span> Unlikely true (3-4)</span>
-        <span><span style={{ color: '#ffffff' }}>&#8226;</span> Uncertain (5)</span>
-        <span><span style={{ color: '#6FB8FF' }}>&#8226;</span> Likely true (6-7)</span>
-        <span><span style={{ color: '#52A8FF' }}>&#8226;</span> True to me (8-9)</span>
+        <span><span style={{ color: '#dc2626' }}>&#8226;</span> Absolute False (0)</span>
+        <span><span style={{ color: '#f87171' }}>&#8226;</span> False (2-3)</span>
+        <span><span style={{ color: '#22c55e' }}>&#8226;</span> Uncertain (5)</span>
+        <span><span style={{ color: '#60a5fa' }}>&#8226;</span> True (7-8)</span>
+        <span><span style={{ color: '#2563eb' }}>&#8226;</span> Absolute True (9)</span>
         <span style={{ marginLeft: 16 }}>
           <span style={{ color: '#ff5050' }}>—</span> Tension
           <span style={{ marginLeft: 8, color: '#44cc88' }}>—</span> Aligned

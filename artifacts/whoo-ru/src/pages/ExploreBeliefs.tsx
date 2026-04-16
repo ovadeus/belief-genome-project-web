@@ -35,8 +35,8 @@ const CATEGORIES: Record<string, { label: string; color: string; dims: number[] 
   economics:     { label: 'Economics',       color: '#e1b12c', dims: [79,80,81,82,83,84,85,86,87,88] },
   science_tech:  { label: 'Science & Tech',  color: '#00d2d3', dims: [89,90,91,92,93,94,95,96,97,98] },
   education:     { label: 'Education',       color: '#c56cf0', dims: [99,100,101,102,103] },
-  health:        { label: 'Health',          color: '#35E4CF', dims: [104,105,106,107,108] },
-  psychology:    { label: 'Psychology',      color: '#52A8FF', dims: [109,110,111,112,113,114,115,116,117,118] },
+  health:        { label: 'Health',          color: '#22c55e', dims: [104,105,106,107,108] },
+  psychology:    { label: 'Psychology',      color: '#3b82f6', dims: [109,110,111,112,113,114,115,116,117,118] },
   relationships: { label: 'Relationships',   color: '#ff6b81', dims: [119,120,121,122,123,124,125,126,127] },
 };
 
@@ -78,13 +78,13 @@ const EXPLORE_DOMAIN_AXES: Record<string, { left: string; right: string; mid: st
 };
 
 function exploreCatColour(avg09: number | null): string {
-  if (avg09 == null) return '#ffffff';
+  if (avg09 == null) return '#86efac';
   const v = avg09 / 9;
-  if (v <= 0.22) return '#35E4CF';
-  if (v <= 0.40) return '#5EECD8';
-  if (v <= 0.60) return '#ffffff';
-  if (v <= 0.78) return '#6FB8FF';
-  return '#52A8FF';
+  if (v <= 0.22) return '#dc2626';
+  if (v <= 0.40) return '#f87171';
+  if (v <= 0.60) return '#22c55e';
+  if (v <= 0.78) return '#60a5fa';
+  return '#2563eb';
 }
 
 function exploreDomainLabel(cat: string, avg09: number): string {
@@ -438,7 +438,7 @@ export default function ExploreBeliefs() {
             const val = ctx.parsed?.y;
             if (val === null || val === undefined) return '';
             const sign = val > 0 ? '+' : '';
-            const direction = val > 0.3 ? '↑ Belief' : val < -0.3 ? '↓ Disbelief' : '→ Neutral';
+            const direction = val > 0.3 ? '↑ Leaning True' : val < -0.3 ? '↓ Leaning False' : '→ Neutral';
             return `Score: ${sign}${val.toFixed(2)} ${direction}`;
           },
           afterBody: (items: any[]) => {
@@ -476,7 +476,7 @@ export default function ExploreBeliefs() {
             const val = ctx.parsed?.y;
             if (val === null || val === undefined) return '';
             const sign = val > 0 ? '+' : '';
-            const direction = val > 0.3 ? '↑ Belief' : val < -0.3 ? '↓ Disbelief' : '→ Neutral';
+            const direction = val > 0.3 ? '↑ Leaning True' : val < -0.3 ? '↓ Leaning False' : '→ Neutral';
             return `${ctx.dataset.label}: ${sign}${val.toFixed(2)} ${direction}`;
           },
           afterBody: (items: any[]) => {
@@ -540,7 +540,7 @@ export default function ExploreBeliefs() {
           label: (ctx: any) => {
             const val = ctx.parsed?.y;
             if (val === null || val === undefined) return '';
-            const direction = val > 0.3 ? '↑ Belief' : val < -0.3 ? '↓ Disbelief' : '→ Neutral';
+            const direction = val > 0.3 ? '↑ Leaning True' : val < -0.3 ? '↓ Leaning False' : '→ Neutral';
             const sign = val > 0 ? '+' : '';
             return ` ${ctx.dataset.label}: ${sign}${val.toFixed(1)} ${direction}`;
           },
@@ -686,7 +686,7 @@ export default function ExploreBeliefs() {
                         <div style={{ position: 'relative', height: 14 }}>
                           <div style={{
                             position: 'absolute', inset: '3px 0', borderRadius: 4,
-                            background: 'linear-gradient(90deg, #35E4CF, #35E4CF 20%, #b0f0e8 45%, #ffffff 50%, #a8d4ff 55%, #52A8FF 80%, #52A8FF)',
+                            background: 'linear-gradient(90deg, #dc2626, #fca5a5 25%, #22c55e 50%, #93c5fd 75%, #2563eb)',
                             opacity: 0.85,
                           }} />
                           <div style={{

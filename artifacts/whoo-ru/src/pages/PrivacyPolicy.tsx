@@ -11,10 +11,10 @@ export default function PrivacyPolicy() {
         </h1>
         <p className="text-muted-foreground mb-12">Last updated: April 5, 2026</p>
 
-        <div className="rounded-2xl border border-[#35E4CF]/30 bg-[#35E4CF]/5 p-6 md:p-8 mb-12 flex gap-4 items-start">
-          <Shield className="text-[#35E4CF] shrink-0 mt-1" size={24} />
+        <div className="rounded-2xl border border-[#22c55e]/30 bg-[#22c55e]/5 p-6 md:p-8 mb-12 flex gap-4 items-start">
+          <Shield className="text-[#22c55e] shrink-0 mt-1" size={24} />
           <div>
-            <p className="text-[#35E4CF] font-display font-semibold text-lg mb-1">Core Privacy Principle</p>
+            <p className="text-[#22c55e] font-display font-semibold text-lg mb-1">Core Privacy Principle</p>
             <p className="text-foreground/90 leading-relaxed">
               No user is ever identified by their Belief DNA. Your 128-character Belief Genome string is anonymous by default. Genome serial keys are generated only when you explicitly opt in, and they are never linked to your personal identity in any public-facing data, research output, or shared visualization.
             </p>

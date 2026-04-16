@@ -189,7 +189,7 @@ export default function ProfilePage() {
           }}>
             {saving ? 'Saving...' : 'Save Profile'}
           </button>
-          {saved && <span style={{ fontSize: 13, color: '#35E4CF' }}>Saved</span>}
+          {saved && <span style={{ fontSize: 13, color: '#22c55e' }}>Saved</span>}
         </div>
       </div>
 
