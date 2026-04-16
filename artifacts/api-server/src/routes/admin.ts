@@ -3,6 +3,7 @@ import { eq, desc, sql, and, ilike } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { db, blogPostsTable, subscribersTable, earlyBirdTable, adminUsersTable, siteSettingsTable, mediaTable } from "@workspace/db";
 import { ObjectStorageService } from "../lib/objectStorage";
+import { seedExploreData, clearTestData } from "../lib/seedExploreData";
 import {
   CreateBlogPostBody,
   UpdateBlogPostBody,
@@ -440,6 +441,33 @@ router.delete("/admin/media/:id", async (req, res): Promise<void> => {
 
   await db.delete(mediaTable).where(eq(mediaTable.id, id));
   res.json({ message: "Media deleted" });
+});
+
+// ---------------------------------------------------------------------------
+// Explore test-data seeding (admin-only, used to populate production)
+// ---------------------------------------------------------------------------
+
+router.post("/admin/seed-explore-data", async (req, res): Promise<void> => {
+  try {
+    const usersPerWeek = typeof req.body?.usersPerWeek === "number" ? req.body.usersPerWeek : undefined;
+    const weeks = typeof req.body?.weeks === "number" ? req.body.weeks : undefined;
+    const wipeFirst = req.body?.wipeFirst !== false;
+    const result = await seedExploreData({ usersPerWeek, weeks, wipeFirst });
+    res.json({ success: true, ...result });
+  } catch (err: any) {
+    console.error("[admin/seed-explore-data] error:", err);
+    res.status(500).json({ success: false, error: err?.message ?? "Seeding failed" });
+  }
+});
+
+router.delete("/admin/test-data", async (_req, res): Promise<void> => {
+  try {
+    const removed = await clearTestData();
+    res.json({ success: true, removed });
+  } catch (err: any) {
+    console.error("[admin/test-data] error:", err);
+    res.status(500).json({ success: false, error: err?.message ?? "Cleanup failed" });
+  }
 });
 
 export default router;

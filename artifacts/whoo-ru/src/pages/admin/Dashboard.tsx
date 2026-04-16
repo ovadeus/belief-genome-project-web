@@ -1,7 +1,11 @@
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { useDashboardStats } from "@/hooks/use-admin";
-import { Users, BookOpen, FileText, CheckCircle } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { Users, BookOpen, FileText, CheckCircle, Database, Trash2 } from "lucide-react";
 import { format } from "date-fns";
+import { useState } from "react";
+
+const API_BASE = "/api";
 
 export default function Dashboard() {
   const { data: stats, isLoading } = useDashboardStats();
@@ -100,7 +104,88 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      <AdminTools />
     </AdminLayout>
+  );
+}
+
+function AdminTools() {
+  const { toast } = useToast();
+  const [seeding, setSeeding] = useState(false);
+  const [clearing, setClearing] = useState(false);
+
+  async function runSeed() {
+    if (!confirm("Seed this database with ~4,760 test submissions? (Replaces existing test data; real user submissions untouched.)")) return;
+    setSeeding(true);
+    try {
+      const res = await fetch(`${API_BASE}/admin/seed-explore-data`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ wipeFirst: true }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || `HTTP ${res.status}`);
+      toast({
+        title: "Seed complete",
+        description: `Wiped ${data.wiped.toLocaleString()} old rows · inserted ${data.inserted.toLocaleString()} new rows (${data.usersPerWeek}/week × ${data.weeks} weeks).`,
+      });
+    } catch (err: any) {
+      toast({ title: "Seed failed", description: err.message, variant: "destructive" });
+    } finally {
+      setSeeding(false);
+    }
+  }
+
+  async function runClear() {
+    if (!confirm("Remove ALL test submissions from this database? (is_test_data = true rows only; real users are safe.)")) return;
+    setClearing(true);
+    try {
+      const res = await fetch(`${API_BASE}/admin/test-data`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || `HTTP ${res.status}`);
+      toast({
+        title: "Cleanup complete",
+        description: `Removed ${data.removed.toLocaleString()} test rows.`,
+      });
+    } catch (err: any) {
+      toast({ title: "Cleanup failed", description: err.message, variant: "destructive" });
+    } finally {
+      setClearing(false);
+    }
+  }
+
+  return (
+    <div className="mt-12 bg-card border border-border rounded-2xl p-6">
+      <h2 className="text-xl font-bold mb-2">Admin Tools</h2>
+      <p className="text-sm text-muted-foreground mb-6">
+        Use these to populate the Explore Beliefs visualizations with realistic test data on any environment
+        (including production). Operations only affect rows flagged <code>is_test_data=true</code> — real user
+        submissions are never touched.
+      </p>
+      <div className="flex flex-wrap gap-3">
+        <button
+          onClick={runSeed}
+          disabled={seeding || clearing}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground font-medium hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <Database size={16} />
+          {seeding ? "Seeding…" : "Seed Explore Test Data"}
+        </button>
+        <button
+          onClick={runClear}
+          disabled={seeding || clearing}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-destructive/10 text-destructive border border-destructive/30 font-medium hover:bg-destructive/20 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <Trash2 size={16} />
+          {clearing ? "Clearing…" : "Clear All Test Data"}
+        </button>
+      </div>
+    </div>
   );
 }
 
