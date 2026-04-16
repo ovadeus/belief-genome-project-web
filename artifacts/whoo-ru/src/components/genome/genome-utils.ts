@@ -34,45 +34,43 @@ export const SHEX: string[] = [
 ];
 
 export const BELIEF_LABELS_10 = [
-  'Absolute False', 'Deeply False', 'False', 'Leaning False', 'Near Neutral',
+  'Absolute False', 'Deeply False', 'False', 'Leaning False', 'Uncertain',
   'Uncertain', 'Leaning True', 'True', 'Deeply True', 'Absolute True',
 ];
 
 export const BELIEF_GRADIENT = 'linear-gradient(90deg, #dc2626, #fca5a5 25%, #22c55e 50%, #93c5fd 75%, #2563eb)';
 
 export function beliefLabel(v: number): string {
-  if (v <= 5)   return 'Absolute False';
-  if (v <= 15)  return 'Deeply False';
-  if (v <= 28)  return 'False';
-  if (v <= 42)  return 'Leaning False';
-  if (v <= 52)  return 'Near Neutral';
-  if (v <= 58)  return 'Uncertain';
-  if (v <= 72)  return 'Leaning True';
-  if (v <= 85)  return 'True';
-  if (v <= 95)  return 'Deeply True';
+  if (v <= 11)  return 'Absolute False';
+  if (v <= 22)  return 'Deeply False';
+  if (v <= 33)  return 'False';
+  if (v <= 44)  return 'Leaning False';
+  if (v <= 55)  return 'Uncertain';
+  if (v <= 66)  return 'Leaning True';
+  if (v <= 77)  return 'True';
+  if (v <= 88)  return 'Deeply True';
   return 'Absolute True';
 }
 
 export function beliefColor(v: number): string {
-  if (v <= 5)   return '#dc2626';
-  if (v <= 15)  return '#ef4444';
-  if (v <= 28)  return '#f87171';
-  if (v <= 42)  return '#fca5a5';
-  if (v <= 52)  return '#86efac';
-  if (v <= 58)  return '#22c55e';
-  if (v <= 72)  return '#93c5fd';
-  if (v <= 85)  return '#60a5fa';
-  if (v <= 95)  return '#3b82f6';
+  if (v <= 11)  return '#dc2626';
+  if (v <= 22)  return '#ef4444';
+  if (v <= 33)  return '#f87171';
+  if (v <= 44)  return '#fca5a5';
+  if (v <= 55)  return '#22c55e';
+  if (v <= 66)  return '#93c5fd';
+  if (v <= 77)  return '#60a5fa';
+  if (v <= 88)  return '#3b82f6';
   return '#2563eb';
 }
 
 export function catColour(v: number | null): string {
-  if (v == null) return '#86efac';
+  if (v == null) return '#22c55e';
   if (v <= 0.11) return '#dc2626';
   if (v <= 0.22) return '#ef4444';
   if (v <= 0.33) return '#f87171';
   if (v <= 0.44) return '#fca5a5';
-  if (v <= 0.55) return '#86efac';
+  if (v <= 0.55) return '#22c55e';
   if (v <= 0.66) return '#93c5fd';
   if (v <= 0.77) return '#60a5fa';
   if (v <= 0.88) return '#3b82f6';

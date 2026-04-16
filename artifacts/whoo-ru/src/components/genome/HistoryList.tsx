@@ -82,8 +82,8 @@ export default function HistoryList({ history }: Props) {
         </select>
         <select value={sentimentFilter} onChange={e => { setSentimentFilter(e.target.value); setPage(1); }} style={selectStyle}>
           <option value="">All Sentiments</option>
-          <option value="true">True / Agree</option>
-          <option value="false">False / Disagree</option>
+          <option value="true">True</option>
+          <option value="false">False</option>
           <option value="uncertain">Uncertain</option>
         </select>
         <select value={sourceFilter} onChange={e => { setSourceFilter(e.target.value); setPage(1); }} style={selectStyle}>

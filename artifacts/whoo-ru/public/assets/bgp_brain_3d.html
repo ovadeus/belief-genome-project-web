@@ -192,7 +192,7 @@ const CAT_N=[10,15,15,20,15,10,10,5,5,10,9];
 const SHEX=['#dc2626','#ef4444','#f87171','#fca5a5','#86efac',
             '#22c55e','#93c5fd','#60a5fa','#3b82f6','#2563eb'];
 const SINT=SHEX.map(h=>parseInt(h.slice(1),16));
-const SLBL=['Absolute False (−4)','Deeply False (−3)','False (−2)','Leaning False (−1)','Near Neutral',
+const SLBL=['Absolute False (−4)','Deeply False (−3)','False (−2)','Leaning False (−1)','Uncertain',
             'Uncertain (0)','Leaning True','True (+1)','Deeply True (+2)','Absolute True (+3)'];
 
 function getScores(id){const ci=CAT_IDS.indexOf(id);if(ci<0)return[];const off=CAT_N.slice(0,ci).reduce((a,b)=>a+b,0);return BELIEF.slice(off,off+CAT_N[ci]);}

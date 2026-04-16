@@ -63,7 +63,7 @@ function scoreLabel(score: number | null): string {
   if (score <= 1) return 'Deeply False';
   if (score <= 2) return 'False';
   if (score <= 3) return 'Leaning False';
-  if (score === 4) return 'Near Neutral';
+  if (score <= 4) return 'Uncertain';
   if (score === 5) return 'Uncertain';
   if (score <= 6) return 'Leaning True';
   if (score <= 7) return 'True';
@@ -375,11 +375,11 @@ export default function TripleHelix({ dimensions, dimensionScores, confidence }:
         display: 'flex', justifyContent: 'center', gap: 20, marginTop: 12,
         fontSize: 10, color: 'rgba(255,255,255,0.4)', flexWrap: 'wrap',
       }}>
-        <span><span style={{ color: '#dc2626' }}>&#8226;</span> Absolute False (0)</span>
-        <span><span style={{ color: '#f87171' }}>&#8226;</span> False (2-3)</span>
+        <span><span style={{ color: '#dc2626' }}>&#8226;</span> False (0–2)</span>
+        <span><span style={{ color: '#fca5a5' }}>&#8226;</span> Leaning False (3–4)</span>
         <span><span style={{ color: '#22c55e' }}>&#8226;</span> Uncertain (5)</span>
-        <span><span style={{ color: '#60a5fa' }}>&#8226;</span> True (7-8)</span>
-        <span><span style={{ color: '#2563eb' }}>&#8226;</span> Absolute True (9)</span>
+        <span><span style={{ color: '#93c5fd' }}>&#8226;</span> Leaning True (6–7)</span>
+        <span><span style={{ color: '#2563eb' }}>&#8226;</span> True (8–9)</span>
         <span style={{ marginLeft: 16 }}>
           <span style={{ color: '#ff5050' }}>—</span> Tension
           <span style={{ marginLeft: 8, color: '#44cc88' }}>—</span> Aligned

@@ -227,13 +227,15 @@ router.post('/forecast', async (req: Request, res: Response) => {
   // Recent history for context
   function beliefLabel(v: number): string {
     const pct = Math.round(v * 100);
-    if (pct <= 10) return 'False to me';
-    if (pct <= 30) return 'Unlikely true';
-    if (pct <= 45) return 'Leaning false';
+    if (pct <= 11) return 'Absolute False';
+    if (pct <= 22) return 'Deeply False';
+    if (pct <= 33) return 'False';
+    if (pct <= 44) return 'Leaning False';
     if (pct <= 55) return 'Uncertain';
-    if (pct <= 70) return 'Leaning true';
-    if (pct <= 88) return 'Likely true';
-    return 'Deeply true to me';
+    if (pct <= 66) return 'Leaning True';
+    if (pct <= 77) return 'True';
+    if (pct <= 88) return 'Deeply True';
+    return 'Absolute True';
   }
 
   const recentHistory = history.slice(0, 40).map(h => {
@@ -269,13 +271,15 @@ TASK
 Based entirely on this person's established belief patterns — their category positions, dimension scores, historical probe answers, and belief drift — forecast exactly where they would place the slider for the new probe above.
 
 The slider runs 0–100:
-  0–10   = "False to me"        (deep rejection)
-  11–30  = "Unlikely true"      (skeptical lean)
-  31–45  = "Leaning false"      (soft skepticism)
-  46–55  = "Uncertain"          (genuine ambivalence)
-  56–70  = "Leaning true"       (soft agreement)
-  71–88  = "Likely true"        (confident agreement)
-  89–100 = "Deeply true to me"  (deep conviction)
+  0–11   = "Absolute False"     (deep rejection)
+  12–22  = "Deeply False"       (strong rejection)
+  23–33  = "False"              (clear disagreement)
+  34–44  = "Leaning False"      (soft skepticism)
+  45–55  = "Uncertain"          (genuine ambivalence)
+  56–66  = "Leaning True"       (soft agreement)
+  67–77  = "True"               (clear agreement)
+  78–88  = "Deeply True"        (strong conviction)
+  89–100 = "Absolute True"      (deep conviction)
 
 Return ONLY valid JSON, nothing else:
 {
