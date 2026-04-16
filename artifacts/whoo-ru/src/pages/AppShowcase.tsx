@@ -4,13 +4,17 @@ import { ArrowRight, Dna, Activity, Eye, ChevronDown, Globe, Chrome, Monitor } f
 import { useState } from "react";
 import { Link } from "wouter";
 
+const GENOME_APP_URL = (
+  (import.meta.env.VITE_GENOME_APP_URL as string | undefined) || "/genome-app/"
+).replace(/\/$/, "");
+
 const engagementOptions = [
   {
     icon: Globe,
     title: "1: Web App (Beta)",
     description: "Sign up directly on this site to begin mapping your Belief Genome. Access your dashboard, respond to probes, and watch your cognitive DNA string emerge in real time.",
     buttonText: "Create Account",
-    buttonHref: "/genome/register",
+    buttonHref: `${GENOME_APP_URL}/register`,
     internal: true,
     imagePlaceholder: "Web App",
   },
@@ -169,7 +173,7 @@ export default function AppShowcase() {
           <motion.div {...fadeUp} className="text-center bg-card border border-border rounded-2xl p-12">
             <h2 className="text-2xl font-bold text-foreground mb-4">Ready to discover who you really are?</h2>
             <Link
-              href="/genome/register"
+              href={`${GENOME_APP_URL}/register`}
               className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-xl font-semibold hover:brightness-110 transition-all"
             >
               <ArrowRight className="w-5 h-5" />

@@ -13,7 +13,7 @@ export default function GenomeLayout({ children }: Props) {
   const [location] = useLocation();
 
   // Public pages don't need auth
-  const isPublicPage = location === '/genome/login' || location === '/genome/register';
+  const isPublicPage = location === '/login' || location === '/register';
 
   if (loading) {
     return (
@@ -28,7 +28,7 @@ export default function GenomeLayout({ children }: Props) {
 
   // Redirect to login if not authenticated (except on public pages)
   if (!user && !isPublicPage) {
-    return <Redirect to="/genome/login" />;
+    return <Redirect to="/login" />;
   }
 
   // Don't show nav on login/register

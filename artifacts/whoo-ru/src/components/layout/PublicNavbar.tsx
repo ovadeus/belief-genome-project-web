@@ -3,7 +3,12 @@ import { Link, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useGenomeAuth } from "@/components/genome/GenomeAuthContext";
+
+// External URL for the dedicated genome web app (subdomain).
+// Override with VITE_GENOME_APP_URL in production once the subdomain is live.
+const GENOME_APP_URL = (
+  (import.meta.env.VITE_GENOME_APP_URL as string | undefined) || "/genome-app/"
+).replace(/\/$/, "");
 
 const TOP_LINKS = [
   { href: "/", label: "Home" },
@@ -23,44 +28,23 @@ const MORE_LINKS = [
 const ALL_MORE_HREFS = MORE_LINKS.map(item => item.href);
 
 function GenomeAuthButton() {
-  const { user, logout } = useGenomeAuth();
-  const [, setLocation] = useLocation();
-
-  if (user) {
-    return (
-      <div className="flex items-center gap-3">
-        <Link
-          href="/genome/dashboard"
-          className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
-        >
-          Dashboard
-        </Link>
-        <span className="text-border">|</span>
-        <span className="text-xs text-muted-foreground">{user.name}</span>
-        <button
-          onClick={logout}
-          className="px-4 py-2 rounded-lg border border-border text-sm text-muted-foreground hover:text-foreground hover:border-foreground/30 active:scale-95 transition-all"
-        >
-          Sign Out
-        </button>
-      </div>
-    );
-  }
-
+  // The Belief Genome web app now lives on its own subdomain. The marketing
+  // site no longer holds session state — we just send users to the standalone
+  // app (which handles its own login/registration).
   return (
     <div className="flex items-center gap-2">
-      <Link
-        href="/genome/login"
+      <a
+        href={`${GENOME_APP_URL}/login`}
         className="px-4 py-2 rounded-lg border border-primary/30 text-sm font-medium text-primary hover:bg-primary/10 transition-colors"
       >
         Sign In
-      </Link>
-      <Link
-        href="/genome/register"
+      </a>
+      <a
+        href={`${GENOME_APP_URL}/register`}
         className="px-4 py-2 rounded-lg bg-primary text-sm font-medium text-white hover:bg-primary/90 transition-colors"
       >
         Get Started
-      </Link>
+      </a>
     </div>
   );
 }

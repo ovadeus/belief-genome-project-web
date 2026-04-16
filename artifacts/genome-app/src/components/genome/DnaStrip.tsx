@@ -70,7 +70,7 @@ export default function DnaStrip({ dimensions, dimensionScores, confidence, tota
       dimNames,
     });
 
-    navigate('/genome/probe');
+    navigate('/probe');
   }, [dimensions, dimensionScores, startExplore, navigate]);
 
   let dimOffset = 0;

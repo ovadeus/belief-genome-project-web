@@ -26,11 +26,18 @@ export function useGenomeAuth() {
   return useContext(GenomeAuthContext);
 }
 
+// Resolve API base. In dev (path-routed proxy), VITE_API_URL is empty so
+// requests go to same-origin '/api/genome/...'. In prod with separate
+// subdomains, set VITE_API_URL=https://api.beliefgenomeproject.org (no
+// trailing slash) and the auth context will hit cross-origin endpoints.
+const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+
 // API helper that includes auth token
 export function genomeApi(path: string, options: RequestInit = {}) {
   const token = localStorage.getItem('genome_token');
-  return fetch(`/api/genome${path}`, {
+  return fetch(`${API_BASE}/api/genome${path}`, {
     ...options,
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -54,8 +61,9 @@ export function GenomeAuthProvider({ children }: { children: ReactNode }) {
   }, [token]);
 
   const login = async (email: string, password: string) => {
-    const res = await fetch('/api/genome/login', {
+    const res = await fetch(`${API_BASE}/api/genome/login`, {
       method: 'POST',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     });
@@ -68,8 +76,9 @@ export function GenomeAuthProvider({ children }: { children: ReactNode }) {
   };
 
   const register = async (name: string, email: string, password: string) => {
-    const res = await fetch('/api/genome/register', {
+    const res = await fetch(`${API_BASE}/api/genome/register`, {
       method: 'POST',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, email, password }),
     });
@@ -85,7 +94,7 @@ export function GenomeAuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('genome_token');
     setToken(null);
     setUser(null);
-    fetch('/api/genome/logout', { method: 'POST' }).catch(() => {});
+    fetch(`${API_BASE}/api/genome/logout`, { method: 'POST', credentials: 'include' }).catch(() => {});
   };
 
   return (

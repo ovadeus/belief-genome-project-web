@@ -1,4 +1,4 @@
-// Belief Genome registration page — styled to match BGP Admin login aesthetic
+// Belief Genome login page — styled to match BGP Admin login aesthetic
 import { useState } from 'react';
 import { useLocation } from 'wouter';
 import { useGenomeAuth } from '../../components/genome/GenomeAuthContext';
@@ -17,44 +17,25 @@ function BgpLogo() {
   );
 }
 
-export default function RegisterPage() {
-  const { register } = useGenomeAuth();
+export default function LoginPage() {
+  const { login } = useGenomeAuth();
   const [, setLocation] = useLocation();
-  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirm, setConfirm] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-
-    if (password !== confirm) {
-      setError('Passwords do not match');
-      return;
-    }
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters');
-      return;
-    }
-
     setLoading(true);
-    const result = await register(name, email, password);
+    const result = await login(email, password);
     setLoading(false);
     if (result.ok) {
-      setLocation('/genome/dashboard');
+      setLocation('/dashboard');
     } else {
-      setError(result.error || 'Registration failed');
+      setError(result.error || 'Login failed');
     }
-  };
-
-  const inputStyle: React.CSSProperties = {
-    width: '100%', padding: '12px 16px', borderRadius: 10,
-    border: '1px solid rgba(255,255,255,0.1)',
-    background: 'rgba(255,255,255,0.06)', color: '#fff',
-    fontSize: 14, outline: 'none', transition: 'border-color 0.2s',
   };
 
   return (
@@ -73,7 +54,7 @@ export default function RegisterPage() {
           fontSize: 24, fontWeight: 700, color: '#fff',
           letterSpacing: '0.01em',
         }}>
-          Join the Belief Genome Project
+          Sign In
         </span>
       </div>
 
@@ -88,13 +69,13 @@ export default function RegisterPage() {
           fontSize: 20, fontWeight: 700, color: '#fff',
           textAlign: 'center', marginBottom: 6,
         }}>
-          Join the Project
+          Secure Access
         </h2>
         <p style={{
           fontSize: 13, color: 'rgba(255,255,255,0.4)',
           textAlign: 'center', marginBottom: 28,
         }}>
-          Begin mapping your Belief DNA
+          Access your Belief Genome
         </p>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -114,30 +95,18 @@ export default function RegisterPage() {
               display: 'block', fontSize: 12, color: 'rgba(108,143,255,0.7)',
               marginBottom: 8, fontWeight: 500,
             }}>
-              Name
-            </label>
-            <input
-              type="text" required value={name}
-              onChange={e => setName(e.target.value)}
-              placeholder="Your name"
-              style={inputStyle}
-              onFocus={e => e.target.style.borderColor = 'rgba(108,143,255,0.4)'}
-              onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
-            />
-          </div>
-
-          <div>
-            <label style={{
-              display: 'block', fontSize: 12, color: 'rgba(108,143,255,0.7)',
-              marginBottom: 8, fontWeight: 500,
-            }}>
               Email
             </label>
             <input
               type="email" required value={email}
               onChange={e => setEmail(e.target.value)}
               placeholder="you@example.com"
-              style={inputStyle}
+              style={{
+                width: '100%', padding: '12px 16px', borderRadius: 10,
+                border: '1px solid rgba(255,255,255,0.1)',
+                background: 'rgba(255,255,255,0.06)', color: '#fff',
+                fontSize: 14, outline: 'none', transition: 'border-color 0.2s',
+              }}
               onFocus={e => e.target.style.borderColor = 'rgba(108,143,255,0.4)'}
               onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
             />
@@ -153,25 +122,13 @@ export default function RegisterPage() {
             <input
               type="password" required value={password}
               onChange={e => setPassword(e.target.value)}
-              placeholder="Min. 8 characters"
-              style={inputStyle}
-              onFocus={e => e.target.style.borderColor = 'rgba(108,143,255,0.4)'}
-              onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
-            />
-          </div>
-
-          <div>
-            <label style={{
-              display: 'block', fontSize: 12, color: 'rgba(108,143,255,0.7)',
-              marginBottom: 8, fontWeight: 500,
-            }}>
-              Confirm Password
-            </label>
-            <input
-              type="password" required value={confirm}
-              onChange={e => setConfirm(e.target.value)}
-              placeholder="Repeat password"
-              style={inputStyle}
+              placeholder="Your password"
+              style={{
+                width: '100%', padding: '12px 16px', borderRadius: 10,
+                border: '1px solid rgba(255,255,255,0.1)',
+                background: 'rgba(255,255,255,0.06)', color: '#fff',
+                fontSize: 14, outline: 'none', transition: 'border-color 0.2s',
+              }}
               onFocus={e => e.target.style.borderColor = 'rgba(108,143,255,0.4)'}
               onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
             />
@@ -187,23 +144,23 @@ export default function RegisterPage() {
             transition: 'all 0.2s', marginTop: 4,
             boxShadow: loading ? 'none' : '0 4px 16px rgba(108,143,255,0.3)',
           }}>
-            {loading ? 'Creating account...' : 'Create Account'}
+            {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
       </div>
 
-      {/* Login link */}
+      {/* Register link */}
       <div style={{
         textAlign: 'center', marginTop: 24,
         fontSize: 13, color: 'rgba(255,255,255,0.35)',
       }}>
-        Already have an account?{' '}
+        Don't have an account?{' '}
         <a
-          href="/genome/login"
-          onClick={e => { e.preventDefault(); setLocation('/genome/login'); }}
+          href="/register"
+          onClick={e => { e.preventDefault(); setLocation('/register'); }}
           style={{ color: '#6c8fff', textDecoration: 'none', fontWeight: 500 }}
         >
-          Sign in
+          Create one
         </a>
       </div>
 

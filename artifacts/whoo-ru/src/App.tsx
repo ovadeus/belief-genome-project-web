@@ -30,19 +30,21 @@ import ExploreBeliefs from "./pages/ExploreBeliefs";
 import NeuromapPage from "./pages/NeuromapPage";
 
 import { usePageTracker } from "./hooks/use-page-tracker";
-import { GenomeAuthProvider } from "./components/genome/GenomeAuthContext";
-import { ExploreProvider } from "./components/genome/ExploreContext";
-import GenomeLayout from "./components/genome/GenomeLayout";
-import LoginPage from "./pages/genome/LoginPage";
-import RegisterPage from "./pages/genome/RegisterPage";
-import ProbePage from "./pages/genome/ProbePage";
-import DashboardPage from "./pages/genome/DashboardPage";
-import DnaPage from "./pages/genome/DnaPage";
-import AnalyzePage from "./pages/genome/AnalyzePage";
-import SyncPage from "./pages/genome/SyncPage";
-import ProfilePage from "./pages/genome/ProfilePage";
 
 const queryClient = new QueryClient();
+
+// External URL for the dedicated genome web app (subdomain). Override with
+// VITE_GENOME_APP_URL in production once the subdomain is live.
+const GENOME_APP_URL = (import.meta.env.VITE_GENOME_APP_URL as string | undefined) || "/genome-app/";
+
+function GenomeRedirect({ path }: { path: string }) {
+  // Redirect any legacy /genome/* URL to the standalone genome app.
+  if (typeof window !== "undefined") {
+    const target = `${GENOME_APP_URL.replace(/\/$/, "")}/${path.replace(/^\//, "")}`;
+    window.location.replace(target);
+  }
+  return null;
+}
 
 function Router() {
   usePageTracker();
@@ -74,29 +76,9 @@ function Router() {
       <Route path="/admin/genome" component={GenomeSubmissions} />
       <Route path="/admin/analytics" component={AdminAnalytics} />
 
-      <Route path="/genome/login">
-        <GenomeLayout><LoginPage /></GenomeLayout>
-      </Route>
-      <Route path="/genome/register">
-        <GenomeLayout><RegisterPage /></GenomeLayout>
-      </Route>
-      <Route path="/genome/probe">
-        <GenomeLayout><ProbePage /></GenomeLayout>
-      </Route>
-      <Route path="/genome/dashboard">
-        <GenomeLayout><DashboardPage /></GenomeLayout>
-      </Route>
-      <Route path="/genome/dna">
-        <GenomeLayout><DnaPage /></GenomeLayout>
-      </Route>
-      <Route path="/genome/analyze">
-        <GenomeLayout><AnalyzePage /></GenomeLayout>
-      </Route>
-      <Route path="/genome/sync">
-        <GenomeLayout><SyncPage /></GenomeLayout>
-      </Route>
-      <Route path="/genome/profile">
-        <GenomeLayout><ProfilePage /></GenomeLayout>
+      {/* Legacy /genome/* paths now bounce to the standalone genome app. */}
+      <Route path="/genome/:rest*">
+        {(params) => <GenomeRedirect path={params.rest || ""} />}
       </Route>
 
       <Route component={NotFound} />
@@ -108,13 +90,9 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <GenomeAuthProvider>
-          <ExploreProvider>
-            <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-              <Router />
-            </WouterRouter>
-          </ExploreProvider>
-        </GenomeAuthProvider>
+        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+          <Router />
+        </WouterRouter>
         <Toaster />
       </TooltipProvider>
     </QueryClientProvider>

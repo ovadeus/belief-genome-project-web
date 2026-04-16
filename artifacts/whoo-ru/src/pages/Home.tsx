@@ -6,6 +6,10 @@ import { TripleHelixCanvas } from "@/components/ui/TripleHelixCanvas";
 import { usePublicBlog } from "@/hooks/use-blog";
 import { format } from "date-fns";
 
+const GENOME_APP_URL = (
+  (import.meta.env.VITE_GENOME_APP_URL as string | undefined) || "/genome-app/"
+).replace(/\/$/, "");
+
 export default function Home() {
   const { data: blogData } = usePublicBlog({ limit: 3 });
 
@@ -136,7 +140,7 @@ export default function Home() {
               <p className="text-xl text-muted-foreground mb-8">
                 What if you could predict your own reactions? The Forecaster uses your Belief Genome to model how you'll respond to new information, news, and complex situations before they even happen.
               </p>
-              <Link href="/genome/register" className="text-primary font-semibold flex items-center gap-2 hover:gap-3 transition-all">
+              <Link href={`${GENOME_APP_URL}/register`} className="text-primary font-semibold flex items-center gap-2 hover:gap-3 transition-all">
                 Start Mapping Your Beliefs <ArrowRight size={18} />
               </Link>
             </div>
@@ -252,7 +256,7 @@ export default function Home() {
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Link
-              href="/genome/register"
+              href={`${GENOME_APP_URL}/register`}
               className="px-8 py-4 rounded-xl font-semibold text-lg bg-primary hover:bg-primary/90 text-primary-foreground transition-all"
             >
               Get Started — Free

@@ -9,12 +9,12 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { path: '/genome/probe',     label: 'Reflections' },
-  { path: '/genome/dashboard', label: 'Dashboard' },
-  { path: '/genome/dna',       label: 'DNA' },
-  { path: '/genome/analyze',   label: 'Analyze' },
-  { path: '/genome/sync',      label: 'Sync Data' },
-  { path: '/genome/profile',   label: 'Profile' },
+  { path: '/probe',     label: 'Reflections' },
+  { path: '/dashboard', label: 'Dashboard' },
+  { path: '/dna',       label: 'DNA' },
+  { path: '/analyze',   label: 'Analyze' },
+  { path: '/sync',      label: 'Sync Data' },
+  { path: '/profile',   label: 'Profile' },
 ];
 
 export default function GenomeNav() {
@@ -35,7 +35,7 @@ export default function GenomeNav() {
       {/* Brand */}
       <div
         style={{ cursor: 'pointer', userSelect: 'none' }}
-        onClick={() => setLocation('/genome/dashboard')}
+        onClick={() => setLocation('/dashboard')}
       >
         <span style={{
           fontSize: 15, fontWeight: 600, color: 'rgba(255,255,255,0.7)',
@@ -49,8 +49,8 @@ export default function GenomeNav() {
       <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
         {NAV_ITEMS.map((item, i) => {
           const active = location === item.path ||
-            (item.path === '/genome/dashboard' && (
-              location === '/genome/dashboard' || location === '/genome/probe'
+            (item.path === '/dashboard' && (
+              location === '/dashboard' || location === '/probe'
             ));
 
           return (
@@ -103,7 +103,7 @@ export default function GenomeNav() {
 
         {/* Sign Out button */}
         <button
-          onClick={() => { logout(); setLocation('/genome/login'); }}
+          onClick={() => { logout(); setLocation('/login'); }}
           style={{
             padding: '6px 16px', borderRadius: 6,
             background: 'transparent',
