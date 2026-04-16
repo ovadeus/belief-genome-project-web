@@ -1,30 +1,30 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useMemo, useEffect, lazy, Suspense } from "react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
-import { motion } from "framer-motion";
-import { Globe, Users, BarChart3, Dna, Filter, ChevronDown, ChevronUp, Info } from "lucide-react";
-import { lazy, Suspense } from "react";
-import { rawToDisplay, formatDisplay, displayBarColor, displayBarBorder, DISPLAY_MIN, DISPLAY_MAX, DISPLAY_NEUTRAL, RAW_NEUTRAL } from "@/lib/belief-scale";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Globe, Users, BarChart3, Dna, Info, Clock, LayoutGrid, UserCircle2,
+} from "lucide-react";
+import {
+  rawToDisplay, displayBarColor, displayBarBorder,
+  DISPLAY_MIN, DISPLAY_MAX, DISPLAY_NEUTRAL,
+} from "@/lib/belief-scale";
 import { getBeliefInterpretation, getCategoryInterpretation } from "@/lib/belief-interpretations";
-const WorldBeliefMap = lazy(() => import("@/components/explore/WorldBeliefMap"));
 import {
   Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  RadialLinearScale,
-  PointElement,
-  LineElement,
-  Filler,
-  Tooltip,
-  Legend,
-  ArcElement,
-  TimeScale,
+  CategoryScale, LinearScale, BarElement, RadialLinearScale,
+  PointElement, LineElement, Filler, Tooltip, Legend, ArcElement, TimeScale,
 } from 'chart.js';
 import { Bar, Line, Doughnut } from 'react-chartjs-2';
+import {
+  useExploreStats, useExploreDimensions, useExploreGenerations,
+  useExploreGenders, useExploreCountries, useExploreTimeline, useExploreCountryBeliefs,
+  type ExploreFilters, DEFAULT_FILTERS,
+} from "@/hooks/use-explore";
+import { FilterBar, COUNTRY_NAMES, CATEGORY_OPTIONS } from "@/components/explore/FilterBar";
+
+const WorldBeliefMap = lazy(() => import("@/components/explore/WorldBeliefMap"));
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend, ArcElement, TimeScale);
-
-const API_BASE = import.meta.env.VITE_API_URL || "/api";
 
 const CATEGORIES: Record<string, { label: string; color: string; dims: number[] }> = {
   epistemology:  { label: 'Epistemology',    color: '#6c63ff', dims: [4,5,6,7,8,9,10,11,12,13] },
@@ -55,14 +55,12 @@ const DIM_NAMES: Record<string, string> = {
 };
 
 const EXPLORE_CAT_ORDER = ['epistemology', 'spirituality', 'morality', 'politics', 'social', 'economics', 'science_tech', 'education', 'health', 'psychology', 'relationships'];
-
 const EXPLORE_CAT_SHORT: Record<string, string> = {
   epistemology: 'Philosophy', spirituality: 'Religion', morality: 'Morality',
   politics: 'Politics', social: 'Society', economics: 'Economics',
   science_tech: 'Sci & Tech', education: 'Education', health: 'Health',
   psychology: 'Psychology', relationships: 'Relationships',
 };
-
 const EXPLORE_DOMAIN_AXES: Record<string, { left: string; right: string; mid: string }> = {
   epistemology:  { left: 'Relativist',   right: 'Absolutist',      mid: 'Mixed epistemic'  },
   spirituality:  { left: 'Secular',      right: 'Spiritual',       mid: 'Open spiritual'   },
@@ -86,7 +84,6 @@ function exploreCatColour(avg09: number | null): string {
   if (v <= 0.78) return '#60a5fa';
   return '#2563eb';
 }
-
 function exploreDomainLabel(cat: string, avg09: number): string {
   const axis = EXPLORE_DOMAIN_AXES[cat];
   if (!axis) return '—';
@@ -98,36 +95,6 @@ function exploreDomainLabel(cat: string, avg09: number): string {
   return `Strongly ${axis.right}`;
 }
 
-const COUNTRY_NAMES: Record<string, string> = {
-  "840":"United States","826":"United Kingdom","124":"Canada","036":"Australia","276":"Germany",
-  "250":"France","356":"India","076":"Brazil","392":"Japan","410":"South Korea",
-  "484":"Mexico","380":"Italy","724":"Spain","528":"Netherlands","752":"Sweden",
-  "616":"Poland","710":"South Africa",
-};
-
-const GENERATION_OPTIONS = [
-  { label: "All Generations", start: "", end: "" },
-  { label: "Silent Generation (1928-1945)", start: "1928", end: "1945" },
-  { label: "Baby Boomers (1946-1964)", start: "1946", end: "1964" },
-  { label: "Generation X (1965-1980)", start: "1965", end: "1980" },
-  { label: "Millennials (1981-1996)", start: "1981", end: "1996" },
-  { label: "Generation Z (1997-2012)", start: "1997", end: "2012" },
-];
-
-const GENDER_OPTIONS = [
-  { label: "All Genders", value: "" },
-  { label: "Male", value: "M" },
-  { label: "Female", value: "F" },
-  { label: "Non-Binary", value: "NB" },
-];
-
-interface DimData { avg: number; count: number; }
-interface StatsData { totalSubmissions: number; uniqueCountries: number; avgDimensionsExplored: number; }
-interface GenerationData { label: string; start: number; end: number; count: number; avgBeliefs: Record<string, number>; }
-interface GenderData { gender: string; count: number; }
-interface CountryData { countryCode: string; count: number; }
-interface TimelinePoint { period: string; count: number; avgs: Record<string, number>; }
-
 const TIMELINE_INTERVALS = [
   { label: 'Week', value: 'week' },
   { label: 'Month', value: 'month' },
@@ -135,215 +102,341 @@ const TIMELINE_INTERVALS = [
   { label: 'Year', value: 'year' },
 ];
 
+type TabKey = "breakdown" | "timeline" | "geo" | "gender" | "generation";
+const TABS: Array<{ key: TabKey; label: string; icon: any }> = [
+  { key: "breakdown",  label: "Category Breakdown", icon: LayoutGrid },
+  { key: "timeline",   label: "Timeline",           icon: Clock },
+  { key: "geo",        label: "Geo Map",            icon: Globe },
+  { key: "gender",     label: "Gender Split",       icon: UserCircle2 },
+  { key: "generation", label: "Generation Split",   icon: Users },
+];
+
+// Debounce hook for filter commits
+function useDebounced<T>(value: T, delay = 300): T {
+  const [v, setV] = useState(value);
+  useEffect(() => {
+    const t = setTimeout(() => setV(value), delay);
+    return () => clearTimeout(t);
+  }, [value, delay]);
+  return v;
+}
+
 export default function ExploreBeliefs() {
-  const [stats, setStats] = useState<StatsData | null>(null);
-  const [dimensions, setDimensions] = useState<Record<string, DimData>>({});
-  const [dimCount, setDimCount] = useState(0);
-  const [insufficientData, setInsufficientData] = useState(false);
-  const [generations, setGenerations] = useState<GenerationData[]>([]);
-  const [genders, setGenders] = useState<GenderData[]>([]);
-  const [countries, setCountries] = useState<CountryData[]>([]);
-  const [timeline, setTimeline] = useState<TimelinePoint[]>([]);
-  const [timelineInterval, setTimelineInterval] = useState("month");
-  const [countryBeliefs, setCountryBeliefs] = useState<Record<string, { avg: number; count: number }>>({});
-  const [mapOpen, setMapOpen] = useState(true);
+  const [activeTab, setActiveTab] = useState<TabKey>("breakdown");
   const [selectedCategory, setSelectedCategory] = useState("epistemology");
-  const [filterCountry, setFilterCountry] = useState("");
-  const [filterGender, setFilterGender] = useState("");
-  const [filterGenIdx, setFilterGenIdx] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [breakdownOpen, setBreakdownOpen] = useState(true);
-  const [timelineOpen, setTimelineOpen] = useState(true);
+  const [timelineInterval, setTimelineInterval] = useState("month");
+  const [filters, setFilters] = useState<ExploreFilters>(DEFAULT_FILTERS);
+  const committedFilters = useDebounced(filters, 300);
 
-  const fetchAll = useCallback(async () => {
-    setLoading(true);
-    try {
-      const qp = new URLSearchParams();
-      if (filterCountry) qp.set("country", filterCountry);
-      if (filterGender) qp.set("gender", filterGender);
-      const gen = GENERATION_OPTIONS[filterGenIdx];
-      if (gen.start) { qp.set("generationStart", gen.start); qp.set("generationEnd", gen.end); }
+  // Stats + countries always loaded (cheap, needed for filter bar)
+  const statsQ = useExploreStats(committedFilters);
+  // Country facet: apply all filters EXCEPT countries, so the user can keep adding/removing countries.
+  const countriesFacetFilters = useMemo(
+    () => ({ ...committedFilters, countries: [] }),
+    [committedFilters],
+  );
+  const countriesQ = useExploreCountries(countriesFacetFilters, true);
 
-      const tlQp = new URLSearchParams(qp);
-      tlQp.set("interval", timelineInterval);
+  // Per-tab gated queries
+  const dimensionsQ = useExploreDimensions(committedFilters, activeTab === "breakdown");
+  const timelineQ = useExploreTimeline(committedFilters, timelineInterval, activeTab === "timeline");
+  const countryBeliefsQ = useExploreCountryBeliefs(committedFilters, activeTab === "geo");
+  const gendersQ = useExploreGenders(committedFilters, activeTab === "gender");
+  const generationsQ = useExploreGenerations(committedFilters, activeTab === "generation");
 
-      const [statsRes, dimsRes, gensRes, gendersRes, countriesRes, tlRes, cbRes] = await Promise.all([
-        fetch(`${API_BASE}/genome/stats?${qp}`),
-        fetch(`${API_BASE}/genome/explore/dimensions?${qp}`),
-        fetch(`${API_BASE}/genome/explore/generations?${qp}`),
-        fetch(`${API_BASE}/genome/explore/genders?${qp}`),
-        fetch(`${API_BASE}/genome/explore/countries?${qp}`),
-        fetch(`${API_BASE}/genome/explore/timeline?${tlQp}`),
-        fetch(`${API_BASE}/genome/explore/country-beliefs?${qp}`),
-      ]);
+  const dimensions = dimensionsQ.data?.dimensions || {};
+  const dimCount = dimensionsQ.data?.count || 0;
+  const insufficientData = !!dimensionsQ.data?.insufficientData;
+  const stats = statsQ.data;
 
-      if (statsRes.ok) setStats(await statsRes.json());
-      if (dimsRes.ok) {
-        const d = await dimsRes.json();
-        setDimensions(d.dimensions || {});
-        setDimCount(d.count || 0);
-        setInsufficientData(d.insufficientData || false);
-      }
-      if (gensRes.ok) { const d = await gensRes.json(); setGenerations(d.generations || []); }
-      if (gendersRes.ok) { const d = await gendersRes.json(); setGenders(d.genders || []); }
-      if (countriesRes.ok) { const d = await countriesRes.json(); setCountries(d.countries || []); }
-      if (tlRes.ok) { const d = await tlRes.json(); setTimeline(d.timeline || []); }
-      if (cbRes.ok) { const d = await cbRes.json(); setCountryBeliefs(d.countryBeliefs || {}); }
-    } catch (err) { console.error("Failed to load explore data:", err); }
-    setLoading(false);
-  }, [filterCountry, filterGender, filterGenIdx, timelineInterval]);
+  return (
+    <PublicLayout>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-4">
+          <h1 className="text-4xl md:text-5xl font-display font-bold text-foreground">
+            Explore <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#6c8fff] to-[#a78bfa]">Beliefs</span>
+          </h1>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Aggregated, anonymized belief data from Belief Genome participants around the world.
+            See how beliefs vary across generations, genders, and geographies.
+          </p>
+        </motion.div>
 
-  useEffect(() => { fetchAll(); }, [fetchAll]);
+        {/* Compact stats row */}
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+          className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <StatCard icon={Dna}       label="Participants"    value={stats?.totalSubmissions ?? 0} loading={statsQ.isLoading} />
+          <StatCard icon={Globe}     label="Countries"       value={stats?.uniqueCountries ?? 0}  loading={statsQ.isLoading} />
+          <StatCard icon={BarChart3} label="Avg Dimensions"  value={stats?.avgDimensionsExplored ?? 0} loading={statsQ.isLoading} />
+          <StatCard icon={Users}     label="Privacy Minimum" value={5} suffix="per group" />
+        </motion.div>
 
-  const categoryDims = useMemo(() => {
-    const cat = CATEGORIES[selectedCategory];
-    if (!cat) return [];
-    return cat.dims.map(id => ({
-      id,
-      name: DIM_NAMES[String(id)] || `Dim ${id}`,
-      avg: dimensions[String(id)]?.avg ?? null,
-      count: dimensions[String(id)]?.count ?? 0,
-    }));
-  }, [selectedCategory, dimensions]);
+        {/* Filter bar at TOP */}
+        <FilterBar
+          filters={filters}
+          onChange={setFilters}
+          availableCountries={countriesQ.data?.countries || []}
+          totalResults={stats?.totalSubmissions}
+        />
 
-  const categoryAvgs = useMemo(() => {
-    const result: Record<string, { avg: number; count: number }> = {};
-    for (const [catKey, cat] of Object.entries(CATEGORIES)) {
-      let sum = 0, count = 0;
-      for (const id of cat.dims) {
-        const d = dimensions[String(id)];
-        if (d) { sum += d.avg; count++; }
-      }
-      if (count > 0) result[catKey] = { avg: sum / count, count };
+        {/* Tab switcher */}
+        <div className="bg-[#0c1025]/80 border border-white/10 rounded-2xl p-2 flex flex-wrap gap-1 sticky top-0 z-20 backdrop-blur">
+          {TABS.map(t => {
+            const Icon = t.icon;
+            const active = activeTab === t.key;
+            return (
+              <button
+                key={t.key}
+                onClick={() => setActiveTab(t.key)}
+                className={`flex-1 min-w-[120px] inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                  active
+                    ? "bg-gradient-to-r from-[#6c8fff] to-[#a78bfa] text-white shadow-lg"
+                    : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                }`}
+              >
+                <Icon size={14} />
+                <span className="hidden sm:inline">{t.label}</span>
+                <span className="sm:hidden">{t.label.split(" ")[0]}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {insufficientData && (
+          <div className="bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 text-sm px-4 py-3 rounded-xl flex items-center gap-2">
+            <Info size={14} />
+            Not enough data for this filter combination. Broaden your filters or wait for more submissions (minimum 5 per group).
+          </div>
+        )}
+
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.2 }}
+          >
+            {activeTab === "breakdown" && (
+              <BreakdownPanel
+                dimensions={dimensions}
+                dimCount={dimCount}
+                loading={dimensionsQ.isLoading}
+                selectedCategory={selectedCategory}
+                onSelectCategory={setSelectedCategory}
+                categoryFilter={filters.categories}
+              />
+            )}
+            {activeTab === "timeline" && (
+              <TimelinePanel
+                timeline={timelineQ.data?.timeline || []}
+                loading={timelineQ.isLoading}
+                interval={timelineInterval}
+                onIntervalChange={setTimelineInterval}
+                categoryFilter={filters.categories}
+              />
+            )}
+            {activeTab === "geo" && (
+              <GeoPanel
+                countryBeliefs={countryBeliefsQ.data?.countryBeliefs || {}}
+                loading={countryBeliefsQ.isLoading}
+              />
+            )}
+            {activeTab === "gender" && (
+              <GenderPanel
+                genders={gendersQ.data?.genders || []}
+                loading={gendersQ.isLoading}
+              />
+            )}
+            {activeTab === "generation" && (
+              <GenerationPanel
+                generations={generationsQ.data?.generations || []}
+                loading={generationsQ.isLoading}
+                selectedCategory={selectedCategory}
+                onSelectCategory={setSelectedCategory}
+              />
+            )}
+          </motion.div>
+        </AnimatePresence>
+
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center space-y-4 py-6">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm">
+            <Info size={14} />
+            All data is anonymized and aggregated. No individual submissions are ever displayed.
+          </div>
+          <p className="text-muted-foreground text-xs max-w-lg mx-auto">
+            Belief DNA is submitted voluntarily and anonymously. Groups with fewer than 5 participants are hidden for privacy.
+          </p>
+        </motion.div>
+      </div>
+    </PublicLayout>
+  );
+}
+
+// ---------- Shared chart styling ----------
+
+const baseTooltipStyle = {
+  backgroundColor: '#0c1025',
+  borderColor: '#ffffff20',
+  borderWidth: 1,
+  titleColor: '#fff',
+  bodyColor: '#94a3b8',
+  padding: 12,
+  cornerRadius: 8,
+};
+
+const scaleOptions = {
+  x: { ticks: { color: '#64748b', font: { size: 10 } }, grid: { color: '#ffffff08' } },
+  y: {
+    min: DISPLAY_MIN, max: DISPLAY_MAX,
+    ticks: {
+      color: '#64748b', stepSize: 1,
+      callback: (v: any) => (v > 0 ? `+${v}` : v),
+    },
+    grid: {
+      color: (ctx: any) => ctx.tick?.value === 0 ? '#ffffff30' : '#ffffff08',
+      lineWidth: (ctx: any) => ctx.tick?.value === 0 ? 1.5 : 1,
+    },
+  },
+};
+
+function wrapText(text: string, maxLen = 50): string[] {
+  const lines: string[] = [''];
+  const words = text.split(' ');
+  let line = '';
+  for (const w of words) {
+    if ((line + ' ' + w).trim().length > maxLen && line) {
+      lines.push(line.trim());
+      line = w;
+    } else {
+      line = line ? line + ' ' + w : w;
     }
-    return result;
-  }, [dimensions]);
+  }
+  if (line) lines.push(line.trim());
+  return lines;
+}
 
-  const barChartData = useMemo(() => {
-    const cat = CATEGORIES[selectedCategory];
-    const displayVals = categoryDims.map(d => d.avg !== null ? rawToDisplay(d.avg) : null);
-    return {
-      labels: categoryDims.map(d => d.name),
-      datasets: [{
-        label: `Average Score (${cat?.label})`,
-        data: displayVals,
-        backgroundColor: displayVals.map(v => v !== null ? displayBarColor(v) + 'aa' : '#787891'),
-        borderColor: displayVals.map(v => v !== null ? displayBarBorder(v) : '#787891'),
-        borderWidth: 2,
-        borderRadius: 6,
-      }],
-    };
-  }, [categoryDims, selectedCategory]);
+// ---------- Panels ----------
 
-  const timelineChartData = useMemo(() => {
-    if (timeline.length === 0) return null;
+function PanelShell({ title, subtitle, tooltip, badge, actions, children }: {
+  title: string; subtitle?: string; tooltip?: string; badge?: string;
+  actions?: React.ReactNode; children: React.ReactNode;
+}) {
+  return (
+    <div className="bg-[#0c1025]/80 border border-white/10 rounded-2xl p-6">
+      <div className="flex items-start justify-between gap-4 mb-4 flex-wrap">
+        <div>
+          <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+            {title}
+            {badge && (
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/15 text-primary font-medium">{badge}</span>
+            )}
+            {tooltip && <InfoTip text={tooltip} />}
+          </h3>
+          {subtitle && <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>}
+        </div>
+        {actions}
+      </div>
+      {children}
+    </div>
+  );
+}
 
-    const catEntries = Object.entries(CATEGORIES);
+function PanelSkeleton({ height = 350 }: { height?: number }) {
+  return (
+    <div className="bg-[#0c1025]/80 border border-white/10 rounded-2xl p-6">
+      <div className="h-5 w-48 bg-white/5 rounded mb-2 animate-pulse" />
+      <div className="h-3 w-72 bg-white/5 rounded mb-6 animate-pulse" />
+      <div className="bg-white/5 rounded-xl animate-pulse" style={{ height }} />
+    </div>
+  );
+}
 
-    const formatPeriod = (p: string) => {
-      const d = new Date(p);
-      if (isNaN(d.getTime())) return p;
-      if (timelineInterval === 'year') return d.getFullYear().toString();
-      if (timelineInterval === 'quarter') {
-        const q = Math.ceil((d.getMonth() + 1) / 3);
-        return `Q${q} ${d.getFullYear()}`;
-      }
-      if (timelineInterval === 'week') return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' });
-      return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-    };
+// ---------- Breakdown Panel ----------
 
-    const labels = timeline.map(t => formatPeriod(t.period));
+function BreakdownPanel({
+  dimensions, dimCount, loading, selectedCategory, onSelectCategory, categoryFilter,
+}: {
+  dimensions: Record<string, { avg: number; count: number }>;
+  dimCount: number;
+  loading: boolean;
+  selectedCategory: string;
+  onSelectCategory: (c: string) => void;
+  categoryFilter: string[];
+}) {
+  if (loading && dimCount === 0) return <PanelSkeleton height={400} />;
 
-    const datasets = catEntries.map(([catKey, cat]) => {
-      const data = timeline.map(t => {
-        let sum = 0, count = 0;
-        for (const dimId of cat.dims) {
-          const val = t.avgs[String(dimId)];
-          if (val !== undefined) { sum += val; count++; }
-        }
-        return count > 0 ? Math.round(rawToDisplay(sum / count) * 100) / 100 : null;
-      });
+  const visibleCategories = categoryFilter.length > 0
+    ? EXPLORE_CAT_ORDER.filter(c => categoryFilter.includes(c))
+    : EXPLORE_CAT_ORDER;
 
-      return {
-        label: cat.label,
-        data,
-        borderColor: cat.color + 'A6',
-        backgroundColor: cat.color + '20',
-        borderWidth: 1,
-        borderDash: [4, 3],
-        pointRadius: 5,
-        pointHoverRadius: 7,
-        pointBackgroundColor: cat.color,
-        pointBorderColor: '#0c1025',
-        pointBorderWidth: 1,
-        tension: 0.3,
-        fill: false,
-        spanGaps: true,
-      };
-    });
+  const categoryAvgs: Record<string, { avg: number; count: number }> = {};
+  for (const [catKey, cat] of Object.entries(CATEGORIES)) {
+    let sum = 0, count = 0;
+    for (const id of cat.dims) {
+      const d = dimensions[String(id)];
+      if (d) { sum += d.avg; count++; }
+    }
+    if (count > 0) categoryAvgs[catKey] = { avg: sum / count, count };
+  }
 
-    return { labels, datasets };
-  }, [timeline, timelineInterval]);
+  const cat = CATEGORIES[selectedCategory];
+  const categoryDims = cat ? cat.dims.map(id => ({
+    id,
+    name: DIM_NAMES[String(id)] || `Dim ${id}`,
+    avg: dimensions[String(id)]?.avg ?? null,
+    count: dimensions[String(id)]?.count ?? 0,
+  })) : [];
 
-  const generationChartData = useMemo(() => {
-    if (generations.length === 0) return null;
-    const catKey = selectedCategory;
-    const cat = CATEGORIES[catKey];
-    const dimIds = cat.dims;
+  const displayVals = categoryDims.map(d => d.avg !== null ? rawToDisplay(d.avg) : null);
 
-    const genDisplayVals = generations.map(g => {
-      let sum = 0, count = 0;
-      for (const id of dimIds) {
-        const val = g.avgBeliefs[String(id)];
-        if (val !== undefined) { sum += val; count++; }
-      }
-      return count > 0 ? Math.round(rawToDisplay(sum / count) * 100) / 100 : null;
-    });
-    return {
-      labels: generations.map(g => g.label.replace('Generation ', 'Gen ')),
-      datasets: [{
-        label: `${cat.label} Avg`,
-        data: genDisplayVals,
-        backgroundColor: genDisplayVals.map(v => v !== null ? displayBarColor(v) + 'aa' : '#787891'),
-        borderColor: genDisplayVals.map(v => v !== null ? displayBarBorder(v) : '#787891'),
-        borderWidth: 2,
-        borderRadius: 6,
-      }],
-    };
-  }, [generations, selectedCategory]);
+  const barChartData = {
+    labels: categoryDims.map(d => d.name),
+    datasets: [{
+      label: `Average Score (${cat?.label})`,
+      data: displayVals,
+      backgroundColor: displayVals.map(v => v !== null ? displayBarColor(v) + 'aa' : '#787891'),
+      borderColor: displayVals.map(v => v !== null ? displayBarBorder(v) : '#787891'),
+      borderWidth: 2,
+      borderRadius: 6,
+    }],
+  };
 
-  const genderChartData = useMemo(() => {
-    if (genders.length === 0) return null;
-    const genderLabels: Record<string, string> = { M: 'Male', F: 'Female', NB: 'Non-Binary', PNS: 'Prefer Not to Say', Intersex: 'Intersex' };
-    const colors = ['#6c8fff', '#a78bfa', '#22d3ee', '#ff6b81', '#44bd32'];
-    return {
-      labels: genders.map(g => genderLabels[g.gender] || g.gender),
-      datasets: [{
-        data: genders.map(g => g.count),
-        backgroundColor: genders.map((_, i) => colors[i % colors.length]),
-        borderWidth: 0,
-      }],
-    };
-  }, [genders]);
+  const dimChartOptions: any = {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        ...baseTooltipStyle,
+        bodyFont: { size: 12 }, padding: 14, displayColors: false,
+        callbacks: {
+          title: (items: any[]) => items[0]?.label || '',
+          label: (ctx: any) => {
+            const val = ctx.parsed?.y;
+            if (val === null || val === undefined) return '';
+            const sign = val > 0 ? '+' : '';
+            const dir = val > 0.3 ? '↑ Leaning True' : val < -0.3 ? '↓ Leaning False' : '→ Neutral';
+            return `Score: ${sign}${val.toFixed(2)} ${dir}`;
+          },
+          afterBody: (items: any[]) => {
+            if (!items.length) return '';
+            const idx = items[0].dataIndex;
+            const c = CATEGORIES[selectedCategory];
+            if (!c) return '';
+            const dimId = String(c.dims[idx]);
+            const val = items[0].parsed?.y;
+            if (val === null || val === undefined) return '';
+            const interp = getBeliefInterpretation(dimId, val);
+            return interp ? wrapText(interp) : '';
+          },
+        },
+      },
+    },
+    scales: scaleOptions,
+  };
 
-  const countryChartData = useMemo(() => {
-    if (countries.length === 0) return null;
-    const sorted = [...countries].sort((a, b) => b.count - a.count).slice(0, 10);
-    return {
-      labels: sorted.map(c => COUNTRY_NAMES[c.countryCode] || c.countryCode),
-      datasets: [{
-        label: 'Submissions',
-        data: sorted.map(c => c.count),
-        backgroundColor: '#6c8fff88',
-        borderColor: '#6c8fff',
-        borderWidth: 2,
-        borderRadius: 6,
-      }],
-    };
-  }, [countries]);
-
-  const tensionLinePlugin = useMemo(() => ({
-    id: 'tensionLine',
+  const neutralLinePlugin = {
+    id: 'neutralLine',
     afterDraw(chart: any) {
       const yScale = chart.scales.y;
       if (!yScale) return;
@@ -362,206 +455,200 @@ export default function ExploreBeliefs() {
       ctx.setLineDash([]);
       ctx.restore();
     },
-  }), [selectedCategory]);
-
-  const baseTooltipStyle = {
-    backgroundColor: '#0c1025',
-    borderColor: '#ffffff20',
-    borderWidth: 1,
-    titleColor: '#fff',
-    bodyColor: '#94a3b8',
-    padding: 12,
-    cornerRadius: 8,
   };
 
-  const baseChartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { display: false },
-      tooltip: baseTooltipStyle,
-    },
-    scales: {
-      x: {
-        ticks: { color: '#64748b', font: { size: 10 } },
-        grid: { color: '#ffffff08' },
-      },
-      y: {
-        min: DISPLAY_MIN, max: DISPLAY_MAX,
-        ticks: {
-          color: '#64748b',
-          stepSize: 1,
-          callback: (v: any) => {
-            if (v > 0) return `+${v}`;
-            return v;
-          },
-        },
-        grid: {
-          color: (ctx: any) => ctx.tick?.value === 0 ? '#ffffff30' : '#ffffff08',
-          lineWidth: (ctx: any) => ctx.tick?.value === 0 ? 1.5 : 1,
-        },
-      },
-    },
+  return (
+    <div className="space-y-6">
+      {/* Category bar view across all categories */}
+      <PanelShell
+        title="All Categories Overview"
+        subtitle={`Based on ${dimCount.toLocaleString()} submissions matching your filters`}
+        badge={categoryFilter.length > 0 ? `${visibleCategories.length}/11 shown` : undefined}
+        tooltip="Each row shows where the group average sits on a belief spectrum. Use the category filter above to focus on specific categories."
+      >
+        {visibleCategories.length === 0 ? (
+          <p className="text-sm text-muted-foreground py-4">No categories match your filter. Clear the category filter to see all 11.</p>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {visibleCategories.map(catKey => {
+              const data = categoryAvgs[catKey];
+              const hasData = !!data;
+              const avg = data?.avg ?? 4.5;
+              const pct = (avg / 9) * 100;
+              const col = exploreCatColour(hasData ? avg : null);
+              const lbl = hasData ? exploreDomainLabel(catKey, avg) : '';
+              const axis = EXPLORE_DOMAIN_AXES[catKey] || { left: '', right: '' };
+              const name = EXPLORE_CAT_SHORT[catKey] || catKey;
+              const cnt = data?.count ?? 0;
+              return (
+                <div key={catKey} style={{ opacity: hasData ? 1 : 0.32 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr 40px 130px', gap: 8, alignItems: 'center' }}>
+                    <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', textAlign: 'right' }}>{name}</span>
+                    <div style={{ position: 'relative', height: 14 }}>
+                      <div style={{
+                        position: 'absolute', inset: '3px 0', borderRadius: 4,
+                        background: 'linear-gradient(90deg, #dc2626, #fca5a5 25%, #22c55e 50%, #93c5fd 75%, #2563eb)',
+                        opacity: 0.85,
+                      }} />
+                      <div style={{ position: 'absolute', left: '50%', top: 0, width: 1, height: '100%', background: 'rgba(255,255,255,0.28)', zIndex: 3 }} />
+                      {hasData && (
+                        <div style={{
+                          position: 'absolute', left: `${pct}%`, top: '50%', transform: 'translate(-50%, -50%)',
+                          width: 15, height: 15, borderRadius: '50%', background: col,
+                          border: '2.5px solid rgba(255,255,255,0.92)',
+                          boxShadow: `0 0 8px ${col}, 0 0 2px rgba(0,0,0,0.8)`, zIndex: 4,
+                        }} />
+                      )}
+                    </div>
+                    <span style={{ fontSize: 11, fontFamily: "'Space Mono', monospace", color: 'rgba(255,255,255,0.35)', textAlign: 'right' }}>
+                      {hasData ? `${cnt}×` : ''}
+                    </span>
+                    <span style={{ fontSize: 11, color: col, textAlign: 'right' }}>{lbl}</span>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr 40px 130px', gap: 8, marginTop: 2 }}>
+                    <span />
+                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 4px' }}>
+                      <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)' }}>{axis.left}</span>
+                      <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)' }}>{axis.right}</span>
+                    </div>
+                    <span /><span />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </PanelShell>
+
+      {/* Per-category drill down */}
+      <PanelShell
+        title={`${cat?.label} — Dimension Details`}
+        subtitle={`Zoom into ${cat?.label.toLowerCase()}. Each bar is one specific belief statement. Dashed line = neutral.`}
+        tooltip="Each bar is the group's average score on a single belief. Higher = group leans toward agreement, lower = group leans toward disagreement."
+      >
+        <div className="flex flex-wrap gap-2 mb-4">
+          {Object.entries(CATEGORIES).map(([key, c]) => (
+            <button
+              key={key}
+              onClick={() => onSelectCategory(key)}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all border ${
+                selectedCategory === key
+                  ? 'text-white border-transparent shadow-md'
+                  : 'text-muted-foreground border-white/10 hover:border-white/20 hover:text-foreground'
+              }`}
+              style={selectedCategory === key ? { backgroundColor: c.color, boxShadow: `0 2px 12px ${c.color}40` } : {}}
+            >
+              {c.label}
+            </button>
+          ))}
+        </div>
+        <div className="h-[360px]">
+          <Bar data={barChartData} options={dimChartOptions} plugins={[neutralLinePlugin]} />
+        </div>
+      </PanelShell>
+    </div>
+  );
+}
+
+// ---------- Timeline Panel ----------
+
+function TimelinePanel({
+  timeline, loading, interval, onIntervalChange, categoryFilter,
+}: {
+  timeline: Array<{ period: string; count: number; avgs: Record<string, number> }>;
+  loading: boolean;
+  interval: string;
+  onIntervalChange: (i: string) => void;
+  categoryFilter: string[];
+}) {
+  if (loading && timeline.length === 0) return <PanelSkeleton height={420} />;
+
+  const visibleCats = categoryFilter.length > 0
+    ? Object.entries(CATEGORIES).filter(([k]) => categoryFilter.includes(k))
+    : Object.entries(CATEGORIES);
+
+  const formatPeriod = (p: string) => {
+    const d = new Date(p);
+    if (isNaN(d.getTime())) return p;
+    if (interval === 'year') return d.getFullYear().toString();
+    if (interval === 'quarter') return `Q${Math.ceil((d.getMonth() + 1) / 3)} ${d.getFullYear()}`;
+    if (interval === 'week') return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' });
+    return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
   };
 
-  const wrapText = (text: string, maxLen = 50): string[] => {
-    const lines: string[] = [''];
-    const words = text.split(' ');
-    let line = '';
-    for (const w of words) {
-      if ((line + ' ' + w).trim().length > maxLen && line) {
-        lines.push(line.trim());
-        line = w;
-      } else {
-        line = line ? line + ' ' + w : w;
+  const labels = timeline.map(t => formatPeriod(t.period));
+  const totalSamples = timeline.reduce((s, t) => s + t.count, 0);
+
+  const datasets = visibleCats.map(([, c]) => {
+    const data = timeline.map(t => {
+      let sum = 0, count = 0;
+      for (const dimId of c.dims) {
+        const v = t.avgs[String(dimId)];
+        if (v !== undefined) { sum += v; count++; }
       }
+      return count > 0 ? Math.round(rawToDisplay(sum / count) * 100) / 100 : null;
+    });
+    return {
+      label: c.label,
+      data,
+      borderColor: c.color + 'CC',
+      backgroundColor: c.color + '20',
+      borderWidth: 2,
+      pointRadius: 4, pointHoverRadius: 7,
+      pointBackgroundColor: c.color,
+      pointBorderColor: '#0c1025', pointBorderWidth: 1,
+      tension: 0.3, fill: false, spanGaps: true,
+    };
+  });
+
+  // Auto-rescale y when <3 categories shown (architect suggestion)
+  const autoScale = visibleCats.length > 0 && visibleCats.length < 3;
+  let yMin = DISPLAY_MIN, yMax = DISPLAY_MAX;
+  if (autoScale) {
+    const flat = datasets.flatMap(d => d.data.filter((v: any) => v !== null) as number[]);
+    if (flat.length > 0) {
+      const lo = Math.min(...flat), hi = Math.max(...flat);
+      const pad = Math.max(0.5, (hi - lo) * 0.25);
+      yMin = Math.floor(lo - pad);
+      yMax = Math.ceil(hi + pad);
     }
-    if (line) lines.push(line.trim());
-    return lines;
-  };
+  }
 
-  const dimChartOptions = {
-    ...baseChartOptions,
-    plugins: {
-      ...baseChartOptions.plugins,
-      tooltip: {
-        ...baseTooltipStyle,
-        bodyFont: { size: 12 },
-        padding: 14,
-        displayColors: false,
-        callbacks: {
-          title: (items: any[]) => {
-            if (!items.length) return '';
-            return items[0].label || '';
-          },
-          label: (ctx: any) => {
-            const val = ctx.parsed?.y;
-            if (val === null || val === undefined) return '';
-            const sign = val > 0 ? '+' : '';
-            const direction = val > 0.3 ? '↑ Leaning True' : val < -0.3 ? '↓ Leaning False' : '→ Neutral';
-            return `Score: ${sign}${val.toFixed(2)} ${direction}`;
-          },
-          afterBody: (items: any[]) => {
-            if (!items.length) return '';
-            const idx = items[0].dataIndex;
-            const cat = CATEGORIES[selectedCategory];
-            if (!cat) return '';
-            const dimId = String(cat.dims[idx]);
-            const val = items[0].parsed?.y;
-            if (val === null || val === undefined) return '';
-            const interp = getBeliefInterpretation(dimId, val);
-            if (!interp) return '';
-            return wrapText(interp);
-          },
-        },
-      },
-    },
-  };
-
-  const genChartOptions = {
-    ...baseChartOptions,
-    plugins: {
-      ...baseChartOptions.plugins,
-      tooltip: {
-        ...baseTooltipStyle,
-        bodyFont: { size: 12 },
-        padding: 14,
-        displayColors: false,
-        callbacks: {
-          title: (items: any[]) => {
-            if (!items.length) return '';
-            return items[0].label || '';
-          },
-          label: (ctx: any) => {
-            const val = ctx.parsed?.y;
-            if (val === null || val === undefined) return '';
-            const sign = val > 0 ? '+' : '';
-            const direction = val > 0.3 ? '↑ Leaning True' : val < -0.3 ? '↓ Leaning False' : '→ Neutral';
-            return `${ctx.dataset.label}: ${sign}${val.toFixed(2)} ${direction}`;
-          },
-          afterBody: (items: any[]) => {
-            if (!items.length) return '';
-            const val = items[0].parsed?.y;
-            if (val === null || val === undefined) return '';
-            const genLabel = items[0].label || '';
-            const interp = getCategoryInterpretation(selectedCategory, val, genLabel);
-            if (!interp) return '';
-            return wrapText(interp);
-          },
-        },
-      },
-    },
-  };
-
-  const countBarOptions = {
-    ...baseChartOptions,
-    indexAxis: 'y' as const,
-    plugins: {
-      ...baseChartOptions.plugins,
-      tooltip: baseTooltipStyle,
-    },
-    scales: {
-      y: { ticks: { color: '#94a3b8', font: { size: 11 } }, grid: { display: false } },
-      x: { ticks: { color: '#64748b' }, grid: { color: '#ffffff08' } },
-    },
-  };
-
-  const timelineOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    interaction: {
-      mode: 'index' as const,
-      intersect: false,
-    },
+  const timelineOptions: any = {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
     plugins: {
       legend: {
-        position: 'bottom' as const,
-        labels: {
-          color: '#94a3b8',
-          padding: 12,
-          font: { size: 11 },
-          usePointStyle: true,
-          pointStyle: 'circle',
-        },
+        position: 'bottom',
+        labels: { color: '#94a3b8', padding: 10, font: { size: 11 }, usePointStyle: true, pointStyle: 'circle' },
       },
       tooltip: {
-        backgroundColor: '#0c1025',
-        borderColor: '#ffffff20',
-        borderWidth: 1,
-        titleColor: '#fff',
-        titleFont: { size: 13, weight: 'bold' as const },
-        titleMarginBottom: 10,
-        bodyColor: '#94a3b8',
-        bodyFont: { size: 12 },
-        bodySpacing: 6,
-        padding: { top: 14, bottom: 14, left: 14, right: 14 },
-        cornerRadius: 8,
+        backgroundColor: '#0c1025', borderColor: '#ffffff20', borderWidth: 1,
+        titleColor: '#fff', titleFont: { size: 13, weight: 'bold' }, titleMarginBottom: 8,
+        bodyColor: '#94a3b8', bodyFont: { size: 12 }, bodySpacing: 6,
+        padding: { top: 12, bottom: 12, left: 12, right: 12 }, cornerRadius: 8,
         callbacks: {
+          title: (items: any[]) => {
+            if (!items.length) return '';
+            const idx = items[0].dataIndex;
+            const point = timeline[idx];
+            return `${items[0].label} · n=${point?.count ?? '?'}`;
+          },
           label: (ctx: any) => {
             const val = ctx.parsed?.y;
             if (val === null || val === undefined) return '';
-            const direction = val > 0.3 ? '↑ Leaning True' : val < -0.3 ? '↓ Leaning False' : '→ Neutral';
             const sign = val > 0 ? '+' : '';
-            return ` ${ctx.dataset.label}: ${sign}${val.toFixed(1)} ${direction}`;
+            const dir = val > 0.3 ? '↑ Leaning True' : val < -0.3 ? '↓ Leaning False' : '→ Neutral';
+            return ` ${ctx.dataset.label}: ${sign}${val.toFixed(1)} ${dir}`;
           },
         },
       },
     },
     scales: {
-      x: {
-        ticks: { color: '#64748b', font: { size: 10 }, maxRotation: 45, minRotation: 0 },
-        grid: { color: '#ffffff08' },
-      },
+      x: { ticks: { color: '#64748b', font: { size: 10 }, maxRotation: 45 }, grid: { color: '#ffffff08' } },
       y: {
-        min: DISPLAY_MIN, max: DISPLAY_MAX,
-        ticks: {
-          color: '#64748b',
-          stepSize: 1,
-          callback: (v: any) => {
-            if (v > 0) return `+${v}`;
-            return v;
-          },
-        },
+        min: yMin, max: yMax,
+        ticks: { color: '#64748b', stepSize: 1, callback: (v: any) => (v > 0 ? `+${v}` : v) },
         grid: {
           color: (ctx: any) => ctx.tick?.value === 0 ? '#ffffff40' : '#ffffff08',
           lineWidth: (ctx: any) => ctx.tick?.value === 0 ? 2 : 1,
@@ -570,388 +657,227 @@ export default function ExploreBeliefs() {
     },
   };
 
-  const doughnutOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { position: 'right' as const, labels: { color: '#94a3b8', padding: 16, font: { size: 12 } } },
-    },
-  };
-
   return (
-    <PublicLayout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-4">
-          <h1 className="text-4xl md:text-5xl font-display font-bold text-foreground">
-            Explore <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#6c8fff] to-[#a78bfa]">Beliefs</span>
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Aggregated, anonymized belief data from Belief Genome participants around the world.
-            See how beliefs vary across generations, genders, and geographies.
-          </p>
-        </motion.div>
-
-        {stats && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <StatCard icon={Dna} label="Participants" value={stats.totalSubmissions} />
-            <StatCard icon={Globe} label="Countries" value={stats.uniqueCountries} />
-            <StatCard icon={BarChart3} label="Avg Dimensions" value={stats.avgDimensionsExplored} />
-            <StatCard icon={Users} label="Privacy Minimum" value={5} suffix="per group" />
-          </motion.div>
-        )}
-
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="bg-[#0c1025]/80 border border-white/10 rounded-2xl p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Filter size={16} className="text-primary" />
-            <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">Filters</h3>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <label className="text-xs text-muted-foreground mb-1 block">Country</label>
-              <select value={filterCountry} onChange={e => setFilterCountry(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-xl bg-[#121730] border border-white/10 text-sm text-foreground focus:ring-2 focus:ring-primary/30 outline-none appearance-none">
-                <option value="">All Countries</option>
-                {countries.map(c => (
-                  <option key={c.countryCode} value={c.countryCode}>
-                    {COUNTRY_NAMES[c.countryCode] || c.countryCode} ({c.count})
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="text-xs text-muted-foreground mb-1 block">Generation</label>
-              <select value={filterGenIdx} onChange={e => setFilterGenIdx(Number(e.target.value))}
-                className="w-full px-3 py-2.5 rounded-xl bg-[#121730] border border-white/10 text-sm text-foreground focus:ring-2 focus:ring-primary/30 outline-none appearance-none">
-                {GENERATION_OPTIONS.map((g, i) => <option key={i} value={i}>{g.label}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="text-xs text-muted-foreground mb-1 block">Gender</label>
-              <select value={filterGender} onChange={e => setFilterGender(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-xl bg-[#121730] border border-white/10 text-sm text-foreground focus:ring-2 focus:ring-primary/30 outline-none appearance-none">
-                {GENDER_OPTIONS.map(g => <option key={g.value} value={g.value}>{g.label}</option>)}
-              </select>
-            </div>
-          </div>
-          {insufficientData && (
-            <div className="mt-4 flex items-center gap-2 text-yellow-400 text-sm bg-yellow-500/10 border border-yellow-500/20 px-4 py-2 rounded-xl">
-              <Info size={14} />
-              Not enough data for this filter combination. At least 5 submissions are needed for privacy.
-            </div>
-          )}
-        </motion.div>
-
-        {!loading && !insufficientData && dimCount >= 5 && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}
-            className="bg-[#0c1025]/80 border border-white/10 rounded-2xl p-6">
+    <PanelShell
+      title="Belief Evolution Timeline"
+      subtitle={`How collective beliefs shift over time — midline = Neutral. ${totalSamples.toLocaleString()} samples total${autoScale ? ' · auto-scaled y-axis' : ''}`}
+      badge={categoryFilter.length > 0 ? `${visibleCats.length}/11 shown` : undefined}
+      tooltip="Each line is one belief category. Positive values = collective agreement, negative = disagreement. Use the category filter to focus on specific categories; with <3 selected, the y-axis auto-scales for more drama."
+      actions={
+        <div className="flex gap-1">
+          {TIMELINE_INTERVALS.map(ti => (
             <button
-              onClick={() => setBreakdownOpen(o => !o)}
-              className="w-full flex items-center justify-between cursor-pointer"
-              style={{ background: 'none', border: 'none', padding: 0 }}
-            >
-              <div style={{
-                fontSize: 11, fontFamily: "'Space Mono', monospace", textTransform: 'uppercase',
-                letterSpacing: 1.5, color: 'rgba(255,255,255,0.5)',
-                display: 'flex', alignItems: 'center', gap: 8,
-              }}>
-                <BarChart3 size={14} style={{ opacity: 0.6 }} />
-                Category Breakdown
-                <InfoTip text="Each row represents a belief category. The dot shows where the group average falls on a spectrum — left means the group leans toward one worldview (e.g. Secular, Progressive), right means the opposite (e.g. Spiritual, Conservative). A dot near the middle means opinions are mixed. The label on the right names the archetype for that position. Use the filters above to compare different groups." />
-              </div>
-              {breakdownOpen ? (
-                <ChevronUp size={16} className="text-muted-foreground" />
-              ) : (
-                <ChevronDown size={16} className="text-muted-foreground" />
-              )}
-            </button>
-
-            {breakdownOpen && (
-              <>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 20 }}>
-                {EXPLORE_CAT_ORDER.map(cat => {
-                  const data = categoryAvgs[cat];
-                  const hasData = !!data;
-                  const avg = data?.avg ?? 4.5;
-                  const pct = (avg / 9) * 100;
-                  const col = exploreCatColour(hasData ? avg : null);
-                  const lbl = hasData ? exploreDomainLabel(cat, avg) : '';
-                  const axis = EXPLORE_DOMAIN_AXES[cat] || { left: '', right: '', mid: '' };
-                  const name = EXPLORE_CAT_SHORT[cat] || cat;
-                  const cnt = data?.count ?? 0;
-
-                  return (
-                    <div key={cat} style={{ opacity: hasData ? 1 : 0.32 }}>
-                      <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr 40px 130px', gap: 8, alignItems: 'center' }}>
-                        <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', textAlign: 'right' }}>{name}</span>
-                        <div style={{ position: 'relative', height: 14 }}>
-                          <div style={{
-                            position: 'absolute', inset: '3px 0', borderRadius: 4,
-                            background: 'linear-gradient(90deg, #dc2626, #fca5a5 25%, #22c55e 50%, #93c5fd 75%, #2563eb)',
-                            opacity: 0.85,
-                          }} />
-                          <div style={{
-                            position: 'absolute', left: '50%', top: 0, width: 1, height: '100%',
-                            background: 'rgba(255,255,255,0.28)', zIndex: 3,
-                          }} />
-                          {hasData && (
-                            <div style={{
-                              position: 'absolute', left: `${pct}%`, top: '50%',
-                              transform: 'translate(-50%, -50%)',
-                              width: 15, height: 15, borderRadius: '50%',
-                              background: col, border: '2.5px solid rgba(255,255,255,0.92)',
-                              boxShadow: `0 0 8px ${col}, 0 0 2px rgba(0,0,0,0.8)`,
-                              zIndex: 4,
-                            }} />
-                          )}
-                        </div>
-                        <span style={{
-                          fontSize: 11, fontFamily: "'Space Mono', monospace",
-                          color: 'rgba(255,255,255,0.35)', textAlign: 'right',
-                        }}>
-                          {hasData ? `${cnt}\u00d7` : ''}
-                        </span>
-                        <span style={{ fontSize: 11, color: col, textAlign: 'right' }}>{lbl}</span>
-                      </div>
-                      <div style={{
-                        display: 'grid', gridTemplateColumns: '100px 1fr 40px 130px', gap: 8, marginTop: 2,
-                      }}>
-                        <span />
-                        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 4px' }}>
-                          <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)' }}>{axis.left}</span>
-                          <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)' }}>{axis.right}</span>
-                        </div>
-                        <span />
-                        <span />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-              <p className="text-xs text-muted-foreground mt-4">Based on {dimCount} submissions matching your filters</p>
-              </>
-            )}
-          </motion.div>
-        )}
-
-        {!loading && !insufficientData && dimCount >= 5 && timelineChartData && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-            className="bg-[#0c1025]/80 border border-white/10 rounded-2xl p-6">
-            <button
-              onClick={() => setTimelineOpen(o => !o)}
-              className="w-full flex items-center justify-between cursor-pointer"
-              style={{ background: 'none', border: 'none', padding: 0 }}
-            >
-              <div style={{
-                fontSize: 11, fontFamily: "'Space Mono', monospace", textTransform: 'uppercase',
-                letterSpacing: 1.5, color: 'rgba(255,255,255,0.5)',
-                display: 'flex', alignItems: 'center', gap: 8,
-              }}>
-                <BarChart3 size={14} style={{ opacity: 0.6 }} />
-                Belief Evolution Timeline
-                <InfoTip text="Tracks how belief category averages shift over time. Each line represents one of the 11 belief categories. The dashed center line at 0 represents 'Neutral'. Positive values (+1 to +4) indicate belief; negative values (−1 to −4) indicate disbelief. Use the interval buttons to zoom in (week) or out (year). Filters apply here too." />
-              </div>
-              {timelineOpen ? (
-                <ChevronUp size={16} className="text-muted-foreground" />
-              ) : (
-                <ChevronDown size={16} className="text-muted-foreground" />
-              )}
-            </button>
-
-            {timelineOpen && (
-              <>
-                <div className="flex items-center justify-between mt-4 mb-2">
-                  <p className="text-xs text-muted-foreground">How collective beliefs shift over time — midline = Neutral (0)</p>
-                  <div className="flex gap-1">
-                    {TIMELINE_INTERVALS.map(ti => (
-                      <button
-                        key={ti.value}
-                        onClick={() => setTimelineInterval(ti.value)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all border ${
-                          timelineInterval === ti.value
-                            ? 'bg-primary/20 border-primary/40 text-primary'
-                            : 'border-white/10 text-muted-foreground hover:text-foreground hover:border-white/20'
-                        }`}
-                      >
-                        {ti.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div className="h-[420px]">
-                  <Line data={timelineChartData} options={timelineOptions as any} plugins={[{
-                    id: 'independentLine',
-                    afterDraw(chart: any) {
-                      const yScale = chart.scales.y;
-                      if (!yScale) return;
-                      const y = yScale.getPixelForValue(DISPLAY_NEUTRAL);
-                      const { left, right } = chart.chartArea;
-                      const ctx = chart.ctx;
-                      ctx.save();
-                      ctx.beginPath();
-                      ctx.setLineDash([8, 4]);
-                      ctx.strokeStyle = '#ffffff50';
-                      ctx.lineWidth = 1.5;
-                      ctx.moveTo(left, y);
-                      ctx.lineTo(right, y);
-                      ctx.stroke();
-                      ctx.setLineDash([]);
-                      ctx.fillStyle = '#ffffff60';
-                      ctx.restore();
-                    },
-                  }]} />
-                </div>
-              </>
-            )}
-          </motion.div>
-        )}
-
-        {!loading && !insufficientData && dimCount >= 5 && Object.keys(countryBeliefs).length > 0 && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 }}
-            className="bg-[#0c1025]/80 border border-white/10 rounded-2xl p-6">
-            <button
-              onClick={() => setMapOpen(o => !o)}
-              className="w-full flex items-center justify-between cursor-pointer"
-              style={{ background: 'none', border: 'none', padding: 0 }}
-            >
-              <div style={{
-                fontSize: 11, fontFamily: "'Space Mono', monospace", textTransform: 'uppercase',
-                letterSpacing: 1.5, color: 'rgba(255,255,255,0.5)',
-                display: 'flex', alignItems: 'center', gap: 8,
-              }}>
-                <Globe size={14} style={{ opacity: 0.6 }} />
-                World Belief Heatmap
-                <InfoTip text="A global view of how beliefs lean across countries. Red tones indicate disbelief-leaning (negative), blue tones indicate belief-leaning (positive), and grey means neutral/mixed (near 0). Only countries with 5+ participants are shown. Hover over a country to see its average score and participant count. Filters for generation and gender apply here too." />
-              </div>
-              {mapOpen ? (
-                <ChevronUp size={16} className="text-muted-foreground" />
-              ) : (
-                <ChevronDown size={16} className="text-muted-foreground" />
-              )}
-            </button>
-
-            {mapOpen && (
-              <>
-                <p className="text-xs text-muted-foreground mt-3 mb-2">Geographic belief distribution — green = progressive (−), blue = traditional (+)</p>
-                <Suspense fallback={
-                  <div className="flex items-center justify-center h-[300px]">
-                    <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                  </div>
-                }>
-                  <WorldBeliefMap countryBeliefs={countryBeliefs} />
-                </Suspense>
-              </>
-            )}
-          </motion.div>
-        )}
-
-        <div className="flex flex-wrap gap-2 justify-center">
-          {Object.entries(CATEGORIES).map(([key, cat]) => (
-            <button
-              key={key}
-              onClick={() => setSelectedCategory(key)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all border ${
-                selectedCategory === key
-                  ? 'text-white border-transparent shadow-lg'
-                  : 'text-muted-foreground border-white/10 hover:border-white/20 hover:text-foreground'
+              key={ti.value}
+              onClick={() => onIntervalChange(ti.value)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all border ${
+                interval === ti.value
+                  ? 'bg-primary/20 border-primary/40 text-primary'
+                  : 'border-white/10 text-muted-foreground hover:text-foreground hover:border-white/20'
               }`}
-              style={selectedCategory === key ? { backgroundColor: cat.color, boxShadow: `0 4px 20px ${cat.color}40` } : {}}
             >
-              {cat.label}
+              {ti.label}
             </button>
           ))}
         </div>
-
-        {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-          </div>
-        ) : insufficientData && dimCount < 5 ? (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-            className="bg-[#0c1025]/80 border border-white/10 rounded-2xl p-12 text-center space-y-4">
-            <Dna size={48} className="mx-auto text-primary/40" />
-            <h3 className="text-xl font-semibold text-foreground">Not Enough Data Yet</h3>
-            <p className="text-muted-foreground max-w-lg mx-auto">
-              We need at least 5 anonymous Belief DNA submissions before visualizations can be shown.
-              Download the Belief Genome desktop app to contribute your anonymous belief profile.
-            </p>
-          </motion.div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-              className="lg:col-span-2 bg-[#0c1025]/80 border border-white/10 rounded-2xl p-6">
-              <h3 className="text-lg font-semibold text-foreground mb-1 flex items-center">
-                {CATEGORIES[selectedCategory]?.label} — Dimension Averages
-                <InfoTip text={`Each bar shows the average belief score for a specific topic within ${CATEGORIES[selectedCategory]?.label}. A score near 0 means most people disagree with the statement, near 9 means most agree, and around 4-5 means opinions are mixed or undecided. Taller bars = stronger collective conviction.`} />
-              </h3>
-              <p className="text-xs text-muted-foreground mb-4">Based on {dimCount} submissions matching your filters</p>
-              <div className="h-[350px]">
-                <Bar data={barChartData} options={dimChartOptions as any} plugins={[tensionLinePlugin]} />
-              </div>
-            </motion.div>
-
-            {generationChartData && (
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-                className="bg-[#0c1025]/80 border border-white/10 rounded-2xl p-6">
-                <h3 className="text-lg font-semibold text-foreground mb-1 flex items-center">
-                  {CATEGORIES[selectedCategory]?.label} by Generation
-                  <InfoTip text={`Compares how different age groups feel about ${CATEGORIES[selectedCategory]?.label} topics. Higher bars mean that generation tends to agree more with those beliefs. You can see how values shift between older and younger generations — for example, Boomers may score high on tradition while Gen Z scores low.`} />
-                </h3>
-                <p className="text-xs text-muted-foreground mb-4">How beliefs shift across age groups</p>
-                <div className="h-[300px]">
-                  <Bar data={generationChartData} options={genChartOptions as any} plugins={[tensionLinePlugin]} />
-                </div>
-              </motion.div>
-            )}
-
-            {genderChartData && (
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
-                className="bg-[#0c1025]/80 border border-white/10 rounded-2xl p-6">
-                <h3 className="text-lg font-semibold text-foreground mb-1 flex items-center">Participants by Gender
-                  <InfoTip text="Shows how many people of each gender have submitted their Belief DNA. This helps you understand the makeup of the data — if one group is much larger, it will have more influence on the overall averages." />
-                </h3>
-                <p className="text-xs text-muted-foreground mb-4">Distribution of submissions</p>
-                <div className="h-[300px] flex items-center justify-center">
-                  <Doughnut data={genderChartData} options={doughnutOptions as any} />
-                </div>
-              </motion.div>
-            )}
-
-            {countryChartData && (
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-                className="lg:col-span-2 bg-[#0c1025]/80 border border-white/10 rounded-2xl p-6">
-                <h3 className="text-lg font-semibold text-foreground mb-1 flex items-center">Top Countries by Submissions
-                  <InfoTip text="Shows which countries have the most Belief DNA submissions. Longer bars mean more participants from that country. Use the country filter above to drill into a specific country's belief profile." />
-                </h3>
-                <p className="text-xs text-muted-foreground mb-4">Geographic distribution of participants</p>
-                <div className="h-[300px]">
-                  <Bar data={countryChartData} options={countBarOptions as any} />
-                </div>
-              </motion.div>
-            )}
-          </div>
-        )}
-
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
-          className="text-center space-y-4 py-8">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm">
-            <Info size={14} />
-            All data is anonymized and aggregated. No individual submissions are ever displayed.
-          </div>
-          <p className="text-muted-foreground text-sm max-w-lg mx-auto">
-            Belief DNA is submitted voluntarily and anonymously through the Belief Genome desktop app.
-            Groups with fewer than 5 participants are hidden for privacy.
-          </p>
-        </motion.div>
-      </div>
-    </PublicLayout>
+      }
+    >
+      {timeline.length === 0 ? (
+        <p className="text-sm text-muted-foreground py-8 text-center">No timeline data for the current filters.</p>
+      ) : visibleCats.length === 0 ? (
+        <p className="text-sm text-muted-foreground py-8 text-center">No categories match your filter. Clear the category filter to see all 11.</p>
+      ) : (
+        <div className="h-[420px]">
+          <Line data={{ labels, datasets }} options={timelineOptions} />
+        </div>
+      )}
+    </PanelShell>
   );
 }
+
+// ---------- Geo Panel ----------
+
+function GeoPanel({
+  countryBeliefs, loading,
+}: { countryBeliefs: Record<string, { avg: number; count: number }>; loading: boolean }) {
+  if (loading && Object.keys(countryBeliefs).length === 0) return <PanelSkeleton height={500} />;
+
+  return (
+    <PanelShell
+      title="World Belief Heatmap"
+      subtitle="Red = disbelief-leaning · Blue = belief-leaning · Grey = neutral. Only countries with 5+ participants shown."
+      tooltip="Hover over a country to see its average score and participant count."
+    >
+      {Object.keys(countryBeliefs).length === 0 ? (
+        <p className="text-sm text-muted-foreground py-8 text-center">No country-level data for the current filters.</p>
+      ) : (
+        <Suspense fallback={<div className="flex items-center justify-center h-[400px]"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
+          <WorldBeliefMap countryBeliefs={countryBeliefs} />
+        </Suspense>
+      )}
+    </PanelShell>
+  );
+}
+
+// ---------- Gender Panel ----------
+
+function GenderPanel({
+  genders, loading,
+}: { genders: Array<{ gender: string; count: number }>; loading: boolean }) {
+  if (loading && genders.length === 0) return <PanelSkeleton height={400} />;
+
+  const genderLabels: Record<string, string> = { M: 'Male', F: 'Female', NB: 'Non-Binary', PNS: 'Prefer Not to Say', Intersex: 'Intersex' };
+  const colors = ['#6c8fff', '#a78bfa', '#22d3ee', '#ff6b81', '#44bd32'];
+  const data = {
+    labels: genders.map(g => genderLabels[g.gender] || g.gender),
+    datasets: [{
+      data: genders.map(g => g.count),
+      backgroundColor: genders.map((_, i) => colors[i % colors.length]),
+      borderWidth: 0,
+    }],
+  };
+  const total = genders.reduce((s, g) => s + g.count, 0);
+
+  return (
+    <PanelShell
+      title="Participants by Gender"
+      subtitle={`${total.toLocaleString()} submissions across ${genders.length} gender identities`}
+      tooltip="Shows the distribution of participants by self-reported gender. Groups with fewer than 5 participants are hidden for privacy."
+    >
+      {genders.length === 0 ? (
+        <p className="text-sm text-muted-foreground py-8 text-center">No gender data for the current filters.</p>
+      ) : (
+        <div className="h-[380px] flex items-center justify-center">
+          <Doughnut
+            data={data}
+            options={{
+              responsive: true, maintainAspectRatio: false,
+              plugins: {
+                legend: { position: 'right', labels: { color: '#94a3b8', padding: 16, font: { size: 12 } } },
+                tooltip: {
+                  ...baseTooltipStyle,
+                  callbacks: {
+                    label: (ctx: any) => {
+                      const v = ctx.parsed; const pct = total > 0 ? Math.round((v / total) * 100) : 0;
+                      return ` ${ctx.label}: ${v.toLocaleString()} (${pct}%)`;
+                    },
+                  },
+                },
+              },
+            } as any}
+          />
+        </div>
+      )}
+    </PanelShell>
+  );
+}
+
+// ---------- Generation Panel ----------
+
+function GenerationPanel({
+  generations, loading, selectedCategory, onSelectCategory,
+}: {
+  generations: Array<{ label: string; start: number; end: number; count: number; avgBeliefs: Record<string, number> }>;
+  loading: boolean;
+  selectedCategory: string;
+  onSelectCategory: (c: string) => void;
+}) {
+  if (loading && generations.length === 0) return <PanelSkeleton height={400} />;
+
+  const cat = CATEGORIES[selectedCategory];
+  const dimIds = cat?.dims || [];
+
+  const genDisplayVals = generations.map(g => {
+    let sum = 0, count = 0;
+    for (const id of dimIds) {
+      const v = g.avgBeliefs[String(id)];
+      if (v !== undefined) { sum += v; count++; }
+    }
+    return count > 0 ? Math.round(rawToDisplay(sum / count) * 100) / 100 : null;
+  });
+
+  const data = {
+    labels: generations.map(g => g.label.replace('Generation ', 'Gen ')),
+    datasets: [{
+      label: `${cat?.label} Avg`,
+      data: genDisplayVals,
+      backgroundColor: genDisplayVals.map(v => v !== null ? displayBarColor(v) + 'aa' : '#787891'),
+      borderColor: genDisplayVals.map(v => v !== null ? displayBarBorder(v) : '#787891'),
+      borderWidth: 2, borderRadius: 6,
+    }],
+  };
+
+  const options: any = {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        ...baseTooltipStyle,
+        bodyFont: { size: 12 }, padding: 14, displayColors: false,
+        callbacks: {
+          title: (items: any[]) => {
+            const idx = items[0].dataIndex;
+            const g = generations[idx];
+            return `${items[0].label} · n=${g?.count ?? '?'}`;
+          },
+          label: (ctx: any) => {
+            const val = ctx.parsed?.y;
+            if (val === null || val === undefined) return '';
+            const sign = val > 0 ? '+' : '';
+            const dir = val > 0.3 ? '↑ Leaning True' : val < -0.3 ? '↓ Leaning False' : '→ Neutral';
+            return `${ctx.dataset.label}: ${sign}${val.toFixed(2)} ${dir}`;
+          },
+          afterBody: (items: any[]) => {
+            const val = items[0].parsed?.y;
+            if (val === null || val === undefined) return '';
+            const interp = getCategoryInterpretation(selectedCategory, val, items[0].label || '');
+            return interp ? wrapText(interp) : '';
+          },
+        },
+      },
+    },
+    scales: scaleOptions,
+  };
+
+  return (
+    <PanelShell
+      title={`${cat?.label} by Generation`}
+      subtitle={`How ${cat?.label.toLowerCase()} beliefs shift across age cohorts`}
+      tooltip="Compares average belief scores by generation for the selected category. Switch categories with the pills below."
+    >
+      <div className="flex flex-wrap gap-2 mb-4">
+        {CATEGORY_OPTIONS.map(c => (
+          <button
+            key={c.value}
+            onClick={() => onSelectCategory(c.value)}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all border ${
+              selectedCategory === c.value
+                ? 'text-white border-transparent shadow-md'
+                : 'text-muted-foreground border-white/10 hover:border-white/20 hover:text-foreground'
+            }`}
+            style={selectedCategory === c.value ? { backgroundColor: c.color, boxShadow: `0 2px 12px ${c.color}40` } : {}}
+          >
+            {c.label}
+          </button>
+        ))}
+      </div>
+      {generations.length === 0 ? (
+        <p className="text-sm text-muted-foreground py-8 text-center">No generation data for the current filters.</p>
+      ) : (
+        <div className="h-[380px]">
+          <Bar data={data} options={options} />
+        </div>
+      )}
+    </PanelShell>
+  );
+}
+
+// ---------- Small shared UI ----------
 
 function InfoTip({ text }: { text: string }) {
   const [show, setShow] = useState(false);
   return (
     <span className="relative inline-flex ml-1.5" onMouseEnter={() => setShow(true)} onMouseLeave={() => setShow(false)}>
-      <Info size={18} className="text-muted-foreground/60 hover:text-primary transition-colors" />
+      <Info size={16} className="text-muted-foreground/60 hover:text-primary transition-colors" />
       {show && (
         <span className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 px-3 py-2.5 rounded-xl bg-[#1a1f3a] border border-white/15 text-xs text-[#c8cfe0] leading-relaxed shadow-xl pointer-events-none">
           {text}
@@ -962,15 +888,19 @@ function InfoTip({ text }: { text: string }) {
   );
 }
 
-function StatCard({ icon: Icon, label, value, suffix }: { icon: any; label: string; value: number; suffix?: string }) {
+function StatCard({ icon: Icon, label, value, suffix, loading }: { icon: any; label: string; value: number; suffix?: string; loading?: boolean }) {
   return (
-    <div className="bg-[#0c1025]/80 border border-white/10 rounded-2xl p-5">
+    <div className="bg-[#0c1025]/80 border border-white/10 rounded-2xl p-4">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
           <Icon size={18} className="text-primary" />
         </div>
-        <div>
-          <p className="text-2xl font-bold text-foreground">{value}</p>
+        <div className="min-w-0">
+          {loading ? (
+            <div className="h-7 w-16 bg-white/5 rounded animate-pulse" />
+          ) : (
+            <p className="text-2xl font-bold text-foreground">{value.toLocaleString()}</p>
+          )}
           <p className="text-xs text-muted-foreground">{label}{suffix ? ` ${suffix}` : ''}</p>
         </div>
       </div>

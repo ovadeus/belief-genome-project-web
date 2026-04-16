@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { db } from '@workspace/db';
 import { genomeSubmissions } from '@workspace/db/schema';
-import { eq, sql, and, gte } from 'drizzle-orm';
+import { eq, sql, and, gte, or, inArray } from 'drizzle-orm';
 
 const router = Router();
 
@@ -199,21 +199,75 @@ router.post('/submit', async (req: Request, res: Response) => {
 
 const EXCLUDE_TEST_DATA = false;
 
+const GENERATION_RANGES: Record<string, { start: number; end: number }> = {
+  'Silent Generation': { start: 1928, end: 1945 },
+  'Baby Boomers': { start: 1946, end: 1964 },
+  'Generation X': { start: 1965, end: 1980 },
+  'Millennials': { start: 1981, end: 1996 },
+  'Generation Z': { start: 1997, end: 2012 },
+  'Generation Alpha': { start: 2013, end: 2030 },
+};
+
+function toArray(val: any): string[] {
+  if (val === undefined || val === null || val === '') return [];
+  if (Array.isArray(val)) return val.filter(v => typeof v === 'string' && v.length > 0);
+  if (typeof val === 'string') return val.split(',').map(s => s.trim()).filter(Boolean);
+  return [];
+}
+
 function buildExploreFilters(query: any) {
   const conditions: any[] = [];
   if (EXCLUDE_TEST_DATA) {
     conditions.push(eq(genomeSubmissions.isTestData, false));
   }
-  if (query.country && typeof query.country === 'string') {
-    conditions.push(eq(genomeSubmissions.countryCode, query.country));
+
+  const countries = toArray(query.countries).length > 0
+    ? toArray(query.countries)
+    : (query.country && typeof query.country === 'string' ? [query.country] : []);
+  if (countries.length > 0) {
+    conditions.push(inArray(genomeSubmissions.countryCode, countries));
   }
-  if (query.gender && typeof query.gender === 'string') {
-    conditions.push(eq(genomeSubmissions.gender, query.gender));
+
+  const genders = toArray(query.genders).length > 0
+    ? toArray(query.genders)
+    : (query.gender && typeof query.gender === 'string' ? [query.gender] : []);
+  if (genders.length > 0) {
+    conditions.push(inArray(genomeSubmissions.gender, genders));
   }
-  if (query.generationStart && query.generationEnd) {
+
+  const generationLabels = toArray(query.generations);
+  if (generationLabels.length > 0) {
+    const ranges = generationLabels
+      .map(l => GENERATION_RANGES[l])
+      .filter(Boolean) as Array<{ start: number; end: number }>;
+    if (ranges.length > 0) {
+      const orClauses = ranges.map(r =>
+        and(
+          gte(genomeSubmissions.birthYear, r.start),
+          sql`${genomeSubmissions.birthYear} <= ${r.end}`,
+        )
+      );
+      conditions.push(or(...orClauses));
+    }
+  } else if (query.generationStart && query.generationEnd) {
     conditions.push(gte(genomeSubmissions.birthYear, parseInt(query.generationStart as string)));
     conditions.push(sql`${genomeSubmissions.birthYear} <= ${parseInt(query.generationEnd as string)}`);
   }
+
+  const parseDate = (v: any): Date | null => {
+    if (typeof v !== 'string' || v.length === 0) return null;
+    const d = new Date(v);
+    return isNaN(d.getTime()) ? null : d;
+  };
+  const startDate = parseDate(query.startDate);
+  const endDate = parseDate(query.endDate);
+  if (startDate) {
+    conditions.push(sql`${genomeSubmissions.submittedAt} >= ${startDate.toISOString()}::timestamp`);
+  }
+  if (endDate) {
+    conditions.push(sql`${genomeSubmissions.submittedAt} <= ${endDate.toISOString()}::timestamp`);
+  }
+
   return conditions.length > 0 ? and(...conditions) : undefined;
 }
 
