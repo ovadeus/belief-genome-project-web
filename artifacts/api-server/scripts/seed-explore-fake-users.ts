@@ -50,44 +50,44 @@ function beliefCharForLean(lean: Lean): string {
   switch (lean) {
     case 'far_left':
       return pickWeighted([
-        { item: String(randInt(8, 9)), w: 60 },
-        { item: String(randInt(6, 7)), w: 25 },
-        { item: String(randInt(4, 5)), w: 8 },
-        { item: String(randInt(0, 3)), w: 4 },
+        { item: '9', w: 55 },
+        { item: '8', w: 30 },
+        { item: '7', w: 10 },
         { item: '.', w: 3 },
+        { item: String(randInt(0, 4)), w: 2 },
       ]);
     case 'left':
       return pickWeighted([
-        { item: String(randInt(6, 8)), w: 55 },
-        { item: String(randInt(4, 5)), w: 25 },
-        { item: String(randInt(9, 9)), w: 8 },
-        { item: String(randInt(1, 3)), w: 8 },
-        { item: '.', w: 4 },
+        { item: String(randInt(7, 8)), w: 55 },
+        { item: '9', w: 20 },
+        { item: String(randInt(5, 6)), w: 17 },
+        { item: '.', w: 3 },
+        { item: String(randInt(0, 4)), w: 5 },
       ]);
     case 'center':
       return pickWeighted([
-        { item: String(randInt(4, 6)), w: 50 },
-        { item: String(randInt(2, 3)), w: 18 },
-        { item: String(randInt(7, 8)), w: 18 },
-        { item: String(randInt(0, 1)), w: 5 },
-        { item: String(randInt(9, 9)), w: 5 },
+        { item: '5', w: 30 },
+        { item: String(randInt(3, 4)), w: 25 },
+        { item: String(randInt(6, 7)), w: 25 },
+        { item: String(randInt(0, 2)), w: 8 },
+        { item: String(randInt(8, 9)), w: 8 },
         { item: '.', w: 4 },
       ]);
     case 'right':
       return pickWeighted([
-        { item: String(randInt(1, 3)), w: 55 },
-        { item: String(randInt(4, 5)), w: 25 },
-        { item: String(randInt(0, 0)), w: 8 },
-        { item: String(randInt(6, 8)), w: 8 },
-        { item: '.', w: 4 },
+        { item: String(randInt(1, 2)), w: 55 },
+        { item: '0', w: 20 },
+        { item: String(randInt(3, 4)), w: 17 },
+        { item: '.', w: 3 },
+        { item: String(randInt(5, 9)), w: 5 },
       ]);
     case 'far_right':
       return pickWeighted([
-        { item: String(randInt(0, 1)), w: 60 },
-        { item: String(randInt(2, 3)), w: 25 },
-        { item: String(randInt(4, 5)), w: 8 },
-        { item: String(randInt(6, 9)), w: 4 },
+        { item: '0', w: 55 },
+        { item: '1', w: 30 },
+        { item: '2', w: 10 },
         { item: '.', w: 3 },
+        { item: String(randInt(5, 9)), w: 2 },
       ]);
   }
 }
@@ -140,20 +140,20 @@ function parseDna(dna: string) {
 }
 
 const TIMELINE_BUCKETS: { weeksAgo: number; mix: { lean: Lean; w: number }[]; count: number }[] = [
-  { weeksAgo: 13, count: 22, mix: [{ lean: 'far_right', w: 50 }, { lean: 'right', w: 30 }, { lean: 'center', w: 15 }, { lean: 'left', w: 5 }] },
-  { weeksAgo: 12, count: 22, mix: [{ lean: 'far_right', w: 45 }, { lean: 'right', w: 30 }, { lean: 'center', w: 18 }, { lean: 'left', w: 7 }] },
-  { weeksAgo: 11, count: 22, mix: [{ lean: 'right', w: 45 }, { lean: 'far_right', w: 25 }, { lean: 'center', w: 22 }, { lean: 'left', w: 8 }] },
-  { weeksAgo: 10, count: 24, mix: [{ lean: 'right', w: 40 }, { lean: 'center', w: 35 }, { lean: 'far_right', w: 15 }, { lean: 'left', w: 10 }] },
-  { weeksAgo: 9, count: 24, mix: [{ lean: 'right', w: 30 }, { lean: 'center', w: 40 }, { lean: 'left', w: 20 }, { lean: 'far_right', w: 10 }] },
-  { weeksAgo: 8, count: 24, mix: [{ lean: 'center', w: 40 }, { lean: 'left', w: 25 }, { lean: 'right', w: 25 }, { lean: 'far_left', w: 5 }, { lean: 'far_right', w: 5 }] },
-  { weeksAgo: 7, count: 26, mix: [{ lean: 'center', w: 30 }, { lean: 'left', w: 35 }, { lean: 'right', w: 20 }, { lean: 'far_left', w: 10 }, { lean: 'far_right', w: 5 }] },
-  { weeksAgo: 6, count: 26, mix: [{ lean: 'left', w: 40 }, { lean: 'center', w: 25 }, { lean: 'far_left', w: 20 }, { lean: 'right', w: 15 }] },
-  { weeksAgo: 5, count: 28, mix: [{ lean: 'left', w: 40 }, { lean: 'far_left', w: 25 }, { lean: 'center', w: 22 }, { lean: 'right', w: 13 }] },
-  { weeksAgo: 4, count: 28, mix: [{ lean: 'left', w: 38 }, { lean: 'far_left', w: 32 }, { lean: 'center', w: 20 }, { lean: 'right', w: 10 }] },
-  { weeksAgo: 3, count: 30, mix: [{ lean: 'far_left', w: 40 }, { lean: 'left', w: 35 }, { lean: 'center', w: 18 }, { lean: 'right', w: 7 }] },
-  { weeksAgo: 2, count: 30, mix: [{ lean: 'far_left', w: 45 }, { lean: 'left', w: 30 }, { lean: 'center', w: 18 }, { lean: 'right', w: 7 }] },
-  { weeksAgo: 1, count: 32, mix: [{ lean: 'far_left', w: 50 }, { lean: 'left', w: 28 }, { lean: 'center', w: 17 }, { lean: 'right', w: 5 }] },
-  { weeksAgo: 0, count: 32, mix: [{ lean: 'far_left', w: 55 }, { lean: 'left', w: 25 }, { lean: 'center', w: 15 }, { lean: 'right', w: 5 }] },
+  { weeksAgo: 13, count: 110, mix: [{ lean: 'far_right', w: 85 }, { lean: 'right', w: 13 }, { lean: 'center', w: 2 }] },
+  { weeksAgo: 12, count: 110, mix: [{ lean: 'far_right', w: 75 }, { lean: 'right', w: 20 }, { lean: 'center', w: 5 }] },
+  { weeksAgo: 11, count: 110, mix: [{ lean: 'far_right', w: 55 }, { lean: 'right', w: 35 }, { lean: 'center', w: 10 }] },
+  { weeksAgo: 10, count: 110, mix: [{ lean: 'right', w: 55 }, { lean: 'far_right', w: 25 }, { lean: 'center', w: 20 }] },
+  { weeksAgo: 9, count: 110, mix: [{ lean: 'right', w: 50 }, { lean: 'center', w: 30 }, { lean: 'far_right', w: 15 }, { lean: 'left', w: 5 }] },
+  { weeksAgo: 8, count: 110, mix: [{ lean: 'center', w: 40 }, { lean: 'right', w: 30 }, { lean: 'left', w: 20 }, { lean: 'far_right', w: 10 }] },
+  { weeksAgo: 7, count: 120, mix: [{ lean: 'center', w: 35 }, { lean: 'left', w: 30 }, { lean: 'right', w: 25 }, { lean: 'far_left', w: 5 }, { lean: 'far_right', w: 5 }] },
+  { weeksAgo: 6, count: 120, mix: [{ lean: 'left', w: 45 }, { lean: 'center', w: 25 }, { lean: 'far_left', w: 20 }, { lean: 'right', w: 10 }] },
+  { weeksAgo: 5, count: 130, mix: [{ lean: 'left', w: 45 }, { lean: 'far_left', w: 30 }, { lean: 'center', w: 20 }, { lean: 'right', w: 5 }] },
+  { weeksAgo: 4, count: 130, mix: [{ lean: 'left', w: 40 }, { lean: 'far_left', w: 40 }, { lean: 'center', w: 15 }, { lean: 'right', w: 5 }] },
+  { weeksAgo: 3, count: 140, mix: [{ lean: 'far_left', w: 50 }, { lean: 'left', w: 35 }, { lean: 'center', w: 13 }, { lean: 'right', w: 2 }] },
+  { weeksAgo: 2, count: 140, mix: [{ lean: 'far_left', w: 60 }, { lean: 'left', w: 30 }, { lean: 'center', w: 10 }] },
+  { weeksAgo: 1, count: 150, mix: [{ lean: 'far_left', w: 75 }, { lean: 'left', w: 20 }, { lean: 'center', w: 5 }] },
+  { weeksAgo: 0, count: 150, mix: [{ lean: 'far_left', w: 85 }, { lean: 'left', w: 13 }, { lean: 'center', w: 2 }] },
 ];
 
 function pickCountryForLean(targetLean: Lean) {
