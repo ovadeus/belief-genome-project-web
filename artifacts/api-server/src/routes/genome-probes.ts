@@ -8,7 +8,7 @@ import { eq, and, sql } from 'drizzle-orm';
 import {
   PROBE_BANK, QUALITY_PRESETS,
   buildDimensionWeights, assignProbeQuality,
-  getProbeFromBank, pickCategory,
+  getProbeFromBank, pickCategory, getProbeForDimension,
 } from '@belief-genome/engine';
 import { fetchNewsProbes } from '@belief-genome/engine';
 
@@ -122,6 +122,42 @@ async function topUpQueues(userId: number) {
 // ── GET /next — dequeue next probe ──────────────────────────
 router.get('/next', async (req: Request, res: Response) => {
   const { userId } = (req as any).genomeUser;
+  const dimId = req.query.dimId ? parseInt(req.query.dimId as string, 10) : null;
+
+  if (dimId && !isNaN(dimId)) {
+    const usedResponses = await db
+      .select({ text: beliefResponses.probeText })
+      .from(beliefResponses)
+      .where(eq(beliefResponses.userId, userId));
+    const usedTexts = usedResponses.map(r => r.text);
+
+    const result = getProbeForDimension(dimId, usedTexts);
+    if (result) {
+      const dimWeights = buildDimensionWeights(result.probe);
+      const quality = result.probe.quality && QUALITY_PRESETS[result.probe.quality]
+        ? { ...QUALITY_PRESETS[result.probe.quality], source: 'bank', assignedAt: new Date().toISOString() }
+        : assignProbeQuality('bank');
+
+      return res.json({
+        id: null,
+        statement: result.probe.text,
+        category: result.category,
+        source: 'bank:explore',
+        targetDim: dimId,
+        dimensionWeights: dimWeights,
+        quality,
+      });
+    }
+    const cat = pickCategory();
+    const probe = getProbeFromBank(cat);
+    return res.json({
+      id: null,
+      statement: probe.text,
+      category: cat,
+      source: 'bank',
+      targetDim: dimId,
+    });
+  }
 
   // Top up queues in background on first call
   const stats = await queueStats(userId);

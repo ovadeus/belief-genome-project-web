@@ -672,13 +672,19 @@ export default function DashboardPage() {
 
       {/* Tab content */}
       {!fullscreen && (
-        <div style={{
-          padding: 24, borderRadius: 12,
-          background: 'rgba(255,255,255,0.02)',
-          border: '1px solid rgba(255,255,255,0.06)',
-          minHeight: 300,
-          position: 'relative',
-        }}>
+        <div
+          className={['dnastrip', 'helix', 'neuromap'].includes(tab) ? 'genome-panel-surface' : ''}
+          style={{
+            padding: 24,
+            ...(!['dnastrip', 'helix', 'neuromap'].includes(tab) ? {
+              borderRadius: 12,
+              background: 'rgba(255,255,255,0.02)',
+              border: '1px solid rgba(255,255,255,0.06)',
+            } : {}),
+            minHeight: 300,
+            position: 'relative',
+          }}
+        >
           {FULLSCREEN_TABS.includes(tab) && (
             <button
               onClick={() => setFullscreen(true)}

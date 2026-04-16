@@ -1,5 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
+import { useLocation } from 'wouter';
 import { SHEX, BELIEF_LABELS_10 } from './genome-utils';
+import { useExplore } from './ExploreContext';
 
 const CATEGORIES = [
   { id: 'epistemology',  label: 'Epistemology',   count: 10 },
@@ -27,8 +29,10 @@ interface Props {
 }
 
 export default function DnaStrip({ dimensions, dimensionScores, confidence, totalResponses, dimensionsCovered, overallConfidence }: Props) {
-  const [tooltip, setTooltip] = useState<{ x: number; y: number; name: string; score: number | null; label: string; conf: number } | null>(null);
+  const [tooltip, setTooltip] = useState<{ x: number; y: number; name: string; score: number | null; label: string; conf: number; isUnexplored: boolean } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const { startExplore } = useExplore();
+  const [, navigate] = useLocation();
 
   const handleCellEnter = useCallback((e: React.MouseEvent, dim: DimDef, score: number | null) => {
     const rect = (e.target as HTMLElement).getBoundingClientRect();
@@ -39,12 +43,88 @@ export default function DnaStrip({ dimensions, dimensionScores, confidence, tota
     if (y < 40) y = rect.bottom + 8;
     const label = score !== null ? BELIEF_LABELS_10[score] || 'Unknown' : 'Unexplored';
     const conf = confidence[dim.id] ?? 0;
-    setTooltip({ x, y, name: dim.name, score, label, conf });
+    setTooltip({ x, y, name: dim.name, score, label, conf, isUnexplored: score === null || score === undefined });
   }, [confidence]);
 
   const handleCellLeave = useCallback(() => setTooltip(null), []);
 
+  const handleCellClick = useCallback((dim: DimDef) => {
+    if (dimensionScores[dim.id] !== undefined) return;
+
+    const cat = CATEGORIES.find(c => c.id === dim.cat);
+    if (!cat) return;
+
+    const allDimsInCat = dimensions.filter(d => d.cat === dim.cat);
+    const unexploredInCat = allDimsInCat.filter(d => dimensionScores[d.id] === undefined);
+
+    const clickedFirst = [dim.id, ...unexploredInCat.filter(d => d.id !== dim.id).map(d => d.id)];
+
+    const dimNames: Record<number, string> = {};
+    unexploredInCat.forEach(d => { dimNames[d.id] = d.name; });
+    dimNames[dim.id] = dim.name;
+
+    startExplore({
+      catKey: cat.id,
+      catLabel: cat.label,
+      dimQueue: clickedFirst,
+      dimNames,
+    });
+
+    navigate('/genome/probe');
+  }, [dimensions, dimensionScores, startExplore, navigate]);
+
   let dimOffset = 0;
+
+  const renderCell = (dim: DimDef, isExplored: boolean, score: number | undefined) => {
+    const explored = isExplored && score !== undefined;
+    return (
+      <div
+        key={dim.id}
+        data-dim-id={dim.id}
+        data-dim-name={dim.name}
+        data-dim-cat={dim.cat}
+        data-dim-cat-label={CATEGORIES.find(c => c.id === dim.cat)?.label || dim.cat}
+        onMouseEnter={e => handleCellEnter(e, dim, explored ? score : null)}
+        onMouseLeave={handleCellLeave}
+        onClick={() => !explored && handleCellClick(dim)}
+        style={{
+          flex: 1, minWidth: 0, height: 14, borderRadius: 2,
+          cursor: explored ? 'default' : 'pointer',
+          transition: 'transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease',
+          ...(explored
+            ? { background: SHEX[score], boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)' }
+            : {
+                background: 'repeating-linear-gradient(45deg, rgba(255,255,255,0.04), rgba(255,255,255,0.04) 2px, transparent 2px, transparent 4px)',
+                border: '1px solid rgba(255,255,255,0.06)',
+              }),
+        }}
+        onMouseOver={e => {
+          const el = e.currentTarget as HTMLElement;
+          el.style.transform = 'scaleY(1.4)';
+          el.style.zIndex = '2';
+          if (explored) {
+            el.style.boxShadow = '0 0 8px rgba(255,255,255,0.25)';
+          } else {
+            el.style.background = 'repeating-linear-gradient(45deg, rgba(108,143,255,0.22), rgba(108,143,255,0.22) 2px, rgba(108,143,255,0.06) 2px, rgba(108,143,255,0.06) 4px)';
+            el.style.borderColor = 'rgba(108,143,255,0.55)';
+            el.style.boxShadow = '0 0 10px rgba(108,143,255,0.35)';
+          }
+        }}
+        onMouseOut={e => {
+          const el = e.currentTarget as HTMLElement;
+          el.style.transform = 'scaleY(1)';
+          el.style.zIndex = '0';
+          if (explored) {
+            el.style.boxShadow = 'inset 0 0 0 1px rgba(255,255,255,0.08)';
+          } else {
+            el.style.background = 'repeating-linear-gradient(45deg, rgba(255,255,255,0.04), rgba(255,255,255,0.04) 2px, transparent 2px, transparent 4px)';
+            el.style.borderColor = 'rgba(255,255,255,0.06)';
+            el.style.boxShadow = 'none';
+          }
+        }}
+      />
+    );
+  };
 
   return (
     <div ref={containerRef}>
@@ -88,25 +168,7 @@ export default function DnaStrip({ dimensions, dimensionScores, confidence, tota
                   {fakeDims.map(dim => {
                     const score = dimensionScores[dim.id];
                     const isExplored = score !== undefined;
-                    return (
-                      <div
-                        key={dim.id}
-                        onMouseEnter={e => handleCellEnter(e, dim, isExplored ? score : null)}
-                        onMouseLeave={handleCellLeave}
-                        style={{
-                          flex: 1, minWidth: 0, height: 14, borderRadius: 2, cursor: 'pointer',
-                          transition: 'transform 0.15s ease, box-shadow 0.15s ease',
-                          ...(isExplored
-                            ? { background: SHEX[score], boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)' }
-                            : {
-                                background: 'repeating-linear-gradient(45deg, rgba(255,255,255,0.04), rgba(255,255,255,0.04) 2px, transparent 2px, transparent 4px)',
-                                border: '1px solid rgba(255,255,255,0.06)',
-                              }),
-                        }}
-                        onMouseOver={e => { (e.currentTarget as HTMLElement).style.transform = 'scaleY(1.4)'; (e.currentTarget as HTMLElement).style.zIndex = '2'; (e.currentTarget as HTMLElement).style.boxShadow = '0 0 8px rgba(255,255,255,0.25)'; }}
-                        onMouseOut={e => { (e.currentTarget as HTMLElement).style.transform = 'scaleY(1)'; (e.currentTarget as HTMLElement).style.zIndex = '0'; (e.currentTarget as HTMLElement).style.boxShadow = isExplored ? 'inset 0 0 0 1px rgba(255,255,255,0.08)' : 'none'; }}
-                      />
-                    );
+                    return renderCell(dim, isExplored, score);
                   })}
                 </div>
                 <span style={{
@@ -132,25 +194,7 @@ export default function DnaStrip({ dimensions, dimensionScores, confidence, tota
                 {catDims.map(dim => {
                   const score = dimensionScores[dim.id];
                   const isExplored = score !== undefined;
-                  return (
-                    <div
-                      key={dim.id}
-                      onMouseEnter={e => handleCellEnter(e, dim, isExplored ? score : null)}
-                      onMouseLeave={handleCellLeave}
-                      style={{
-                        flex: 1, minWidth: 0, height: 14, borderRadius: 2, cursor: 'pointer',
-                        transition: 'transform 0.15s ease, box-shadow 0.15s ease',
-                        ...(isExplored
-                          ? { background: SHEX[score], boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)' }
-                          : {
-                              background: 'repeating-linear-gradient(45deg, rgba(255,255,255,0.04), rgba(255,255,255,0.04) 2px, transparent 2px, transparent 4px)',
-                              border: '1px solid rgba(255,255,255,0.06)',
-                            }),
-                      }}
-                      onMouseOver={e => { (e.currentTarget as HTMLElement).style.transform = 'scaleY(1.4)'; (e.currentTarget as HTMLElement).style.zIndex = '2'; (e.currentTarget as HTMLElement).style.boxShadow = '0 0 8px rgba(255,255,255,0.25)'; }}
-                      onMouseOut={e => { (e.currentTarget as HTMLElement).style.transform = 'scaleY(1)'; (e.currentTarget as HTMLElement).style.zIndex = '0'; (e.currentTarget as HTMLElement).style.boxShadow = isExplored ? 'inset 0 0 0 1px rgba(255,255,255,0.08)' : 'none'; }}
-                    />
-                  );
+                  return renderCell(dim, isExplored, score);
                 })}
               </div>
               <span style={{
@@ -170,7 +214,7 @@ export default function DnaStrip({ dimensions, dimensionScores, confidence, tota
       }}>
         <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: '#dc2626', marginRight: 4, verticalAlign: 'middle' }} />Absolute False</span>
         <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: '#f87171', marginRight: 4, verticalAlign: 'middle' }} />False</span>
-        <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: '#22c55e', marginRight: 4, verticalAlign: 'middle' }} />Uncertain</span>
+        <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: '#22c55e', marginRight: 4, verticalAlign: 'middle' }} />Balanced</span>
         <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: '#60a5fa', marginRight: 4, verticalAlign: 'middle' }} />True</span>
         <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: '#2563eb', marginRight: 4, verticalAlign: 'middle' }} />Absolute True</span>
         <span><span style={{
@@ -189,13 +233,20 @@ export default function DnaStrip({ dimensions, dimensionScores, confidence, tota
           fontSize: 10, color: '#fff', whiteSpace: 'nowrap', zIndex: 9999,
           pointerEvents: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
         }}>
-          <div style={{ marginBottom: 2 }}>{tooltip.name}</div>
-          <div style={{ color: tooltip.score !== null ? SHEX[tooltip.score] : 'rgba(255,255,255,0.3)' }}>
-            {tooltip.label}{tooltip.score !== null ? ` (${tooltip.score}/9)` : ''}
-          </div>
-          {tooltip.conf > 0 && (
+          <div style={{ marginBottom: 2 }}>{tooltip.name}{tooltip.isUnexplored ? ': Unexplored' : ''}</div>
+          {!tooltip.isUnexplored && (
+            <div style={{ color: tooltip.score !== null ? SHEX[tooltip.score] : 'rgba(255,255,255,0.3)' }}>
+              {tooltip.label}{tooltip.score !== null ? ` (${tooltip.score}/9)` : ''}
+            </div>
+          )}
+          {tooltip.conf > 0 && !tooltip.isUnexplored && (
             <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: 9 }}>
               Confidence: {tooltip.conf}%
+            </div>
+          )}
+          {tooltip.isUnexplored && (
+            <div style={{ borderTop: '1px dashed rgba(255,255,255,0.15)', paddingTop: 3, marginTop: 3, color: '#6c8fff', fontSize: 9 }}>
+              → Click to Explore Now
             </div>
           )}
         </div>

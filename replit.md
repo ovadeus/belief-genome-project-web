@@ -85,8 +85,8 @@ All genome pages wrapped in `GenomeLayout` which provides sticky `GenomeNav` bar
 
 - **Register** (`/genome/register`): Create genome user account (no nav shown). Styled with molecular dot logo, glassmorphism card, "Join the Project" heading. Redirects to Dashboard.
 - **Login** (`/genome/login`): Sign in to genome (no nav shown). Styled with molecular dot logo, glassmorphism card, "Secure Access" heading, blue-to-violet gradient button. Redirects to Dashboard.
-- **Reflections** (`/genome/probe`): Answer belief probes (core interaction) — renamed from "Probe"
-- **Dashboard** (`/genome/dashboard`): Personalized time-of-day greeting + daily rotating quote (100 curated quotes). 7-tab dashboard — Triple Helix, Neuromap, Radar, Breakdown, Timeline, History, Forecaster
+- **Reflections** (`/genome/probe`): Answer belief probes (core interaction) — renamed from "Probe". Supports exploration mode: when entering from DNA Strip click-to-explore, shows green EXPLORING pill with category, remaining count, and X dismiss. 30s idle timer auto-exits exploration. Forwards dimension weights and quality from targeted probes for accurate scoring.
+- **Dashboard** (`/genome/dashboard`): Personalized time-of-day greeting + daily rotating quote (100 curated quotes). 7-tab dashboard — DNA Strip (default), Triple Helix, Neuromap, Radar, Breakdown, Timeline, History, Forecaster. Visual tabs (DNA Strip, Triple Helix, Neuromap) use `.genome-panel-surface` frosted glass styling.
 - **Neuromap** (`/neuromap/:key`): Public shareable 3D neural belief map. Loads `bgp_brain_3d.html` (Three.js) in an iframe and sends genome data via postMessage. Brain nodes colored by ideology spectrum. API: `GET /api/genome/lookup/:anonymousKey`
 - **Belief DNA** (`/genome/dna`): Full 140-char DNA string viewer with copy button and how-it-works legend
 - **Analyze** (`/genome/analyze`): Full DNA rebuild from all responses, shows dimensions covered and confidence
@@ -105,7 +105,7 @@ Text links with pipe separators: Belief Genome Project (left) | Reflections | Da
 #### Belief Engine (`@belief-genome/engine`)
 Pure domain logic package with no framework deps:
 - `beliefDNA.ts`: 124-dimension framework (IDs 4-127), DIMENSIONS, CATEGORIES constants
-- `probeBank.ts`: 100+ categorized belief probes with dimension weights
+- `probeBank.ts`: 100+ categorized belief probes with dimension weights, `getProbeForDimension()` for targeted dimension exploration
 - `dnaCalculator.ts`: DNA string builder (140 chars: 16 identity prefix + 124 belief dimensions), dimension value calculator
 - DNA prefix: pos 0-7 identity, pos 8-10 country (ISO numeric 3-digit), pos 11-15 zip, pos 16-139 beliefs
 - `probeFeeds.ts`: RSS news feed → AI-classified belief probes (requires OPENAI_API_KEY)
@@ -191,7 +191,8 @@ React + Vite frontend with dark premium design, wouter routing, React Query hook
 - Pages: `src/pages/` (public + admin + genome)
 - Hooks: `src/hooks/` (use-auth, use-admin, use-blog, use-toast, use-media)
 - Layouts: `src/components/layout/` (PublicLayout, AdminLayout)
-- Genome: `src/components/genome/` (GenomeAuthContext, genome-utils, RadarChart, BreakdownBars, DnaString, HistoryList, TripleHelix, Timeline, Forecaster, GenomeLayout, GenomeNav)
+- Genome: `src/components/genome/` (GenomeAuthContext, ExploreContext, genome-utils, RadarChart, BreakdownBars, DnaString, DnaStrip, HistoryList, TripleHelix, Timeline, Forecaster, GenomeLayout, GenomeNav)
+- Terminology: `beliefLabel()` returns "Uncertain" in harvesting/slider contexts. `beliefLabelForConclusion()` returns "Balanced" for 45-55% in readout/summary/conclusion contexts. `BELIEF_LABELS_10[4,5]` = 'Balanced'. DNA Strip click-to-explore: click unexplored cell → ExploreContext → navigate to ProbePage with dimension-targeted probes.
 
 ### `lib/db` (`@workspace/db`)
 

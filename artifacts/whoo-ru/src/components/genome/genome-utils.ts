@@ -8,12 +8,18 @@ export const CAT_SHORT: Record<string, string> = {
 
 export const DOMAIN_AXES: Record<string, { left: string; right: string; mid: string }> = {
   philosophy:    { left: 'Relativist',   right: 'Absolutist',      mid: 'Mixed epistemic'  },
+  epistemology:  { left: 'Relativist',   right: 'Absolutist',      mid: 'Mixed epistemic'  },
   religion:      { left: 'Secular',      right: 'Spiritual',       mid: 'Open spiritual'   },
+  spirituality:  { left: 'Secular',      right: 'Spiritual',       mid: 'Open spiritual'   },
+  morality:      { left: 'Situational',  right: 'Principled',      mid: 'Contextual'       },
   psychology:    { left: 'Determinist',  right: 'Autonomous',      mid: 'Compatibilist'    },
   relationships: { left: 'Fluid',        right: 'Traditional',     mid: 'Contextual'       },
   society:       { left: 'Collectivist', right: 'Individualist',   mid: 'Balanced social'  },
+  social:        { left: 'Collectivist', right: 'Individualist',   mid: 'Balanced social'  },
   economics:     { left: 'Progressive',  right: 'Market-oriented', mid: 'Mixed economic'   },
   science_tech:  { left: 'Tech-skeptic', right: 'Techno-optimist', mid: 'Tech-pragmatist'  },
+  education:     { left: 'Reformist',    right: 'Traditional',     mid: 'Pragmatic'        },
+  health:        { left: 'Holistic',     right: 'Conventional',    mid: 'Integrative'      },
   politics:      { left: 'Progressive',  right: 'Conservative',    mid: 'Centrist'         },
   life:          { left: 'Structured',   right: 'Spontaneous',     mid: 'Balanced'         },
 };
@@ -34,8 +40,8 @@ export const SHEX: string[] = [
 ];
 
 export const BELIEF_LABELS_10 = [
-  'Absolute False', 'Deeply False', 'False', 'Leaning False', 'Uncertain',
-  'Uncertain', 'Leaning True', 'True', 'Deeply True', 'Absolute True',
+  'Absolute False', 'Deeply False', 'False', 'Leaning False', 'Balanced',
+  'Balanced', 'Leaning True', 'True', 'Deeply True', 'Absolute True',
 ];
 
 export const BELIEF_GRADIENT = 'linear-gradient(90deg, #dc2626, #fca5a5 25%, #22c55e 50%, #93c5fd 75%, #2563eb)';
@@ -62,6 +68,18 @@ export function beliefColor(v: number): string {
   if (v <= 77)  return '#60a5fa';
   if (v <= 88)  return '#3b82f6';
   return '#2563eb';
+}
+
+export function beliefLabelForConclusion(pct: number, category?: string): string {
+  if (pct <= 11) return 'Absolute False';
+  if (pct <= 22) return 'Deeply False';
+  if (pct <= 33) return 'False';
+  if (pct <= 44) return 'Leaning False';
+  if (pct <= 55) return (category && DOMAIN_AXES[category]?.mid) || 'Balanced';
+  if (pct <= 66) return 'Leaning True';
+  if (pct <= 77) return 'True';
+  if (pct <= 88) return 'Deeply True';
+  return 'Absolute True';
 }
 
 export function catColour(v: number | null): string {

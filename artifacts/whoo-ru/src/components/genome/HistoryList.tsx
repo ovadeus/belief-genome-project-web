@@ -2,9 +2,9 @@
 // Matches desktop: same labels, same colors, same filters
 import { useState, useMemo } from 'react';
 
-import { CAT_SHORT, beliefLabel as _beliefLabel, beliefColor as _beliefColor } from './genome-utils';
+import { CAT_SHORT, beliefLabelForConclusion, beliefColor as _beliefColor } from './genome-utils';
 
-function beliefLabel(v: number): string { return _beliefLabel(Math.round(v * 100)); }
+function conclusionLabel(v: number, cat?: string): string { return beliefLabelForConclusion(Math.round(v * 100), cat); }
 function beliefColor(v: number): string { return _beliefColor(Math.round(v * 100)); }
 
 interface HistoryEntry {
@@ -84,7 +84,7 @@ export default function HistoryList({ history }: Props) {
           <option value="">All Sentiments</option>
           <option value="true">True</option>
           <option value="false">False</option>
-          <option value="uncertain">Uncertain</option>
+          <option value="uncertain">Balanced</option>
         </select>
         <select value={sourceFilter} onChange={e => { setSourceFilter(e.target.value); setPage(1); }} style={selectStyle}>
           <option value="">All Sources</option>
@@ -110,7 +110,7 @@ export default function HistoryList({ history }: Props) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {pageItems.map(entry => {
           const col = beliefColor(entry.value);
-          const lbl = beliefLabel(entry.value);
+          const lbl = conclusionLabel(entry.value, entry.probeCategory);
           const pct = Math.round(entry.value * 100);
 
           return (

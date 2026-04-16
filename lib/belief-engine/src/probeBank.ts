@@ -253,3 +253,19 @@ export function getBankProbe(usedTexts: string[] = [], usedCategories: string[] 
   const probe = getProbeFromBank(cat, usedTexts);
   return { ...probe, category: cat };
 }
+
+export function getProbeForDimension(dimId: number, usedStatements: string[] = []): { probe: ProbeDefinition; category: string } | null {
+  for (const [cat, pool] of Object.entries(PROBE_BANK)) {
+    const matches = pool.filter(p => p.dims.includes(dimId) && !usedStatements.includes(p.text));
+    if (matches.length > 0) {
+      return { probe: matches[Math.floor(Math.random() * matches.length)], category: cat };
+    }
+  }
+  for (const [cat, pool] of Object.entries(PROBE_BANK)) {
+    const matches = pool.filter(p => p.dims.includes(dimId));
+    if (matches.length > 0) {
+      return { probe: matches[Math.floor(Math.random() * matches.length)], category: cat };
+    }
+  }
+  return null;
+}

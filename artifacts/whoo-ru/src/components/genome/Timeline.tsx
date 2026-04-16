@@ -163,7 +163,7 @@ export default function Timeline({ history }: Props) {
           },
           label: (ctx: any) => {
             const v = ctx.parsed.y;
-            const lbl = v >= 65 ? 'Leaning True' : v <= 35 ? 'Leaning False' : 'Uncertain';
+            const lbl = v >= 65 ? 'Leaning True' : v <= 35 ? 'Leaning False' : 'Balanced';
             return ` ${ctx.dataset.label}: ${v}% — ${lbl}`;
           },
         },

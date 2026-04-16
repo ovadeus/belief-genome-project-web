@@ -108,7 +108,7 @@ export default function DnaPage() {
           <strong style={{ color: '#6c8fff' }}>Scoring Scale:</strong>{' '}
           <span style={{ color: '#dc2626' }}>0 = Absolute False</span> {' → '}
           <span style={{ color: '#fca5a5' }}>3 = Leaning False</span> {' → '}
-          <span style={{ color: '#22c55e' }}>5 = Uncertain</span> {' → '}
+          <span style={{ color: '#22c55e' }}>5 = Balanced</span> {' → '}
           <span style={{ color: '#60a5fa' }}>7 = True</span> {' → '}
           <span style={{ color: '#2563eb' }}>9 = Absolute True</span>
         </div>

@@ -31,6 +31,7 @@ import NeuromapPage from "./pages/NeuromapPage";
 
 import { usePageTracker } from "./hooks/use-page-tracker";
 import { GenomeAuthProvider } from "./components/genome/GenomeAuthContext";
+import { ExploreProvider } from "./components/genome/ExploreContext";
 import GenomeLayout from "./components/genome/GenomeLayout";
 import LoginPage from "./pages/genome/LoginPage";
 import RegisterPage from "./pages/genome/RegisterPage";
@@ -108,9 +109,11 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <GenomeAuthProvider>
-          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-            <Router />
-          </WouterRouter>
+          <ExploreProvider>
+            <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+              <Router />
+            </WouterRouter>
+          </ExploreProvider>
         </GenomeAuthProvider>
         <Toaster />
       </TooltipProvider>
