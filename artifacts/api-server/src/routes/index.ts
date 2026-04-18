@@ -11,6 +11,7 @@ import blogAssetsRouter from "./blog-assets";
 import genomeAuthRouter, { genomeAuth } from "./genome-auth";
 import genomeProbesRouter from "./genome-probes";
 import genomeDataRouter from "./genome-data";
+import genomePublicRouter from "./genome-public";
 import genomeSubmitRouter from "./genome-submit";
 import genomeAdminRouter from "./genome-admin";
 import analyticsRouter from "./analytics";
@@ -28,6 +29,10 @@ router.use(settingsRouter);
 router.use(storageRouter);
 router.use(blogAssetsRouter);
 router.use(analyticsRouter);
+
+// Public, unauthenticated DNA share routes — MUST be mounted before the
+// auth-gated /genome subrouter so the auth middleware doesn't intercept them.
+router.use("/genome/dna/public", genomePublicRouter);
 
 router.use("/genome", genomeSubmitRouter);
 router.use("/genome/admin", requireAuth, genomeAdminRouter);

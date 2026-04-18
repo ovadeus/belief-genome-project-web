@@ -10,6 +10,7 @@ import RegisterPage from "./pages/genome/RegisterPage";
 import ProbePage from "./pages/genome/ProbePage";
 import DashboardPage from "./pages/genome/DashboardPage";
 import DnaPage from "./pages/genome/DnaPage";
+import PublicDnaPage from "./pages/genome/PublicDnaPage";
 import AnalyzePage from "./pages/genome/AnalyzePage";
 import SyncPage from "./pages/genome/SyncPage";
 import ProfilePage from "./pages/genome/ProfilePage";
@@ -76,6 +77,9 @@ function Router() {
       <Route path="/dashboard">
         <RequireAuth><GenomeLayout><DashboardPage /></GenomeLayout></RequireAuth>
       </Route>
+      {/* Public, unauthenticated share page — MUST come before the protected
+          /dna route, since wouter matches in declaration order. */}
+      <Route path="/dna/:signature"><PublicDnaPage /></Route>
       <Route path="/dna">
         <RequireAuth><GenomeLayout><DnaPage /></GenomeLayout></RequireAuth>
       </Route>

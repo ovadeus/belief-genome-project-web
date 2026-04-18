@@ -7,6 +7,12 @@ import router from "./routes";
 
 const app: Express = express();
 
+// We're behind Replit's reverse proxy. Trust the first hop so req.ip
+// reflects the real client IP — otherwise express-rate-limit would key
+// every visitor under the proxy IP and a single user could trip the
+// limit for everyone (DoS vector).
+app.set("trust proxy", 1);
+
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(",")
   : [
@@ -18,6 +24,7 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
 app.use("/api/genome/submit", cors());
 app.use("/api/genome/stats", cors());
 app.use("/api/genome/explore", cors());
+app.use("/api/genome/dna/public", cors());
 
 app.use(cors({
   origin: (origin, callback) => {

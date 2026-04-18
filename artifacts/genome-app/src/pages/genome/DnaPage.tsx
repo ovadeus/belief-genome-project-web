@@ -1,13 +1,18 @@
 // Dedicated Belief DNA page — full-screen DNA string viewer with stats
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import DnaString from '../../components/genome/DnaString';
 import DnaStrip from '../../components/genome/DnaStrip';
+import ShareDnaModal from '../../components/genome/ShareDnaModal';
 import { useDNA, useDimensions } from '../../hooks/use-genome';
+import { toast } from 'sonner';
 
 export default function DnaPage() {
   const dnaQ = useDNA();
   const dimsQ = useDimensions();
   const [copying, setCopying] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const stripRef = useRef<HTMLDivElement>(null);
 
   const dna = dnaQ.data;
   const dims = dimsQ.data?.dimensions ?? [];
@@ -19,6 +24,31 @@ export default function DnaPage() {
       setCopying(true);
       setTimeout(() => setCopying(false), 2000);
     } catch {}
+  };
+
+  const downloadPng = async () => {
+    if (!stripRef.current || downloading) return;
+    setDownloading(true);
+    try {
+      // Dynamic import keeps html-to-image out of the initial bundle.
+      const { toPng } = await import('html-to-image');
+      const dataUrl = await toPng(stripRef.current, {
+        cacheBust: true,
+        pixelRatio: 2,
+        backgroundColor: '#0a0a14',
+      });
+      const link = document.createElement('a');
+      link.download = `belief-dna-${new Date().toISOString().slice(0, 10)}.png`;
+      link.href = dataUrl;
+      link.click();
+      toast.success('DNA image downloaded');
+    } catch (err) {
+      toast.error("Couldn't generate image");
+      // eslint-disable-next-line no-console
+      console.error('PNG export failed:', err);
+    } finally {
+      setDownloading(false);
+    }
   };
 
   if (dnaQ.isLoading || dimsQ.isLoading) {
@@ -59,20 +89,39 @@ export default function DnaPage() {
             Click any gray cell to explore that belief dimension.
           </p>
         </div>
-        <button onClick={copyDna} style={{
-          padding: '8px 16px', borderRadius: 8,
-          background: copying ? 'rgba(46,213,115,0.15)' : 'transparent',
-          border: `1px solid ${copying ? 'rgba(46,213,115,0.3)' : 'rgba(108,143,255,0.3)'}`,
-          color: copying ? '#22c55e' : 'rgba(255,255,255,0.6)',
-          fontSize: 12, cursor: 'pointer',
-          fontFamily: "'Space Mono', monospace",
-        }}>
-          {copying ? 'Copied!' : 'Copy DNA String'}
-        </button>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <button onClick={() => setShareOpen(true)} style={{
+            padding: '8px 14px', borderRadius: 8,
+            background: 'rgba(108,143,255,0.18)',
+            border: '1px solid rgba(108,143,255,0.4)',
+            color: '#a8c0ff',
+            fontSize: 12, fontWeight: 600, cursor: 'pointer',
+          }}>Share</button>
+          <button onClick={downloadPng} disabled={downloading} style={{
+            padding: '8px 14px', borderRadius: 8,
+            background: 'transparent',
+            border: '1px solid rgba(108,143,255,0.3)',
+            color: 'rgba(255,255,255,0.7)',
+            fontSize: 12, fontWeight: 600,
+            cursor: downloading ? 'wait' : 'pointer',
+            opacity: downloading ? 0.6 : 1,
+          }}>{downloading ? 'Rendering…' : 'Download PNG'}</button>
+          <button onClick={copyDna} style={{
+            padding: '8px 14px', borderRadius: 8,
+            background: copying ? 'rgba(46,213,115,0.15)' : 'transparent',
+            border: `1px solid ${copying ? 'rgba(46,213,115,0.3)' : 'rgba(108,143,255,0.3)'}`,
+            color: copying ? '#22c55e' : 'rgba(255,255,255,0.6)',
+            fontSize: 12, cursor: 'pointer',
+            fontFamily: "'Space Mono', monospace",
+          }}>
+            {copying ? 'Copied!' : 'Copy String'}
+          </button>
+        </div>
       </div>
 
-      {/* Visual DNA Strip */}
-      <div style={{
+      {/* Visual DNA Strip — ref'd for PNG export. The export captures only
+          this element so demographics text outside it is never included. */}
+      <div ref={stripRef} style={{
         padding: 24, borderRadius: 16,
         background: 'rgba(255,255,255,0.02)',
         border: '1px solid rgba(108,143,255,0.12)',
