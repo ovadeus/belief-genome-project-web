@@ -77,6 +77,7 @@
   "dependencies": {
     "@belief-genome/engine": "workspace:*",
     "chart.js": "^4.5.1",
+    "html-to-image": "^1.11.13",
     "react-chartjs-2": "^5.3.1"
   }
 }
