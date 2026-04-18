@@ -6,7 +6,7 @@ import { db } from '@workspace/db';
 import { probes, beliefResponses, dimensionScores } from '@workspace/db/schema';
 import { eq, and, sql } from 'drizzle-orm';
 import {
-  PROBE_BANK, QUALITY_PRESETS,
+  PROBE_BANK, QUALITY_PRESETS, DIMENSIONS,
   buildDimensionWeights, assignProbeQuality,
   getProbeFromBank, pickCategory, getProbeForDimension,
 } from '@belief-genome/engine';
@@ -241,6 +241,27 @@ router.post('/respond', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'dimensionWeights missing — refusing to save (would corrupt DNA scoring).' });
     }
   }
+  // Explore mode: if the client asked us to anchor this answer to a specific
+  // dimension (the gray cell the user clicked), boost that dim's weight to 1.0
+  // so it registers strongly against the targeted cell. Preserve direction.
+  // Strict validation: must be a real number (not a coerced empty string),
+  // must be a positive integer, and must be a known dimension id.
+  const rawTarget = req.body.exploreTargetDim;
+  if (rawTarget !== undefined && rawTarget !== null && rawTarget !== '') {
+    const isFiniteNum = typeof rawTarget === 'number' && Number.isFinite(rawTarget);
+    const isCleanIntStr = typeof rawTarget === 'string' && /^\d+$/.test(rawTarget.trim());
+    if (!isFiniteNum && !isCleanIntStr) {
+      return res.status(400).json({ error: 'exploreTargetDim must be a positive integer dimension id.' });
+    }
+    const targetId = typeof rawTarget === 'number' ? rawTarget : parseInt(rawTarget, 10);
+    if (!Number.isInteger(targetId) || !DIMENSIONS.some(d => d.id === targetId)) {
+      return res.status(400).json({ error: `exploreTargetDim ${rawTarget} is not a valid dimension id.` });
+    }
+    const key = String(targetId);
+    const existingDir = (dimWeights as any)[key]?.direction ?? 1;
+    (dimWeights as any)[key] = { direction: existingDir, weight: 1.0 };
+  }
+
   const qualityObj = quality || assignProbeQuality(probeSource || 'bank');
 
   await db.insert(beliefResponses).values({

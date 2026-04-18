@@ -4,6 +4,8 @@ import { genomeApi } from '../../components/genome/GenomeAuthContext';
 import { PROBE_CATEGORIES } from '@belief-genome/engine';
 import { beliefLabel, beliefColor } from '../../components/genome/genome-utils';
 import { useExplore } from '../../components/genome/ExploreContext';
+import { useDNA, useDimensions, useRespondProbe } from '../../hooks/use-genome';
+import DnaStrip from '../../components/genome/DnaStrip';
 import { Compass, X } from 'lucide-react';
 
 function getSemanticLabel(value: number): string { return beliefLabel(Math.round(value * 100)); }
@@ -14,12 +16,15 @@ const EXPLORE_IDLE_MS = 30_000;
 export default function ProbePage() {
   const [probe, setProbe] = useState<any>(null);
   const [value, setValue] = useState(0.5);
-  const [submitting, setSubmitting] = useState(false);
   const [count, setCount] = useState(0);
 
   const { exploreIntent, clearExplore, advanceQueue } = useExplore();
   const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isExploring = !!exploreIntent;
+
+  const respond = useRespondProbe();
+  const dnaQ = useDNA();
+  const dimsQ = useDimensions();
 
   const resetIdleTimer = useCallback(() => {
     if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
@@ -56,10 +61,10 @@ export default function ProbePage() {
   }, [isExploring, exploreIntent?.dimQueue[0]]);
 
   const handleSubmit = async () => {
-    if (!probe) return;
-    setSubmitting(true);
+    if (!probe || respond.isPending) return;
     resetIdleTimer();
-    const payload: Record<string, any> = {
+    const exploreTargetDim = isExploring ? exploreIntent!.dimQueue[0] : undefined;
+    const payload: any = {
       probeText: probe.statement,
       probeCategory: probe.category,
       probeSource: probe.source,
@@ -67,24 +72,16 @@ export default function ProbePage() {
     };
     if (probe.dimensionWeights) payload.dimensionWeights = probe.dimensionWeights;
     if (probe.quality) payload.quality = probe.quality;
+    if (exploreTargetDim) payload.exploreTargetDim = exploreTargetDim;
+
     try {
-      const res = await genomeApi('/probes/respond', {
-        method: 'POST',
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        toast.error(err?.error || 'Could not save your response. Please try again.');
-        setSubmitting(false);
-        return;
-      }
-      setCount(c => c + 1);
+      await respond.mutateAsync(payload);
     } catch {
-      toast.error('Network error — your response was not saved.');
-      setSubmitting(false);
+      // Error toast already handled in mutation onError
       return;
     }
-    setSubmitting(false);
+
+    setCount(c => c + 1);
 
     if (isExploring) {
       advanceQueue();
@@ -115,6 +112,9 @@ export default function ProbePage() {
   }
 
   const catInfo = PROBE_CATEGORIES[probe.category];
+  const submitting = respond.isPending;
+  const dna = dnaQ.data;
+  const dims = dimsQ.data?.dimensions ?? [];
 
   return (
     <div
@@ -128,6 +128,29 @@ export default function ProbePage() {
           textAlign: 'center', fontSize: 12, color: 'rgba(255,255,255,0.3)', marginBottom: 16,
         }}>
           {count} answered this session
+        </div>
+      )}
+
+      {/* Mini-strip during explore mode — Phase 2 Option A */}
+      {isExploring && dna && dims.length > 0 && (
+        <div
+          data-testid="explore-mini-strip"
+          style={{
+            padding: 12, borderRadius: 12, marginBottom: 16,
+            background: 'rgba(34,197,94,0.04)',
+            border: '1px solid rgba(34,197,94,0.18)',
+          }}
+        >
+          <DnaStrip
+            dimensions={dims}
+            dimensionScores={dna.dimensionScores ?? {}}
+            confidence={dna.dimensionConfidence ?? {}}
+            totalResponses={dna.totalResponses}
+            dimensionsCovered={dna.dimensionsCovered}
+            overallConfidence={dna.overallConfidence}
+            filterCat={exploreIntent!.catKey}
+            miniMode
+          />
         </div>
       )}
 

@@ -213,3 +213,50 @@
     font-size: 16px;
   }
 }
+
+/* ─── DNA Strip cells (Phase 2) ─── */
+.dna-strip-cell {
+  flex: 1;
+  min-width: 6px;
+  border-radius: 2px;
+  position: relative;
+  transition: transform 0.15s ease, box-shadow 0.15s ease,
+              background 0.5s ease, border-color 0.5s ease;
+}
+.dna-strip-cell.is-unexplored {
+  background: repeating-linear-gradient(
+    45deg, rgba(255,255,255,0.04), rgba(255,255,255,0.04) 2px,
+    transparent 2px, transparent 4px
+  );
+  border: 1px solid rgba(255,255,255,0.06);
+  cursor: pointer;
+}
+.dna-strip-cell.is-explored { cursor: default; }
+.dna-strip-cell.is-unexplored:hover,
+.dna-strip-cell.is-unexplored:focus-visible {
+  background: repeating-linear-gradient(45deg, rgba(108,143,255,0.22), rgba(108,143,255,0.22) 2px, rgba(108,143,255,0.06) 2px, rgba(108,143,255,0.06) 4px);
+  border-color: rgba(108,143,255,0.55);
+  box-shadow: 0 0 10px rgba(108,143,255,0.35);
+  transform: scaleY(1.4);
+  z-index: 2;
+  outline: none;
+}
+.dna-strip-cell.is-explored:hover {
+  transform: scaleY(1.4);
+  z-index: 2;
+  box-shadow: 0 0 8px rgba(255,255,255,0.25), inset 0 0 0 1px rgba(255,255,255,0.08);
+}
+@media (max-width: 640px) {
+  .dna-strip-cells-scroll { overflow-x: auto; }
+  .dna-strip-cell { min-width: 8px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .dna-strip-cell.just-filled {
+    animation: dna-cell-pulse 0.9s ease;
+  }
+  @keyframes dna-cell-pulse {
+    0%   { transform: scaleY(1);   box-shadow: 0 0 0 0 rgba(108,143,255, 0.7); }
+    40%  { transform: scaleY(1.9); box-shadow: 0 0 12px 3px rgba(108,143,255, 0.55); }
+    100% { transform: scaleY(1);   box-shadow: 0 0 0 0 rgba(108,143,255, 0); }
+  }
+}

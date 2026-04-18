@@ -1,15 +1,16 @@
 // Dedicated Belief DNA page — full-screen DNA string viewer with stats
-import { useState, useEffect } from 'react';
-import { genomeApi } from '../../components/genome/GenomeAuthContext';
+import { useState } from 'react';
 import DnaString from '../../components/genome/DnaString';
+import DnaStrip from '../../components/genome/DnaStrip';
+import { useDNA, useDimensions } from '../../hooks/use-genome';
 
 export default function DnaPage() {
-  const [dna, setDna] = useState<any>(null);
+  const dnaQ = useDNA();
+  const dimsQ = useDimensions();
   const [copying, setCopying] = useState(false);
 
-  useEffect(() => {
-    genomeApi('/dna').then(r => r.json()).then(setDna).catch(() => {});
-  }, []);
+  const dna = dnaQ.data;
+  const dims = dimsQ.data?.dimensions ?? [];
 
   const copyDna = async () => {
     if (!dna?.dnaString) return;
@@ -20,10 +21,28 @@ export default function DnaPage() {
     } catch {}
   };
 
-  if (!dna) {
+  if (dnaQ.isLoading || dimsQ.isLoading) {
     return (
       <div style={{ textAlign: 'center', padding: 60, color: 'rgba(255,255,255,0.3)' }}>
         Loading Belief DNA...
+      </div>
+    );
+  }
+
+  if (dnaQ.isError || dimsQ.isError || !dna) {
+    return (
+      <div style={{ textAlign: 'center', padding: 60, color: 'rgba(255,255,255,0.5)' }}>
+        <p style={{ marginBottom: 16 }}>Couldn't load your Belief DNA.</p>
+        <button
+          onClick={() => { dnaQ.refetch(); dimsQ.refetch(); }}
+          style={{
+            padding: '8px 20px', borderRadius: 8,
+            background: 'transparent', border: '1px solid rgba(108,143,255,0.4)',
+            color: '#6c8fff', fontSize: 13, cursor: 'pointer',
+          }}
+        >
+          Retry
+        </button>
       </div>
     );
   }
@@ -37,7 +56,7 @@ export default function DnaPage() {
         <div>
           <h1 style={{ fontSize: 24, fontWeight: 700, color: '#fff', margin: 0 }}>Belief DNA</h1>
           <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', margin: '4px 0 0' }}>
-            Your 140-character cognitive fingerprint
+            Click any gray cell to explore that belief dimension.
           </p>
         </div>
         <button onClick={copyDna} style={{
@@ -52,7 +71,24 @@ export default function DnaPage() {
         </button>
       </div>
 
-      {/* Main DNA display */}
+      {/* Visual DNA Strip */}
+      <div style={{
+        padding: 24, borderRadius: 16,
+        background: 'rgba(255,255,255,0.02)',
+        border: '1px solid rgba(108,143,255,0.12)',
+        marginBottom: 24,
+      }}>
+        <DnaStrip
+          dimensions={dims}
+          dimensionScores={dna.dimensionScores ?? {}}
+          confidence={dna.dimensionConfidence ?? {}}
+          totalResponses={dna.totalResponses}
+          dimensionsCovered={dna.dimensionsCovered}
+          overallConfidence={dna.overallConfidence}
+        />
+      </div>
+
+      {/* Text DNA display */}
       <div style={{
         padding: 28, borderRadius: 16,
         background: 'rgba(255,255,255,0.02)',
@@ -99,18 +135,6 @@ export default function DnaPage() {
             <strong style={{ color: '#6c8fff' }}>Positions 16-139: Beliefs</strong>
             <p>124 belief dimensions scored 0-9. Each dot ({'\u00B7'}) is an unexplored dimension.</p>
           </div>
-        </div>
-        <div style={{
-          marginTop: 16, padding: 12, borderRadius: 8,
-          background: 'rgba(108,143,255,0.06)',
-          fontSize: 11, color: 'rgba(255,255,255,0.4)', lineHeight: 1.6,
-        }}>
-          <strong style={{ color: '#6c8fff' }}>Scoring Scale:</strong>{' '}
-          <span style={{ color: '#dc2626' }}>0 = Absolute False</span> {' → '}
-          <span style={{ color: '#fca5a5' }}>3 = Leaning False</span> {' → '}
-          <span style={{ color: '#22c55e' }}>5 = Balanced</span> {' → '}
-          <span style={{ color: '#60a5fa' }}>7 = True</span> {' → '}
-          <span style={{ color: '#2563eb' }}>9 = Absolute True</span>
         </div>
       </div>
     </div>
