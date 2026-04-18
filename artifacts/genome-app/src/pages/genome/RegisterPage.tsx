@@ -44,7 +44,13 @@ export default function RegisterPage() {
     const result = await register(name, email, password);
     setLoading(false);
     if (result.ok) {
-      setLocation('/dashboard');
+      let next = '/dashboard';
+      try {
+        const stored = sessionStorage.getItem('genome:redirectAfterLogin');
+        if (stored && stored !== '/login' && stored !== '/register') next = stored;
+        sessionStorage.removeItem('genome:redirectAfterLogin');
+      } catch {}
+      setLocation(next);
     } else {
       setError(result.error || 'Registration failed');
     }

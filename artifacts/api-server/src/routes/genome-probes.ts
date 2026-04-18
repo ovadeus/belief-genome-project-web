@@ -150,12 +150,18 @@ router.get('/next', async (req: Request, res: Response) => {
     }
     const cat = pickCategory();
     const probe = getProbeFromBank(cat);
+    const dimWeights = buildDimensionWeights(probe);
+    const quality = probe.quality && QUALITY_PRESETS[probe.quality]
+      ? { ...QUALITY_PRESETS[probe.quality], source: 'bank', assignedAt: new Date().toISOString() }
+      : assignProbeQuality('bank');
     return res.json({
       id: null,
       statement: probe.text,
       category: cat,
       source: 'bank',
       targetDim: dimId,
+      dimensionWeights: dimWeights,
+      quality,
     });
   }
 
@@ -187,18 +193,26 @@ router.get('/next', async (req: Request, res: Response) => {
         statement: probe.statement,
         category: probe.category,
         source: probe.source,
+        dimensionWeights: probe.dimensionWeights,
+        quality: probe.quality,
       });
     }
   }
 
-  // Emergency: generate a bank probe on the fly
+  // Emergency: generate a bank probe on the fly — include weights + quality so /respond doesn't fall back to the broken legacy path
   const cat = pickCategory();
   const probe = getProbeFromBank(cat);
+  const dimWeights = buildDimensionWeights(probe);
+  const quality = probe.quality && QUALITY_PRESETS[probe.quality]
+    ? { ...QUALITY_PRESETS[probe.quality], source: 'bank', assignedAt: new Date().toISOString() }
+    : assignProbeQuality('bank');
   return res.json({
     id: null,
     statement: probe.text,
     category: cat,
     source: 'bank',
+    dimensionWeights: dimWeights,
+    quality,
   });
 });
 
@@ -211,8 +225,22 @@ router.post('/respond', async (req: Request, res: Response) => {
     return res.status(400).json({ error: 'probeText and value are required' });
   }
 
-  // Save response
-  const dimWeights = dimensionWeights || buildDimensionWeights(probeCategory || 'life');
+  // Resolve dimensionWeights — never use the broad category fallback (it touches
+  // every dim in a category and inflates the user's DNA). If the client did not
+  // send weights, look the probe up in the queued probes table for this user.
+  let dimWeights = dimensionWeights;
+  if (!dimWeights || (typeof dimWeights === 'object' && Object.keys(dimWeights).length === 0)) {
+    const [queued] = await db
+      .select({ dimensionWeights: probes.dimensionWeights })
+      .from(probes)
+      .where(and(eq(probes.userId, userId), eq(probes.statement, probeText)))
+      .limit(1);
+    if (queued?.dimensionWeights && Object.keys(queued.dimensionWeights as object).length > 0) {
+      dimWeights = queued.dimensionWeights;
+    } else {
+      return res.status(400).json({ error: 'dimensionWeights missing — refusing to save (would corrupt DNA scoring).' });
+    }
+  }
   const qualityObj = quality || assignProbeQuality(probeSource || 'bank');
 
   await db.insert(beliefResponses).values({

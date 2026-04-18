@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { toast } from 'sonner';
 import { genomeApi } from '../../components/genome/GenomeAuthContext';
 import { PROBE_CATEGORIES } from '@belief-genome/engine';
 import { beliefLabel, beliefColor } from '../../components/genome/genome-utils';
@@ -66,11 +67,23 @@ export default function ProbePage() {
     };
     if (probe.dimensionWeights) payload.dimensionWeights = probe.dimensionWeights;
     if (probe.quality) payload.quality = probe.quality;
-    await genomeApi('/probes/respond', {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    });
-    setCount(c => c + 1);
+    try {
+      const res = await genomeApi('/probes/respond', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        toast.error(err?.error || 'Could not save your response. Please try again.');
+        setSubmitting(false);
+        return;
+      }
+      setCount(c => c + 1);
+    } catch {
+      toast.error('Network error — your response was not saved.');
+      setSubmitting(false);
+      return;
+    }
     setSubmitting(false);
 
     if (isExploring) {
@@ -200,9 +213,14 @@ export default function ProbePage() {
 
           <input
             type="range"
-            min={0} max={1} step={0.01}
-            value={value}
-            onChange={e => { setValue(parseFloat(e.target.value)); handleActivity(); }}
+            min={0} max={100} step={1}
+            value={Math.round(value * 100)}
+            onChange={e => { setValue(parseInt(e.target.value, 10) / 100); handleActivity(); }}
+            aria-label="How true is this statement, on a scale from 0 (absolutely false) to 100 (absolutely true)"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={Math.round(value * 100)}
+            aria-valuetext={`${Math.round(value * 100)} — ${getSemanticLabel(value)}`}
             style={{
               width: '100%', cursor: 'pointer',
               accentColor: sliderColor(value),

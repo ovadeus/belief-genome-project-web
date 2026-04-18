@@ -5,7 +5,7 @@ import { Router, Request, Response } from 'express';
 import crypto from 'crypto';
 import { db } from '@workspace/db';
 import { users, beliefResponses, dimensionScores, dnaSnapshots, genomeSubmissions, genomeAnalyses } from '@workspace/db/schema';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, sql } from 'drizzle-orm';
 import { DIMENSIONS, CATEGORIES } from '@belief-genome/engine';
 import { buildDNAString, calcDimensionValue, calcConfidence } from '@belief-genome/engine';
 import type { Accumulator } from '@belief-genome/engine';
@@ -25,7 +25,6 @@ router.get('/dna', async (req: Request, res: Response) => {
 
   const dimScores: Record<number, number> = {};
   const confidence: Record<number, number> = {};
-  let totalResponses = 0;
 
   for (const s of scores) {
     const accum: Accumulator = { sum: s.weightedSum, totalWeight: s.totalWeight, count: s.count };
@@ -34,8 +33,13 @@ router.get('/dna', async (req: Request, res: Response) => {
       dimScores[s.dimensionId] = val;
       confidence[s.dimensionId] = calcConfidence(accum);
     }
-    totalResponses += s.count;
   }
+
+  // True response count = number of probes the user actually answered
+  const [{ count: totalResponses } = { count: 0 }] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(beliefResponses)
+    .where(eq(beliefResponses.userId, userId));
 
   const dnaString = buildDNAString(dimScores, {
     birthYear: user.birthYear ?? undefined,

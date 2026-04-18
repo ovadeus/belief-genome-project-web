@@ -1,7 +1,8 @@
 import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
-import { useEffect } from "react";
+import { useEffect, type ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { GenomeAuthProvider } from "./components/genome/GenomeAuthContext";
+import { Toaster } from "sonner";
+import { GenomeAuthProvider, useGenomeAuth } from "./components/genome/GenomeAuthContext";
 import { ExploreProvider } from "./components/genome/ExploreContext";
 import GenomeLayout from "./components/genome/GenomeLayout";
 import LoginPage from "./pages/genome/LoginPage";
@@ -15,11 +16,39 @@ import ProfilePage from "./pages/genome/ProfilePage";
 
 const queryClient = new QueryClient();
 
+const REDIRECT_KEY = "genome:redirectAfterLogin";
+
+function RequireAuth({ children }: { children: ReactNode }) {
+  const { user, loading } = useGenomeAuth();
+  const [location, setLocation] = useLocation();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      try {
+        sessionStorage.setItem(REDIRECT_KEY, location);
+      } catch {}
+      setLocation("/login", { replace: true });
+    }
+  }, [loading, user, location, setLocation]);
+
+  if (loading) {
+    return (
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", color: "rgba(255,255,255,0.4)", background: "var(--app-bg)" }}>
+        Loading…
+      </div>
+    );
+  }
+  if (!user) return null;
+  return <>{children}</>;
+}
+
 function RootRedirect() {
   const [, setLocation] = useLocation();
+  const { user, loading } = useGenomeAuth();
   useEffect(() => {
-    setLocation("/dashboard", { replace: true });
-  }, [setLocation]);
+    if (loading) return;
+    setLocation(user ? "/dashboard" : "/login", { replace: true });
+  }, [loading, user, setLocation]);
   return null;
 }
 
@@ -42,22 +71,22 @@ function Router() {
       <Route path="/login"><LoginPage /></Route>
       <Route path="/register"><RegisterPage /></Route>
       <Route path="/probe">
-        <GenomeLayout><ProbePage /></GenomeLayout>
+        <RequireAuth><GenomeLayout><ProbePage /></GenomeLayout></RequireAuth>
       </Route>
       <Route path="/dashboard">
-        <GenomeLayout><DashboardPage /></GenomeLayout>
+        <RequireAuth><GenomeLayout><DashboardPage /></GenomeLayout></RequireAuth>
       </Route>
       <Route path="/dna">
-        <GenomeLayout><DnaPage /></GenomeLayout>
+        <RequireAuth><GenomeLayout><DnaPage /></GenomeLayout></RequireAuth>
       </Route>
       <Route path="/analyze">
-        <GenomeLayout><AnalyzePage /></GenomeLayout>
+        <RequireAuth><GenomeLayout><AnalyzePage /></GenomeLayout></RequireAuth>
       </Route>
       <Route path="/sync">
-        <GenomeLayout><SyncPage /></GenomeLayout>
+        <RequireAuth><GenomeLayout><SyncPage /></GenomeLayout></RequireAuth>
       </Route>
       <Route path="/profile">
-        <GenomeLayout><ProfilePage /></GenomeLayout>
+        <RequireAuth><GenomeLayout><ProfilePage /></GenomeLayout></RequireAuth>
       </Route>
       <Route path="/"><RootRedirect /></Route>
       <Route><NotFound /></Route>
@@ -73,6 +102,7 @@ function App() {
           <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
             <Router />
           </WouterRouter>
+          <Toaster theme="dark" position="top-right" richColors closeButton />
         </ExploreProvider>
       </GenomeAuthProvider>
     </QueryClientProvider>

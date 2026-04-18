@@ -56,7 +56,7 @@ router.post('/register', async (req: Request, res: Response) => {
 
     const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, { expiresIn: TOKEN_EXPIRY });
 
-    res.cookie('genome_token', token, { httpOnly: true, secure: true, sameSite: 'lax', maxAge: 30 * 24 * 60 * 60 * 1000 });
+    res.cookie('genome_token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', maxAge: 30 * 24 * 60 * 60 * 1000 });
     return res.json({ token, user: { id: user.id, name: user.name, email: user.email } });
   } catch (e) {
     console.error('Register error:', e);
@@ -84,7 +84,7 @@ router.post('/login', async (req: Request, res: Response) => {
 
     const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, { expiresIn: TOKEN_EXPIRY });
 
-    res.cookie('genome_token', token, { httpOnly: true, secure: true, sameSite: 'lax', maxAge: 30 * 24 * 60 * 60 * 1000 });
+    res.cookie('genome_token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', maxAge: 30 * 24 * 60 * 60 * 1000 });
     return res.json({ token, user: { id: user.id, name: user.name, email: user.email } });
   } catch (e) {
     console.error('Login error:', e);

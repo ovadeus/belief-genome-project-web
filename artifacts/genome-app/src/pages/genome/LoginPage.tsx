@@ -30,12 +30,18 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
     const result = await login(email, password);
-    setLoading(false);
     if (result.ok) {
-      setLocation('/dashboard');
-    } else {
-      setError(result.error || 'Login failed');
+      let next = '/dashboard';
+      try {
+        const stored = sessionStorage.getItem('genome:redirectAfterLogin');
+        if (stored && stored !== '/login' && stored !== '/register') next = stored;
+        sessionStorage.removeItem('genome:redirectAfterLogin');
+      } catch {}
+      setLocation(next);
+      return;
     }
+    setLoading(false);
+    setError(result.error || 'Login failed');
   };
 
   return (
