@@ -12,11 +12,24 @@ export interface DnaCellProps {
   onClick?: () => void;
   onHover?: (e: React.MouseEvent, dimName: string, score: number | null, conf: number) => void;
   onLeave?: () => void;
+  /**
+   * Optional explicit fill color. When provided, the cell renders with this
+   * background regardless of `score` (used by compare mode to paint cells by
+   * agreement bucket rather than belief value). When undefined, the cell
+   * falls back to the default belief-color SHEX[score] for explored cells.
+   */
+  colorOverride?: string;
+  /**
+   * When true, the cell is clickable & keyboard-focusable regardless of
+   * whether it's explored (compare mode wants every cell selectable so the
+   * detail panel can show that dimension's per-side scores).
+   */
+  forceClickable?: boolean;
 }
 
 export default function DnaCell({
   dimId, dimName, catKey, catLabel, score, confidence,
-  height = 14, onClick, onHover, onLeave,
+  height = 14, onClick, onHover, onLeave, colorOverride, forceClickable = false,
 }: DnaCellProps) {
   const wasUnexploredRef = useRef<boolean>(score === null);
   const [justFilled, setJustFilled] = useState(false);
@@ -32,17 +45,23 @@ export default function DnaCell({
   }, [score]);
 
   const explored = score !== null;
+  const clickable = forceClickable || !explored;
 
   const handleKey = useCallback((e: React.KeyboardEvent) => {
-    if (!explored && (e.key === 'Enter' || e.key === ' ')) {
+    if (clickable && (e.key === 'Enter' || e.key === ' ')) {
       e.preventDefault();
       onClick?.();
     }
-  }, [explored, onClick]);
+  }, [clickable, onClick]);
 
   const ariaLabel = explored
     ? `${catLabel}: ${dimName}, ${BELIEF_LABELS_10[score!] || 'Unknown'} (${score}/9), ${confidence}% confidence`
     : `${catLabel}: ${dimName}, Unexplored. Press Enter to explore now.`;
+
+  // Background priority: explicit override > SHEX[score] for explored > undefined
+  // for unexplored (CSS handles the gray-striped pattern via .is-unexplored).
+  const background = colorOverride ?? (explored ? SHEX[score!] : undefined);
+  const hasFill = !!colorOverride || explored;
 
   return (
     <div
@@ -50,19 +69,20 @@ export default function DnaCell({
       data-dim-cat={catKey}
       data-testid={`dna-cell-${dimId}`}
       role="button"
-      tabIndex={explored ? -1 : 0}
+      tabIndex={clickable ? 0 : -1}
       aria-label={ariaLabel}
-      className={`dna-strip-cell${explored ? ' is-explored' : ' is-unexplored'}${justFilled ? ' just-filled' : ''}`}
+      className={`dna-strip-cell${hasFill ? ' is-explored' : ' is-unexplored'}${justFilled ? ' just-filled' : ''}`}
       onMouseEnter={e => onHover?.(e, dimName, score, confidence)}
       onMouseLeave={onLeave}
       onFocus={e => onHover?.(e as unknown as React.MouseEvent, dimName, score, confidence)}
       onBlur={onLeave}
-      onClick={() => !explored && onClick?.()}
+      onClick={() => clickable && onClick?.()}
       onKeyDown={handleKey}
       style={{
         height,
-        background: explored ? SHEX[score!] : undefined,
-        boxShadow: explored ? 'inset 0 0 0 1px rgba(255,255,255,0.08)' : undefined,
+        background,
+        boxShadow: hasFill ? 'inset 0 0 0 1px rgba(255,255,255,0.08)' : undefined,
+        cursor: clickable ? 'pointer' : 'default',
       }}
     />
   );

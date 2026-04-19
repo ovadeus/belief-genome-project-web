@@ -11,8 +11,9 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { path: '/probe',     label: 'Reflections' },
   { path: '/dashboard', label: 'Dashboard' },
-  { path: '/dna',       label: 'DNA' },
-  { path: '/analyze',   label: 'Analyze' },
+  { path: '/dna',         label: 'DNA' },
+  { path: '/dna/compare', label: 'Compare' },
+  { path: '/analyze',     label: 'Analyze' },
   { path: '/sync',      label: 'Sync Data' },
   { path: '/profile',   label: 'Profile' },
 ];

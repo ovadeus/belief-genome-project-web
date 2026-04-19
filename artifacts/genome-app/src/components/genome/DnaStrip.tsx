@@ -31,6 +31,23 @@ interface Props {
   filterCat?: string;
   /** Compact mode: hides header, legend, totals — useful inside the probe page. */
   miniMode?: boolean;
+  /**
+   * Compare mode: per-dimension fill color override (typically agreement-bucket
+   * colors). When provided, the legend at the bottom switches to the agreement
+   * legend instead of the belief legend.
+   */
+  colorOverride?: Record<number, string>;
+  /**
+   * Compare mode: when supplied, every cell becomes clickable and this
+   * callback fires with the dim id (compare page uses it to drive the
+   * detail panel). When omitted, default behaviour is preserved (only
+   * unexplored cells launch the explore flow).
+   */
+  onCellSelect?: (dimId: number) => void;
+  /** Currently selected dim id in compare mode — gets a focus ring. */
+  selectedDimId?: number | null;
+  /** When true, render the agreement legend instead of belief legend. */
+  agreementLegend?: boolean;
 }
 
 interface TooltipState {
@@ -41,6 +58,7 @@ export default function DnaStrip({
   dimensions, dimensionScores, confidence,
   totalResponses, dimensionsCovered, overallConfidence,
   filterCat, miniMode = false,
+  colorOverride, onCellSelect, selectedDimId, agreementLegend = false,
 }: Props) {
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -60,6 +78,11 @@ export default function DnaStrip({
   const handleLeave = useCallback(() => setTooltip(null), []);
 
   const handleCellClick = useCallback((dim: DimDef) => {
+    // Compare mode short-circuit — any cell click goes to the supplied handler.
+    if (onCellSelect) {
+      onCellSelect(dim.id);
+      return;
+    }
     if (dimensionScores[dim.id] !== undefined) return;
     const cat = CATEGORIES.find(c => c.id === dim.cat);
     if (!cat) return;
@@ -71,7 +94,7 @@ export default function DnaStrip({
     dimNames[dim.id] = dim.name;
     startExplore({ catKey: cat.id, catLabel: cat.label, dimQueue: clickedFirst, dimNames });
     navigate('/probe');
-  }, [dimensions, dimensionScores, startExplore, navigate]);
+  }, [dimensions, dimensionScores, startExplore, navigate, onCellSelect]);
 
   const visibleCats = filterCat ? CATEGORIES.filter(c => c.id === filterCat) : CATEGORIES;
 
@@ -125,20 +148,28 @@ export default function DnaStrip({
                 {catDims.map(dim => {
                   const raw = dimensionScores[dim.id];
                   const score = raw === undefined ? null : raw;
+                  const isSelected = selectedDimId === dim.id;
                   return (
-                    <DnaCell
-                      key={dim.id}
-                      dimId={dim.id}
-                      dimName={dim.name}
-                      catKey={dim.cat}
-                      catLabel={cat.label}
-                      score={score}
-                      confidence={confidence[dim.id] ?? 0}
-                      height={miniMode ? 12 : 14}
-                      onClick={() => handleCellClick(dim)}
-                      onHover={handleHover}
-                      onLeave={handleLeave}
-                    />
+                    <div key={dim.id} style={{
+                      flex: 1, minWidth: 0, display: 'flex',
+                      outline: isSelected ? '2px solid #6c8fff' : 'none',
+                      outlineOffset: 1, borderRadius: 2,
+                    }}>
+                      <DnaCell
+                        dimId={dim.id}
+                        dimName={dim.name}
+                        catKey={dim.cat}
+                        catLabel={cat.label}
+                        score={score}
+                        confidence={confidence[dim.id] ?? 0}
+                        height={miniMode ? 12 : 14}
+                        onClick={() => handleCellClick(dim)}
+                        onHover={handleHover}
+                        onLeave={handleLeave}
+                        colorOverride={colorOverride?.[dim.id]}
+                        forceClickable={!!onCellSelect}
+                      />
+                    </div>
                   );
                 })}
               </div>
@@ -153,7 +184,19 @@ export default function DnaStrip({
         })}
       </div>
 
-      {!miniMode && (
+      {!miniMode && agreementLegend && (
+        <div style={{
+          display: 'flex', justifyContent: 'center', gap: 16, marginTop: 16,
+          fontSize: 10, color: 'rgba(255,255,255,0.4)', flexWrap: 'wrap',
+        }}>
+          <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: '#22c55e', marginRight: 4, verticalAlign: 'middle' }} />Strong Agreement (Δ≤1)</span>
+          <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: '#facc15', marginRight: 4, verticalAlign: 'middle' }} />Mild (Δ≤3)</span>
+          <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: '#fb923c', marginRight: 4, verticalAlign: 'middle' }} />Moderate (Δ≤5)</span>
+          <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: '#dc2626', marginRight: 4, verticalAlign: 'middle' }} />Strong Divergence</span>
+          <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: 'rgba(255,255,255,0.15)', marginRight: 4, verticalAlign: 'middle' }} />One side unexplored</span>
+        </div>
+      )}
+      {!miniMode && !agreementLegend && (
         <div style={{
           display: 'flex', justifyContent: 'center', gap: 16, marginTop: 16,
           fontSize: 10, color: 'rgba(255,255,255,0.4)', flexWrap: 'wrap',

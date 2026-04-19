@@ -11,6 +11,7 @@ import ProbePage from "./pages/genome/ProbePage";
 import DashboardPage from "./pages/genome/DashboardPage";
 import DnaPage from "./pages/genome/DnaPage";
 import PublicDnaPage from "./pages/genome/PublicDnaPage";
+import ComparePage from "./pages/genome/ComparePage";
 import AnalyzePage from "./pages/genome/AnalyzePage";
 import SyncPage from "./pages/genome/SyncPage";
 import ProfilePage from "./pages/genome/ProfilePage";
@@ -76,6 +77,16 @@ function Router() {
       </Route>
       <Route path="/dashboard">
         <RequireAuth><GenomeLayout><DashboardPage /></GenomeLayout></RequireAuth>
+      </Route>
+      {/* Auth-gated Compare — declared BEFORE /dna/:signature so the literal
+          'compare' segment doesn't get swallowed as a signature. The library
+          view (/dna/compare) and the compare-against-entry view
+          (/dna/compare/:entryId) share one page component, two visual modes. */}
+      <Route path="/dna/compare/:entryId">
+        <RequireAuth><GenomeLayout><ComparePage /></GenomeLayout></RequireAuth>
+      </Route>
+      <Route path="/dna/compare">
+        <RequireAuth><GenomeLayout><ComparePage /></GenomeLayout></RequireAuth>
       </Route>
       {/* Public, unauthenticated share page — MUST come before the protected
           /dna route, since wouter matches in declaration order. */}
