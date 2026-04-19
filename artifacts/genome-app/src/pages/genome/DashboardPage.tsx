@@ -353,6 +353,9 @@ export default function DashboardPage() {
   const [analysis, setAnalysis] = useState('');
   const [analysisTags, setAnalysisTags] = useState<string[]>([]);
   const [analysisError, setAnalysisError] = useState('');
+  // Lets the user dismiss the AI panel. Resets to false whenever a fresh
+  // analysis or error loads so a Refresh re-opens the panel.
+  const [analysisDismissed, setAnalysisDismissed] = useState(false);
   const [zoomIndex, setZoomIndex] = useState(0);
   const [fullscreen, setFullscreen] = useState(false);
 
@@ -375,6 +378,7 @@ export default function DashboardPage() {
         if (data?.analysis) {
           setAnalysis(data.analysis);
           setAnalysisTags(data.tags || []);
+          setAnalysisDismissed(false);
         }
       })
       .catch(() => {});
@@ -393,12 +397,16 @@ export default function DashboardPage() {
       if (res.ok && data.analysis) {
         setAnalysis(data.analysis);
         setAnalysisTags(data.tags || []);
+        setAnalysisError('');
       } else {
         setAnalysisError(data.error || 'Analysis failed.');
       }
     } catch {
       setAnalysisError('Network error — please try again.');
     }
+    // Always re-open the panel after a refresh attempt — even if it errored,
+    // the user needs to see why.
+    setAnalysisDismissed(false);
     setAnalysing(false);
   }, []);
 
@@ -560,13 +568,44 @@ export default function DashboardPage() {
       </div>
 
       {/* AI World View Analysis */}
-      {(analysis || analysisError) && (
+      {(analysis || analysisError) && !analysisDismissed && (
         <div style={{
+          position: 'relative',
           padding: 20, borderRadius: 12, marginBottom: 16,
           background: 'rgba(108,143,255,0.04)', border: '1px solid rgba(108,143,255,0.12)',
         }}>
+          <button
+            onClick={() => setAnalysisDismissed(true)}
+            aria-label="Close AI World View Analysis"
+            title="Close (re-opens on Refresh Analysis)"
+            style={{
+              position: 'absolute', top: 10, right: 10,
+              width: 28, height: 28,
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              background: 'transparent',
+              border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: 6,
+              color: 'rgba(255,255,255,0.5)',
+              cursor: 'pointer',
+              padding: 0,
+              transition: 'background 0.15s, color 0.15s, border-color 0.15s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(255,255,255,0.06)';
+              e.currentTarget.style.color = 'rgba(255,255,255,0.85)';
+              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.18)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = 'rgba(255,255,255,0.5)';
+              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
+            }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
           <div style={{
             display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12,
+            paddingRight: 36,
             fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase',
             color: 'rgba(167,139,250,0.8)',
             fontFamily: "'Space Mono', monospace",
