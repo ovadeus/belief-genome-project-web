@@ -96,7 +96,9 @@ export default function ComparePage() {
           <h2 style={sectionLabel}>Your Library</h2>
           <KnownDnasList
             selectedId={validEntryId}
-            onSelect={(e) => navigate(`/dna/compare/${e.id}`)}
+            onSelect={(e) =>
+              navigate(e.id === validEntryId ? '/dna/compare' : `/dna/compare/${e.id}`)
+            }
           />
         </section>
       </div>

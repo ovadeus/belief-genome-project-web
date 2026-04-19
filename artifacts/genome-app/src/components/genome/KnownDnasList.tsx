@@ -2,6 +2,7 @@
 // a delete button. Empty state nudges toward the dropzone. Server is the
 // source of truth for ordering; this is a pure render of useKnownDnas().
 
+import { Eye, EyeOff } from 'lucide-react';
 import { useKnownDnas, useDeleteKnownDna, type KnownDnaEntry } from '../../hooks/use-known-dnas';
 import { FormatBadge } from './ImportBgpDropzone';
 
@@ -85,17 +86,23 @@ export default function KnownDnasList({ selectedId, onSelect }: Props) {
             </div>
             <button
               onClick={() => onSelect(entry)}
-              title="Compare with your DNA"
-              aria-label={`Compare with ${entry.shareableName || 'this entry'}`}
+              title={isSelected ? 'Close comparison' : 'Preview comparison'}
+              aria-label={
+                isSelected
+                  ? `Close comparison with ${entry.shareableName || 'this entry'}`
+                  : `Compare with ${entry.shareableName || 'this entry'}`
+              }
+              aria-pressed={isSelected}
               style={{
                 padding: '6px 10px', borderRadius: 6,
-                background: 'rgba(108,143,255,0.15)',
-                border: '1px solid rgba(108,143,255,0.3)',
-                color: '#a8c0ff', fontSize: 14, cursor: 'pointer',
-                lineHeight: 1,
+                background: isSelected ? 'rgba(108,143,255,0.28)' : 'rgba(108,143,255,0.15)',
+                border: `1px solid ${isSelected ? 'rgba(108,143,255,0.6)' : 'rgba(108,143,255,0.3)'}`,
+                color: '#a8c0ff', cursor: 'pointer',
+                lineHeight: 0,
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
               }}
             >
-              👁️
+              {isSelected ? <EyeOff size={14} /> : <Eye size={14} />}
             </button>
             <button
               onClick={() => {
