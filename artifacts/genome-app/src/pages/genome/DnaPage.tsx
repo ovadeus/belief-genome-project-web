@@ -3,14 +3,18 @@ import { useRef, useState } from 'react';
 import DnaString from '../../components/genome/DnaString';
 import DnaStrip from '../../components/genome/DnaStrip';
 import ShareDnaModal from '../../components/genome/ShareDnaModal';
+import ExportBgpModal from '../../components/genome/ExportBgpModal';
 import { useDNA, useDimensions } from '../../hooks/use-genome';
+import { useGenomeAuth } from '../../components/genome/GenomeAuthContext';
 import { toast } from 'sonner';
 
 export default function DnaPage() {
   const dnaQ = useDNA();
   const dimsQ = useDimensions();
+  const { user } = useGenomeAuth();
   const [copying, setCopying] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const stripRef = useRef<HTMLDivElement>(null);
 
@@ -97,6 +101,13 @@ export default function DnaPage() {
             color: '#a8c0ff',
             fontSize: 12, fontWeight: 600, cursor: 'pointer',
           }}>Share</button>
+          <button onClick={() => setExportOpen(true)} style={{
+            padding: '8px 14px', borderRadius: 8,
+            background: 'transparent',
+            border: '1px solid rgba(108,143,255,0.3)',
+            color: 'rgba(255,255,255,0.7)',
+            fontSize: 12, fontWeight: 600, cursor: 'pointer',
+          }}>Export .bgp</button>
           <button onClick={downloadPng} disabled={downloading} style={{
             padding: '8px 14px', borderRadius: 8,
             background: 'transparent',
@@ -151,6 +162,18 @@ export default function DnaPage() {
           overallConfidence={dna.overallConfidence}
         />
       </div>
+
+      <ShareDnaModal
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        dnaString={dna.dnaString}
+      />
+      <ExportBgpModal
+        open={exportOpen}
+        onClose={() => setExportOpen(false)}
+        dnaString={dna.dnaString}
+        defaultName={user?.name ?? null}
+      />
 
       {/* How it works */}
       <div style={{

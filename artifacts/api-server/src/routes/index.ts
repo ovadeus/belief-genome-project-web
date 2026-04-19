@@ -14,6 +14,8 @@ import genomeDataRouter from "./genome-data";
 import genomePublicRouter from "./genome-public";
 import genomeSubmitRouter from "./genome-submit";
 import genomeAdminRouter from "./genome-admin";
+import genomeKnownDnasRouter from "./genome-known-dnas";
+import genomeCompareRouter from "./genome-compare";
 import analyticsRouter from "./analytics";
 import { requireAuth } from "../middlewares/auth";
 
@@ -38,6 +40,8 @@ router.use("/genome", genomeSubmitRouter);
 router.use("/genome/admin", requireAuth, genomeAdminRouter);
 router.use("/genome", genomeAuthRouter);
 router.use("/genome", genomeAuth, genomeDataRouter);
+router.use("/genome", genomeAuth, genomeCompareRouter);
 router.use("/genome/probes", genomeAuth, genomeProbesRouter);
+router.use("/genome/known-dnas", genomeAuth, genomeKnownDnasRouter);
 
 export default router;

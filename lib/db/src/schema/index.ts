@@ -9,3 +9,4 @@ export * from "./genomeSubmissions";
 export * from "./genomeAnalyses";
 export * from "./pageViews";
 export * from "./dnaShareEvents";
+export * from "./knownDnas";

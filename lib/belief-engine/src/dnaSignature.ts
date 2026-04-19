@@ -19,6 +19,7 @@ export interface DecodedSignature {
   format: SignatureFormat | null;
   beliefSegment: string;     // always present when valid
   fullDna: string | null;    // signed only
+  signature: string;         // the original signature string (carried through so callers don't reconstruct)
   reason?: string;           // diagnostics for server-side logging only
 }
 
@@ -82,7 +83,7 @@ export function encodeSigned(dnaString: string): string {
  */
 export function decodeSignature(sig: string): DecodedSignature {
   const fail = (reason: string): DecodedSignature => ({
-    valid: false, format: null, beliefSegment: '', fullDna: null, reason,
+    valid: false, format: null, beliefSegment: '', fullDna: null, signature: '', reason,
   });
 
   if (typeof sig !== 'string' || sig.length < 6) return fail('too_short');
@@ -102,7 +103,7 @@ export function decodeSignature(sig: string): DecodedSignature {
   if (prefix === 'a') {
     if (payload.length !== BELIEF_SEGMENT_LENGTH) return fail('payload_length_anon');
     if (checksum(payload) !== cs) return fail('checksum_mismatch_anon');
-    return { valid: true, format: 'anonymous', beliefSegment: payload, fullDna: null };
+    return { valid: true, format: 'anonymous', beliefSegment: payload, fullDna: null, signature: sig };
   }
 
   if (prefix === 's') {
@@ -113,6 +114,7 @@ export function decodeSignature(sig: string): DecodedSignature {
       format: 'signed',
       beliefSegment: payload.slice(BELIEF_SEGMENT_START),
       fullDna: payload,
+      signature: sig,
     };
   }
 
@@ -162,4 +164,158 @@ export function parseDemographicPrefix(dnaString: string): DemographicPrefix {
     countryCode: dnaString.slice(8, 11),
     zipCode:     dnaString.slice(11, 16),
   };
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+//  .bgp portable file format
+// ──────────────────────────────────────────────────────────────────────────────
+//
+// The .bgp file is a small JSON envelope wrapping a share signature. It's the
+// portable format for exchanging DNAs between desktop, web, mobile, etc.
+//
+// Privacy invariant: anonymous .bgp files never carry demographics. The engine
+// enforces this by accepting only a pre-built signature (anonymous or signed)
+// — callers cannot leak demographics through this surface.
+
+export const BGP_FORMAT = 'bgp-dna/v1' as const;
+
+export type BgpExportSource = 'desktop' | 'web' | 'mobile' | string;
+
+export interface BgpFile {
+  format: typeof BGP_FORMAT;
+  type: SignatureFormat;            // 'anonymous' | 'signed'
+  signature: string;                // a:... or s:... — already encoded
+  exportedAt: string;               // ISO timestamp
+  exportedFrom: BgpExportSource;    // 'web' from this codebase
+  shareableName?: string | null;
+  note?: string | null;
+}
+
+/**
+ * Build a .bgp file payload around an already-encoded signature. The caller
+ * must pass the signature produced by encodeAnonymous / encodeSigned — this
+ * function does NOT take a raw DNA string, so it cannot accidentally leak
+ * demographics through an anonymous export.
+ */
+export function buildBgpFile(opts: {
+  signature: string;
+  shareableName?: string | null;
+  note?: string | null;
+  exportedFrom?: BgpExportSource;
+  exportedAt?: string;
+}): BgpFile {
+  const decoded = decodeSignature(opts.signature);
+  if (!decoded.valid || !decoded.format) {
+    throw new Error('buildBgpFile: invalid signature');
+  }
+  const file: BgpFile = {
+    format: BGP_FORMAT,
+    type: decoded.format,
+    signature: opts.signature,
+    exportedAt: opts.exportedAt || new Date().toISOString(),
+    exportedFrom: opts.exportedFrom || 'web',
+  };
+  if (opts.shareableName && opts.shareableName.trim()) {
+    file.shareableName = opts.shareableName.trim().slice(0, 80);
+  }
+  if (opts.note && opts.note.trim()) {
+    file.note = opts.note.trim().slice(0, 500);
+  }
+  return file;
+}
+
+export interface ParsedSignature {
+  valid: true;
+  format: SignatureFormat;
+  signature: string;
+  beliefSegment: string;
+  fullDna: string | null;
+  // Optional metadata when the source was a .bgp file
+  shareableName: string | null;
+  note: string | null;
+  exportedAt: string | null;
+  exportedFrom: string | null;
+  fileFormat: typeof BGP_FORMAT | null;
+}
+
+/**
+ * Parse a .bgp JSON blob (already-stringified). Returns null on any structural
+ * problem — same minimal-error-surface rule as decodeSignature.
+ */
+export function parseBgpFile(json: string): ParsedSignature | null {
+  let raw: unknown;
+  try { raw = JSON.parse(json); } catch { return null; }
+  if (!raw || typeof raw !== 'object') return null;
+  const obj = raw as Record<string, unknown>;
+  if (obj.format !== BGP_FORMAT) return null;
+  if (typeof obj.signature !== 'string') return null;
+
+  const decoded = decodeSignature(obj.signature);
+  if (!decoded.valid || !decoded.format) return null;
+
+  // The 'type' field in the file should match the prefix on the signature —
+  // mismatch means the file was hand-edited or corrupted. Reject it.
+  if (obj.type !== decoded.format) return null;
+
+  return {
+    valid: true,
+    format: decoded.format,
+    signature: decoded.signature,
+    beliefSegment: decoded.beliefSegment,
+    fullDna: decoded.fullDna,
+    shareableName: typeof obj.shareableName === 'string' ? obj.shareableName.slice(0, 80) : null,
+    note: typeof obj.note === 'string' ? obj.note.slice(0, 500) : null,
+    exportedAt: typeof obj.exportedAt === 'string' ? obj.exportedAt : null,
+    exportedFrom: typeof obj.exportedFrom === 'string' ? obj.exportedFrom : null,
+    fileFormat: BGP_FORMAT,
+  };
+}
+
+/**
+ * Universal parser. Accepts:
+ *   - Raw signatures:       "a:...-abc4" or "s:...-abc4"
+ *   - Share URLs:           "https://.../dna/a:...-abc4?utm=..."  or  ".../compare/a:...-abc4/s:...-def2"
+ *     (returns the FIRST valid signature found in URL position)
+ *   - Full .bgp JSON blobs: the file contents pasted as text
+ *   - Whitespace around any of the above
+ *
+ * Returns null for garbage input. Does NOT distinguish between "wrong prefix"
+ * and "bad checksum" in its return — callers should treat both as 404.
+ */
+export function parseSignatureFromAnyInput(raw: string): ParsedSignature | null {
+  if (!raw || typeof raw !== 'string') return null;
+  const input = raw.trim();
+  if (!input) return null;
+
+  // Shape 1: full .bgp JSON blob
+  if (input.startsWith('{')) {
+    const fromJson = parseBgpFile(input);
+    if (fromJson) return fromJson;
+    // If it parsed as JSON but failed validation, fall through — the user
+    // might have pasted a JSON-shaped string that contains a signature.
+  }
+
+  // Shape 2: share URL — pull the first signature off the path/query.
+  // Matches a:... or s:... preceded by /, ?, &, or whitespace, ended by
+  // /, ?, &, #, whitespace, or string end.
+  const sigMatch = input.match(/(?:^|[\/?&\s])([as]:[A-Za-z0-9·\-]+?)(?=[\/?&#\s]|$)/);
+  const candidate = sigMatch ? sigMatch[1] : input;
+
+  // Shape 3: raw signature
+  const decoded = decodeSignature(candidate);
+  if (decoded.valid && decoded.format) {
+    return {
+      valid: true,
+      format: decoded.format,
+      signature: decoded.signature,
+      beliefSegment: decoded.beliefSegment,
+      fullDna: decoded.fullDna,
+      shareableName: null,
+      note: null,
+      exportedAt: null,
+      exportedFrom: null,
+      fileFormat: null,
+    };
+  }
+  return null;
 }

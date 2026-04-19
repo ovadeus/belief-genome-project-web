@@ -3,6 +3,7 @@ import rateLimit from 'express-rate-limit';
 import crypto from 'crypto';
 import { db, dnaShareEvents } from '@workspace/db';
 import { decodeSignature, beliefSegmentToScores, parseDemographicPrefix, DIMENSIONS } from '@belief-genome/engine';
+import { buildTheirSide, computeComparison } from '../services/compareService';
 
 // Pre-compute the public dimensions payload once at module load. The
 // dimension catalog is static, so we don't need a per-request DB lookup
@@ -105,6 +106,53 @@ router.get('/:signature', async (req, res) => {
   }
 
   return res.json(payload);
+});
+
+// GET /api/genome/dna/public/compare/:sigA/:sigB
+// Public, unauthenticated two-side compare. Same rate limit + 404 semantics
+// as the single-DNA route. Both sides decoded server-side; demographics
+// included only for whichever side is 'signed'.
+router.get('/compare/:sigA/:sigB', async (req, res) => {
+  const { sigA, sigB } = req.params;
+
+  let sideA, sideB;
+  try {
+    sideA = buildTheirSide(sigA);
+    sideB = buildTheirSide(sigB);
+  } catch {
+    return res.status(404).json({ error: 'not_found' });
+  }
+
+  const validDimIds = new Set(DIMENSIONS.map(d => d.id));
+  for (const ids of [Object.keys(sideA.dimensionScores), Object.keys(sideB.dimensionScores)]) {
+    for (const idStr of ids) {
+      if (!validDimIds.has(parseInt(idStr, 10))) {
+        return res.status(404).json({ error: 'not_found' });
+      }
+    }
+  }
+
+  const utm = {
+    source: typeof req.query.utm_source === 'string' ? req.query.utm_source.slice(0, 64) : null,
+    medium: typeof req.query.utm_medium === 'string' ? req.query.utm_medium.slice(0, 64) : null,
+    campaign: typeof req.query.utm_campaign === 'string' ? req.query.utm_campaign.slice(0, 64) : null,
+  };
+  const ip = (req.headers['x-forwarded-for']?.toString().split(',')[0] || req.ip || '').trim();
+  db.insert(dnaShareEvents).values({
+    signature: sigA,
+    signatureB: sigB,
+    kind: 'compare_view',
+    utmSource: utm.source,
+    utmMedium: utm.medium,
+    utmCampaign: utm.campaign,
+    ipHash: hashIp(ip),
+  }).catch((err: unknown) => {
+    // eslint-disable-next-line no-console
+    console.warn('[genome-public] compare-view analytics insert failed:', err);
+  });
+
+  const comparison = computeComparison(sideA.dimensionScores, sideB.dimensionScores);
+  return res.json({ sideA, sideB, comparison });
 });
 
 // POST /api/genome/dna/public/:signature/share-click
