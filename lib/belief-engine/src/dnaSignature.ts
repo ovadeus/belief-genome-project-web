@@ -272,11 +272,31 @@ export function parseBgpFile(json: string): ParsedSignature | null {
 }
 
 /**
+ * Normalize "raw DNA" placeholder characters down to the canonical `·`.
+ * Users transcribing DNAs by hand (or pasting from "Copy DNA" on other
+ * surfaces) may use `*`, `?`, `_`, `-`, or whitespace as gap markers — all
+ * of those collapse to `·` here so the length check operates on a clean
+ * string. Digits 0-9 and existing `·` pass through untouched.
+ */
+function normalizeRawDnaPlaceholders(s: string): string {
+  // Strip ALL whitespace (tabs/newlines from a multi-line paste), then map
+  // the placeholder characters. Anything else stays as-is so the charset
+  // gate below can reject it.
+  return s.replace(/\s+/g, '').replace(/[*?_\-]/g, '·');
+}
+
+const RAW_DNA_CHARSET = /^[0-9·]+$/;
+
+/**
  * Universal parser. Accepts:
  *   - Raw signatures:       "a:...-abc4" or "s:...-abc4"
  *   - Share URLs:           "https://.../dna/a:...-abc4?utm=..."  or  ".../compare/a:...-abc4/s:...-def2"
  *     (returns the FIRST valid signature found in URL position)
  *   - Full .bgp JSON blobs: the file contents pasted as text
+ *   - Raw belief segment:   124 chars of [0-9·] (placeholders `*?_-` and
+ *                           whitespace are normalized to `·` first) — the
+ *                           parser auto-mints `a:<124>-<checksum>`
+ *   - Raw full DNA:         140 chars of [0-9·] — auto-mints `s:<140>-<checksum>`
  *   - Whitespace around any of the above
  *
  * Returns null for garbage input. Does NOT distinguish between "wrong prefix"
@@ -301,7 +321,7 @@ export function parseSignatureFromAnyInput(raw: string): ParsedSignature | null 
   const sigMatch = input.match(/(?:^|[\/?&\s])([as]:[A-Za-z0-9·\-]+?)(?=[\/?&#\s]|$)/);
   const candidate = sigMatch ? sigMatch[1] : input;
 
-  // Shape 3: raw signature
+  // Shape 3: raw prefixed signature
   const decoded = decodeSignature(candidate);
   if (decoded.valid && decoded.format) {
     return {
@@ -317,5 +337,44 @@ export function parseSignatureFromAnyInput(raw: string): ParsedSignature | null 
       fileFormat: null,
     };
   }
+
+  // Shape 4 & 5: raw DNA paste (no prefix, no checksum). Normalize placeholder
+  // chars to `·` and check length. Apply ONLY to the original input (NOT the
+  // URL-extracted candidate), so `https://...` / multi-line JSON blobs that
+  // failed earlier shapes don't accidentally match.
+  const normalized = normalizeRawDnaPlaceholders(input);
+  if (RAW_DNA_CHARSET.test(normalized)) {
+    if (normalized.length === FULL_DNA_LENGTH) {
+      const minted = `s:${normalized}-${checksum(normalized)}`;
+      return {
+        valid: true,
+        format: 'signed',
+        signature: minted,
+        beliefSegment: normalized.slice(BELIEF_SEGMENT_START),
+        fullDna: normalized,
+        shareableName: null,
+        note: null,
+        exportedAt: null,
+        exportedFrom: null,
+        fileFormat: null,
+      };
+    }
+    if (normalized.length === BELIEF_SEGMENT_LENGTH) {
+      const minted = `a:${normalized}-${checksum(normalized)}`;
+      return {
+        valid: true,
+        format: 'anonymous',
+        signature: minted,
+        beliefSegment: normalized,
+        fullDna: null,
+        shareableName: null,
+        note: null,
+        exportedAt: null,
+        exportedFrom: null,
+        fileFormat: null,
+      };
+    }
+  }
+
   return null;
 }
