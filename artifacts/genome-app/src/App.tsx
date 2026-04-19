@@ -8,6 +8,7 @@ import GenomeLayout from "./components/genome/GenomeLayout";
 import LoginPage from "./pages/genome/LoginPage";
 import RegisterPage from "./pages/genome/RegisterPage";
 import ProbePage from "./pages/genome/ProbePage";
+import { useThemeBootstrap } from "./hooks/use-theme";
 import DashboardPage from "./pages/genome/DashboardPage";
 import DnaPage from "./pages/genome/DnaPage";
 import PublicDnaPage from "./pages/genome/PublicDnaPage";
@@ -110,6 +111,7 @@ function Router() {
 }
 
 function App() {
+  useThemeBootstrap();
   return (
     <QueryClientProvider client={queryClient}>
       <GenomeAuthProvider>

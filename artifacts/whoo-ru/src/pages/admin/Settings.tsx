@@ -1,13 +1,20 @@
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { useAdminSettings, useAdminUpdateSettings, useAdminChangePassword } from "@/hooks/use-admin";
+import { useAdminTheme, type ThemeName } from "@/hooks/use-theme";
 import { useForm } from "react-hook-form";
 import { useEffect } from "react";
-import { Save, Lock } from "lucide-react";
+import { Save, Lock, Palette } from "lucide-react";
+
+const THEME_OPTIONS: Array<{ value: ThemeName; label: string; description: string }> = [
+  { value: "dark",  label: "Dark Mode Modern",     description: "Current site palette — deep navy, electric blue, soft violet." },
+  { value: "light", label: "Light Mode Classical", description: "Editorial paper-and-ink. Source Serif display, warm off-white background." },
+];
 
 export default function AdminSettings() {
   const { data: settings, isLoading } = useAdminSettings();
   const updateSettings = useAdminUpdateSettings();
   const changePassword = useAdminChangePassword();
+  const themeCtl = useAdminTheme();
 
   const { register: regSettings, handleSubmit: handleSettings, reset: resetSettings } = useForm();
   const { register: regPw, handleSubmit: handlePw, reset: resetPw } = useForm<{ currentPassword: string; newPassword: string }>();
@@ -42,6 +49,44 @@ export default function AdminSettings() {
     <AdminLayout>
       <div className="space-y-8">
         <h1 className="text-2xl font-bold text-foreground">Settings</h1>
+
+        <section className="bg-card border border-border rounded-2xl p-8 space-y-6">
+          <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+            <Palette className="w-5 h-5 text-primary" />
+            Appearance
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Choose the global theme. Applies to both this marketing site and the Belief Genome app for every visitor.
+          </p>
+          <div className="grid md:grid-cols-2 gap-4">
+            {THEME_OPTIONS.map(opt => {
+              const active = themeCtl.theme === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  disabled={themeCtl.loading || themeCtl.saving || active}
+                  onClick={() => { void themeCtl.save(opt.value); }}
+                  className={
+                    "text-left rounded-xl border p-4 transition " +
+                    (active
+                      ? "border-primary bg-primary/10 ring-2 ring-primary/40"
+                      : "border-border bg-background hover:border-primary/60") +
+                    " disabled:cursor-default"
+                  }
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-foreground">{opt.label}</span>
+                    {active && <span className="text-xs text-primary font-medium">ACTIVE</span>}
+                  </div>
+                  <p className="mt-1 text-sm text-muted-foreground">{opt.description}</p>
+                </button>
+              );
+            })}
+          </div>
+          {themeCtl.saving && <p className="text-xs text-muted-foreground">Saving…</p>}
+          {themeCtl.error && <p className="text-xs text-destructive">{themeCtl.error}</p>}
+        </section>
 
         <form onSubmit={handleSettings(onSaveSettings)} className="bg-card border border-border rounded-2xl p-8 space-y-6">
           <h2 className="text-lg font-bold text-foreground">Site Settings</h2>

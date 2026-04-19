@@ -1,9 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 
 @theme inline {
-  --font-sans: 'DM Sans', sans-serif;
-  --font-display: 'Outfit', sans-serif;
+  --font-sans: var(--theme-font-sans);
+  --font-display: var(--theme-font-display);
+  --font-mono: var(--theme-font-mono);
 
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
@@ -25,6 +27,7 @@
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
 
+  /* Belief score palette — IDENTITY, never theme-dependent */
   --color-belief-0: #dc2626;
   --color-belief-1: #ef4444;
   --color-belief-2: #f87171;
@@ -48,37 +51,117 @@
   --color-belief-right-pole: #2563eb;
 }
 
-:root {
-  /* Dark mode first design system */
-  --background: 240 20% 5%; /* #0a0a0f */
-  --foreground: 240 20% 95%; /* #f0f0f5 */
-  
-  --card: 240 18% 9%; /* #12121a */
+/* ──────────────────────────────────────────────────────────────────────────
+   THEME: Dark Mode Modern (default)
+   ──────────────────────────────────────────────────────────────────────── */
+:root,
+[data-theme="dark"] {
+  --theme-font-sans: 'DM Sans', system-ui, sans-serif;
+  --theme-font-display: 'Outfit', system-ui, sans-serif;
+  --theme-font-mono: 'Space Mono', 'JetBrains Mono', monospace;
+
+  --background: 240 20% 5%;        /* #0a0a0f */
+  --foreground: 240 20% 95%;       /* #f0f0f5 */
+  --card: 240 18% 9%;              /* #12121a */
   --card-foreground: 240 20% 95%;
-  
   --popover: 240 18% 9%;
   --popover-foreground: 240 20% 95%;
-  
-  --primary: 226 100% 71%; /* #6c8fff Electric Blue */
+  --primary: 226 100% 71%;         /* #6c8fff Electric Blue */
   --primary-foreground: 0 0% 100%;
-  
-  --secondary: 255 92% 76%; /* #a78bfa Soft Violet */
+  --secondary: 255 92% 76%;        /* #a78bfa Soft Violet */
   --secondary-foreground: 0 0% 100%;
-  
   --muted: 240 10% 15%;
   --muted-foreground: 215 16% 47%; /* #6b7280 */
-  
-  --accent: 188 86% 53%; /* #22d3ee Cyan/Teal */
+  --accent: 188 86% 53%;           /* #22d3ee Cyan/Teal */
   --accent-foreground: 0 0% 100%;
-  
-  --destructive: 0 84% 60%; /* #ef4444 */
+  --destructive: 0 84% 60%;        /* #ef4444 */
   --destructive-foreground: 0 0% 100%;
-  
   --border: 240 10% 15%;
   --input: 240 10% 15%;
   --ring: 226 100% 71%;
-  
   --radius: 0.75rem;
+
+  /* Inline-style convenience tokens (consumed by genome-app .tsx files) */
+  --text-primary:    #ffffff;
+  --text-secondary:  rgba(255, 255, 255, 0.7);
+  --text-muted:      rgba(255, 255, 255, 0.5);
+  --text-faint:      rgba(255, 255, 255, 0.35);
+  --text-ghost:      rgba(255, 255, 255, 0.2);
+  --surface-1:       rgba(255, 255, 255, 0.02);
+  --surface-2:       rgba(255, 255, 255, 0.04);
+  --surface-3:       rgba(255, 255, 255, 0.06);
+  --surface-overlay: rgba(0, 0, 0, 0.3);
+  --border-subtle:   rgba(255, 255, 255, 0.06);
+  --border-soft:     rgba(255, 255, 255, 0.1);
+  --border-strong:   rgba(255, 255, 255, 0.2);
+  --accent-soft:     rgba(108, 143, 255, 0.15);
+  --accent-mid:      rgba(108, 143, 255, 0.3);
+  --accent-strong:   rgba(108, 143, 255, 0.6);
+  --accent-text:     #a8c0ff;
+  --accent-bright:   #6c8fff;
+  --panel-glass-bg:  rgba(12, 12, 22, 0.65);
+  --panel-glass-bd:  rgba(30, 30, 53, 0.6);
+  --panel-glass-bd-hover: rgba(108, 143, 255, 0.4);
+  --strip-unexplored-stripe: rgba(255, 255, 255, 0.04);
+  --strip-unexplored-border: rgba(255, 255, 255, 0.06);
+  --strip-cell-hover-shadow: 0 0 8px rgba(255,255,255,0.25), inset 0 0 0 1px rgba(255,255,255,0.08);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   THEME: Light Mode Classical (editorial / paper-and-ink)
+   Mirrors the dark token names so the same components work unchanged.
+   ──────────────────────────────────────────────────────────────────────── */
+[data-theme="light"] {
+  --theme-font-sans:    'Inter', system-ui, sans-serif;
+  --theme-font-display: 'Source Serif 4', Georgia, serif;
+  --theme-font-mono:    'JetBrains Mono', 'Space Mono', monospace;
+
+  /* HSL approximations of the spec's OKLCH paper/ink/primary tokens */
+  --background: 48 30% 97%;        /* paper — warm off-white */
+  --foreground: 230 12% 17%;       /* ink — deep blue-black */
+  --card: 48 25% 94%;              /* paper-2 — recessed sections */
+  --card-foreground: 230 12% 17%;
+  --popover: 48 30% 97%;
+  --popover-foreground: 230 12% 17%;
+  --primary: 198 35% 35%;          /* deeper teal-blue — primary CTA / BGP */
+  --primary-foreground: 48 30% 97%;
+  --secondary: 230 18% 50%;
+  --secondary-foreground: 48 30% 97%;
+  --muted: 230 8% 92%;
+  --muted-foreground: 230 8% 48%;  /* ink-3 — meta, captions */
+  --accent: 220 22% 50%;           /* muted blue — supporting */
+  --accent-foreground: 48 30% 97%;
+  --destructive: 230 12% 28%;      /* spec: no red — destructive becomes ink-2 */
+  --destructive-foreground: 48 30% 97%;
+  --border: 230 8% 84%;            /* rule — 1px dividers */
+  --input: 230 8% 88%;
+  --ring: 198 35% 35%;
+  --radius: 0.125rem;              /* 2px — rectangular, not pill */
+
+  /* Inline-style convenience tokens (light variants) */
+  --text-primary:    #2a2d38;      /* ink */
+  --text-secondary:  #4f5462;      /* ink-2 */
+  --text-muted:      #6c7280;      /* ink-3 */
+  --text-faint:      #9097a3;
+  --text-ghost:      #b8bcc4;
+  --surface-1:       #faf9f5;      /* same as paper, used for subtle panels */
+  --surface-2:       #f1efe8;      /* paper-2 wash */
+  --surface-3:       #e8e6dd;
+  --surface-overlay: rgba(0, 0, 0, 0.04);
+  --border-subtle:   #e3e1d9;
+  --border-soft:     #d6d4cc;
+  --border-strong:   #2a2d38;      /* ink — for header rules */
+  --accent-soft:     rgba(58, 99, 122, 0.08);
+  --accent-mid:      rgba(58, 99, 122, 0.25);
+  --accent-strong:   rgba(58, 99, 122, 0.5);
+  --accent-text:     #3a637a;      /* primary teal-blue */
+  --accent-bright:   #3a637a;
+  --panel-glass-bg:  #faf9f5;      /* no glass effect in light — flat paper */
+  --panel-glass-bd:  #d6d4cc;
+  --panel-glass-bd-hover: #3a637a;
+  --strip-unexplored-stripe: rgba(0, 0, 0, 0.04);
+  --strip-unexplored-border: rgba(0, 0, 0, 0.08);
+  --strip-cell-hover-shadow: 0 0 6px rgba(0,0,0,0.12), inset 0 0 0 1px rgba(0,0,0,0.05);
 }
 
 @layer base {
@@ -94,7 +177,7 @@
   }
 }
 
-/* React Quill Dark Theme Overrides */
+/* React Quill editor — uses theme variables so it follows light/dark */
 .ql-toolbar.ql-snow {
   border-color: hsl(var(--border)) !important;
   background-color: hsl(var(--card));
@@ -177,16 +260,20 @@
 }
 
 .genome-panel-surface {
-  background: rgba(12, 12, 22, 0.65);
+  background: var(--panel-glass-bg);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
-  border: 1px solid rgba(30, 30, 53, 0.6);
+  border: 1px solid var(--panel-glass-bd);
   border-radius: 12px;
   overflow: hidden;
   transition: border-color 0.2s;
 }
+[data-theme="light"] .genome-panel-surface {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
 .genome-panel-surface:hover {
-  border-color: rgba(108, 143, 255, 0.4);
+  border-color: var(--panel-glass-bd-hover);
 }
 
 .belief-chip {
@@ -197,7 +284,7 @@
   border-radius: 999px;
   font-family: var(--font-sans);
   font-size: 11px;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid var(--border-soft);
 }
 
 @media (pointer: coarse) {

@@ -10,6 +10,20 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+      // First-paint theme bootstrap. Reads the cached theme written on the
+      // previous visit so the page renders in the correct palette before React
+      // mounts. The useThemeBootstrap hook in App.tsx then refreshes from the
+      // server on mount, so an admin's change propagates within one full load.
+      (function () {
+        try {
+          var t = localStorage.getItem("bgpTheme");
+          document.documentElement.dataset.theme = (t === "light" || t === "dark") ? t : "dark";
+        } catch (_) {
+          document.documentElement.dataset.theme = "dark";
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

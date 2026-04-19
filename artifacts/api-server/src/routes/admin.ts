@@ -14,6 +14,7 @@ import {
   ChangeAdminPasswordBody,
 } from "@workspace/api-zod";
 import { requireAuth } from "../middlewares/auth";
+import { VALID_THEMES, normalizeTheme } from "./settings";
 
 const router: IRouter = Router();
 
@@ -368,6 +369,30 @@ router.patch("/admin/settings", async (req, res): Promise<void> => {
     founderPhotoUrl: settingsObj.founderPhotoUrl || "",
     bookCoverUrl: settingsObj.bookCoverUrl || "",
   });
+});
+
+// Theme selector — read returns current value, write requires admin auth
+// (already gated by router.use("/admin", requireAuth) above).
+router.get("/admin/theme", async (_req, res): Promise<void> => {
+  const [row] = await db
+    .select()
+    .from(siteSettingsTable)
+    .where(eq(siteSettingsTable.key, "activeTheme"))
+    .limit(1);
+  res.json({ activeTheme: normalizeTheme(row?.value || undefined), valid: VALID_THEMES });
+});
+
+router.patch("/admin/theme", async (req, res): Promise<void> => {
+  const raw = typeof req.body?.activeTheme === "string" ? req.body.activeTheme : "";
+  if (!(VALID_THEMES as readonly string[]).includes(raw)) {
+    res.status(400).json({ error: "invalid_theme", valid: VALID_THEMES });
+    return;
+  }
+  await db
+    .insert(siteSettingsTable)
+    .values({ key: "activeTheme", value: raw })
+    .onConflictDoUpdate({ target: siteSettingsTable.key, set: { value: raw } });
+  res.json({ activeTheme: raw });
 });
 
 router.post("/admin/change-password", async (req, res): Promise<void> => {
