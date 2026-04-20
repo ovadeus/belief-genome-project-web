@@ -65,12 +65,12 @@ export default function Dashboard() {
           </h2>
           <div className="space-y-4">
             {stats?.recentSubscribers?.length ? stats.recentSubscribers.map(sub => (
-              <div key={sub.id} className="flex justify-between items-center py-3 border-b border-border last:border-0">
-                <div>
-                  <p className="font-medium text-foreground">{sub.email}</p>
-                  <p className="text-sm text-muted-foreground">{sub.name || 'No name provided'}</p>
+              <div key={sub.id} className="flex justify-between items-center gap-4 py-3 border-b border-border last:border-0">
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-foreground truncate">{sub.email}</p>
+                  <p className="text-sm text-muted-foreground truncate">{sub.name || 'No name provided'}</p>
                 </div>
-                <div className="text-right">
+                <div className="text-right whitespace-nowrap shrink-0">
                   <span className="text-xs font-medium px-2 py-1 bg-background border border-border rounded-md uppercase tracking-wider text-muted-foreground">
                     {sub.source}
                   </span>
@@ -87,12 +87,12 @@ export default function Dashboard() {
           <h2 className="text-xl font-bold mb-6">Recent Blog Activity</h2>
           <div className="space-y-4">
             {stats?.recentPosts?.length ? stats.recentPosts.map(post => (
-              <div key={post.id} className="flex justify-between items-center py-3 border-b border-border last:border-0">
-                <div className="flex-1 pr-4">
+              <div key={post.id} className="flex justify-between items-center gap-4 py-3 border-b border-border last:border-0">
+                <div className="flex-1 min-w-0">
                   <p className="font-medium text-foreground truncate">{post.title}</p>
-                  <p className="text-sm text-muted-foreground">{post.slug}</p>
+                  <p className="text-sm text-muted-foreground truncate">{post.slug}</p>
                 </div>
-                <div className="text-right whitespace-nowrap">
+                <div className="text-right whitespace-nowrap shrink-0">
                   <span className={`text-xs font-medium px-2 py-1 rounded-md capitalize ${
                     post.status === 'published' ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/10 text-yellow-500'
                   }`}>
