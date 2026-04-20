@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { eq, desc, sql, and, ilike } from "drizzle-orm";
 import bcrypt from "bcryptjs";
-import { db, blogPostsTable, subscribersTable, earlyBirdTable, adminUsersTable, siteSettingsTable, mediaTable } from "@workspace/db";
+import { db, blogPostsTable, subscribersTable, earlyBirdTable, adminUsersTable, siteSettingsTable, mediaTable, users as genomeUsersTable, beliefResponses as beliefResponsesTable, dnaSnapshots as dnaSnapshotsTable } from "@workspace/db";
 import { ObjectStorageService } from "../lib/objectStorage";
 import { seedExploreData, clearTestData } from "../lib/seedExploreData";
 import {
@@ -368,6 +368,65 @@ router.patch("/admin/settings", async (req, res): Promise<void> => {
     githubUrl: settingsObj.githubUrl || "",
     founderPhotoUrl: settingsObj.founderPhotoUrl || "",
     bookCoverUrl: settingsObj.bookCoverUrl || "",
+  });
+});
+
+// ─── Genome users (BGP app users — distinct from admin users and from
+// marketing-list subscribers). One row per user with derived fields:
+// probeCount = total belief_responses for that user, latestDnaString = the
+// most recent dna_snapshots.dna_string. Both are computed in SQL with a
+// single round trip so this scales to thousands of users.
+router.get("/admin/users", async (req, res): Promise<void> => {
+  const page = Math.max(1, parseInt((req.query.page as string) || "1", 10) || 1);
+  const limit = Math.min(100, Math.max(1, parseInt((req.query.limit as string) || "25", 10) || 25));
+  const offset = (page - 1) * limit;
+  const search = ((req.query.search as string) || "").trim();
+
+  const where = search
+    ? sql`WHERE u.email ILIKE ${"%" + search + "%"} OR u.name ILIKE ${"%" + search + "%"}`
+    : sql``;
+
+  const rowsResult = await db.execute(sql`
+    SELECT
+      u.id,
+      u.email,
+      u.name,
+      u.created_at AS "createdAt",
+      COALESCE(rc.cnt, 0)::int AS "probeCount",
+      ds.dna_string AS "latestDnaString",
+      ds.snapshot_at AS "latestDnaAt"
+    FROM ${genomeUsersTable} u
+    LEFT JOIN (
+      SELECT user_id, COUNT(*) AS cnt
+      FROM ${beliefResponsesTable}
+      GROUP BY user_id
+    ) rc ON rc.user_id = u.id
+    LEFT JOIN LATERAL (
+      SELECT dna_string, snapshot_at
+      FROM ${dnaSnapshotsTable}
+      WHERE user_id = u.id
+      ORDER BY snapshot_at DESC
+      LIMIT 1
+    ) ds ON true
+    ${where}
+    ORDER BY u.created_at DESC
+    LIMIT ${limit} OFFSET ${offset};
+  `);
+
+  const countResult = await db.execute(sql`
+    SELECT COUNT(*)::int AS total FROM ${genomeUsersTable} u ${where};
+  `);
+
+  const rows = (rowsResult as any).rows ?? rowsResult;
+  const totalRow = ((countResult as any).rows ?? countResult)[0] as { total: number } | undefined;
+  const total = totalRow?.total ?? 0;
+
+  res.json({
+    users: rows,
+    total,
+    page,
+    limit,
+    totalPages: Math.max(1, Math.ceil(total / limit)),
   });
 });
 

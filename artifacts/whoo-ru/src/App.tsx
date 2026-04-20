@@ -22,6 +22,7 @@ import Dashboard from "./pages/admin/Dashboard";
 import BlogList from "./pages/admin/BlogList";
 import BlogEditor from "./pages/admin/BlogEditor";
 import AdminSubscribers from "./pages/admin/Subscribers";
+import AdminUsers from "./pages/admin/Users";
 import AdminEarlyBird from "./pages/admin/EarlyBird";
 import AdminSettings from "./pages/admin/Settings";
 import MediaLibrary from "./pages/admin/MediaLibrary";
@@ -71,6 +72,7 @@ function Router() {
       <Route path="/admin/blog/new" component={BlogEditor} />
       <Route path="/admin/blog/edit/:id" component={BlogEditor} />
       <Route path="/admin/subscribers" component={AdminSubscribers} />
+      <Route path="/admin/users" component={AdminUsers} />
       <Route path="/admin/earlybird" component={AdminEarlyBird} />
       <Route path="/admin/media" component={MediaLibrary} />
       <Route path="/admin/settings" component={AdminSettings} />
