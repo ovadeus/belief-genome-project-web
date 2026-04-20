@@ -2,8 +2,8 @@ import { PublicNavbar } from "@/components/layout/PublicNavbar";
 
 export default function MindMap() {
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-[#06091a]">
-      <div className="fixed top-0 left-0 right-0 z-[1000] bg-[#06091a] backdrop-blur-md">
+    <div className="relative w-full h-screen overflow-hidden bg-background">
+      <div className="fixed top-0 left-0 right-0 z-[1000] bg-background backdrop-blur-md">
         <PublicNavbar />
       </div>
       <iframe

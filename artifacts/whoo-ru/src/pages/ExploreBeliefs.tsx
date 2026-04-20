@@ -154,7 +154,7 @@ export default function ExploreBeliefs() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-4">
           <h1 className="text-4xl md:text-5xl font-display font-bold text-foreground">
-            Explore <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#6c8fff] to-[#a78bfa]">Beliefs</span>
+            Explore <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Beliefs</span>
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Aggregated, anonymized belief data from Belief Genome participants around the world.
@@ -180,7 +180,7 @@ export default function ExploreBeliefs() {
         />
 
         {/* Tab switcher */}
-        <div className="bg-[#0c1025]/80 border border-white/10 rounded-2xl p-2 flex flex-wrap gap-1 sticky top-0 z-20 backdrop-blur">
+        <div className="bg-card/80 border border-border rounded-2xl p-2 flex flex-wrap gap-1 sticky top-0 z-20 backdrop-blur">
           {TABS.map(t => {
             const Icon = t.icon;
             const active = activeTab === t.key;
@@ -190,8 +190,8 @@ export default function ExploreBeliefs() {
                 onClick={() => setActiveTab(t.key)}
                 className={`flex-1 min-w-[120px] inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
                   active
-                    ? "bg-gradient-to-r from-[#6c8fff] to-[#a78bfa] text-white shadow-lg"
-                    : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                    ? "bg-gradient-to-r from-primary to-secondary text-foreground shadow-lg"
+                    : "text-muted-foreground hover:text-foreground hover:bg-foreground/5"
                 }`}
               >
                 <Icon size={14} />
@@ -279,7 +279,7 @@ const baseTooltipStyle = {
   backgroundColor: '#0c1025',
   borderColor: '#ffffff20',
   borderWidth: 1,
-  titleColor: '#fff',
+  titleColor: 'var(--text-primary)',
   bodyColor: '#94a3b8',
   padding: 12,
   cornerRadius: 8,
@@ -323,7 +323,7 @@ function PanelShell({ title, subtitle, tooltip, badge, actions, children }: {
   actions?: React.ReactNode; children: React.ReactNode;
 }) {
   return (
-    <div className="bg-[#0c1025]/80 border border-white/10 rounded-2xl p-6">
+    <div className="bg-card/80 border border-border rounded-2xl p-6">
       <div className="flex items-start justify-between gap-4 mb-4 flex-wrap">
         <div>
           <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
@@ -344,10 +344,10 @@ function PanelShell({ title, subtitle, tooltip, badge, actions, children }: {
 
 function PanelSkeleton({ height = 350 }: { height?: number }) {
   return (
-    <div className="bg-[#0c1025]/80 border border-white/10 rounded-2xl p-6">
-      <div className="h-5 w-48 bg-white/5 rounded mb-2 animate-pulse" />
-      <div className="h-3 w-72 bg-white/5 rounded mb-6 animate-pulse" />
-      <div className="bg-white/5 rounded-xl animate-pulse" style={{ height }} />
+    <div className="bg-card/80 border border-border rounded-2xl p-6">
+      <div className="h-5 w-48 bg-foreground/5 rounded mb-2 animate-pulse" />
+      <div className="h-3 w-72 bg-foreground/5 rounded mb-6 animate-pulse" />
+      <div className="bg-foreground/5 rounded-xl animate-pulse" style={{ height }} />
     </div>
   );
 }
@@ -443,7 +443,7 @@ function BreakdownPanel({
       const y = yScale.getPixelForValue(DISPLAY_NEUTRAL);
       const { left, right } = chart.chartArea;
       const ctx = chart.ctx;
-      const color = CATEGORIES[selectedCategory]?.color || '#6c8fff';
+      const color = CATEGORIES[selectedCategory]?.color || 'var(--accent-bright)';
       ctx.save();
       ctx.beginPath();
       ctx.setLineDash([6, 4]);
@@ -483,7 +483,7 @@ function BreakdownPanel({
               return (
                 <div key={catKey} style={{ opacity: hasData ? 1 : 0.32 }}>
                   <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr 40px 130px', gap: 8, alignItems: 'center' }}>
-                    <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', textAlign: 'right' }}>{name}</span>
+                    <span style={{ fontSize: 13, color: 'var(--text-secondary)', textAlign: 'right' }}>{name}</span>
                     <div style={{ position: 'relative', height: 14 }}>
                       <div style={{
                         position: 'absolute', inset: '3px 0', borderRadius: 4,
@@ -500,7 +500,7 @@ function BreakdownPanel({
                         }} />
                       )}
                     </div>
-                    <span style={{ fontSize: 11, fontFamily: "'Space Mono', monospace", color: 'rgba(255,255,255,0.35)', textAlign: 'right' }}>
+                    <span style={{ fontSize: 11, fontFamily: "'Space Mono', monospace", color: 'var(--text-faint)', textAlign: 'right' }}>
                       {hasData ? `${cnt}×` : ''}
                     </span>
                     <span style={{ fontSize: 11, color: col, textAlign: 'right' }}>{lbl}</span>
@@ -508,8 +508,8 @@ function BreakdownPanel({
                   <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr 40px 130px', gap: 8, marginTop: 2 }}>
                     <span />
                     <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 4px' }}>
-                      <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)' }}>{axis.left}</span>
-                      <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)' }}>{axis.right}</span>
+                      <span style={{ fontSize: 10, color: 'var(--text-ghost)' }}>{axis.left}</span>
+                      <span style={{ fontSize: 10, color: 'var(--text-ghost)' }}>{axis.right}</span>
                     </div>
                     <span /><span />
                   </div>
@@ -533,8 +533,8 @@ function BreakdownPanel({
               onClick={() => onSelectCategory(key)}
               className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all border ${
                 selectedCategory === key
-                  ? 'text-white border-transparent shadow-md'
-                  : 'text-muted-foreground border-white/10 hover:border-white/20 hover:text-foreground'
+                  ? 'text-foreground border-transparent shadow-md'
+                  : 'text-muted-foreground border-border hover:border-border hover:text-foreground'
               }`}
               style={selectedCategory === key ? { backgroundColor: c.color, boxShadow: `0 2px 12px ${c.color}40` } : {}}
             >
@@ -624,7 +624,7 @@ function TimelinePanel({
       },
       tooltip: {
         backgroundColor: '#0c1025', borderColor: '#ffffff20', borderWidth: 1,
-        titleColor: '#fff', titleFont: { size: 13, weight: 'bold' }, titleMarginBottom: 8,
+        titleColor: 'var(--text-primary)', titleFont: { size: 13, weight: 'bold' }, titleMarginBottom: 8,
         bodyColor: '#94a3b8', bodyFont: { size: 12 }, bodySpacing: 6,
         padding: { top: 12, bottom: 12, left: 12, right: 12 }, cornerRadius: 8,
         callbacks: {
@@ -672,7 +672,7 @@ function TimelinePanel({
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all border ${
                 interval === ti.value
                   ? 'bg-primary/20 border-primary/40 text-primary'
-                  : 'border-white/10 text-muted-foreground hover:text-foreground hover:border-white/20'
+                  : 'border-border text-muted-foreground hover:text-foreground hover:border-border'
               }`}
             >
               {ti.label}
@@ -726,7 +726,7 @@ function GenderPanel({
   if (loading && genders.length === 0) return <PanelSkeleton height={400} />;
 
   const genderLabels: Record<string, string> = { M: 'Male', F: 'Female', NB: 'Non-Binary', PNS: 'Prefer Not to Say', Intersex: 'Intersex' };
-  const colors = ['#6c8fff', '#a78bfa', '#22d3ee', '#ff6b81', '#44bd32'];
+  const colors = ['var(--accent-bright)', 'var(--accent-text)', '#22d3ee', '#ff6b81', '#44bd32'];
   const data = {
     labels: genders.map(g => genderLabels[g.gender] || g.gender),
     datasets: [{
@@ -851,8 +851,8 @@ function GenerationPanel({
             onClick={() => onSelectCategory(c.value)}
             className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all border ${
               selectedCategory === c.value
-                ? 'text-white border-transparent shadow-md'
-                : 'text-muted-foreground border-white/10 hover:border-white/20 hover:text-foreground'
+                ? 'text-foreground border-transparent shadow-md'
+                : 'text-muted-foreground border-border hover:border-border hover:text-foreground'
             }`}
             style={selectedCategory === c.value ? { backgroundColor: c.color, boxShadow: `0 2px 12px ${c.color}40` } : {}}
           >
@@ -879,7 +879,7 @@ function InfoTip({ text }: { text: string }) {
     <span className="relative inline-flex ml-1.5" onMouseEnter={() => setShow(true)} onMouseLeave={() => setShow(false)}>
       <Info size={16} className="text-muted-foreground/60 hover:text-primary transition-colors" />
       {show && (
-        <span className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 px-3 py-2.5 rounded-xl bg-[#1a1f3a] border border-white/15 text-xs text-[#c8cfe0] leading-relaxed shadow-xl pointer-events-none">
+        <span className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 px-3 py-2.5 rounded-xl bg-muted border border-white/15 text-xs text-[#c8cfe0] leading-relaxed shadow-xl pointer-events-none">
           {text}
           <span className="absolute top-full left-1/2 -translate-x-1/2 -mt-px w-0 h-0 border-x-[6px] border-x-transparent border-t-[6px] border-t-[#1a1f3a]" />
         </span>
@@ -890,14 +890,14 @@ function InfoTip({ text }: { text: string }) {
 
 function StatCard({ icon: Icon, label, value, suffix, loading }: { icon: any; label: string; value: number; suffix?: string; loading?: boolean }) {
   return (
-    <div className="bg-[#0c1025]/80 border border-white/10 rounded-2xl p-4">
+    <div className="bg-card/80 border border-border rounded-2xl p-4">
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
           <Icon size={18} className="text-primary" />
         </div>
         <div className="min-w-0">
           {loading ? (
-            <div className="h-7 w-16 bg-white/5 rounded animate-pulse" />
+            <div className="h-7 w-16 bg-foreground/5 rounded animate-pulse" />
           ) : (
             <p className="text-2xl font-bold text-foreground">{value.toLocaleString()}</p>
           )}

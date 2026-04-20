@@ -19,7 +19,7 @@ export default function GenomeLayout({ children }: Props) {
     return (
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        minHeight: '100vh', color: 'rgba(255,255,255,0.3)', fontSize: 14,
+        minHeight: '100vh', color: 'var(--text-faint)', fontSize: 14,
       }}>
         Loading...
       </div>
@@ -33,11 +33,11 @@ export default function GenomeLayout({ children }: Props) {
 
   // Don't show nav on login/register
   if (isPublicPage) {
-    return <div style={{ minHeight: '100vh', background: '#0a0a0f' }}>{children}</div>;
+    return <div style={{ minHeight: '100vh', background: 'hsl(var(--background))' }}>{children}</div>;
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0a0a0f' }}>
+    <div style={{ minHeight: '100vh', background: 'hsl(var(--background))' }}>
       <GenomeNav />
       <main style={{ padding: '32px 24px' }}>
         {children}

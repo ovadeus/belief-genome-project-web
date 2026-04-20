@@ -54,7 +54,7 @@ export default function Forecaster({ history }: Props) {
     }
   };
 
-  const color = result ? beliefColor(result.value) : '#6c8fff';
+  const color = result ? beliefColor(result.value) : 'var(--accent-bright)';
   const pct = result ? Math.max(2, Math.min(98, result.value)) : 50;
 
   return (
@@ -64,19 +64,19 @@ export default function Forecaster({ history }: Props) {
       }}>
         <span style={{
           fontSize: 11, fontFamily: "'Space Mono', monospace", textTransform: 'uppercase',
-          letterSpacing: 1.5, color: 'rgba(255,255,255,0.5)',
+          letterSpacing: 1.5, color: 'var(--text-muted)',
         }}>
           Belief Forecaster
         </span>
         <span style={{
           fontSize: 10, fontFamily: "'Space Mono', monospace", textTransform: 'uppercase',
-          letterSpacing: 1, color: 'rgba(108,143,255,0.6)',
+          letterSpacing: 1, color: 'var(--accent-strong)',
         }}>
           AI-Powered Prediction Engine
         </span>
       </div>
 
-      <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginBottom: 20, lineHeight: 1.6 }}>
+      <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 20, lineHeight: 1.6 }}>
         Write a belief statement below — in the same style as your Quantum Reflection probes.
         The AI will read your complete response history, belief dimensions, worldview position,
         and drift patterns to forecast where you would place the slider.
@@ -85,7 +85,7 @@ export default function Forecaster({ history }: Props) {
       <div style={{ marginBottom: 20 }}>
         <label style={{
           fontSize: 10, fontFamily: "'Space Mono', monospace", textTransform: 'uppercase',
-          letterSpacing: 1, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 8,
+          letterSpacing: 1, color: 'var(--text-muted)', display: 'block', marginBottom: 8,
         }}>
           Enter a Probe Statement
         </label>
@@ -95,8 +95,8 @@ export default function Forecaster({ history }: Props) {
           placeholder="e.g. The erosion of shared reality is a greater threat to civilisation than any physical crisis..."
           style={{
             width: '100%', minHeight: 100, padding: 16, borderRadius: 8,
-            background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
-            color: '#fff', fontSize: 14, lineHeight: 1.5, resize: 'vertical',
+            background: 'var(--surface-2)', border: '1px solid rgba(255,255,255,0.1)',
+            color: 'var(--text-primary)', fontSize: 14, lineHeight: 1.5, resize: 'vertical',
             fontFamily: 'inherit',
           }}
         />
@@ -105,8 +105,8 @@ export default function Forecaster({ history }: Props) {
           disabled={loading || !probe.trim()}
           style={{
             marginTop: 12, padding: '10px 24px', borderRadius: 8, border: 'none',
-            background: loading ? 'rgba(108,143,255,0.3)' : '#6c8fff',
-            color: '#fff', fontSize: 14, fontWeight: 600, cursor: loading ? 'wait' : 'pointer',
+            background: loading ? 'var(--accent-mid)' : 'var(--accent-bright)',
+            color: 'var(--text-primary)', fontSize: 14, fontWeight: 600, cursor: loading ? 'wait' : 'pointer',
             display: 'flex', alignItems: 'center', gap: 8,
           }}
         >
@@ -125,15 +125,15 @@ export default function Forecaster({ history }: Props) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           <div style={{
             padding: 16, borderRadius: 8,
-            background: 'rgba(108,143,255,0.06)', border: '1px solid rgba(108,143,255,0.15)',
+            background: 'var(--accent-soft)', border: '1px solid rgba(108,143,255,0.15)',
           }}>
             <div style={{
               fontSize: 10, fontFamily: "'Space Mono', monospace", textTransform: 'uppercase',
-              letterSpacing: 1, color: 'rgba(255,255,255,0.4)', marginBottom: 8,
+              letterSpacing: 1, color: 'var(--text-muted)', marginBottom: 8,
             }}>
               AI Analysis
             </div>
-            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', lineHeight: 1.6, margin: 0 }}>
+            <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6, margin: 0 }}>
               {result.reasoning}
             </p>
           </div>
@@ -141,7 +141,7 @@ export default function Forecaster({ history }: Props) {
           <div>
             <div style={{
               fontSize: 10, fontFamily: "'Space Mono', monospace", textTransform: 'uppercase',
-              letterSpacing: 1, color: 'rgba(255,255,255,0.4)', marginBottom: 12,
+              letterSpacing: 1, color: 'var(--text-muted)', marginBottom: 12,
             }}>
               Forecasted Position
             </div>
@@ -157,7 +157,7 @@ export default function Forecaster({ history }: Props) {
                 {[5, 20, 38, 50, 63, 80, 94].map(p => (
                   <div key={p} style={{
                     position: 'absolute', left: `${p}%`, top: -2, width: 1, height: 12,
-                    background: 'rgba(255,255,255,0.2)',
+                    background: 'var(--border-strong)',
                   }} />
                 ))}
                 <div style={{
@@ -176,14 +176,14 @@ export default function Forecaster({ history }: Props) {
               display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8,
             }}>
               <span style={{ fontSize: 16, fontWeight: 700, color }}>{result.label}</span>
-              <span style={{ fontSize: 12, fontFamily: "'Space Mono', monospace", color: 'rgba(255,255,255,0.4)' }}>
+              <span style={{ fontSize: 12, fontFamily: "'Space Mono', monospace", color: 'var(--text-muted)' }}>
                 {result.value} / 100
               </span>
             </div>
 
             <div style={{
               display: 'flex', justifyContent: 'space-between', fontSize: 8,
-              fontFamily: "'Space Mono', monospace", color: 'rgba(255,255,255,0.25)',
+              fontFamily: "'Space Mono', monospace", color: 'var(--text-ghost)',
             }}>
               {BELIEF_LABELS_10.map(z => <span key={z}>{z}</span>)}
             </div>
@@ -196,19 +196,19 @@ export default function Forecaster({ history }: Props) {
                 {Array.from({ length: 5 }, (_, i) => (
                   <span key={i} style={{
                     width: 10, height: 10, borderRadius: '50%',
-                    border: `1.5px solid ${i < result.confidence ? color : 'rgba(255,255,255,0.15)'}`,
+                    border: `1.5px solid ${i < result.confidence ? color : 'var(--border-strong)'}`,
                     background: i < result.confidence ? color : 'transparent',
                     boxShadow: i < result.confidence ? `0 0 6px ${color}80` : 'none',
                   }} />
                 ))}
               </div>
-              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>{result.confidenceLabel}</span>
+              <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{result.confidenceLabel}</span>
             </div>
 
             <div>
               <div style={metaLabelStyle}>Key Factors</div>
               {result.keyFactors.map((f, i) => (
-                <div key={i} style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', marginBottom: 4 }}>
+                <div key={i} style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>
                   <span style={{ color, marginRight: 6 }}>&#9656;</span>{f}
                 </div>
               ))}
@@ -223,7 +223,7 @@ export default function Forecaster({ history }: Props) {
                 return (
                   <span style={{ fontSize: 13 }}>
                     <span style={{ color: qualCol, fontWeight: 700, fontFamily: "'Space Mono', monospace" }}>{total}</span>
-                    <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}> responses · {quality}</span>
+                    <span style={{ fontSize: 11, color: 'var(--text-muted)' }}> responses · {quality}</span>
                   </span>
                 );
               })()}
@@ -237,5 +237,5 @@ export default function Forecaster({ history }: Props) {
 
 const metaLabelStyle: React.CSSProperties = {
   fontSize: 10, fontFamily: "'Space Mono', monospace", textTransform: 'uppercase',
-  letterSpacing: 1, color: 'rgba(255,255,255,0.4)', marginBottom: 8,
+  letterSpacing: 1, color: 'var(--text-muted)', marginBottom: 8,
 };

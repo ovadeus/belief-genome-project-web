@@ -101,7 +101,7 @@ export default function DnaStrip({
   // No fallback synthetic dims — show a skeleton if dimensions haven't loaded.
   if (dimensions.length === 0) {
     return (
-      <div style={{ padding: 24, color: 'rgba(255,255,255,0.4)', fontSize: 12, textAlign: 'center' }}>
+      <div style={{ padding: 24, color: 'var(--text-muted)', fontSize: 12, textAlign: 'center' }}>
         Loading dimensions…
       </div>
     );
@@ -115,11 +115,11 @@ export default function DnaStrip({
         }}>
           <span style={{
             fontSize: 11, fontFamily: "'Space Mono', monospace", textTransform: 'uppercase',
-            letterSpacing: 1.5, color: 'rgba(255,255,255,0.5)',
+            letterSpacing: 1.5, color: 'var(--text-muted)',
           }}>
             Belief Genome — Belief DNA
           </span>
-          <div style={{ display: 'flex', gap: 16, fontSize: 11, fontFamily: "'Space Mono', monospace", color: 'rgba(255,255,255,0.35)' }}>
+          <div style={{ display: 'flex', gap: 16, fontSize: 11, fontFamily: "'Space Mono', monospace", color: 'var(--text-faint)' }}>
             <span data-testid="dna-total-responses">{totalResponses} responses</span>
             <span data-testid="dna-dims-covered">{dimensionsCovered}/124 dims</span>
             <span data-testid="dna-confidence">{overallConfidence}% confidence</span>
@@ -139,7 +139,7 @@ export default function DnaStrip({
               <span style={{
                 width: miniMode ? 80 : 100, minWidth: miniMode ? 80 : 100,
                 fontFamily: "'Space Mono', monospace", fontSize: miniMode ? 9 : 10,
-                color: 'rgba(255,255,255,0.45)', textAlign: 'right',
+                color: 'var(--text-muted)', textAlign: 'right',
                 textTransform: 'uppercase', letterSpacing: 0.5,
               }}>
                 {cat.label}
@@ -175,7 +175,7 @@ export default function DnaStrip({
               </div>
               <span style={{
                 width: 32, minWidth: 32, fontFamily: "'Space Mono', monospace", fontSize: 9,
-                color: 'rgba(255,255,255,0.35)',
+                color: 'var(--text-faint)',
               }}>
                 {explored}/{catDims.length}
               </span>
@@ -187,19 +187,19 @@ export default function DnaStrip({
       {!miniMode && agreementLegend && (
         <div style={{
           display: 'flex', justifyContent: 'center', gap: 16, marginTop: 16,
-          fontSize: 10, color: 'rgba(255,255,255,0.4)', flexWrap: 'wrap',
+          fontSize: 10, color: 'var(--text-muted)', flexWrap: 'wrap',
         }}>
           <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: '#22c55e', marginRight: 4, verticalAlign: 'middle' }} />Strong Agreement (Δ≤1)</span>
           <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: '#facc15', marginRight: 4, verticalAlign: 'middle' }} />Mild (Δ≤3)</span>
           <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: '#fb923c', marginRight: 4, verticalAlign: 'middle' }} />Moderate (Δ≤5)</span>
           <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: '#dc2626', marginRight: 4, verticalAlign: 'middle' }} />Strong Divergence</span>
-          <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: 'rgba(255,255,255,0.15)', marginRight: 4, verticalAlign: 'middle' }} />One side unexplored</span>
+          <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: 'var(--border-strong)', marginRight: 4, verticalAlign: 'middle' }} />One side unexplored</span>
         </div>
       )}
       {!miniMode && !agreementLegend && (
         <div style={{
           display: 'flex', justifyContent: 'center', gap: 16, marginTop: 16,
-          fontSize: 10, color: 'rgba(255,255,255,0.4)', flexWrap: 'wrap',
+          fontSize: 10, color: 'var(--text-muted)', flexWrap: 'wrap',
         }}>
           <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: '#dc2626', marginRight: 4, verticalAlign: 'middle' }} />Absolute False</span>
           <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: '#f87171', marginRight: 4, verticalAlign: 'middle' }} />False</span>
@@ -220,7 +220,7 @@ export default function DnaStrip({
           transform: 'translateX(-50%) translateY(-100%)',
           background: 'rgba(15,15,26,0.95)', border: '1px solid rgba(255,255,255,0.15)',
           borderRadius: 6, padding: '6px 10px', fontFamily: "'Space Mono', monospace",
-          fontSize: 10, color: '#fff', whiteSpace: 'nowrap', zIndex: 9999,
+          fontSize: 10, color: 'var(--text-primary)', whiteSpace: 'nowrap', zIndex: 9999,
           pointerEvents: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
         }}>
           <div style={{ marginBottom: 2 }}>{tooltip.name}{tooltip.score === null ? ': Unexplored' : ''}</div>
@@ -230,7 +230,7 @@ export default function DnaStrip({
             </div>
           )}
           {tooltip.score === null && (
-            <div style={{ borderTop: '1px dashed rgba(255,255,255,0.15)', paddingTop: 3, marginTop: 3, color: '#6c8fff', fontSize: 9 }}>
+            <div style={{ borderTop: '1px dashed rgba(255,255,255,0.15)', paddingTop: 3, marginTop: 3, color: 'var(--accent-bright)', fontSize: 9 }}>
               → Click to Explore Now
             </div>
           )}

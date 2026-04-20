@@ -24,10 +24,10 @@ export default function AnalyzePage() {
 
   return (
     <div style={{ maxWidth: 700, margin: '0 auto' }}>
-      <h1 style={{ fontSize: 24, fontWeight: 700, color: '#fff', marginBottom: 8 }}>
+      <h1 style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>
         Analyze
       </h1>
-      <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)', marginBottom: 32, lineHeight: 1.6 }}>
+      <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 32, lineHeight: 1.6 }}>
         Rebuild your Belief DNA from scratch. This recalculates all 124 dimension scores
         from your complete response history and regenerates your 140-character DNA string.
       </p>
@@ -35,12 +35,12 @@ export default function AnalyzePage() {
       {/* Trigger */}
       <div style={{
         padding: 28, borderRadius: 16,
-        background: 'rgba(255,255,255,0.02)',
+        background: 'var(--surface-1)',
         border: '1px solid rgba(108,143,255,0.12)',
         marginBottom: 24, textAlign: 'center',
       }}>
         <div style={{ fontSize: 48, marginBottom: 16, opacity: 0.6 }}>&#x2699;</div>
-        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 20, maxWidth: 400, margin: '0 auto 20px' }}>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 20, maxWidth: 400, margin: '0 auto 20px' }}>
           Your scores update incrementally with each probe response.
           Use this to force a full recalculation if you suspect drift or after syncing data from another device.
         </p>
@@ -49,8 +49,8 @@ export default function AnalyzePage() {
           disabled={analyzing}
           style={{
             padding: '12px 32px', borderRadius: 8, border: 'none',
-            background: analyzing ? 'rgba(108,143,255,0.3)' : '#6c8fff',
-            color: '#fff', fontSize: 14, fontWeight: 600,
+            background: analyzing ? 'var(--accent-mid)' : 'var(--accent-bright)',
+            color: 'var(--text-primary)', fontSize: 14, fontWeight: 600,
             cursor: analyzing ? 'wait' : 'pointer',
             transition: 'all 0.2s',
           }}
@@ -87,18 +87,18 @@ export default function AnalyzePage() {
           </h3>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
             <div>
-              <div style={{ fontSize: 24, fontWeight: 700, color: '#6c8fff' }}>
+              <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--accent-bright)' }}>
                 {result.totalResponses || 0}
               </div>
-              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', marginTop: 4 }}>
+              <div style={{ fontSize: 10, color: 'var(--text-faint)', textTransform: 'uppercase', marginTop: 4 }}>
                 Responses Processed
               </div>
             </div>
             <div>
-              <div style={{ fontSize: 24, fontWeight: 700, color: '#a78bfa' }}>
+              <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--accent-text)' }}>
                 {result.dimensionsCovered || 0}
               </div>
-              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', marginTop: 4 }}>
+              <div style={{ fontSize: 10, color: 'var(--text-faint)', textTransform: 'uppercase', marginTop: 4 }}>
                 Dimensions Mapped
               </div>
             </div>
@@ -106,7 +106,7 @@ export default function AnalyzePage() {
               <div style={{ fontSize: 24, fontWeight: 700, color: '#22d3ee' }}>
                 {result.overallConfidence ? `${Math.round(result.overallConfidence * 100)}%` : '—'}
               </div>
-              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', marginTop: 4 }}>
+              <div style={{ fontSize: 10, color: 'var(--text-faint)', textTransform: 'uppercase', marginTop: 4 }}>
                 Confidence
               </div>
             </div>
@@ -114,9 +114,9 @@ export default function AnalyzePage() {
           {result.dnaString && (
             <div style={{
               marginTop: 20, padding: 14, borderRadius: 8,
-              background: 'rgba(0,0,0,0.3)',
+              background: 'var(--surface-overlay)',
               fontFamily: "'Space Mono', monospace",
-              fontSize: 11, color: '#6c8fff',
+              fontSize: 11, color: 'var(--accent-bright)',
               letterSpacing: '0.15em', wordBreak: 'break-all', lineHeight: 1.8,
             }}>
               {result.dnaString}

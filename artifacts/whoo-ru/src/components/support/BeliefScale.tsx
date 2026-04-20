@@ -26,7 +26,7 @@ export function BeliefScale({
             <div key={i} className="flex flex-col items-center">
               <div className="h-6 w-full rounded" style={{ background: c }} />
               {showLabels && (
-                <span className="mt-1.5 text-center font-mono text-[10px] leading-tight text-white/60">
+                <span className="mt-1.5 text-center font-mono text-[10px] leading-tight text-muted-foreground">
                   {BELIEF_LABELS[i]}
                 </span>
               )}
@@ -65,7 +65,7 @@ export function BeliefScale({
               className="h-5 w-5 rounded-full border-2 border-white shadow-lg"
               style={{ background: markerColor }}
             />
-            <div className="mt-1 whitespace-nowrap rounded bg-black/80 px-2 py-0.5 font-mono text-[10px] text-white">
+            <div className="mt-1 whitespace-nowrap rounded bg-black/80 px-2 py-0.5 font-mono text-[10px] text-foreground">
               {markerLabel} · {markerPct}
             </div>
           </div>

@@ -68,7 +68,7 @@ export default function BlogList() {
                 <tr><td colSpan={4} className="p-6 text-center text-muted-foreground">No posts found. Create one!</td></tr>
               ) : (
                 data?.posts?.map((post) => (
-                  <tr key={post.id} className="hover:bg-white/[0.02] transition-colors">
+                  <tr key={post.id} className="hover:bg-foreground/5 transition-colors">
                     <td className="px-6 py-4">
                       <p className="font-bold text-foreground mb-1 flex items-center gap-2">
                         {post.title}

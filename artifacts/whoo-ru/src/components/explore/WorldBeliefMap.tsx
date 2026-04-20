@@ -165,7 +165,7 @@ export default function WorldBeliefMap({ countryBeliefs }: WorldBeliefMapProps) 
       <div className="flex items-center justify-center gap-3 mt-2 mb-1">
         <button
           onClick={handleZoomOut}
-          className="p-1.5 rounded-lg border border-white/10 bg-[#0c1025]/80 hover:bg-[#1a1f3a] text-[#64748b] hover:text-white transition-colors"
+          className="p-1.5 rounded-lg border border-border bg-card/80 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
           aria-label="Zoom out"
         >
           <ZoomOut size={14} />
@@ -177,17 +177,17 @@ export default function WorldBeliefMap({ countryBeliefs }: WorldBeliefMapProps) 
           step={0.1}
           value={zoom}
           onChange={handleSliderChange}
-          className="w-48 h-1.5 appearance-none rounded-full bg-[#1a1f3a] cursor-pointer accent-[#6c8fff] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#6c8fff] [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-[#0c1025] [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:w-3.5 [&::-moz-range-thumb]:h-3.5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-[#6c8fff] [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-[#0c1025] [&::-moz-range-thumb]:cursor-pointer"
+          className="w-48 h-1.5 appearance-none rounded-full bg-muted cursor-pointer accent-primary [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-card [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:w-3.5 [&::-moz-range-thumb]:h-3.5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-primary [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-card [&::-moz-range-thumb]:cursor-pointer"
           aria-label="Map zoom level"
         />
         <button
           onClick={handleZoomIn}
-          className="p-1.5 rounded-lg border border-white/10 bg-[#0c1025]/80 hover:bg-[#1a1f3a] text-[#64748b] hover:text-white transition-colors"
+          className="p-1.5 rounded-lg border border-border bg-card/80 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
           aria-label="Zoom in"
         >
           <ZoomIn size={14} />
         </button>
-        <span className="text-[10px] text-[#64748b] ml-1">{zoom.toFixed(1)}x</span>
+        <span className="text-[10px] text-muted-foreground ml-1">{zoom.toFixed(1)}x</span>
       </div>
 
       {tooltip && (
@@ -200,7 +200,7 @@ export default function WorldBeliefMap({ countryBeliefs }: WorldBeliefMapProps) 
             borderColor: '#ffffff20',
           }}
         >
-          <div className="font-semibold text-white text-sm mb-1">{tooltip.name}</div>
+          <div className="font-semibold text-foreground text-sm mb-1">{tooltip.name}</div>
           <div className="flex items-center gap-2">
             <span
               className="inline-block w-2.5 h-2.5 rounded-full"
@@ -209,9 +209,9 @@ export default function WorldBeliefMap({ countryBeliefs }: WorldBeliefMapProps) 
             <span style={{ color: beliefColor(tooltip.avg) }}>
               {beliefLabel(tooltip.avg)}
             </span>
-            <span className="text-[#64748b]">({formatDisplay(tooltip.avg)})</span>
+            <span className="text-muted-foreground">({formatDisplay(tooltip.avg)})</span>
           </div>
-          <div className="text-[#64748b] mt-0.5">{tooltip.count} participants</div>
+          <div className="text-muted-foreground mt-0.5">{tooltip.count} participants</div>
         </div>
       )}
 
@@ -224,8 +224,8 @@ export default function WorldBeliefMap({ countryBeliefs }: WorldBeliefMapProps) 
           })}
         </div>
         <span className="text-[10px] text-[#2563eb]">+4 True</span>
-        <span className="text-[10px] text-[#64748b] ml-3">■</span>
-        <span className="text-[10px] text-[#64748b]">No data</span>
+        <span className="text-[10px] text-muted-foreground ml-3">■</span>
+        <span className="text-[10px] text-muted-foreground">No data</span>
       </div>
     </div>
   );

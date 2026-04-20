@@ -28,8 +28,8 @@ import {
 } from "recharts";
 
 const DEVICE_COLORS: Record<string, string> = {
-  Desktop: "#6c8fff",
-  Mobile: "#a78bfa",
+  Desktop: "var(--accent-bright)",
+  Mobile: "var(--accent-text)",
   Tablet: "#22d3ee",
 };
 
@@ -136,15 +136,15 @@ export default function Analytics() {
                   <AreaChart data={data.viewsByDay}>
                     <defs>
                       <linearGradient id="viewGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#6c8fff" stopOpacity={0.3} />
-                        <stop offset="100%" stopColor="#6c8fff" stopOpacity={0} />
+                        <stop offset="0%" stopColor="var(--accent-bright)" stopOpacity={0.3} />
+                        <stop offset="100%" stopColor="var(--accent-bright)" stopOpacity={0} />
                       </linearGradient>
                       <linearGradient id="visitorGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#a78bfa" stopOpacity={0.3} />
-                        <stop offset="100%" stopColor="#a78bfa" stopOpacity={0} />
+                        <stop offset="0%" stopColor="var(--accent-text)" stopOpacity={0.3} />
+                        <stop offset="100%" stopColor="var(--accent-text)" stopOpacity={0} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" />
                     <XAxis
                       dataKey="date"
                       tickFormatter={(d: string) => {
@@ -176,7 +176,7 @@ export default function Analytics() {
                     <Area
                       type="monotone"
                       dataKey="views"
-                      stroke="#6c8fff"
+                      stroke="var(--accent-bright)"
                       fill="url(#viewGrad)"
                       strokeWidth={2}
                       name="Views"
@@ -184,7 +184,7 @@ export default function Analytics() {
                     <Area
                       type="monotone"
                       dataKey="visitors"
-                      stroke="#a78bfa"
+                      stroke="var(--accent-text)"
                       fill="url(#visitorGrad)"
                       strokeWidth={2}
                       name="Visitors"

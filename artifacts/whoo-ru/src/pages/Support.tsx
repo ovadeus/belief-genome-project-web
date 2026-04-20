@@ -116,7 +116,7 @@ export default function Support() {
                   <button
                     key={s.id}
                     onClick={() => scrollTo(s.id)}
-                    className="w-full text-left px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-white/5 flex items-center gap-2"
+                    className="w-full text-left px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-foreground/5 flex items-center gap-2"
                   >
                     <s.icon size={14} className="text-primary shrink-0" />
                     {s.label}
@@ -183,7 +183,7 @@ export default function Support() {
                   <button
                     key={s.id}
                     onClick={() => scrollTo(s.id)}
-                    className="w-full text-left px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-white/5"
+                    className="w-full text-left px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-foreground/5"
                   >
                     {s.label}
                   </button>

@@ -19,7 +19,7 @@ const BUCKET_COLOR: Record<AgreementBucket, string> = {
   mild:        '#facc15',
   moderate:    '#fb923c',
   strong_diff: '#dc2626',
-  none:        'rgba(255,255,255,0.15)',
+  none:        'var(--border-strong)',
 };
 
 const BUCKET_LABEL: Record<AgreementBucket, string> = {
@@ -80,8 +80,8 @@ export default function ComparePage() {
   return (
     <div style={{ maxWidth: 900, margin: '0 auto' }}>
       <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontSize: 24, fontWeight: 700, color: '#fff', margin: 0 }}>Compare</h1>
-        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', margin: '4px 0 0' }}>
+        <h1 style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>Compare</h1>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '4px 0 0' }}>
           Import another person's Belief DNA, then see where you agree and diverge.
         </p>
       </div>
@@ -107,7 +107,7 @@ export default function ComparePage() {
       {validEntryId != null && (
         <section style={{
           padding: 24, borderRadius: 16,
-          background: 'rgba(255,255,255,0.02)',
+          background: 'var(--surface-1)',
           border: '1px solid rgba(108,143,255,0.18)',
         }}>
           {compareQ.isLoading && <DnaStripSkeleton message="Computing alignment…" />}
@@ -119,7 +119,7 @@ export default function ComparePage() {
               msg === 'rate_limited' ? 'Too many compare requests — wait a moment, then try again.' :
                                        "Couldn't load this comparison.";
             return (
-              <div style={{ textAlign: 'center', padding: 20, color: 'rgba(255,255,255,0.5)' }}>
+              <div style={{ textAlign: 'center', padding: 20, color: 'var(--text-muted)' }}>
                 <p style={{ marginBottom: 12 }}>{headline}</p>
                 <div style={{ display: 'inline-flex', gap: 8 }}>
                   {msg !== 'not_found' && (
@@ -127,9 +127,9 @@ export default function ComparePage() {
                       onClick={() => compareQ.refetch()}
                       style={{
                         padding: '8px 16px', borderRadius: 8,
-                        background: 'rgba(108,143,255,0.15)',
+                        background: 'var(--accent-soft)',
                         border: '1px solid rgba(108,143,255,0.4)',
-                        color: '#a8c0ff', fontSize: 12, cursor: 'pointer',
+                        color: 'var(--accent-text)', fontSize: 12, cursor: 'pointer',
                       }}
                     >
                       Try again
@@ -140,7 +140,7 @@ export default function ComparePage() {
                     style={{
                       padding: '8px 16px', borderRadius: 8,
                       background: 'transparent', border: '1px solid rgba(108,143,255,0.4)',
-                      color: '#6c8fff', fontSize: 12, cursor: 'pointer',
+                      color: 'var(--accent-bright)', fontSize: 12, cursor: 'pointer',
                     }}
                   >
                     Back to library
@@ -168,7 +168,7 @@ export default function ComparePage() {
 
 const sectionLabel: React.CSSProperties = {
   fontSize: 11, fontFamily: "'Space Mono', monospace", textTransform: 'uppercase',
-  letterSpacing: 1.5, color: 'rgba(255,255,255,0.5)',
+  letterSpacing: 1.5, color: 'var(--text-muted)',
   margin: '0 0 12px',
 };
 
@@ -200,13 +200,13 @@ function CompareView({
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 18, gap: 12 }}>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-            <h2 style={{ fontSize: 16, fontWeight: 700, color: '#fff', margin: 0 }}>
+            <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
               You vs {theirs.shareableName || 'Anonymous DNA'}
             </h2>
             <FormatBadge format={theirs.format} />
           </div>
           {theirs.note && (
-            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', margin: '4px 0 0', fontStyle: 'italic' }}>
+            <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '4px 0 0', fontStyle: 'italic' }}>
               "{theirs.note}"
             </p>
           )}
@@ -218,7 +218,7 @@ function CompareView({
             padding: '6px 10px', borderRadius: 6,
             background: 'transparent',
             border: '1px solid rgba(255,255,255,0.1)',
-            color: 'rgba(255,255,255,0.6)',
+            color: 'var(--text-secondary)',
             fontSize: 14, cursor: 'pointer', lineHeight: 1,
           }}
         >
@@ -267,15 +267,15 @@ function CompareView({
       {selectedDim && selectedPerDim ? (
         <div style={{
           padding: 16, borderRadius: 10,
-          background: 'rgba(0,0,0,0.3)',
+          background: 'var(--surface-overlay)',
           border: `1px solid ${BUCKET_COLOR[selectedPerDim.agreement]}55`,
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
             <div>
-              <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', fontFamily: "'Space Mono', monospace", textTransform: 'uppercase', letterSpacing: 1 }}>
+              <span style={{ fontSize: 10, color: 'var(--text-muted)', fontFamily: "'Space Mono', monospace", textTransform: 'uppercase', letterSpacing: 1 }}>
                 Dimension #{selectedDim.id} · {selectedDim.cat}
               </span>
-              <h3 style={{ fontSize: 15, fontWeight: 700, color: '#fff', margin: '2px 0 0' }}>
+              <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', margin: '2px 0 0' }}>
                 {selectedDim.name}
               </h3>
             </div>
@@ -296,7 +296,7 @@ function CompareView({
             <SidePill label={theirs.shareableName || 'Them'} value={selectedPerDim.theirs} />
           </div>
 
-          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', margin: 0, lineHeight: 1.5 }}>
+          <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
             {BUCKET_COPY[selectedPerDim.agreement]}
           </p>
         </div>
@@ -305,14 +305,14 @@ function CompareView({
           padding: 14, borderRadius: 10, textAlign: 'center',
           background: 'rgba(0,0,0,0.2)',
           border: '1px dashed rgba(255,255,255,0.08)',
-          fontSize: 12, color: 'rgba(255,255,255,0.4)',
+          fontSize: 12, color: 'var(--text-muted)',
         }}>
           Click any cell above to see both positions and the divergence detail.
         </div>
       )}
 
       {/* Hidden but useful — keep the yours summary visible so users can sanity-check */}
-      <div style={{ marginTop: 14, fontSize: 10, color: 'rgba(255,255,255,0.3)', fontFamily: "'Space Mono', monospace", textAlign: 'right' }}>
+      <div style={{ marginTop: 14, fontSize: 10, color: 'var(--text-faint)', fontFamily: "'Space Mono', monospace", textAlign: 'right' }}>
         Your DNA: {yours.dimensionsCovered}/124 dims, {yours.totalResponses} responses, {yours.overallConfidence}% confidence
       </div>
     </>
@@ -320,15 +320,15 @@ function CompareView({
 }
 
 function Stat({ label, value, tone }: { label: string; value: string; tone?: 'primary' | 'good' | 'warn' }) {
-  const color = tone === 'primary' ? '#a8c0ff' : tone === 'good' ? '#4ade80' : tone === 'warn' ? '#fb923c' : '#fff';
+  const color = tone === 'primary' ? 'var(--accent-text)' : tone === 'good' ? '#4ade80' : tone === 'warn' ? '#fb923c' : 'var(--text-primary)';
   return (
     <div style={{
       flex: '1 1 140px', minWidth: 140,
       padding: 12, borderRadius: 8,
-      background: 'rgba(0,0,0,0.25)',
+      background: 'var(--surface-overlay)',
       border: '1px solid rgba(255,255,255,0.06)',
     }}>
-      <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', fontFamily: "'Space Mono', monospace", textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>
+      <div style={{ fontSize: 10, color: 'var(--text-muted)', fontFamily: "'Space Mono', monospace", textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>
         {label}
       </div>
       <div style={{ fontSize: 18, fontWeight: 700, color }}>
@@ -339,14 +339,14 @@ function Stat({ label, value, tone }: { label: string; value: string; tone?: 'pr
 }
 
 function SidePill({ label, value }: { label: string; value: number | null }) {
-  const color = value != null ? SHEX[value] : 'rgba(255,255,255,0.2)';
+  const color = value != null ? SHEX[value] : 'var(--border-strong)';
   return (
     <div style={{
       padding: 12, borderRadius: 8,
-      background: 'rgba(255,255,255,0.02)',
+      background: 'var(--surface-1)',
       border: '1px solid rgba(255,255,255,0.06)',
     }}>
-      <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', fontFamily: "'Space Mono', monospace", textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>
+      <div style={{ fontSize: 10, color: 'var(--text-muted)', fontFamily: "'Space Mono', monospace", textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>
         {label}
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -355,10 +355,10 @@ function SidePill({ label, value }: { label: string; value: number | null }) {
           boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
         }} />
         <div>
-          <div style={{ fontSize: 16, fontWeight: 700, color: '#fff', lineHeight: 1 }}>
+          <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1 }}>
             {value != null ? `${value}/9` : 'Unexplored'}
           </div>
-          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginTop: 2 }}>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
             {value != null ? (BELIEF_LABELS_10[value] || 'Unknown') : '—'}
           </div>
         </div>

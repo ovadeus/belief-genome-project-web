@@ -25,7 +25,7 @@ export default function BreakdownBars({ history }: Props) {
 
   if (history.length === 0) {
     return (
-      <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.3)', padding: 40 }}>
+      <div style={{ textAlign: 'center', color: 'var(--text-faint)', padding: 40 }}>
         No responses yet — answer some probes first.
       </div>
     );
@@ -35,7 +35,7 @@ export default function BreakdownBars({ history }: Props) {
     <div>
       <div style={{
         fontSize: 11, fontFamily: "'Space Mono', monospace", textTransform: 'uppercase',
-        letterSpacing: 1.5, color: 'rgba(255,255,255,0.5)', marginBottom: 16,
+        letterSpacing: 1.5, color: 'var(--text-muted)', marginBottom: 16,
       }}>
         Category Breakdown
       </div>
@@ -54,7 +54,7 @@ export default function BreakdownBars({ history }: Props) {
           return (
             <div key={cat} style={{ opacity: hasData ? 1 : 0.32 }}>
               <div style={{ display: 'grid', gridTemplateColumns: '110px 1fr auto', gap: 8, alignItems: 'center' }}>
-                <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', textAlign: 'right' }}>{name}</span>
+                <span style={{ fontSize: 13, color: 'var(--text-secondary)', textAlign: 'right' }}>{name}</span>
 
                 <div style={{ position: 'relative', height: 14 }}>
                   <div style={{
@@ -64,7 +64,7 @@ export default function BreakdownBars({ history }: Props) {
                   }} />
                   <div style={{
                     position: 'absolute', left: '50%', top: 0, width: 2, height: '100%',
-                    background: '#ffffff', zIndex: 3,
+                    background: 'var(--text-primary)', zIndex: 3,
                   }} />
                   {hasData && (
                     <div style={{
@@ -80,7 +80,7 @@ export default function BreakdownBars({ history }: Props) {
 
                 <span style={{
                   fontSize: 11, fontFamily: "'Space Mono', monospace",
-                  color: 'rgba(255,255,255,0.35)', minWidth: 30, textAlign: 'right',
+                  color: 'var(--text-faint)', minWidth: 30, textAlign: 'right',
                 }}>
                   {hasData ? `${cnt}\u00d7` : ''}
                 </span>
@@ -92,8 +92,8 @@ export default function BreakdownBars({ history }: Props) {
                 }}>
                   <span />
                   <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 4px' }}>
-                    <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>{axis.left}</span>
-                    <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>{axis.right}</span>
+                    <span style={{ fontSize: 10, color: 'var(--text-faint)' }}>{axis.left}</span>
+                    <span style={{ fontSize: 10, color: 'var(--text-faint)' }}>{axis.right}</span>
                   </div>
                   <span style={{ fontSize: 11, color: col, minWidth: 120, textAlign: 'right' }}>{lbl}</span>
                 </div>
@@ -104,11 +104,11 @@ export default function BreakdownBars({ history }: Props) {
                 }}>
                   <span />
                   <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 4px' }}>
-                    <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)' }}>{axis.left}</span>
-                    <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)' }}>{axis.right}</span>
+                    <span style={{ fontSize: 10, color: 'var(--border-strong)' }}>{axis.left}</span>
+                    <span style={{ fontSize: 10, color: 'var(--border-strong)' }}>{axis.right}</span>
                   </div>
                   <span style={{
-                    fontSize: 10, color: 'rgba(255,255,255,0.25)', minWidth: 120, textAlign: 'right',
+                    fontSize: 10, color: 'var(--text-ghost)', minWidth: 120, textAlign: 'right',
                   }}>unexplored</span>
                 </div>
               )}

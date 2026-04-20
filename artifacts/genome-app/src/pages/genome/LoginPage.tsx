@@ -7,12 +7,12 @@ import { useGenomeAuth } from '../../components/genome/GenomeAuthContext';
 function BgpLogo() {
   return (
     <svg width="36" height="36" viewBox="0 0 36 36" fill="none" style={{ marginRight: 10 }}>
-      <circle cx="18" cy="6" r="4" fill="#e879a8" />
-      <circle cx="10" cy="22" r="4" fill="#6c8fff" />
+      <circle cx="18" cy="6" r="4" fill="var(--accent-text)" />
+      <circle cx="10" cy="22" r="4" fill="var(--accent-bright)" />
       <circle cx="26" cy="22" r="4" fill="#34d399" />
-      <line x1="18" y1="10" x2="10" y2="18" stroke="#6c8fff" strokeWidth="1.5" opacity="0.5" />
+      <line x1="18" y1="10" x2="10" y2="18" stroke="var(--accent-bright)" strokeWidth="1.5" opacity="0.5" />
       <line x1="18" y1="10" x2="26" y2="18" stroke="#34d399" strokeWidth="1.5" opacity="0.5" />
-      <line x1="10" y1="22" x2="26" y2="22" stroke="#a78bfa" strokeWidth="1.5" opacity="0.3" />
+      <line x1="10" y1="22" x2="26" y2="22" stroke="var(--accent-text)" strokeWidth="1.5" opacity="0.3" />
     </svg>
   );
 }
@@ -48,7 +48,7 @@ export default function LoginPage() {
     <div style={{
       minHeight: '100vh', display: 'flex', flexDirection: 'column',
       alignItems: 'center', justifyContent: 'center',
-      background: '#0a0a0f', padding: 20,
+      background: 'hsl(var(--background))', padding: 20,
     }}>
       {/* Logo + Title */}
       <div style={{
@@ -57,7 +57,7 @@ export default function LoginPage() {
       }}>
         <BgpLogo />
         <span style={{
-          fontSize: 24, fontWeight: 700, color: '#fff',
+          fontSize: 24, fontWeight: 700, color: 'var(--text-primary)',
           letterSpacing: '0.01em',
         }}>
           Sign In
@@ -67,18 +67,18 @@ export default function LoginPage() {
       {/* Card */}
       <div style={{
         width: '100%', maxWidth: 420, padding: 36, borderRadius: 16,
-        background: 'rgba(255,255,255,0.03)',
+        background: 'var(--surface-1)',
         border: '1px solid rgba(255,255,255,0.08)',
         boxShadow: '0 8px 40px rgba(0,0,0,0.4)',
       }}>
         <h2 style={{
-          fontSize: 20, fontWeight: 700, color: '#fff',
+          fontSize: 20, fontWeight: 700, color: 'var(--text-primary)',
           textAlign: 'center', marginBottom: 6,
         }}>
           Secure Access
         </h2>
         <p style={{
-          fontSize: 13, color: 'rgba(255,255,255,0.4)',
+          fontSize: 13, color: 'var(--text-muted)',
           textAlign: 'center', marginBottom: 28,
         }}>
           Access your Belief Genome
@@ -98,7 +98,7 @@ export default function LoginPage() {
 
           <div>
             <label style={{
-              display: 'block', fontSize: 12, color: 'rgba(108,143,255,0.7)',
+              display: 'block', fontSize: 12, color: 'var(--accent-strong)',
               marginBottom: 8, fontWeight: 500,
             }}>
               Email
@@ -110,17 +110,17 @@ export default function LoginPage() {
               style={{
                 width: '100%', padding: '12px 16px', borderRadius: 10,
                 border: '1px solid rgba(255,255,255,0.1)',
-                background: 'rgba(255,255,255,0.06)', color: '#fff',
+                background: 'var(--border-subtle)', color: 'var(--text-primary)',
                 fontSize: 14, outline: 'none', transition: 'border-color 0.2s',
               }}
-              onFocus={e => e.target.style.borderColor = 'rgba(108,143,255,0.4)'}
-              onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
+              onFocus={e => e.target.style.borderColor = 'var(--accent-mid)'}
+              onBlur={e => e.target.style.borderColor = 'var(--border-soft)'}
             />
           </div>
 
           <div>
             <label style={{
-              display: 'block', fontSize: 12, color: 'rgba(108,143,255,0.7)',
+              display: 'block', fontSize: 12, color: 'var(--accent-strong)',
               marginBottom: 8, fontWeight: 500,
             }}>
               Password
@@ -132,20 +132,20 @@ export default function LoginPage() {
               style={{
                 width: '100%', padding: '12px 16px', borderRadius: 10,
                 border: '1px solid rgba(255,255,255,0.1)',
-                background: 'rgba(255,255,255,0.06)', color: '#fff',
+                background: 'var(--border-subtle)', color: 'var(--text-primary)',
                 fontSize: 14, outline: 'none', transition: 'border-color 0.2s',
               }}
-              onFocus={e => e.target.style.borderColor = 'rgba(108,143,255,0.4)'}
-              onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
+              onFocus={e => e.target.style.borderColor = 'var(--accent-mid)'}
+              onBlur={e => e.target.style.borderColor = 'var(--border-soft)'}
             />
           </div>
 
           <button type="submit" disabled={loading} style={{
             width: '100%', padding: '14px', borderRadius: 10, border: 'none',
             background: loading
-              ? 'rgba(108,143,255,0.4)'
-              : 'linear-gradient(135deg, #6c8fff 0%, #8b7aff 100%)',
-            color: '#fff', fontSize: 15, fontWeight: 600,
+              ? 'var(--accent-mid)'
+              : 'linear-gradient(135deg, var(--accent-bright) 0%, var(--accent-text) 100%)',
+            color: 'var(--text-primary)', fontSize: 15, fontWeight: 600,
             cursor: loading ? 'wait' : 'pointer',
             transition: 'all 0.2s', marginTop: 4,
             boxShadow: loading ? 'none' : '0 4px 16px rgba(108,143,255,0.3)',
@@ -158,13 +158,13 @@ export default function LoginPage() {
       {/* Register link */}
       <div style={{
         textAlign: 'center', marginTop: 24,
-        fontSize: 13, color: 'rgba(255,255,255,0.35)',
+        fontSize: 13, color: 'var(--text-faint)',
       }}>
         Don't have an account?{' '}
         <a
           href="/register"
           onClick={e => { e.preventDefault(); setLocation('/register'); }}
-          style={{ color: '#6c8fff', textDecoration: 'none', fontWeight: 500 }}
+          style={{ color: 'var(--accent-bright)', textDecoration: 'none', fontWeight: 500 }}
         >
           Create one
         </a>
@@ -175,12 +175,12 @@ export default function LoginPage() {
         onClick={e => { e.preventDefault(); setLocation('/'); }}
         style={{
           display: 'inline-flex', alignItems: 'center', gap: 6,
-          color: 'rgba(255,255,255,0.35)', fontSize: 13, fontWeight: 500,
+          color: 'var(--text-faint)', fontSize: 13, fontWeight: 500,
           textDecoration: 'none', marginTop: 32,
           transition: 'color 0.2s',
         }}
-        onMouseEnter={e => (e.currentTarget.style.color = '#6c8fff')}
-        onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.35)')}
+        onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent-bright)')}
+        onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-faint)')}
       >
         &larr; Back to Belief Genome Project
       </a>

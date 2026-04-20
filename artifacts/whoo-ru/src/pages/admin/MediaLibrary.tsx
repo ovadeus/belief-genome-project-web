@@ -134,8 +134,8 @@ export default function MediaLibrary() {
                 />
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-end">
                   <div className="w-full p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <p className="text-white text-xs truncate">{media.filename}</p>
-                    <p className="text-white/70 text-xs">{formatSize(media.size)}</p>
+                    <p className="text-foreground text-xs truncate">{media.filename}</p>
+                    <p className="text-foreground/70 text-xs">{formatSize(media.size)}</p>
                   </div>
                 </div>
               </div>
@@ -147,7 +147,7 @@ export default function MediaLibrary() {
               <button
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="p-2 rounded-lg border border-border hover:bg-white/5 disabled:opacity-30"
+                className="p-2 rounded-lg border border-border hover:bg-foreground/5 disabled:opacity-30"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
@@ -157,7 +157,7 @@ export default function MediaLibrary() {
               <button
                 onClick={() => setPage(p => Math.min(data.totalPages, p + 1))}
                 disabled={page === data.totalPages}
-                className="p-2 rounded-lg border border-border hover:bg-white/5 disabled:opacity-30"
+                className="p-2 rounded-lg border border-border hover:bg-foreground/5 disabled:opacity-30"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -187,14 +187,14 @@ export default function MediaLibrary() {
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => handleCopyUrl(selectedMedia)}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-sm hover:bg-white/5 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-sm hover:bg-foreground/5 transition-colors"
                 >
                   {copiedId === selectedMedia.id ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
                   Copy URL
                 </button>
                 <button
                   onClick={() => handleCopyMarkdown(selectedMedia)}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-sm hover:bg-white/5 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-sm hover:bg-foreground/5 transition-colors"
                 >
                   <Copy className="w-4 h-4" />
                   Copy Markdown

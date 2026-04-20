@@ -85,7 +85,7 @@ export default function Timeline({ history }: Props) {
         <TimelineToolbar period={period} onPeriod={handlePeriod}
           label={win.label} count={windowed.length} offset={offset}
           onBack={shiftBack} onForward={shiftForward} />
-        <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.3)', padding: 60 }}>
+        <div style={{ textAlign: 'center', color: 'var(--text-faint)', padding: 60 }}>
           {windowed.length === 0
             ? `No responses in this ${period}.`
             : 'Need at least 2 responses to draw a chart.'}
@@ -135,27 +135,27 @@ export default function Timeline({ history }: Props) {
     animation: { duration: 400 },
     scales: {
       x: {
-        ticks: { color: 'rgba(255,255,255,0.3)', font: { size: 10 }, maxTicksLimit: 12 },
-        grid: { color: 'rgba(255,255,255,0.05)' },
+        ticks: { color: 'var(--text-faint)', font: { size: 10 }, maxTicksLimit: 12 },
+        grid: { color: 'var(--surface-3)' },
       },
       y: {
         min: 0, max: 100,
         ticks: {
-          color: 'rgba(255,255,255,0.3)',
+          color: 'var(--text-faint)',
           font: { size: 10, family: "'Space Mono', monospace" },
           callback: (v: number) => v === 50 ? 'Neutral' : v === 0 ? 'Disagree' : v === 100 ? 'Agree' : v,
         },
-        grid: { color: 'rgba(255,255,255,0.05)' },
+        grid: { color: 'var(--surface-3)' },
       },
     },
     plugins: {
       legend: {
-        labels: { color: 'rgba(255,255,255,0.5)', font: { size: 11 }, boxWidth: 14 },
+        labels: { color: 'var(--text-muted)', font: { size: 11 }, boxWidth: 14 },
       },
       tooltip: {
         backgroundColor: 'rgba(20,20,40,0.95)',
-        titleColor: '#fff',
-        bodyColor: 'rgba(255,255,255,0.7)',
+        titleColor: 'var(--text-primary)',
+        bodyColor: 'var(--text-secondary)',
         callbacks: {
           title: (items: any[]) => {
             const h = windowed[items[0].dataIndex];
@@ -198,13 +198,13 @@ function TimelineToolbar({ period, onPeriod, label, count, offset, onBack, onFor
     }}>
       <span style={{
         fontSize: 11, fontFamily: "'Space Mono', monospace", textTransform: 'uppercase',
-        letterSpacing: 1.5, color: 'rgba(255,255,255,0.5)',
+        letterSpacing: 1.5, color: 'var(--text-muted)',
       }}>
         Belief Drift Over Time
       </span>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <div style={{
-          display: 'flex', gap: 2, background: 'rgba(255,255,255,0.06)', borderRadius: 6, padding: 2,
+          display: 'flex', gap: 2, background: 'var(--border-subtle)', borderRadius: 6, padding: 2,
         }}>
           {periods.map(p => (
             <button
@@ -213,8 +213,8 @@ function TimelineToolbar({ period, onPeriod, label, count, offset, onBack, onFor
               style={{
                 padding: '4px 10px', borderRadius: 4, border: 'none', fontSize: 11,
                 fontFamily: "'Space Mono', monospace", cursor: 'pointer',
-                background: period === p.key ? 'rgba(108,143,255,0.25)' : 'transparent',
-                color: period === p.key ? '#6c8fff' : 'rgba(255,255,255,0.4)',
+                background: period === p.key ? 'var(--accent-mid)' : 'transparent',
+                color: period === p.key ? 'var(--accent-bright)' : 'var(--text-muted)',
               }}
             >
               {p.label}
@@ -224,7 +224,7 @@ function TimelineToolbar({ period, onPeriod, label, count, offset, onBack, onFor
 
         <button onClick={onBack} style={navBtnStyle}>&#8592;</button>
         <span style={{
-          fontSize: 11, fontFamily: "'Space Mono', monospace", color: 'rgba(255,255,255,0.5)',
+          fontSize: 11, fontFamily: "'Space Mono', monospace", color: 'var(--text-muted)',
           minWidth: 120, textAlign: 'center',
         }}>
           {label}
@@ -234,7 +234,7 @@ function TimelineToolbar({ period, onPeriod, label, count, offset, onBack, onFor
         }}>&#8594;</button>
 
         <span style={{
-          fontSize: 10, fontFamily: "'Space Mono', monospace", color: 'rgba(255,255,255,0.35)',
+          fontSize: 10, fontFamily: "'Space Mono', monospace", color: 'var(--text-faint)',
         }}>
           {count} response{count !== 1 ? 's' : ''}
         </span>
@@ -244,7 +244,7 @@ function TimelineToolbar({ period, onPeriod, label, count, offset, onBack, onFor
 }
 
 const navBtnStyle: React.CSSProperties = {
-  background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
-  borderRadius: 4, padding: '4px 8px', cursor: 'pointer', color: 'rgba(255,255,255,0.5)',
+  background: 'var(--border-subtle)', border: '1px solid rgba(255,255,255,0.1)',
+  borderRadius: 4, padding: '4px 8px', cursor: 'pointer', color: 'var(--text-muted)',
   fontSize: 12,
 };

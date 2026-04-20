@@ -84,12 +84,12 @@ function getCategoryScores(dnaString: string) {
 
 function colorDnaChar(char: string, index: number): { color: string; isBold: boolean } {
   if (index < 16) {
-    if (index === 0) return { color: '#6c8fff', isBold: true };
-    if (index <= 2) return { color: '#a78bfa', isBold: true };
+    if (index === 0) return { color: 'var(--accent-bright)', isBold: true };
+    if (index <= 2) return { color: 'var(--accent-text)', isBold: true };
     if (index <= 4) return { color: '#22d3ee', isBold: false };
     if (index <= 6) return { color: '#22d3ee', isBold: false };
     if (index === 7) return { color: '#f59e0b', isBold: true };
-    if (index <= 10) return { color: '#6c8fff', isBold: true };
+    if (index <= 10) return { color: 'var(--accent-bright)', isBold: true };
     return { color: '#94a3b8', isBold: false };
   }
   const dimId = (index - 16) + 4;
@@ -117,7 +117,7 @@ function GenomeViewerPopup({ submission, onClose }: { submission: Submission; on
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
       <div
-        className="relative w-full max-w-2xl bg-[#0a0e1f] border border-white/10 rounded-2xl shadow-2xl shadow-black/50 overflow-hidden max-h-[90vh] overflow-y-auto"
+        className="relative w-full max-w-2xl bg-background border border-border rounded-2xl shadow-2xl shadow-black/50 overflow-hidden max-h-[90vh] overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
         <div className="p-6 space-y-5">
@@ -129,21 +129,21 @@ function GenomeViewerPopup({ submission, onClose }: { submission: Submission; on
             <div className="flex items-center gap-2">
               <button
                 onClick={handleCopy}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/15 text-xs text-muted-foreground hover:text-foreground hover:border-white/30 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/15 text-xs text-muted-foreground hover:text-foreground hover:border-border transition-colors"
               >
                 {copied ? <Check size={12} className="text-green-400" /> : <Copy size={12} />}
                 {copied ? "Copied" : "Copy"}
               </button>
               <button
                 onClick={onClose}
-                className="p-1.5 rounded-lg hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors"
+                className="p-1.5 rounded-lg hover:bg-foreground/10 text-muted-foreground hover:text-foreground transition-colors"
               >
                 <X size={16} />
               </button>
             </div>
           </div>
 
-          <div className="font-mono text-xs leading-relaxed tracking-wide break-all select-all bg-[#060818] rounded-xl p-4 border border-white/5">
+          <div className="font-mono text-xs leading-relaxed tracking-wide break-all select-all bg-background rounded-xl p-4 border border-border/50">
             {dna.split('').map((ch, i) => {
               const { color, isBold } = colorDnaChar(ch, i);
               const addSpace = (i === 16) || (i > 16 && (i - 16) % 10 === 0);
@@ -177,7 +177,7 @@ function GenomeViewerPopup({ submission, onClose }: { submission: Submission; on
               {catScores.map(cat => (
                 <div key={cat.key} className="flex items-center gap-3">
                   <span className="text-xs text-muted-foreground w-28 text-right shrink-0">{cat.label}</span>
-                  <div className="flex-1 h-3 bg-white/5 rounded-full overflow-hidden relative">
+                  <div className="flex-1 h-3 bg-foreground/5 rounded-full overflow-hidden relative">
                     <div
                       className="h-full rounded-full transition-all duration-500"
                       style={{
@@ -192,7 +192,7 @@ function GenomeViewerPopup({ submission, onClose }: { submission: Submission; on
             </div>
           </div>
 
-          <p className="text-[10px] text-muted-foreground/60 leading-relaxed border-t border-white/5 pt-4">
+          <p className="text-[10px] text-muted-foreground/60 leading-relaxed border-t border-border/50 pt-4">
             This string encodes your position across 124 belief dimensions on a 0–9 scale. 5 = neutral/uncertain. Plant this key into any AI system for instant cognitive alignment.
           </p>
         </div>
@@ -435,7 +435,7 @@ export default function GenomeSubmissions() {
                 ) : submissions.length === 0 ? (
                   <tr><td colSpan={9} className="px-4 py-12 text-center text-muted-foreground">No submissions found</td></tr>
                 ) : sortedSubmissions.map((sub) => (
-                  <tr key={sub.id} className="border-b border-border/50 hover:bg-white/[0.02] transition-colors">
+                  <tr key={sub.id} className="border-b border-border/50 hover:bg-foreground/5 transition-colors">
                     <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{sub.anonymousKey.slice(0, 12)}...</td>
                     <td className="px-4 py-3">{countryName(sub.countryCode)}</td>
                     <td className="px-4 py-3 font-mono text-xs">{sub.zipCode}</td>
@@ -499,14 +499,14 @@ export default function GenomeSubmissions() {
               <button
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="px-4 py-2 rounded-xl bg-card border border-border text-sm disabled:opacity-40 hover:bg-white/5 transition-colors"
+                className="px-4 py-2 rounded-xl bg-card border border-border text-sm disabled:opacity-40 hover:bg-foreground/5 transition-colors"
               >
                 Previous
               </button>
               <button
                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
-                className="px-4 py-2 rounded-xl bg-card border border-border text-sm disabled:opacity-40 hover:bg-white/5 transition-colors"
+                className="px-4 py-2 rounded-xl bg-card border border-border text-sm disabled:opacity-40 hover:bg-foreground/5 transition-colors"
               >
                 Next
               </button>

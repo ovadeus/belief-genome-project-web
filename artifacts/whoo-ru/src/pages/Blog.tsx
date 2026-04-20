@@ -180,7 +180,7 @@ export default function Blog() {
             <button 
               onClick={() => setPage(p => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="px-5 py-3 rounded-xl border border-border bg-card text-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/5 active:scale-95 transition-all font-medium"
+              className="px-5 py-3 rounded-xl border border-border bg-card text-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:bg-foreground/5 active:scale-95 transition-all font-medium"
             >
               Previous
             </button>
@@ -190,7 +190,7 @@ export default function Blog() {
             <button 
               onClick={() => setPage(p => Math.min(data.totalPages, p + 1))}
               disabled={page === data.totalPages}
-              className="px-5 py-3 rounded-xl border border-border bg-card text-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/5 active:scale-95 transition-all font-medium"
+              className="px-5 py-3 rounded-xl border border-border bg-card text-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:bg-foreground/5 active:scale-95 transition-all font-medium"
             >
               Next
             </button>

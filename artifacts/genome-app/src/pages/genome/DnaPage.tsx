@@ -57,7 +57,7 @@ export default function DnaPage() {
 
   if (dnaQ.isLoading || dimsQ.isLoading) {
     return (
-      <div style={{ textAlign: 'center', padding: 60, color: 'rgba(255,255,255,0.3)' }}>
+      <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-faint)' }}>
         Loading Belief DNA...
       </div>
     );
@@ -65,14 +65,14 @@ export default function DnaPage() {
 
   if (dnaQ.isError || dimsQ.isError || !dna) {
     return (
-      <div style={{ textAlign: 'center', padding: 60, color: 'rgba(255,255,255,0.5)' }}>
+      <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-muted)' }}>
         <p style={{ marginBottom: 16 }}>Couldn't load your Belief DNA.</p>
         <button
           onClick={() => { dnaQ.refetch(); dimsQ.refetch(); }}
           style={{
             padding: '8px 20px', borderRadius: 8,
             background: 'transparent', border: '1px solid rgba(108,143,255,0.4)',
-            color: '#6c8fff', fontSize: 13, cursor: 'pointer',
+            color: 'var(--accent-bright)', fontSize: 13, cursor: 'pointer',
           }}
         >
           Retry
@@ -88,31 +88,31 @@ export default function DnaPage() {
         marginBottom: 24,
       }}>
         <div>
-          <h1 style={{ fontSize: 24, fontWeight: 700, color: '#fff', margin: 0 }}>Belief DNA</h1>
-          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', margin: '4px 0 0' }}>
+          <h1 style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>Belief DNA</h1>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '4px 0 0' }}>
             Click any gray cell to explore that belief dimension.
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <button onClick={() => setShareOpen(true)} style={{
             padding: '8px 14px', borderRadius: 8,
-            background: 'rgba(108,143,255,0.18)',
+            background: 'var(--accent-mid)',
             border: '1px solid rgba(108,143,255,0.4)',
-            color: '#a8c0ff',
+            color: 'var(--accent-text)',
             fontSize: 12, fontWeight: 600, cursor: 'pointer',
           }}>Share</button>
           <button onClick={() => setExportOpen(true)} style={{
             padding: '8px 14px', borderRadius: 8,
             background: 'transparent',
             border: '1px solid rgba(108,143,255,0.3)',
-            color: 'rgba(255,255,255,0.7)',
+            color: 'var(--text-secondary)',
             fontSize: 12, fontWeight: 600, cursor: 'pointer',
           }}>Export .bgp</button>
           <button onClick={downloadPng} disabled={downloading} style={{
             padding: '8px 14px', borderRadius: 8,
             background: 'transparent',
             border: '1px solid rgba(108,143,255,0.3)',
-            color: 'rgba(255,255,255,0.7)',
+            color: 'var(--text-secondary)',
             fontSize: 12, fontWeight: 600,
             cursor: downloading ? 'wait' : 'pointer',
             opacity: downloading ? 0.6 : 1,
@@ -120,8 +120,8 @@ export default function DnaPage() {
           <button onClick={copyDna} style={{
             padding: '8px 14px', borderRadius: 8,
             background: copying ? 'rgba(46,213,115,0.15)' : 'transparent',
-            border: `1px solid ${copying ? 'rgba(46,213,115,0.3)' : 'rgba(108,143,255,0.3)'}`,
-            color: copying ? '#22c55e' : 'rgba(255,255,255,0.6)',
+            border: `1px solid ${copying ? 'rgba(46,213,115,0.3)' : 'var(--accent-mid)'}`,
+            color: copying ? '#22c55e' : 'var(--text-secondary)',
             fontSize: 12, cursor: 'pointer',
             fontFamily: "'Space Mono', monospace",
           }}>
@@ -134,7 +134,7 @@ export default function DnaPage() {
           this element so demographics text outside it is never included. */}
       <div ref={stripRef} style={{
         padding: 24, borderRadius: 16,
-        background: 'rgba(255,255,255,0.02)',
+        background: 'var(--surface-1)',
         border: '1px solid rgba(108,143,255,0.12)',
         marginBottom: 24,
       }}>
@@ -151,7 +151,7 @@ export default function DnaPage() {
       {/* Text DNA display */}
       <div style={{
         padding: 28, borderRadius: 16,
-        background: 'rgba(255,255,255,0.02)',
+        background: 'var(--surface-1)',
         border: '1px solid rgba(108,143,255,0.12)',
         marginBottom: 24,
       }}>
@@ -178,18 +178,18 @@ export default function DnaPage() {
       {/* How it works */}
       <div style={{
         padding: 20, borderRadius: 12,
-        background: 'rgba(255,255,255,0.02)',
+        background: 'var(--surface-1)',
         border: '1px solid rgba(255,255,255,0.06)',
       }}>
         <h3 style={{
           fontSize: 11, fontFamily: "'Space Mono', monospace", textTransform: 'uppercase',
-          letterSpacing: 1.5, color: 'rgba(255,255,255,0.4)', marginBottom: 16,
+          letterSpacing: 1.5, color: 'var(--text-muted)', marginBottom: 16,
         }}>
           How Your DNA String Works
         </h3>
         <div style={{
           display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16,
-          fontSize: 12, color: 'rgba(255,255,255,0.5)', lineHeight: 1.6,
+          fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.6,
         }}>
           <div>
             <strong style={{ color: '#3dd68c' }}>Positions 0-7: Identity</strong>
@@ -204,7 +204,7 @@ export default function DnaPage() {
             <p>5-character postal code for geographic belief analysis. Defaults to 00000.</p>
           </div>
           <div>
-            <strong style={{ color: '#6c8fff' }}>Positions 16-139: Beliefs</strong>
+            <strong style={{ color: 'var(--accent-bright)' }}>Positions 16-139: Beliefs</strong>
             <p>124 belief dimensions scored 0-9. Each dot ({'\u00B7'}) is an unexplored dimension.</p>
           </div>
         </div>

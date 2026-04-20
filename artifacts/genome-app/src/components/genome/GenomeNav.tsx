@@ -39,7 +39,7 @@ export default function GenomeNav() {
         onClick={() => setLocation('/dashboard')}
       >
         <span style={{
-          fontSize: 15, fontWeight: 600, color: 'rgba(255,255,255,0.7)',
+          fontSize: 15, fontWeight: 600, color: 'var(--text-secondary)',
           letterSpacing: '0.01em',
         }}>
           Belief Genome Project
@@ -59,7 +59,7 @@ export default function GenomeNav() {
               {/* Pipe separator before each item */}
               {i > 0 && (
                 <span style={{
-                  color: 'rgba(255,255,255,0.15)', fontSize: 14,
+                  color: 'var(--border-strong)', fontSize: 14,
                   margin: '0 2px', userSelect: 'none',
                 }}>|</span>
               )}
@@ -68,7 +68,7 @@ export default function GenomeNav() {
                 style={{
                   padding: '6px 12px', border: 'none',
                   background: 'transparent',
-                  color: active ? '#fff' : 'rgba(255, 255, 255, 0.45)',
+                  color: active ? 'var(--text-primary)' : 'var(--text-muted)',
                   fontSize: 13, cursor: 'pointer',
                   fontWeight: active ? 600 : 400,
                   borderBottom: active ? '2px solid #6c8fff' : '2px solid transparent',
@@ -76,10 +76,10 @@ export default function GenomeNav() {
                   fontFamily: 'inherit',
                 }}
                 onMouseEnter={e => {
-                  if (!active) (e.currentTarget).style.color = 'rgba(255,255,255,0.8)';
+                  if (!active) (e.currentTarget).style.color = 'var(--text-primary)';
                 }}
                 onMouseLeave={e => {
-                  if (!active) (e.currentTarget).style.color = 'rgba(255,255,255,0.45)';
+                  if (!active) (e.currentTarget).style.color = 'var(--text-muted)';
                 }}
               >
                 {item.label}
@@ -90,13 +90,13 @@ export default function GenomeNav() {
 
         {/* Separator before user */}
         <span style={{
-          color: 'rgba(255,255,255,0.15)', fontSize: 14,
+          color: 'var(--border-strong)', fontSize: 14,
           margin: '0 8px 0 6px', userSelect: 'none',
         }}>|</span>
 
         {/* User name */}
         <span style={{
-          fontSize: 13, color: 'rgba(255, 255, 255, 0.55)',
+          fontSize: 13, color: 'var(--text-muted)',
           marginRight: 12, fontWeight: 500,
         }}>
           {user.name || user.email}
@@ -109,7 +109,7 @@ export default function GenomeNav() {
             padding: '6px 16px', borderRadius: 6,
             background: 'transparent',
             border: '1px solid rgba(255, 255, 255, 0.15)',
-            color: 'rgba(255, 255, 255, 0.5)',
+            color: 'var(--text-muted)',
             fontSize: 12, cursor: 'pointer',
             transition: 'all 0.15s',
             fontFamily: 'inherit',
@@ -119,8 +119,8 @@ export default function GenomeNav() {
             e.currentTarget.style.color = '#ff6b6b';
           }}
           onMouseLeave={e => {
-            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)';
-            e.currentTarget.style.color = 'rgba(255,255,255,0.5)';
+            e.currentTarget.style.borderColor = 'var(--border-strong)';
+            e.currentTarget.style.color = 'var(--text-muted)';
           }}
         >
           Sign Out

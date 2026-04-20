@@ -262,7 +262,7 @@ export default function BlogEditor() {
                 form.handleSubmit(onSubmit)();
               }}
               disabled={createPost.isPending || updatePost.isPending}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-card border border-border text-foreground hover:bg-white/5 transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-card border border-border text-foreground hover:bg-foreground/5 transition-colors disabled:opacity-50"
             >
               <Save size={18} /> Save Draft
             </button>
@@ -342,7 +342,7 @@ export default function BlogEditor() {
             <button
               type="button"
               onClick={() => setShowStyleEditor(!showStyleEditor)}
-              className="w-full flex items-center gap-2 px-4 py-3 text-left hover:bg-white/5 transition-colors border-b border-border"
+              className="w-full flex items-center gap-2 px-4 py-3 text-left hover:bg-foreground/5 transition-colors border-b border-border"
             >
               {showStyleEditor ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
               <Palette size={16} className="text-violet-400" />
@@ -388,7 +388,7 @@ export default function BlogEditor() {
                     type="button"
                     onClick={() => handleToolbar(action)}
                     title={label}
-                    className={`p-2 rounded-lg hover:text-foreground hover:bg-white/5 transition ${action === "iframe" ? "text-cyan-400" : "text-muted-foreground"}`}
+                    className={`p-2 rounded-lg hover:text-foreground hover:bg-foreground/5 transition ${action === "iframe" ? "text-cyan-400" : "text-muted-foreground"}`}
                   >
                     <Icon size={18} />
                   </button>
@@ -410,7 +410,7 @@ export default function BlogEditor() {
             <button
               type="button"
               onClick={() => setShowJsEditor(!showJsEditor)}
-              className="w-full flex items-center gap-2 px-4 py-3 text-left hover:bg-white/5 transition-colors border-b border-border"
+              className="w-full flex items-center gap-2 px-4 py-3 text-left hover:bg-foreground/5 transition-colors border-b border-border"
             >
               {showJsEditor ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
               <Code size={16} className="text-cyan-400" />

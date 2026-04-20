@@ -35,7 +35,7 @@ function DnaCell({ dna }: { dna: string | null }) {
 
 function UserRow({ user }: { user: AdminGenomeUser }) {
   return (
-    <tr className="border-b border-border/50 hover:bg-white/[0.02]">
+    <tr className="border-b border-border/50 hover:bg-foreground/5">
       <td className="px-6 py-4 text-sm text-foreground">{user.name || "—"}</td>
       <td className="px-6 py-4 text-sm text-foreground">{user.email}</td>
       <td className="px-6 py-4 text-sm text-foreground tabular-nums text-right">

@@ -188,14 +188,14 @@ function SubmitGenomeButton() {
 
       {showPopup && (
         <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)',
+          position: 'fixed', inset: 0, background: 'var(--surface-overlay)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           zIndex: 1000, padding: 20, backdropFilter: 'blur(4px)',
         }} onClick={() => { if (!submitting) setShowPopup(false); }}>
           <div
             style={{
               maxWidth: 520, width: '100%', padding: 32, borderRadius: 16,
-              background: '#0a0e1f', border: '1px solid rgba(34,197,94,0.2)',
+              background: 'hsl(var(--background))', border: '1px solid rgba(34,197,94,0.2)',
               boxShadow: '0 16px 64px rgba(0,0,0,0.5)',
             }}
             onClick={e => e.stopPropagation()}
@@ -203,11 +203,11 @@ function SubmitGenomeButton() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span style={{ fontSize: 24 }}>🧬</span>
-                <h2 style={{ fontSize: 18, fontWeight: 700, color: '#fff', margin: 0 }}>Submit to Explore Database</h2>
+                <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>Submit to Explore Database</h2>
               </div>
               <button
                 onClick={() => setShowPopup(false)}
-                style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: 20, cursor: 'pointer' }}
+                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: 20, cursor: 'pointer' }}
               >
                 &times;
               </button>
@@ -216,7 +216,7 @@ function SubmitGenomeButton() {
             <div style={{
               padding: 16, borderRadius: 10,
               background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.12)',
-              marginBottom: 16, fontSize: 13, color: 'rgba(255,255,255,0.7)', lineHeight: 1.7,
+              marginBottom: 16, fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.7,
             }}>
               <p style={{ margin: '0 0 10px' }}>
                 <strong style={{ color: '#22c55e' }}>What happens:</strong> Your Belief DNA string will be submitted
@@ -238,8 +238,8 @@ function SubmitGenomeButton() {
             {publicStatus?.submitted && (
               <div style={{
                 padding: 10, borderRadius: 8, marginBottom: 16,
-                background: 'rgba(108,143,255,0.06)', border: '1px solid rgba(108,143,255,0.15)',
-                fontSize: 12, color: 'rgba(255,255,255,0.5)', textAlign: 'center',
+                background: 'var(--accent-soft)', border: '1px solid rgba(108,143,255,0.15)',
+                fontSize: 12, color: 'var(--text-muted)', textAlign: 'center',
               }}>
                 You've already submitted. Clicking submit again will update your entry with your latest data.
                 {publicStatus.lastUpdated && (
@@ -274,7 +274,7 @@ function SubmitGenomeButton() {
                 style={{
                   flex: 1, padding: '12px 20px', borderRadius: 10,
                   background: 'transparent', border: '1px solid rgba(255,255,255,0.15)',
-                  color: 'rgba(255,255,255,0.5)', fontSize: 14, cursor: 'pointer',
+                  color: 'var(--text-muted)', fontSize: 14, cursor: 'pointer',
                   fontFamily: 'inherit',
                 }}
               >
@@ -285,8 +285,8 @@ function SubmitGenomeButton() {
                 disabled={submitting}
                 style={{
                   flex: 2, padding: '12px 20px', borderRadius: 10,
-                  background: submitting ? 'rgba(34,197,94,0.3)' : 'linear-gradient(135deg, #22c55e, #16a34a)',
-                  border: 'none', color: '#fff', fontSize: 14, fontWeight: 600,
+                  background: submitting ? 'rgba(34,197,94,0.3)' : 'linear-gradient(135deg, #22c55e, #16a34a)' /* semantic green — kept */,
+                  border: 'none', color: 'var(--text-primary)', fontSize: 14, fontWeight: 600,
                   cursor: submitting ? 'not-allowed' : 'pointer',
                   fontFamily: 'inherit',
                   boxShadow: submitting ? 'none' : '0 4px 16px rgba(34,197,94,0.3)',
@@ -439,7 +439,7 @@ export default function DashboardPage() {
   const renderTabContent = () => {
     if (!dna && tab !== 'forecaster') {
       return (
-        <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.3)', padding: 60 }}>
+        <div style={{ textAlign: 'center', color: 'var(--text-faint)', padding: 60 }}>
           Loading...
         </div>
       );
@@ -485,8 +485,8 @@ export default function DashboardPage() {
       {/* Header row: Title + action buttons */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 8, flexWrap: 'wrap' }}>
         <div>
-          <h1 style={{ fontSize: 28, fontWeight: 700, color: '#fff', margin: 0 }}>Belief Genome</h1>
-          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', margin: '4px 0 0' }}>
+          <h1 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>Belief Genome</h1>
+          <p style={{ fontSize: 13, color: 'var(--text-faint)', margin: '4px 0 0' }}>
             Mapping your cognitive DNA — one reflection at a time
           </p>
         </div>
@@ -509,7 +509,7 @@ export default function DashboardPage() {
               style={{
                 width: 24, height: 24, borderRadius: '50%',
                 border: '1px solid rgba(255,255,255,0.10)',
-                background: 'rgba(15,15,26,0.55)', color: 'rgba(255,255,255,0.4)',
+                background: 'var(--panel-glass-bg)', color: 'var(--text-muted)',
                 cursor: zoomIndex <= 0 ? 'default' : 'pointer',
                 display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                 opacity: zoomIndex <= 0 ? 0.25 : 1,
@@ -525,7 +525,7 @@ export default function DashboardPage() {
               style={{
                 width: 24, height: 24, borderRadius: '50%',
                 border: '1px solid rgba(255,255,255,0.10)',
-                background: 'rgba(15,15,26,0.55)', color: 'rgba(255,255,255,0.4)',
+                background: 'var(--panel-glass-bg)', color: 'var(--text-muted)',
                 cursor: zoomIndex >= UI_ZOOM_STEPS.length - 1 ? 'default' : 'pointer',
                 display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                 opacity: zoomIndex >= UI_ZOOM_STEPS.length - 1 ? 0.25 : 1,
@@ -545,20 +545,20 @@ export default function DashboardPage() {
           display: 'flex', alignItems: 'center', gap: 0, flexWrap: 'wrap',
         }}>
           <span style={{
-            fontSize: 13, color: 'rgba(255,255,255,0.5)',
+            fontSize: 13, color: 'var(--text-muted)',
           }}>
             {greeting}
           </span>
           <span style={{
-            color: 'rgba(255,255,255,0.15)', margin: '0 12px', fontSize: 14, userSelect: 'none',
+            color: 'var(--border-strong)', margin: '0 12px', fontSize: 14, userSelect: 'none',
           }}>|</span>
           <span style={{
-            fontSize: 12, color: 'rgba(108,143,255,0.7)', fontStyle: 'italic',
+            fontSize: 12, color: 'var(--accent-strong)', fontStyle: 'italic',
           }}>
             &ldquo;{dailyQuote.text}&rdquo;
           </span>
           <span style={{
-            fontSize: 11, color: 'rgba(255,255,255,0.3)', marginLeft: 10,
+            fontSize: 11, color: 'var(--text-faint)', marginLeft: 10,
             fontFamily: "'Space Mono', monospace", textTransform: 'uppercase',
             letterSpacing: '0.04em',
           }}>
@@ -572,7 +572,7 @@ export default function DashboardPage() {
         <div style={{
           position: 'relative',
           padding: 20, borderRadius: 12, marginBottom: 16,
-          background: 'rgba(108,143,255,0.04)', border: '1px solid rgba(108,143,255,0.12)',
+          background: 'var(--accent-soft)', border: '1px solid rgba(108,143,255,0.12)',
         }}>
           <button
             onClick={() => setAnalysisDismissed(true)}
@@ -585,20 +585,20 @@ export default function DashboardPage() {
               background: 'transparent',
               border: '1px solid rgba(255,255,255,0.08)',
               borderRadius: 6,
-              color: 'rgba(255,255,255,0.5)',
+              color: 'var(--text-muted)',
               cursor: 'pointer',
               padding: 0,
               transition: 'background 0.15s, color 0.15s, border-color 0.15s',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(255,255,255,0.06)';
-              e.currentTarget.style.color = 'rgba(255,255,255,0.85)';
-              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.18)';
+              e.currentTarget.style.background = 'var(--border-subtle)';
+              e.currentTarget.style.color = 'var(--text-primary)';
+              e.currentTarget.style.borderColor = 'var(--border-strong)';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.color = 'rgba(255,255,255,0.5)';
-              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
+              e.currentTarget.style.color = 'var(--text-muted)';
+              e.currentTarget.style.borderColor = 'var(--border-soft)';
             }}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
@@ -607,7 +607,7 @@ export default function DashboardPage() {
             display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12,
             paddingRight: 36,
             fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase',
-            color: 'rgba(167,139,250,0.8)',
+            color: 'var(--accent-mid)',
             fontFamily: "'Space Mono', monospace",
           }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
@@ -618,7 +618,7 @@ export default function DashboardPage() {
           ) : (
             <>
               <p style={{
-                fontSize: 13, color: 'rgba(255,255,255,0.75)', lineHeight: 1.7,
+                fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.7,
                 margin: 0,
               }}>
                 {analysis}
@@ -638,7 +638,7 @@ export default function DashboardPage() {
                         padding: '4px 12px', borderRadius: 14,
                         background: colors[i % colors.length],
                         border: '1px solid rgba(255,255,255,0.1)',
-                        fontSize: 11, color: 'rgba(255,255,255,0.6)',
+                        fontSize: 11, color: 'var(--text-secondary)',
                         fontFamily: "'Space Mono', monospace",
                       }}>
                         {tag}
@@ -665,17 +665,17 @@ export default function DashboardPage() {
         ].map((s, i) => (
           <div key={i} style={{
             flex: 1, minWidth: 90, padding: '12px 16px', textAlign: 'center',
-            background: 'rgba(255,255,255,0.03)',
+            background: 'var(--surface-1)',
             border: '1px solid rgba(255,255,255,0.06)', borderRadius: 10,
           }}>
             <div style={{
-              fontSize: 22, fontWeight: 700, color: '#6c8fff',
+              fontSize: 22, fontWeight: 700, color: 'var(--accent-bright)',
               fontFamily: "'Space Mono', monospace",
             }}>
               {s.num}
             </div>
             <div style={{
-              fontSize: 10, color: 'rgba(255,255,255,0.35)', marginTop: 2,
+              fontSize: 10, color: 'var(--text-faint)', marginTop: 2,
               fontFamily: "'Space Mono', monospace", textTransform: 'uppercase',
             }}>
               {s.label}
@@ -694,8 +694,8 @@ export default function DashboardPage() {
             onClick={() => setTab(t.key)}
             style={{
               padding: '8px 18px', borderRadius: 20,
-              background: tab === t.key ? 'rgba(108,143,255,0.15)' : 'transparent',
-              color: tab === t.key ? '#6c8fff' : 'rgba(255,255,255,0.4)',
+              background: tab === t.key ? 'var(--accent-soft)' : 'transparent',
+              color: tab === t.key ? 'var(--accent-bright)' : 'var(--text-muted)',
               fontSize: 13, cursor: 'pointer', transition: 'all 0.2s',
               display: 'flex', alignItems: 'center', gap: 6,
               fontWeight: tab === t.key ? 500 : 400,
@@ -717,7 +717,7 @@ export default function DashboardPage() {
             padding: 24,
             ...(!['dnastrip', 'helix', 'neuromap'].includes(tab) ? {
               borderRadius: 12,
-              background: 'rgba(255,255,255,0.02)',
+              background: 'var(--surface-1)',
               border: '1px solid rgba(255,255,255,0.06)',
             } : {}),
             minHeight: 300,
@@ -730,8 +730,8 @@ export default function DashboardPage() {
               style={{
                 position: 'absolute', top: 12, right: 12, zIndex: 5,
                 width: 32, height: 32, borderRadius: 8,
-                background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)',
-                color: 'rgba(255,255,255,0.4)', cursor: 'pointer',
+                background: 'var(--border-subtle)', border: '1px solid rgba(255,255,255,0.12)',
+                color: 'var(--text-muted)', cursor: 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}
               title="Fullscreen"
@@ -746,7 +746,7 @@ export default function DashboardPage() {
       {fullscreen && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 5000,
-          background: 'rgba(8,8,16,0.97)',
+          background: 'hsl(var(--background))',
           display: 'flex', flexDirection: 'column',
           animation: 'vizFadeIn 0.25s ease',
         }}>
@@ -756,7 +756,7 @@ export default function DashboardPage() {
           }}>
             <div style={{
               fontFamily: "'Space Grotesk', sans-serif", fontSize: 16, fontWeight: 600,
-              color: '#fff', display: 'flex', alignItems: 'center', gap: 8,
+              color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 8,
             }}>
               <span>{TAB_ICONS[tab]}</span>
               {TABS.find(t => t.key === tab)?.label || tab}
@@ -764,8 +764,8 @@ export default function DashboardPage() {
             <button
               onClick={() => setFullscreen(false)}
               style={{
-                background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)',
-                borderRadius: 8, color: 'rgba(255,255,255,0.5)',
+                background: 'var(--border-subtle)', border: '1px solid rgba(255,255,255,0.12)',
+                borderRadius: 8, color: 'var(--text-muted)',
                 fontFamily: "'Space Mono', monospace", fontSize: 12,
                 padding: '6px 14px', cursor: 'pointer',
                 display: 'flex', alignItems: 'center', gap: 6,
@@ -789,7 +789,7 @@ export default function DashboardPage() {
 const headerBtnStyle: React.CSSProperties = {
   padding: '8px 16px', borderRadius: 8,
   background: 'transparent', border: '1px solid rgba(108,143,255,0.3)',
-  color: 'rgba(255,255,255,0.6)', fontSize: 12, cursor: 'pointer',
+  color: 'var(--text-secondary)', fontSize: 12, cursor: 'pointer',
   display: 'flex', alignItems: 'center', gap: 6,
   fontFamily: "'Space Mono', monospace",
   transition: 'all 0.2s',

@@ -55,7 +55,7 @@ interface SectionProps {
 function Section({ title, count, children }: SectionProps) {
   const [open, setOpen] = useState(true);
   return (
-    <div className="border border-white/10 rounded-xl bg-[#121730]/60">
+    <div className="border border-border rounded-xl bg-card/60">
       <button
         onClick={() => setOpen(o => !o)}
         className="w-full flex items-center justify-between px-4 py-3 text-left"
@@ -89,15 +89,15 @@ function CheckboxPill({ checked, onToggle, label, color, badge }: CheckboxPillPr
       onClick={onToggle}
       className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
         checked
-          ? "border-transparent text-white shadow-sm"
-          : "border-white/10 text-muted-foreground hover:border-white/30 hover:text-foreground bg-[#0c1025]/60"
+          ? "border-transparent text-foreground shadow-sm"
+          : "border-border text-muted-foreground hover:border-border hover:text-foreground bg-card/60"
       }`}
-      style={checked ? { backgroundColor: (color || "#6c8fff") + "dd", boxShadow: `0 2px 12px ${color || "#6c8fff"}40` } : {}}
+      style={checked ? { backgroundColor: (color || "var(--accent-bright)") + "dd", boxShadow: `0 2px 12px ${color || "var(--accent-bright)"}40` } : {}}
     >
       <span className={`w-3.5 h-3.5 rounded-sm border flex items-center justify-center flex-shrink-0 ${
-        checked ? "bg-white/90 border-white/90" : "border-white/30"
+        checked ? "bg-foreground/90 border-white/90" : "border-border"
       }`}>
-        {checked && <Check size={10} strokeWidth={3} className="text-black" />}
+        {checked && <Check size={10} strokeWidth={3} className="text-background" />}
       </span>
       <span>{label}</span>
       {badge !== undefined && (
@@ -141,7 +141,7 @@ export function FilterBar({ filters, onChange, availableCountries, totalResults 
   }
 
   return (
-    <div className="bg-[#0c1025]/80 border border-white/10 rounded-2xl overflow-hidden">
+    <div className="bg-card/80 border border-border rounded-2xl overflow-hidden">
       <button
         onClick={() => setOpen(o => !o)}
         className="w-full flex items-center justify-between px-6 py-4"
@@ -172,7 +172,7 @@ export function FilterBar({ filters, onChange, availableCountries, totalResults 
       </button>
 
       {open && (
-        <div className="px-6 pb-6 space-y-3 border-t border-white/5 pt-4">
+        <div className="px-6 pb-6 space-y-3 border-t border-border/50 pt-4">
           <p className="text-[11px] text-muted-foreground leading-relaxed">
             Nothing selected = include everyone. Check items to narrow your view.
             Category filters affect the <span className="text-foreground">Category Breakdown</span> and <span className="text-foreground">Timeline</span> views.
@@ -186,7 +186,7 @@ export function FilterBar({ filters, onChange, availableCountries, totalResults 
                 value={countrySearch}
                 onChange={e => setCountrySearch(e.target.value)}
                 placeholder="Search countries..."
-                className="w-full pl-8 pr-3 py-2 rounded-lg bg-[#0c1025] border border-white/10 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:border-primary/50"
+                className="w-full pl-8 pr-3 py-2 rounded-lg bg-card border border-border text-xs text-foreground placeholder:text-muted-foreground outline-none focus:border-primary/50"
               />
             </div>
             <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto pr-1">

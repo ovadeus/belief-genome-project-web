@@ -57,7 +57,7 @@ export default function HistoryList({ history }: Props) {
 
   if (history.length === 0) {
     return (
-      <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.3)', padding: 40 }}>
+      <div style={{ textAlign: 'center', color: 'var(--text-faint)', padding: 40 }}>
         No belief responses yet. Answer probes to start building your Belief Genome.
       </div>
     );
@@ -94,14 +94,14 @@ export default function HistoryList({ history }: Props) {
         </select>
         <span style={{
           fontSize: 10, fontFamily: "'Space Mono', monospace",
-          color: 'rgba(255,255,255,0.35)', marginLeft: 'auto',
+          color: 'var(--text-faint)', marginLeft: 'auto',
         }}>
           {filtered.length} response{filtered.length !== 1 ? 's' : ''}
         </span>
       </div>
 
       {filtered.length === 0 && (
-        <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.3)', padding: 40 }}>
+        <div style={{ textAlign: 'center', color: 'var(--text-faint)', padding: 40 }}>
           No results match your filters.
         </div>
       )}
@@ -116,17 +116,17 @@ export default function HistoryList({ history }: Props) {
           return (
             <div key={entry.id} style={{
               padding: '12px 16px', borderRadius: 8,
-              background: 'rgba(255,255,255,0.03)',
+              background: 'var(--surface-1)',
               border: '1px solid rgba(255,255,255,0.06)',
             }}>
-              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.85)', marginBottom: 8 }}>
+              <div style={{ fontSize: 13, color: 'var(--text-primary)', marginBottom: 8 }}>
                 "{entry.probeText}"
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 6 }}>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                   <span style={{
                     fontSize: 10, padding: '2px 8px', borderRadius: 4,
-                    background: 'rgba(108,143,255,0.15)', color: '#6c8fff',
+                    background: 'var(--accent-soft)', color: 'var(--accent-bright)',
                     fontFamily: "'Space Mono', monospace", textTransform: 'uppercase',
                   }}>
                     {CAT_SHORT[entry.probeCategory] || entry.probeCategory}
@@ -134,7 +134,7 @@ export default function HistoryList({ history }: Props) {
                   {entry.probeSource && entry.probeSource !== 'bank' && (
                     <span style={{
                       fontSize: 9, padding: '2px 6px', borderRadius: 3,
-                      background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.3)',
+                      background: 'var(--border-subtle)', color: 'var(--text-faint)',
                     }}>
                       {entry.probeSource.startsWith('news:') ? 'NEWS' : entry.probeSource.toUpperCase()}
                     </span>
@@ -142,11 +142,11 @@ export default function HistoryList({ history }: Props) {
                   <span style={{ fontSize: 12, fontFamily: "'Space Mono', monospace", color: col }}>
                     {lbl}
                   </span>
-                  <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)' }}>
+                  <span style={{ fontSize: 10, color: 'var(--text-ghost)' }}>
                     ({pct}/100)
                   </span>
                 </div>
-                <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)' }}>
+                <span style={{ fontSize: 10, color: 'var(--border-strong)' }}>
                   {new Date(entry.createdAt).toLocaleDateString()}
                 </span>
               </div>
@@ -168,7 +168,7 @@ export default function HistoryList({ history }: Props) {
           >
             &#8592; Prev
           </button>
-          <span style={{ color: 'rgba(255,255,255,0.4)', fontFamily: "'Space Mono', monospace", fontSize: 11 }}>
+          <span style={{ color: 'var(--text-muted)', fontFamily: "'Space Mono', monospace", fontSize: 11 }}>
             Page {safePage} of {totalPages}
           </span>
           <button
@@ -186,19 +186,19 @@ export default function HistoryList({ history }: Props) {
 
 const inputStyle: React.CSSProperties = {
   padding: '10px 14px', borderRadius: 8,
-  background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
-  color: '#fff', fontSize: 14, minWidth: 150, minHeight: 44,
+  background: 'var(--surface-2)', border: '1px solid rgba(255,255,255,0.1)',
+  color: 'var(--text-primary)', fontSize: 14, minWidth: 150, minHeight: 44,
 };
 
 const selectStyle: React.CSSProperties = {
   padding: '10px 12px', borderRadius: 8,
-  background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
-  color: '#fff', fontSize: 13, minHeight: 44, cursor: 'pointer',
+  background: 'var(--surface-2)', border: '1px solid rgba(255,255,255,0.1)',
+  color: 'var(--text-primary)', fontSize: 13, minHeight: 44, cursor: 'pointer',
 };
 
 const pageBtnStyle: React.CSSProperties = {
   padding: '10px 16px', borderRadius: 8,
-  background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
-  color: 'rgba(255,255,255,0.6)', fontSize: 13, cursor: 'pointer',
+  background: 'var(--border-subtle)', border: '1px solid rgba(255,255,255,0.1)',
+  color: 'var(--text-secondary)', fontSize: 13, cursor: 'pointer',
   fontFamily: "'Space Mono', monospace", minHeight: 44,
 };

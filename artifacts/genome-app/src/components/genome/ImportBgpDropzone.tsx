@@ -96,16 +96,16 @@ export default function ImportBgpDropzone() {
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') fileInputRef.current?.click(); }}
         style={{
           padding: 24, borderRadius: 12,
-          border: `1.5px dashed ${dragOver ? 'rgba(108,143,255,0.6)' : 'rgba(108,143,255,0.25)'}`,
-          background: dragOver ? 'rgba(108,143,255,0.08)' : 'rgba(255,255,255,0.02)',
+          border: `1.5px dashed ${dragOver ? 'var(--accent-strong)' : 'var(--accent-mid)'}`,
+          background: dragOver ? 'var(--accent-soft)' : 'var(--surface-1)',
           textAlign: 'center', cursor: 'pointer',
           transition: 'all 0.15s ease',
         }}
       >
-        <p style={{ fontSize: 13, color: '#fff', margin: '0 0 4px', fontWeight: 600 }}>
+        <p style={{ fontSize: 13, color: 'var(--text-primary)', margin: '0 0 4px', fontWeight: 600 }}>
           Drop a .bgp file here
         </p>
-        <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', margin: 0 }}>
+        <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: 0 }}>
           or click to choose a file
         </p>
         <input
@@ -119,11 +119,11 @@ export default function ImportBgpDropzone() {
 
       {/* OR divider */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.08)' }} />
-        <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', fontFamily: "'Space Mono', monospace", textTransform: 'uppercase', letterSpacing: 1.5 }}>
+        <div style={{ flex: 1, height: 1, background: 'var(--border-soft)' }} />
+        <span style={{ fontSize: 10, color: 'var(--text-faint)', fontFamily: "'Space Mono', monospace", textTransform: 'uppercase', letterSpacing: 1.5 }}>
           or paste
         </span>
-        <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.08)' }} />
+        <div style={{ flex: 1, height: 1, background: 'var(--border-soft)' }} />
       </div>
 
       {/* Paste textarea */}
@@ -136,7 +136,7 @@ export default function ImportBgpDropzone() {
           style={{
             width: '100%', boxSizing: 'border-box',
             padding: '10px 12px', borderRadius: 8,
-            background: 'rgba(0,0,0,0.4)', color: '#fff',
+            background: 'var(--surface-overlay)', color: 'var(--text-primary)',
             border: '1px solid rgba(255,255,255,0.1)',
             fontSize: 12, fontFamily: "'Space Mono', monospace",
             resize: 'vertical',
@@ -148,9 +148,9 @@ export default function ImportBgpDropzone() {
             disabled={!pasteText.trim() || parseM.isPending}
             style={{
               padding: '8px 16px', borderRadius: 8,
-              background: pasteText.trim() ? 'rgba(108,143,255,0.18)' : 'transparent',
+              background: pasteText.trim() ? 'var(--accent-mid)' : 'transparent',
               border: '1px solid rgba(108,143,255,0.4)',
-              color: pasteText.trim() ? '#a8c0ff' : 'rgba(255,255,255,0.3)',
+              color: pasteText.trim() ? 'var(--accent-text)' : 'var(--text-faint)',
               fontSize: 12, fontWeight: 600,
               cursor: pasteText.trim() ? 'pointer' : 'not-allowed',
               opacity: parseM.isPending ? 0.6 : 1,
@@ -165,26 +165,26 @@ export default function ImportBgpDropzone() {
       {pending && (
         <div style={{
           padding: 16, borderRadius: 12,
-          background: 'rgba(108,143,255,0.06)',
+          background: 'var(--accent-soft)',
           border: '1px solid rgba(108,143,255,0.3)',
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12, gap: 12 }}>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                <span style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>
+                <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>
                   {pending.parsed.shareableName || 'Anonymous DNA'}
                 </span>
                 <FormatBadge format={pending.parsed.format} />
               </div>
-              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)', fontFamily: "'Space Mono', monospace", wordBreak: 'break-all' }}>
+              <div style={{ fontSize: 10, color: 'var(--text-muted)', fontFamily: "'Space Mono', monospace", wordBreak: 'break-all' }}>
                 {pending.parsed.signature.slice(0, 56)}{pending.parsed.signature.length > 56 ? '…' : ''}
               </div>
-              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 6 }}>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>
                 {pending.parsed.dimensionsCovered}/124 dimensions covered
                 {pending.parsed.exportedFrom ? ` · from ${pending.parsed.exportedFrom}` : ''}
               </div>
               {pending.parsed.note && (
-                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', marginTop: 8, fontStyle: 'italic' }}>
+                <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 8, fontStyle: 'italic' }}>
                   "{pending.parsed.note}"
                 </div>
               )}
@@ -211,7 +211,7 @@ export default function ImportBgpDropzone() {
                 padding: '8px 14px', borderRadius: 8,
                 background: 'transparent',
                 border: '1px solid rgba(255,255,255,0.1)',
-                color: 'rgba(255,255,255,0.5)',
+                color: 'var(--text-muted)',
                 fontSize: 12, cursor: 'pointer',
               }}
             >

@@ -60,7 +60,7 @@ export function MiniRadar({
           const end = pointAt(i, 1);
           return (
             <line key={i} x1={cx} y1={cy} x2={end.x} y2={end.y}
-              stroke="rgba(255,255,255,0.08)" strokeWidth={1} />
+              stroke="var(--border-soft)" strokeWidth={1} />
           );
         })}
 
@@ -81,7 +81,7 @@ export function MiniRadar({
           return (
             <g key={i}>
               <circle cx={p.x} cy={p.y} r={5} fill={color}
-                stroke="rgba(255,255,255,0.9)" strokeWidth={1.5}>
+                stroke="var(--text-primary)" strokeWidth={1.5}>
                 {showTooltipOnHover && <title>{`${axis.short}: ${label} (${pct}%)`}</title>}
               </circle>
             </g>
@@ -93,11 +93,11 @@ export function MiniRadar({
           const anchor = Math.abs(p.x - cx) < 20 ? 'middle' : p.x > cx ? 'start' : 'end';
           return (
             <g key={`lbl-${i}`} textAnchor={anchor}>
-              <text x={p.x} y={p.y} fill="rgba(255,255,255,0.85)"
+              <text x={p.x} y={p.y} fill="var(--text-primary)"
                     fontSize={12} fontFamily="'DM Sans', sans-serif" fontWeight={600}>
                 {axis.short}
               </text>
-              <text x={p.x} y={p.y + 14} fill="rgba(255,255,255,0.45)"
+              <text x={p.x} y={p.y + 14} fill="var(--text-muted)"
                     fontSize={9} fontFamily="'Space Mono', monospace">
                 {axis.left}  ↔  {axis.right}
               </text>

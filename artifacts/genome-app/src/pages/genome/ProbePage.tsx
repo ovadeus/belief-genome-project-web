@@ -105,7 +105,7 @@ export default function ProbePage() {
 
   if (!probe) {
     return (
-      <div style={{ textAlign: 'center', padding: 60, color: 'rgba(255,255,255,0.4)' }}>
+      <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-muted)' }}>
         Loading probe...
       </div>
     );
@@ -121,11 +121,11 @@ export default function ProbePage() {
       style={{ maxWidth: 600, margin: '0 auto', position: 'relative' }}
       onMouseMove={handleActivity}
     >
-      <h1 style={{ fontSize: 24, marginBottom: 32, color: '#fff' }}>Reflections</h1>
+      <h1 style={{ fontSize: 24, marginBottom: 32, color: 'var(--text-primary)' }}>Reflections</h1>
 
       {count > 0 && (
         <div style={{
-          textAlign: 'center', fontSize: 12, color: 'rgba(255,255,255,0.3)', marginBottom: 16,
+          textAlign: 'center', fontSize: 12, color: 'var(--text-faint)', marginBottom: 16,
         }}>
           {count} answered this session
         </div>
@@ -196,21 +196,21 @@ export default function ProbePage() {
 
         <div style={{
           padding: '32px 28px', borderRadius: 16,
-          background: 'rgba(255,255,255,0.03)',
-          border: `1px solid ${isExploring ? 'rgba(34,197,94,0.25)' : 'rgba(108,143,255,0.15)'}`,
+          background: 'var(--surface-1)',
+          border: `1px solid ${isExploring ? 'rgba(34,197,94,0.25)' : 'var(--accent-soft)'}`,
           marginBottom: 32,
         }}>
           <div style={{ marginBottom: 20, textAlign: 'center' }}>
             <span style={{
               fontSize: 11, padding: '4px 12px', borderRadius: 12,
-              background: 'rgba(108,143,255,0.12)', color: '#6c8fff',
+              background: 'var(--accent-soft)', color: 'var(--accent-bright)',
               textTransform: 'uppercase', letterSpacing: '0.06em',
             }}>
               {catInfo?.label || probe.category}
             </span>
             {isExploring && exploreIntent!.dimQueue[0] && exploreIntent!.dimNames[exploreIntent!.dimQueue[0]] && (
               <div style={{
-                fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 6,
+                fontSize: 10, color: 'var(--text-faint)', marginTop: 6,
                 fontFamily: "'Space Mono', monospace",
               }}>
                 Dimension: {exploreIntent!.dimNames[exploreIntent!.dimQueue[0]]}
@@ -220,7 +220,7 @@ export default function ProbePage() {
 
           <div style={{
             fontSize: 18, lineHeight: 1.6, textAlign: 'center',
-            color: 'rgba(255,255,255,0.9)', marginBottom: 32,
+            color: 'var(--text-primary)', marginBottom: 32,
             fontStyle: 'italic',
           }}>
             "{probe.statement}"
@@ -252,7 +252,7 @@ export default function ProbePage() {
 
           <div style={{
             display: 'flex', justifyContent: 'space-between',
-            fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 4,
+            fontSize: 10, color: 'var(--text-faint)', marginTop: 4,
           }}>
             <span>Absolute False</span>
             <span>Uncertain</span>
@@ -267,7 +267,7 @@ export default function ProbePage() {
           disabled={submitting}
           style={{
             padding: '12px 32px', borderRadius: 8, border: 'none',
-            background: '#6c8fff', color: '#fff', fontSize: 14,
+            background: 'var(--accent-bright)', color: 'var(--text-primary)', fontSize: 14,
             cursor: submitting ? 'wait' : 'pointer',
             opacity: submitting ? 0.6 : 1,
           }}
@@ -278,7 +278,7 @@ export default function ProbePage() {
           onClick={handleSkip}
           style={{
             padding: '12px 24px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.15)',
-            background: 'transparent', color: 'rgba(255,255,255,0.5)', fontSize: 14,
+            background: 'transparent', color: 'var(--text-muted)', fontSize: 14,
             cursor: 'pointer',
           }}
         >

@@ -51,7 +51,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
                   "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 font-medium",
                   isActive 
                     ? "bg-primary/10 text-primary" 
-                    : "text-muted-foreground hover:bg-white/5 hover:text-foreground"
+                    : "text-muted-foreground hover:bg-foreground/5 hover:text-foreground"
                 )}
               >
                 <Icon size={20} className={isActive ? "text-primary" : "text-muted-foreground"} />

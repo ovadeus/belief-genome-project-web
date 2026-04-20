@@ -50,7 +50,7 @@ export default function RadarChart({ history }: Props) {
       borderColor: 'rgba(59, 130, 246, 0.8)',
       pointBackgroundColor: CAT_ORDER.map(c => {
         const v = avgs[c];
-        if (v == null) return 'rgba(255,255,255,0.15)';
+        if (v == null) return 'var(--border-strong)';
         return v >= 0.6 ? '#3b82f6' : v <= 0.4 ? '#f87171' : '#86efac';
       }),
       pointRadius: 5,
@@ -67,7 +67,7 @@ export default function RadarChart({ history }: Props) {
         min: 0, max: 100,
         ticks: {
           stepSize: 25,
-          color: 'rgba(255,255,255,0.2)',
+          color: 'var(--border-strong)',
           backdropColor: 'transparent',
           font: { size: 9, family: "'Space Mono', monospace" },
           callback: (v: number) => v === 50 ? 'Neutral' : v === 0 ? 'False' : v === 100 ? 'True' : '',
@@ -75,7 +75,7 @@ export default function RadarChart({ history }: Props) {
         grid: { color: 'rgba(255,255,255,0.07)' },
         angleLines: { color: 'rgba(255,255,255,0.07)' },
         pointLabels: {
-          color: 'rgba(255,255,255,0.6)',
+          color: 'var(--text-secondary)',
           font: { size: 11, family: "'DM Sans', sans-serif" },
         },
       },
@@ -95,8 +95,8 @@ export default function RadarChart({ history }: Props) {
           },
         },
         backgroundColor: 'rgba(20,20,40,0.95)',
-        titleColor: '#fff',
-        bodyColor: 'rgba(255,255,255,0.7)',
+        titleColor: 'var(--text-primary)',
+        bodyColor: 'var(--text-secondary)',
         borderColor: 'rgba(59,130,246,0.4)',
         borderWidth: 1,
       },
@@ -110,13 +110,13 @@ export default function RadarChart({ history }: Props) {
       }}>
         <span style={{
           fontSize: 11, fontFamily: "'Space Mono', monospace", textTransform: 'uppercase',
-          letterSpacing: 1.5, color: 'rgba(255,255,255,0.5)',
+          letterSpacing: 1.5, color: 'var(--text-muted)',
         }}>
           World View Radar
         </span>
         <span style={{
           fontSize: 10, fontFamily: "'Space Mono', monospace", textTransform: 'uppercase',
-          letterSpacing: 1, color: 'rgba(108,143,255,0.6)',
+          letterSpacing: 1, color: 'var(--accent-strong)',
         }}>
           {subtitle}
         </span>

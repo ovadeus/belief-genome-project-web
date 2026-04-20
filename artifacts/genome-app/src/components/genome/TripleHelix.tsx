@@ -1,9 +1,9 @@
 import { useRef, useEffect, useCallback } from 'react';
 
 const STRAND_DEFS = [
-  { id: 'logos',  name: 'LOGOS',  sub: 'How you reason', color: '#6c8fff', phase: 0,
+  { id: 'logos',  name: 'LOGOS',  sub: 'How you reason', color: 'var(--accent-bright)', phase: 0,
     cats: ['epistemology', 'politics', 'science_tech', 'education'] },
-  { id: 'pathos', name: 'PATHOS', sub: 'How you feel',   color: '#a78bfa', phase: (2 * Math.PI) / 3,
+  { id: 'pathos', name: 'PATHOS', sub: 'How you feel',   color: 'var(--accent-text)', phase: (2 * Math.PI) / 3,
     cats: ['spirituality', 'psychology', 'relationships', 'health'] },
   { id: 'ethos',  name: 'ETHOS',  sub: 'How you act',    color: '#22d3ee', phase: (4 * Math.PI) / 3,
     cats: ['morality', 'social', 'economics'] },
@@ -220,7 +220,7 @@ export default function TripleHelix({ dimensions, dimensionScores, confidence }:
         if (scored && conf > 0.2) {
           ctx.beginPath();
           ctx.arc(p.x, p.y, r * 0.45 * conf, 0, 2 * Math.PI);
-          ctx.fillStyle = '#ffffff' + Math.round(60 * depth * conf).toString(16).padStart(2, '0');
+          ctx.fillStyle = 'var(--text-primary)' + Math.round(60 * depth * conf).toString(16).padStart(2, '0');
           ctx.fill();
         }
 
@@ -342,13 +342,13 @@ export default function TripleHelix({ dimensions, dimensionScores, confidence }:
       }}>
         <span style={{
           fontSize: 11, fontFamily: "'Space Mono', monospace", textTransform: 'uppercase',
-          letterSpacing: 1.5, color: 'rgba(255,255,255,0.5)',
+          letterSpacing: 1.5, color: 'var(--text-muted)',
         }}>
           Belief Genome — Triple Helix
         </span>
         <div style={{ display: 'flex', gap: 16, fontSize: 11, fontFamily: "'Space Mono', monospace" }}>
-          <span style={{ color: '#6c8fff' }}>&#9679; LOGOS · How you reason</span>
-          <span style={{ color: '#a78bfa' }}>&#9679; PATHOS · How you feel</span>
+          <span style={{ color: 'var(--accent-bright)' }}>&#9679; LOGOS · How you reason</span>
+          <span style={{ color: 'var(--accent-text)' }}>&#9679; PATHOS · How you feel</span>
           <span style={{ color: '#22d3ee' }}>&#9679; ETHOS · How you act</span>
         </div>
       </div>
@@ -373,7 +373,7 @@ export default function TripleHelix({ dimensions, dimensionScores, confidence }:
 
       <div style={{
         display: 'flex', justifyContent: 'center', gap: 20, marginTop: 12,
-        fontSize: 10, color: 'rgba(255,255,255,0.4)', flexWrap: 'wrap',
+        fontSize: 10, color: 'var(--text-muted)', flexWrap: 'wrap',
       }}>
         <span><span style={{ color: '#dc2626' }}>&#8226;</span> False (0–2)</span>
         <span><span style={{ color: '#fca5a5' }}>&#8226;</span> Leaning False (3–4)</span>

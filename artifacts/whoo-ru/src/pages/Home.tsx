@@ -40,7 +40,7 @@ export default function Home() {
             transition={{ duration: 0.9, ease: "easeOut" }}
             className="text-center"
           >
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-display font-bold tracking-tight text-white mb-8 leading-[1.1]">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-display font-bold tracking-tight text-foreground mb-8 leading-[1.1]">
               A Systematic Exploration of
               <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
@@ -62,7 +62,7 @@ export default function Home() {
               </Link>
               <Link 
                 href="/subscribe"
-                className="px-8 py-4 rounded-xl font-semibold text-lg bg-card/50 backdrop-blur-sm border border-white/10 hover:border-white/20 text-white transition-all hover:-translate-y-0.5 flex items-center justify-center gap-2"
+                className="px-8 py-4 rounded-xl font-semibold text-lg bg-card/50 backdrop-blur-sm border border-border hover:border-border text-foreground transition-all hover:-translate-y-0.5 flex items-center justify-center gap-2"
               >
                 Follow the Research
               </Link>
@@ -236,7 +236,7 @@ export default function Home() {
           <div className="flex justify-center mt-12">
             <Link
               href="/subscribe"
-              className="px-8 py-3 rounded-full font-semibold text-sm bg-white/10 hover:bg-white/20 text-white transition-colors border border-white/10"
+              className="px-8 py-3 rounded-full font-semibold text-sm bg-foreground/10 hover:bg-foreground/20 text-foreground transition-colors border border-border"
             >
               Subscribe to Updates
             </Link>
@@ -248,7 +248,7 @@ export default function Home() {
       <section className="py-32 relative overflow-hidden border-t border-border">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-primary/5" />
         <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
-          <h2 className="text-5xl md:text-6xl font-display font-bold text-white mb-6">
+          <h2 className="text-5xl md:text-6xl font-display font-bold text-foreground mb-6">
             The Curtain Is Already Pulled Back.
           </h2>
           <p className="text-2xl text-muted-foreground mb-12 font-light">
@@ -263,7 +263,7 @@ export default function Home() {
             </Link>
             <Link 
               href="/book"
-              className="px-8 py-4 rounded-xl font-semibold text-lg bg-transparent border-2 border-secondary text-white hover:bg-secondary/10 transition-all"
+              className="px-8 py-4 rounded-xl font-semibold text-lg bg-transparent border-2 border-secondary text-foreground hover:bg-secondary/10 transition-all"
             >
               Preorder the Book
             </Link>

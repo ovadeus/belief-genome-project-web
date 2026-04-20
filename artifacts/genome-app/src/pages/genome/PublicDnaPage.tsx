@@ -69,7 +69,7 @@ export default function PublicDnaPage() {
   if (loading) {
     return (
       <Shell>
-        <div style={{ textAlign: 'center', padding: 60, color: 'rgba(255,255,255,0.4)' }}>
+        <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-muted)' }}>
           Loading shared Belief DNA…
         </div>
       </Shell>
@@ -80,8 +80,8 @@ export default function PublicDnaPage() {
     return (
       <Shell>
         <Centered>
-          <h1 style={{ fontSize: 22, color: '#fff', margin: 0 }}>Slow down a sec</h1>
-          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginTop: 8 }}>
+          <h1 style={{ fontSize: 22, color: 'var(--text-primary)', margin: 0 }}>Slow down a sec</h1>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 8 }}>
             Too many requests from your network. Please try again in about a minute.
           </p>
         </Centered>
@@ -93,14 +93,14 @@ export default function PublicDnaPage() {
     return (
       <Shell>
         <Centered>
-          <h1 style={{ fontSize: 22, color: '#fff', margin: 0 }}>This DNA link isn't valid</h1>
-          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginTop: 8 }}>
+          <h1 style={{ fontSize: 22, color: 'var(--text-primary)', margin: 0 }}>This DNA link isn't valid</h1>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 8 }}>
             The link may be incomplete or mistyped. Ask the sender for a fresh one.
           </p>
           <Link href="/login" style={{
             display: 'inline-block', marginTop: 20, padding: '10px 20px',
-            borderRadius: 8, background: 'rgba(108,143,255,0.18)',
-            border: '1px solid rgba(108,143,255,0.4)', color: '#a8c0ff',
+            borderRadius: 8, background: 'var(--accent-mid)',
+            border: '1px solid rgba(108,143,255,0.4)', color: 'var(--accent-text)',
             fontSize: 13, fontWeight: 600, textDecoration: 'none',
           }}>
             Map your own Belief DNA
@@ -123,14 +123,14 @@ export default function PublicDnaPage() {
           <p style={{
             fontSize: 11, fontFamily: "'Space Mono', monospace",
             textTransform: 'uppercase', letterSpacing: 2,
-            color: 'rgba(108,143,255,0.7)', margin: 0,
+            color: 'var(--accent-strong)', margin: 0,
           }}>
             Belief Genome Project
           </p>
-          <h1 style={{ fontSize: 28, fontWeight: 700, color: '#fff', margin: '8px 0 4px' }}>
+          <h1 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: '8px 0 4px' }}>
             A shared Belief DNA
           </h1>
-          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', margin: 0 }}>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: 0 }}>
             {dimensionsCovered} of 124 dimensions explored
             {data.format === 'signed' && data.demographics && (
               <> · {formatDemographics(data.demographics)}</>
@@ -140,7 +140,7 @@ export default function PublicDnaPage() {
 
         <div style={{
           padding: 24, borderRadius: 16,
-          background: 'rgba(255,255,255,0.02)',
+          background: 'var(--surface-1)',
           border: '1px solid rgba(108,143,255,0.12)',
           marginBottom: 24,
         }}>
@@ -155,13 +155,13 @@ export default function PublicDnaPage() {
         </div>
 
         <div style={{ textAlign: 'center', padding: '20px 0 60px' }}>
-          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', marginBottom: 16 }}>
+          <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 16 }}>
             Curious what your Belief DNA looks like?
           </p>
           <Link href="/register" style={{
             display: 'inline-block', padding: '12px 24px', borderRadius: 8,
-            background: 'rgba(108,143,255,0.2)',
-            border: '1px solid rgba(108,143,255,0.4)', color: '#a8c0ff',
+            background: 'var(--accent-mid)',
+            border: '1px solid rgba(108,143,255,0.4)', color: 'var(--accent-text)',
             fontSize: 13, fontWeight: 600, textDecoration: 'none',
           }}>
             Map yours — free

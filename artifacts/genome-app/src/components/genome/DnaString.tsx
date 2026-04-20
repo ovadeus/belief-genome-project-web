@@ -11,10 +11,10 @@ function charColor(ch: string, pos: number): string {
   if (pos <= 7) return '#3dd68c';
   if (pos <= 10) return '#00d2d3';
   if (pos <= 15) return '#f5a623';
-  if (ch === '\u00B7' || ch === '.' || ch === '_') return 'rgba(255,255,255,0.15)';
+  if (ch === '\u00B7' || ch === '.' || ch === '_') return 'var(--border-strong)';
   const n = parseInt(ch);
-  if (isNaN(n)) return 'rgba(255,255,255,0.4)';
-  return SHEX[n] || 'rgba(255,255,255,0.4)';
+  if (isNaN(n)) return 'var(--text-muted)';
+  return SHEX[n] || 'var(--text-muted)';
 }
 
 export default function DnaString({ dnaString, dimensionsCovered, totalResponses, overallConfidence }: Props) {
@@ -24,16 +24,16 @@ export default function DnaString({ dnaString, dimensionsCovered, totalResponses
         display: 'flex', gap: 24, marginBottom: 20, justifyContent: 'center', flexWrap: 'wrap',
       }}>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 20, fontFamily: 'monospace', color: '#6c8fff' }}>{totalResponses}</div>
-          <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase' }}>Responses</div>
+          <div style={{ fontSize: 20, fontFamily: 'monospace', color: 'var(--accent-bright)' }}>{totalResponses}</div>
+          <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Responses</div>
         </div>
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: 20, fontFamily: 'monospace', color: '#22c55e' }}>{dimensionsCovered}/124</div>
-          <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase' }}>Dimensions</div>
+          <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Dimensions</div>
         </div>
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: 20, fontFamily: 'monospace', color: '#f5a623' }}>{overallConfidence}%</div>
-          <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase' }}>Confidence</div>
+          <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Confidence</div>
         </div>
       </div>
 
@@ -41,7 +41,7 @@ export default function DnaString({ dnaString, dimensionsCovered, totalResponses
         fontFamily: 'monospace', fontSize: 15, letterSpacing: 3,
         wordBreak: 'break-all', lineHeight: 2.2, textAlign: 'center',
         padding: '20px 24px', borderRadius: 12,
-        background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(108,143,255,0.15)',
+        background: 'var(--surface-1)', border: '1px solid rgba(108,143,255,0.15)',
       }}>
         {dnaString.split('').map((ch, i) => (
           <span
@@ -65,7 +65,7 @@ export default function DnaString({ dnaString, dimensionsCovered, totalResponses
 
       <div style={{
         display: 'flex', justifyContent: 'center', gap: 12, marginTop: 10,
-        fontSize: 9, color: 'rgba(255,255,255,0.4)', flexWrap: 'wrap',
+        fontSize: 9, color: 'var(--text-muted)', flexWrap: 'wrap',
       }}>
         <span style={{ color: '#3dd68c' }}>Identity (0-7)</span>
         <span style={{ color: '#00d2d3' }}>Country (8-10)</span>
@@ -75,12 +75,12 @@ export default function DnaString({ dnaString, dimensionsCovered, totalResponses
 
       <div style={{
         display: 'flex', justifyContent: 'center', gap: 16, marginTop: 8,
-        fontSize: 10, color: 'rgba(255,255,255,0.4)',
+        fontSize: 10, color: 'var(--text-muted)',
       }}>
         <span><span style={{ color: '#dc2626' }}>0</span> Absolute False</span>
         <span><span style={{ color: '#22c55e' }}>5</span> Uncertain</span>
         <span><span style={{ color: '#2563eb' }}>9</span> Absolute True</span>
-        <span><span style={{ color: 'rgba(255,255,255,0.15)' }}>{'\u00B7'}</span> Unexplored</span>
+        <span><span style={{ color: 'var(--border-strong)' }}>{'\u00B7'}</span> Unexplored</span>
       </div>
     </div>
   );

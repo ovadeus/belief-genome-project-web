@@ -68,7 +68,7 @@ export default function AdminSubscribers() {
                   <tr><td colSpan={6} className="px-6 py-10 text-center text-muted-foreground">No subscribers found</td></tr>
                 ) : (
                   data?.subscribers?.map((sub) => (
-                    <tr key={sub.id} className="border-b border-border/50 hover:bg-white/[0.02]">
+                    <tr key={sub.id} className="border-b border-border/50 hover:bg-foreground/5">
                       <td className="px-6 py-4 text-sm text-foreground">{sub.name || "—"}</td>
                       <td className="px-6 py-4 text-sm text-foreground">{sub.email}</td>
                       <td className="px-6 py-4">

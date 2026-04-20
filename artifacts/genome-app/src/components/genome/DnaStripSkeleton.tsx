@@ -21,7 +21,7 @@ export default function DnaStripSkeleton({ message }: { message?: string }) {
   return (
     <div aria-busy="true" aria-label={message || 'Loading comparison'}>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
-        <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', fontFamily: "'Space Mono', monospace", textTransform: 'uppercase', letterSpacing: 1.5 }}>
+        <span style={{ fontSize: 11, color: 'var(--text-faint)', fontFamily: "'Space Mono', monospace", textTransform: 'uppercase', letterSpacing: 1.5 }}>
           {message || 'Loading…'}
         </span>
       </div>
@@ -31,7 +31,7 @@ export default function DnaStripSkeleton({ message }: { message?: string }) {
             <span style={{
               width: 100, minWidth: 100,
               fontFamily: "'Space Mono', monospace", fontSize: 10,
-              color: 'rgba(255,255,255,0.2)', textAlign: 'right',
+              color: 'var(--border-strong)', textAlign: 'right',
               textTransform: 'uppercase', letterSpacing: 0.5,
             }}>
               {cat.label}
@@ -50,7 +50,7 @@ export default function DnaStripSkeleton({ message }: { message?: string }) {
                 />
               ))}
             </div>
-            <span style={{ width: 32, minWidth: 32, fontFamily: "'Space Mono', monospace", fontSize: 9, color: 'rgba(255,255,255,0.15)' }}>
+            <span style={{ width: 32, minWidth: 32, fontFamily: "'Space Mono', monospace", fontSize: 9, color: 'var(--border-strong)' }}>
               —/{cat.count}
             </span>
           </div>

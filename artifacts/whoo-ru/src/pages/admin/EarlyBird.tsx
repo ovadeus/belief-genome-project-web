@@ -49,7 +49,7 @@ export default function AdminEarlyBird() {
                   </tr>
                 ) : (
                   data?.entries?.map((entry) => (
-                    <tr key={entry.id} className="border-b border-border/50 hover:bg-white/[0.02]">
+                    <tr key={entry.id} className="border-b border-border/50 hover:bg-foreground/5">
                       <td className="px-6 py-4 text-sm text-foreground">{entry.name || "—"}</td>
                       <td className="px-6 py-4 text-sm text-foreground">{entry.email}</td>
                       <td className="px-6 py-4 text-sm text-muted-foreground">

@@ -77,7 +77,7 @@ export default function ShareDnaModal({ open, onClose, dnaString }: ShareDnaModa
       onClick={onClose}
       style={{
         position: 'fixed', inset: 0, zIndex: 1000,
-        background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)',
+        background: 'var(--surface-overlay)', backdropFilter: 'blur(8px)',
         display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
       }}
     >
@@ -91,10 +91,10 @@ export default function ShareDnaModal({ open, onClose, dnaString }: ShareDnaModa
           boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
         }}
       >
-        <h2 id="share-modal-title" style={{ fontSize: 18, fontWeight: 700, color: '#fff', margin: '0 0 4px' }}>
+        <h2 id="share-modal-title" style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 4px' }}>
           Share your Belief DNA
         </h2>
-        <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', margin: '0 0 20px' }}>
+        <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '0 0 20px' }}>
           Choose how much to reveal. Anonymous is recommended.
         </p>
 
@@ -128,7 +128,7 @@ export default function ShareDnaModal({ open, onClose, dnaString }: ShareDnaModa
             <p style={{ fontSize: 12, color: '#f5a623', margin: '0 0 10px', lineHeight: 1.5 }}>
               <strong>Heads up:</strong> Signed links permanently encode your demographics into the URL. Once you share it, anyone who has the link can see them — even if you delete your account.
             </p>
-            <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 12, color: 'rgba(255,255,255,0.8)', cursor: 'pointer' }}>
+            <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 12, color: 'var(--text-primary)', cursor: 'pointer' }}>
               <input
                 type="checkbox"
                 checked={signedAcknowledged}
@@ -143,11 +143,11 @@ export default function ShareDnaModal({ open, onClose, dnaString }: ShareDnaModa
         {/* Link box */}
         <div style={{
           padding: '10px 12px', borderRadius: 8,
-          background: 'rgba(0,0,0,0.4)',
+          background: 'var(--surface-overlay)',
           border: '1px solid rgba(255,255,255,0.08)',
           marginBottom: 16,
           fontFamily: "'Space Mono', monospace", fontSize: 11,
-          color: shareUrl ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.25)',
+          color: shareUrl ? 'var(--text-secondary)' : 'var(--text-ghost)',
           wordBreak: 'break-all',
           minHeight: 38,
         }}>
@@ -161,9 +161,9 @@ export default function ShareDnaModal({ open, onClose, dnaString }: ShareDnaModa
             disabled={!shareUrl}
             style={{
               flex: 1, padding: '10px 16px', borderRadius: 8,
-              background: copied ? 'rgba(46,213,115,0.18)' : 'rgba(108,143,255,0.18)',
-              border: `1px solid ${copied ? 'rgba(46,213,115,0.4)' : 'rgba(108,143,255,0.4)'}`,
-              color: copied ? '#22c55e' : '#a8c0ff',
+              background: copied ? 'rgba(46,213,115,0.18)' : 'var(--accent-mid)',
+              border: `1px solid ${copied ? 'rgba(46,213,115,0.4)' : 'var(--accent-mid)'}`,
+              color: copied ? '#22c55e' : 'var(--accent-text)',
               fontSize: 13, fontWeight: 600, cursor: shareUrl ? 'pointer' : 'not-allowed',
               opacity: shareUrl ? 1 : 0.4,
             }}
@@ -177,7 +177,7 @@ export default function ShareDnaModal({ open, onClose, dnaString }: ShareDnaModa
               padding: '10px 16px', borderRadius: 8,
               background: 'transparent',
               border: '1px solid rgba(255,255,255,0.15)',
-              color: 'rgba(255,255,255,0.8)',
+              color: 'var(--text-primary)',
               fontSize: 13, fontWeight: 600, cursor: shareUrl ? 'pointer' : 'not-allowed',
               opacity: shareUrl ? 1 : 0.4,
             }}
@@ -190,7 +190,7 @@ export default function ShareDnaModal({ open, onClose, dnaString }: ShareDnaModa
               padding: '10px 14px', borderRadius: 8,
               background: 'transparent',
               border: '1px solid rgba(255,255,255,0.1)',
-              color: 'rgba(255,255,255,0.5)',
+              color: 'var(--text-muted)',
               fontSize: 13, cursor: 'pointer',
             }}
           >
@@ -212,8 +212,8 @@ function ModeOption(props: {
       style={{
         display: 'flex', gap: 12, alignItems: 'flex-start',
         padding: 12, borderRadius: 10,
-        background: props.checked ? 'rgba(108,143,255,0.08)' : 'rgba(255,255,255,0.02)',
-        border: `1px solid ${props.checked ? 'rgba(108,143,255,0.4)' : 'rgba(255,255,255,0.08)'}`,
+        background: props.checked ? 'var(--accent-soft)' : 'var(--surface-1)',
+        border: `1px solid ${props.checked ? 'var(--accent-mid)' : 'var(--border-soft)'}`,
         cursor: 'pointer',
       }}
     >
@@ -224,7 +224,7 @@ function ModeOption(props: {
       />
       <div style={{ flex: 1 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>{props.label}</span>
+          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{props.label}</span>
           {props.recommended && (
             <span style={{
               fontSize: 9, padding: '2px 6px', borderRadius: 4,
@@ -233,7 +233,7 @@ function ModeOption(props: {
             }}>Recommended</span>
           )}
         </div>
-        <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', margin: '4px 0 0', lineHeight: 1.5 }}>
+        <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: '4px 0 0', lineHeight: 1.5 }}>
           {props.description}
         </p>
       </div>

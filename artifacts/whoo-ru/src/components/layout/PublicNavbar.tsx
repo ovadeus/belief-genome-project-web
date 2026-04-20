@@ -41,7 +41,7 @@ function GenomeAuthButton() {
       </a>
       <a
         href={`${GENOME_APP_URL}/register`}
-        className="px-4 py-2 rounded-lg bg-primary text-sm font-medium text-white hover:bg-primary/90 transition-colors"
+        className="px-4 py-2 rounded-lg bg-primary text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
       >
         Get Started
       </a>
@@ -90,7 +90,7 @@ function MoreDropdown({ location }: { location: string }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.15 }}
-            className="absolute top-full right-0 mt-2 min-w-[200px] bg-[#0c1025]/95 backdrop-blur-md border border-white/10 rounded-lg shadow-xl shadow-black/30 py-2 z-50"
+            className="absolute top-full right-0 mt-2 min-w-[200px] bg-card/95 backdrop-blur-md border border-border rounded-lg shadow-xl shadow-foreground/20 py-2 z-50"
           >
             {MORE_LINKS.map((item) => (
               <Link
@@ -98,7 +98,7 @@ function MoreDropdown({ location }: { location: string }) {
                 href={item.href}
                 onClick={() => setOpen(false)}
                 className={cn(
-                  "block px-4 py-2.5 text-sm transition-colors hover:bg-white/5",
+                  "block px-4 py-2.5 text-sm transition-colors hover:bg-foreground/5",
                   location === item.href ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"
                 )}
               >
@@ -135,8 +135,8 @@ export function PublicNavbar() {
         className={cn(
           "fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b backdrop-blur-xl",
           isScrolled 
-            ? "bg-[#06091a]/[0.98] border-border shadow-lg shadow-black/20 py-4" 
-            : "bg-[#06091a]/[0.94] border-transparent py-6"
+            ? "bg-background/95 border-border shadow-lg shadow-foreground/10 py-4" 
+            : "bg-background/90 border-transparent py-6"
         )}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
