@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRoute, useLocation } from "wouter";
 import { Save, ArrowLeft, Upload, Mic, Image as ImageIcon, X, Loader2 } from "lucide-react";
 import { AdminLayout } from "@/components/layout/AdminLayout";
@@ -10,6 +10,7 @@ import {
   formatDuration,
   type AdminPodcastEpisode,
 } from "@/hooks/use-podcasts";
+import { useMediaLibrary, useUploadMedia, getMediaUrl, type MediaItem } from "@/hooks/use-media";
 
 export default function PodcastEditor() {
   const [, params] = useRoute("/admin/podcast/edit/:id");
@@ -30,8 +31,13 @@ export default function PodcastEditor() {
   const [audio, setAudio] = useState<{ objectPath: string; fileName: string; mimeType: string; bytes: number; durationSec?: number } | null>(null);
   const [cover, setCover] = useState<{ objectPath: string; fileName: string } | null>(null);
   const [audioUploading, setAudioUploading] = useState(false);
-  const [coverUploading, setCoverUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Media library picker (mirrors BlogEditor)
+  const [showMediaPicker, setShowMediaPicker] = useState(false);
+  const mediaLibrary = useMediaLibrary(1);
+  const uploadMedia = useUploadMedia();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!existing) return;
@@ -84,17 +90,22 @@ export default function PodcastEditor() {
     }
   };
 
-  const handleCoverUpload = async (file: File) => {
+  const selectMedia = (media: MediaItem) => {
+    setCover({ objectPath: media.objectPath, fileName: media.filename });
+    setShowMediaPicker(false);
+  };
+
+  const handlePickerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
     setError(null);
-    setCoverUploading(true);
     try {
-      const asset = await uploadAsset(file);
-      setCover({ objectPath: asset.objectPath, fileName: asset.fileName });
-    } catch (e: any) {
-      setError(e.message || "Cover upload failed");
-    } finally {
-      setCoverUploading(false);
+      const media = await uploadMedia.mutateAsync(file);
+      selectMedia(media);
+    } catch (err: any) {
+      setError(err.message || "Cover upload failed");
     }
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleSave = async (publishNow?: boolean) => {
@@ -260,7 +271,7 @@ export default function PodcastEditor() {
             )}
           </div>
 
-          {/* Cover uploader */}
+          {/* Cover image — choose from Media Library */}
           <div className="bg-card border border-border rounded-2xl p-6">
             <h3 className="font-display font-semibold text-foreground mb-3 flex items-center gap-2">
               <ImageIcon size={18} className="text-primary" /> Cover image
@@ -268,41 +279,109 @@ export default function PodcastEditor() {
             {cover ? (
               <div className="space-y-3">
                 <img
-                  src={`/api/storage${cover.objectPath}`}
+                  src={getMediaUrl(cover.objectPath)}
                   alt="Cover"
                   className="w-full aspect-square object-cover rounded-xl border border-border"
                 />
-                <button
-                  onClick={() => setCover(null)}
-                  className="text-xs text-destructive hover:underline flex items-center gap-1"
-                >
-                  <X size={12} /> Remove
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowMediaPicker(true)}
+                    className="flex-1 text-xs px-3 py-1.5 rounded-lg bg-foreground/5 hover:bg-foreground/10 text-foreground transition-colors"
+                  >
+                    Change image
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCover(null)}
+                    className="text-xs px-3 py-1.5 rounded-lg text-destructive hover:bg-destructive/10 flex items-center gap-1"
+                  >
+                    <X size={12} /> Remove
+                  </button>
+                </div>
               </div>
             ) : (
-              <label className="block">
-                <div className="border-2 border-dashed border-border rounded-xl p-6 text-center cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-colors">
-                  {coverUploading ? (
-                    <Loader2 className="w-8 h-8 mx-auto text-primary animate-spin" />
-                  ) : (
-                    <>
-                      <Upload className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
-                      <p className="text-sm text-foreground font-medium">Upload square image</p>
-                      <p className="text-xs text-muted-foreground mt-1">PNG / JPG, 1400×1400 ideal</p>
-                    </>
-                  )}
-                </div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => e.target.files?.[0] && handleCoverUpload(e.target.files[0])}
-                />
-              </label>
+              <button
+                type="button"
+                onClick={() => setShowMediaPicker(true)}
+                className="w-full border-2 border-dashed border-border rounded-xl p-6 text-center cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-colors"
+              >
+                <ImageIcon className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
+                <p className="text-sm text-foreground font-medium">Choose from Media Library</p>
+                <p className="text-xs text-muted-foreground mt-1">PNG / JPG, 1400×1400 ideal</p>
+              </button>
             )}
           </div>
         </div>
       </div>
+
+      {/* Media Library Picker Modal — mirrors BlogEditor */}
+      {showMediaPicker && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={() => setShowMediaPicker(false)}>
+          <div className="bg-card border border-border rounded-2xl max-w-3xl w-full max-h-[80vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border sticky top-0 bg-card z-10">
+              <h3 className="font-semibold text-foreground text-lg">Choose Cover Image</h3>
+              <div className="flex items-center gap-3">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePickerUpload}
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadMedia.isPending}
+                  className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium hover:brightness-110 disabled:opacity-50"
+                >
+                  {uploadMedia.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                  Upload New
+                </button>
+                <button type="button" onClick={() => setShowMediaPicker(false)} className="text-muted-foreground hover:text-foreground">
+                  <X size={20} />
+                </button>
+              </div>
+            </div>
+            <div className="p-6">
+              {mediaLibrary.isLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                </div>
+              ) : !mediaLibrary.data?.items.length ? (
+                <div className="text-center py-12">
+                  <ImageIcon className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+                  <p className="text-muted-foreground mb-4">No images uploaded yet</p>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="bg-primary text-primary-foreground px-5 py-2 rounded-lg font-medium text-sm"
+                  >
+                    Upload Your First Image
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                  {mediaLibrary.data.items.map((media) => (
+                    <button
+                      key={media.id}
+                      type="button"
+                      onClick={() => selectMedia(media)}
+                      className="aspect-square bg-background border border-border rounded-lg overflow-hidden hover:border-primary hover:ring-2 hover:ring-primary/30 transition-all"
+                    >
+                      <img
+                        src={getMediaUrl(media.objectPath)}
+                        alt={media.alt || media.filename}
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </AdminLayout>
   );
 }

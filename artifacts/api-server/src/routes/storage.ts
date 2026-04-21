@@ -92,32 +92,52 @@ router.get("/storage/objects/*path", async (req: Request, res: Response) => {
     const objectPath = `/objects/${wildcardPath}`;
     const objectFile = await objectStorageService.getObjectEntityFile(objectPath);
 
-    // --- Protected route example (uncomment when using replit-auth) ---
-    // if (!req.isAuthenticated()) {
-    //   res.status(401).json({ error: "Unauthorized" });
-    //   return;
-    // }
-    // const canAccess = await objectStorageService.canAccessObjectEntity({
-    //   userId: req.user.id,
-    //   objectFile,
-    //   requestedPermission: ObjectPermission.READ,
-    // });
-    // if (!canAccess) {
-    //   res.status(403).json({ error: "Forbidden" });
-    //   return;
-    // }
+    // Always advertise range support — required for HTML5 <audio>/<video> seeking.
+    res.setHeader("Accept-Ranges", "bytes");
 
-    const response = await objectStorageService.downloadObject(objectFile);
+    const [metadata] = await objectFile.getMetadata();
+    const totalSize = Number(metadata.size || 0);
+    const contentType = (metadata.contentType as string) || "application/octet-stream";
+    res.setHeader("Content-Type", contentType);
+    res.setHeader("Cache-Control", "public, max-age=3600");
 
-    res.status(response.status);
-    response.headers.forEach((value, key) => res.setHeader(key, value));
-
-    if (response.body) {
-      const nodeStream = Readable.fromWeb(response.body as ReadableStream<Uint8Array>);
-      nodeStream.pipe(res);
-    } else {
-      res.end();
+    const rangeHeader = req.headers.range;
+    if (rangeHeader && totalSize > 0) {
+      // Parse "bytes=start-end" (end optional)
+      const match = /bytes=(\d+)-(\d*)/.exec(rangeHeader);
+      if (!match) {
+        res.status(416).setHeader("Content-Range", `bytes */${totalSize}`).end();
+        return;
+      }
+      const start = parseInt(match[1], 10);
+      const end = match[2] ? parseInt(match[2], 10) : totalSize - 1;
+      if (start >= totalSize || end >= totalSize || start > end) {
+        res.status(416).setHeader("Content-Range", `bytes */${totalSize}`).end();
+        return;
+      }
+      const chunkSize = end - start + 1;
+      res.status(206);
+      res.setHeader("Content-Range", `bytes ${start}-${end}/${totalSize}`);
+      res.setHeader("Content-Length", String(chunkSize));
+      const stream = objectFile.createReadStream({ start, end });
+      stream.on("error", (err) => {
+        console.error("Range stream error:", err);
+        if (!res.headersSent) res.status(500).end();
+        else res.destroy();
+      });
+      stream.pipe(res);
+      return;
     }
+
+    // No range — full body
+    if (totalSize > 0) res.setHeader("Content-Length", String(totalSize));
+    const stream = objectFile.createReadStream();
+    stream.on("error", (err) => {
+      console.error("Stream error:", err);
+      if (!res.headersSent) res.status(500).end();
+      else res.destroy();
+    });
+    stream.pipe(res);
   } catch (error) {
     console.error("Error serving object:", error);
     if (error instanceof ObjectNotFoundError) {

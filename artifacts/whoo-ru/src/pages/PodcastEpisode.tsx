@@ -58,11 +58,22 @@ export default function PodcastEpisode() {
     };
   }, [ep?.id, loggedListen]);
 
-  const togglePlay = () => {
+  const [playError, setPlayError] = useState<string | null>(null);
+
+  const togglePlay = async () => {
     const a = audioRef.current;
     if (!a) return;
-    if (playing) { a.pause(); setPlaying(false); }
-    else { a.play(); setPlaying(true); }
+    setPlayError(null);
+    if (playing) { a.pause(); setPlaying(false); return; }
+    try {
+      await a.play();
+      setPlaying(true);
+    } catch (err: any) {
+      setPlaying(false);
+      const msg = err?.message || "Audio could not be played.";
+      console.error("Audio play() failed:", err);
+      setPlayError(`${msg} (Check that the audio file is accessible.)`);
+    }
   };
 
   const seek = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -177,7 +188,23 @@ export default function PodcastEpisode() {
             {/* Audio player */}
             {ep.audioUrl && (
               <div className="border-t border-border p-4 bg-background/40">
-                <audio ref={audioRef} src={ep.audioUrl} preload="metadata" />
+                <audio
+                  ref={audioRef}
+                  src={ep.audioUrl}
+                  preload="metadata"
+                  onError={(e) => {
+                    const a = e.currentTarget;
+                    const code = a.error?.code;
+                    const codeMsg = code === 1 ? "aborted" : code === 2 ? "network error" : code === 3 ? "decode error" : code === 4 ? "format not supported" : "unknown";
+                    setPlayError(`Audio failed to load (${codeMsg}). The file may be missing or the URL may be wrong.`);
+                    setPlaying(false);
+                  }}
+                />
+                {playError && (
+                  <div className="mb-3 px-3 py-2 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-xs">
+                    {playError}
+                  </div>
+                )}
                 <div className="flex items-center gap-4">
                   <button
                     onClick={togglePlay}
