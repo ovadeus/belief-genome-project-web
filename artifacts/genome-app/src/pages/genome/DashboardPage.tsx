@@ -315,6 +315,9 @@ const TAB_ICONS: Record<Tab, string> = {
   forecaster: '⚙',
 };
 
+/** Tabs whose visualisations require a black canvas. */
+const DARK_PANEL_TABS: Tab[] = ['dnastrip', 'helix', 'neuromap', 'radar'];
+
 const TABS: { key: Tab; label: string }[] = [
   { key: 'dnastrip',   label: 'Belief DNA' },
   { key: 'helix',      label: 'Triple Helix' },
@@ -698,10 +701,10 @@ export default function DashboardPage() {
                 width: 104,
                 padding: '12px 8px',
                 borderRadius: 2,
-                background: active ? 'var(--text-primary)' : 'transparent',
-                color: active ? 'var(--background)' : 'var(--text-muted)',
+                background: active ? '#0a0a0a' : 'transparent',
+                color: active ? '#ffffff' : 'var(--text-muted)',
                 border: active
-                  ? '1px solid var(--text-primary)'
+                  ? '1px solid #0a0a0a'
                   : '1px solid var(--border-subtle)',
                 fontSize: 12,
                 cursor: 'pointer',
@@ -710,7 +713,7 @@ export default function DashboardPage() {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: 6,
+                gap: 8,
                 fontWeight: active ? 600 : 500,
                 fontFamily: 'inherit',
                 textAlign: 'center',
@@ -719,7 +722,7 @@ export default function DashboardPage() {
               <span style={{
                 fontSize: 22,
                 lineHeight: 1,
-                opacity: active ? 1 : 0.7,
+                color: active ? '#ffffff' : 'currentColor',
               }}>
                 {TAB_ICONS[t.key]}
               </span>
@@ -732,14 +735,14 @@ export default function DashboardPage() {
       {/* Tab content */}
       {!fullscreen && (
         <div
-          className={['dnastrip', 'helix', 'neuromap'].includes(tab) ? 'genome-panel-surface' : ''}
           style={{
-            padding: 24,
-            ...(!['dnastrip', 'helix', 'neuromap'].includes(tab) ? {
-              borderRadius: 12,
-              background: 'var(--surface-1)',
-              border: '1px solid rgba(255,255,255,0.06)',
-            } : {}),
+            padding: DARK_PANEL_TABS.includes(tab) ? 0 : 24,
+            borderRadius: 2,
+            background: DARK_PANEL_TABS.includes(tab) ? '#000000' : 'var(--surface-1)',
+            border: DARK_PANEL_TABS.includes(tab)
+              ? '1px solid #0a0a0a'
+              : '1px solid var(--border-subtle)',
+            overflow: 'hidden',
             minHeight: 300,
             position: 'relative',
           }}
