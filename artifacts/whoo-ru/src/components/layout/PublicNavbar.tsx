@@ -15,6 +15,7 @@ const TOP_LINKS = [
   { href: "/app", label: "Participate" },
   { href: "/explore", label: "Explore Beliefs" },
   { href: "/blog", label: "Blog" },
+  { href: "/podcast", label: "Podcast" },
   { href: "/book", label: "Book" },
 ];
 

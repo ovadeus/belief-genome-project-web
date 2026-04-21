@@ -30,6 +30,11 @@ import GenomeSubmissions from "./pages/admin/GenomeSubmissions";
 import AdminAnalytics from "./pages/admin/Analytics";
 import ExploreBeliefs from "./pages/ExploreBeliefs";
 import NeuromapPage from "./pages/NeuromapPage";
+import Podcast from "./pages/Podcast";
+import PodcastEpisode from "./pages/PodcastEpisode";
+import AdminPodcastList from "./pages/admin/PodcastList";
+import AdminPodcastEditor from "./pages/admin/PodcastEditor";
+import AdminPodcastComments from "./pages/admin/PodcastComments";
 
 import { usePageTracker } from "./hooks/use-page-tracker";
 
@@ -66,6 +71,8 @@ function Router() {
       <Route path="/subscribe" component={Subscribe} />
       <Route path="/explore" component={ExploreBeliefs} />
       <Route path="/neuromap/:key" component={NeuromapPage} />
+      <Route path="/podcast" component={Podcast} />
+      <Route path="/podcast/:slug" component={PodcastEpisode} />
       <Route path="/admin/login" component={AdminLogin} />
       <Route path="/admin/dashboard" component={Dashboard} />
       <Route path="/admin/blog" component={BlogList} />
@@ -78,6 +85,10 @@ function Router() {
       <Route path="/admin/settings" component={AdminSettings} />
       <Route path="/admin/genome" component={GenomeSubmissions} />
       <Route path="/admin/analytics" component={AdminAnalytics} />
+      <Route path="/admin/podcast" component={AdminPodcastList} />
+      <Route path="/admin/podcast/new" component={AdminPodcastEditor} />
+      <Route path="/admin/podcast/edit/:id" component={AdminPodcastEditor} />
+      <Route path="/admin/podcast/comments" component={AdminPodcastComments} />
 
       {/* Legacy /genome/* paths now bounce to the standalone genome app. */}
       <Route path="/genome/:rest*">

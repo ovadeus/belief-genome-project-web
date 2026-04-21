@@ -17,6 +17,7 @@ import genomeAdminRouter from "./genome-admin";
 import genomeKnownDnasRouter from "./genome-known-dnas";
 import genomeCompareRouter from "./genome-compare";
 import analyticsRouter from "./analytics";
+import podcastsRouter, { podcastAdminRouter } from "./podcasts";
 import { requireAuth } from "../middlewares/auth";
 
 const router: IRouter = Router();
@@ -31,6 +32,8 @@ router.use(settingsRouter);
 router.use(storageRouter);
 router.use(blogAssetsRouter);
 router.use(analyticsRouter);
+router.use(podcastsRouter);
+router.use("/admin", podcastAdminRouter);
 
 // Public, unauthenticated DNA share routes — MUST be mounted before the
 // auth-gated /genome subrouter so the auth middleware doesn't intercept them.
