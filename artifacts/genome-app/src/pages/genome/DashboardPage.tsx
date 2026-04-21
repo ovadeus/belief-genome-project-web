@@ -767,42 +767,49 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {fullscreen && (
-        <div style={{
-          position: 'fixed', inset: 0, zIndex: 5000,
-          background: 'hsl(var(--background))',
-          display: 'flex', flexDirection: 'column',
-          animation: 'vizFadeIn 0.25s ease',
-        }}>
+      {fullscreen && (() => {
+        const dark = DARK_PANEL_TABS.includes(tab);
+        return (
           <div style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '16px 24px', borderBottom: '1px solid rgba(255,255,255,0.08)',
+            position: 'fixed', inset: 0, zIndex: 5000,
+            background: dark ? '#000000' : 'hsl(var(--background))',
+            display: 'flex', flexDirection: 'column',
+            animation: 'vizFadeIn 0.25s ease',
           }}>
             <div style={{
-              fontFamily: "'Space Grotesk', sans-serif", fontSize: 16, fontWeight: 600,
-              color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 8,
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '16px 24px',
+              borderBottom: dark ? '1px solid rgba(255,255,255,0.12)' : '1px solid var(--border-subtle)',
             }}>
-              {(() => { const Icon = TAB_ICONS[tab]; return <Icon size={18} strokeWidth={1.5} />; })()}
-              {TABS.find(t => t.key === tab)?.label || tab}
+              <div style={{
+                fontFamily: "'Space Grotesk', sans-serif", fontSize: 16, fontWeight: 600,
+                color: dark ? '#ffffff' : 'var(--text-primary)',
+                display: 'flex', alignItems: 'center', gap: 8,
+              }}>
+                {(() => { const Icon = TAB_ICONS[tab]; return <Icon size={18} strokeWidth={1.5} />; })()}
+                {TABS.find(t => t.key === tab)?.label || tab}
+              </div>
+              <button
+                onClick={() => setFullscreen(false)}
+                style={{
+                  background: dark ? 'rgba(255,255,255,0.08)' : 'var(--border-subtle)',
+                  border: dark ? '1px solid rgba(255,255,255,0.18)' : '1px solid var(--border-subtle)',
+                  borderRadius: 2,
+                  color: dark ? '#ffffff' : 'var(--text-muted)',
+                  fontFamily: "'Space Mono', monospace", fontSize: 12,
+                  padding: '6px 14px', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: 6,
+                }}
+              >
+                <X size={14} /> Close
+              </button>
             </div>
-            <button
-              onClick={() => setFullscreen(false)}
-              style={{
-                background: 'var(--border-subtle)', border: '1px solid rgba(255,255,255,0.12)',
-                borderRadius: 8, color: 'var(--text-muted)',
-                fontFamily: "'Space Mono', monospace", fontSize: 12,
-                padding: '6px 14px', cursor: 'pointer',
-                display: 'flex', alignItems: 'center', gap: 6,
-              }}
-            >
-              <X size={14} /> Close
-            </button>
+            <div style={{ flex: 1, overflow: 'auto', padding: 24 }}>
+              {renderTabContent()}
+            </div>
           </div>
-          <div style={{ flex: 1, overflow: 'auto', padding: 24 }}>
-            {renderTabContent()}
-          </div>
-        </div>
-      )}
+        );
+      })()}
 
       <style>{`@keyframes vizFadeIn { from { opacity: 0 } to { opacity: 1 } }`}</style>
 
