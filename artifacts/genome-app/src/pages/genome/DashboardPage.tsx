@@ -12,7 +12,11 @@ import Forecaster from '../../components/genome/Forecaster';
 import Neuromap from '../../components/genome/Neuromap';
 import DnaString from '../../components/genome/DnaString';
 import DnaStrip from '../../components/genome/DnaStrip';
-import { Minus, Plus, Maximize2, X } from 'lucide-react';
+import {
+  Minus, Plus, Maximize2, X,
+  Dna, RotateCw, Target, CircleDot, RectangleVertical, Activity, Menu, Settings,
+} from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 /* ── 100 curated quotes on self-knowledge ─────────────────── */
 const QUOTES = [
@@ -304,15 +308,15 @@ function SubmitGenomeButton() {
 
 type Tab = 'dnastrip' | 'helix' | 'neuromap' | 'radar' | 'breakdown' | 'timeline' | 'history' | 'forecaster';
 
-const TAB_ICONS: Record<Tab, string> = {
-  dnastrip: '🧬',
-  helix: '⟳',
-  neuromap: '⊛',
-  radar: '◎',
-  breakdown: '▐',
-  timeline: '∿',
-  history: '☰',
-  forecaster: '⚙',
+const TAB_ICONS: Record<Tab, LucideIcon> = {
+  dnastrip: Dna,
+  helix: RotateCw,
+  neuromap: Target,
+  radar: CircleDot,
+  breakdown: RectangleVertical,
+  timeline: Activity,
+  history: Menu,
+  forecaster: Settings,
 };
 
 /** Tabs whose visualisations require a black canvas. */
@@ -719,13 +723,10 @@ export default function DashboardPage() {
                 textAlign: 'center',
               }}
             >
-              <span style={{
-                fontSize: 22,
-                lineHeight: 1,
-                color: active ? '#ffffff' : 'currentColor',
-              }}>
-                {TAB_ICONS[t.key]}
-              </span>
+              {(() => {
+                const Icon = TAB_ICONS[t.key];
+                return <Icon size={20} strokeWidth={1.5} color={active ? '#ffffff' : 'currentColor'} />;
+              })()}
               <span style={{ letterSpacing: 0.2 }}>{t.label}</span>
             </button>
           );
@@ -781,7 +782,7 @@ export default function DashboardPage() {
               fontFamily: "'Space Grotesk', sans-serif", fontSize: 16, fontWeight: 600,
               color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 8,
             }}>
-              <span>{TAB_ICONS[tab]}</span>
+              {(() => { const Icon = TAB_ICONS[tab]; return <Icon size={18} strokeWidth={1.5} />; })()}
               {TABS.find(t => t.key === tab)?.label || tab}
             </div>
             <button
