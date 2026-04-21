@@ -737,7 +737,7 @@ export default function DashboardPage() {
       {!fullscreen && (
         <div
           style={{
-            padding: DARK_PANEL_TABS.includes(tab) ? 0 : 24,
+            padding: DARK_PANEL_TABS.includes(tab) ? 20 : 24,
             borderRadius: 2,
             background: DARK_PANEL_TABS.includes(tab) ? '#000000' : 'var(--surface-1)',
             border: DARK_PANEL_TABS.includes(tab)
