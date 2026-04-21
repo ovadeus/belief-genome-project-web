@@ -684,29 +684,49 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* Tab bar — pill buttons */}
+      {/* Tab bar — square stacked buttons (icon above label) */}
       <div style={{
         display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap',
       }}>
-        {TABS.map(t => (
-          <button
-            key={t.key}
-            onClick={() => setTab(t.key)}
-            style={{
-              padding: '8px 18px', borderRadius: 20,
-              background: tab === t.key ? 'var(--accent-soft)' : 'transparent',
-              color: tab === t.key ? 'var(--accent-bright)' : 'var(--text-muted)',
-              fontSize: 13, cursor: 'pointer', transition: 'all 0.2s',
-              display: 'flex', alignItems: 'center', gap: 6,
-              fontWeight: tab === t.key ? 500 : 400,
-              border: tab === t.key ? '1px solid rgba(108,143,255,0.3)' : '1px solid rgba(255,255,255,0.08)',
-              fontFamily: 'inherit',
-            }}
-          >
-            <span style={{ fontSize: 16, opacity: tab === t.key ? 1 : 0.6 }}>{TAB_ICONS[t.key]}</span>
-            {t.label}
-          </button>
-        ))}
+        {TABS.map(t => {
+          const active = tab === t.key;
+          return (
+            <button
+              key={t.key}
+              onClick={() => setTab(t.key)}
+              style={{
+                width: 104,
+                padding: '12px 8px',
+                borderRadius: 2,
+                background: active ? 'var(--text-primary)' : 'transparent',
+                color: active ? 'var(--background)' : 'var(--text-muted)',
+                border: active
+                  ? '1px solid var(--text-primary)'
+                  : '1px solid var(--border-subtle)',
+                fontSize: 12,
+                cursor: 'pointer',
+                transition: 'all 0.15s',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 6,
+                fontWeight: active ? 600 : 500,
+                fontFamily: 'inherit',
+                textAlign: 'center',
+              }}
+            >
+              <span style={{
+                fontSize: 22,
+                lineHeight: 1,
+                opacity: active ? 1 : 0.7,
+              }}>
+                {TAB_ICONS[t.key]}
+              </span>
+              <span style={{ letterSpacing: 0.2 }}>{t.label}</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Tab content */}
