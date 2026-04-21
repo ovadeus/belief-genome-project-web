@@ -97,7 +97,27 @@ router.get("/storage/objects/*path", async (req: Request, res: Response) => {
 
     const [metadata] = await objectFile.getMetadata();
     const totalSize = Number(metadata.size || 0);
-    const contentType = (metadata.contentType as string) || "application/octet-stream";
+    let contentType = (metadata.contentType as string) || "application/octet-stream";
+    // Normalize non-standard / vendor-prefixed audio MIME types so all browsers
+    // (especially Chrome + Firefox) will decode them. Safari is the only browser
+    // that accepts audio/x-m4a; everyone else needs audio/mp4 for AAC-in-MP4.
+    const mimeOverrides: Record<string, string> = {
+      "audio/x-m4a": "audio/mp4",
+      "audio/x-mp3": "audio/mpeg",
+      "audio/mp3": "audio/mpeg",
+      "audio/x-wav": "audio/wav",
+    };
+    // Also fall back to extension-based detection if the stored type is generic.
+    if (mimeOverrides[contentType.toLowerCase()]) {
+      contentType = mimeOverrides[contentType.toLowerCase()];
+    } else if (contentType === "application/octet-stream" || contentType === "binary/octet-stream") {
+      const lowerPath = wildcardPath.toLowerCase();
+      if (lowerPath.endsWith(".m4a") || lowerPath.endsWith(".mp4") || lowerPath.endsWith(".aac")) contentType = "audio/mp4";
+      else if (lowerPath.endsWith(".mp3")) contentType = "audio/mpeg";
+      else if (lowerPath.endsWith(".wav")) contentType = "audio/wav";
+      else if (lowerPath.endsWith(".ogg") || lowerPath.endsWith(".oga")) contentType = "audio/ogg";
+      else if (lowerPath.endsWith(".webm")) contentType = "audio/webm";
+    }
     res.setHeader("Content-Type", contentType);
     res.setHeader("Cache-Control", "public, max-age=3600");
 
