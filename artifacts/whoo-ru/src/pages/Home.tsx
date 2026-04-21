@@ -53,13 +53,13 @@ export default function Home() {
             </p>
             
             <div className="flex justify-center">
-              <Link
-                href="/subscribe"
+              <a
+                href="https://beliefgenomeproject.org/genome-app/register"
                 className="px-10 py-4 rounded-xl font-semibold text-lg tracking-[0.15em] uppercase bg-primary hover:bg-primary/90 text-primary-foreground transition-all hover:-translate-y-0.5 flex items-center justify-center gap-3"
               >
                 Join the Project
                 <ArrowRight size={20} />
-              </Link>
+              </a>
             </div>
           </motion.div>
         </div>
