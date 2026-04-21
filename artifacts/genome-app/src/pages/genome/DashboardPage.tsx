@@ -434,6 +434,22 @@ export default function DashboardPage() {
     return () => window.removeEventListener('keydown', onKey);
   }, [fullscreen]);
 
+  // When the active tab is a "dark visualisation" tab, paint the entire page
+  // background black so the panel reads edge-to-edge instead of floating as a
+  // small black rectangle inside a cream page.
+  const darkPage = DARK_PANEL_TABS.includes(tab);
+  useEffect(() => {
+    if (!darkPage) return;
+    const prevBody = document.body.style.backgroundColor;
+    const prevHtml = document.documentElement.style.backgroundColor;
+    document.body.style.backgroundColor = '#000000';
+    document.documentElement.style.backgroundColor = '#000000';
+    return () => {
+      document.body.style.backgroundColor = prevBody;
+      document.documentElement.style.backgroundColor = prevHtml;
+    };
+  }, [darkPage]);
+
   const zoomVal = UI_ZOOM_STEPS[zoomIndex];
   const zoomStyle: React.CSSProperties = zoomIndex > 0 ? {
     transform: `scale(${zoomVal})`,
@@ -488,7 +504,13 @@ export default function DashboardPage() {
   };
 
   return (
-    <div style={{ maxWidth: 900, margin: '0 auto', ...zoomStyle }}>
+    <div style={{
+      maxWidth: darkPage ? '100%' : 900,
+      margin: '0 auto',
+      paddingLeft: darkPage ? 16 : undefined,
+      paddingRight: darkPage ? 16 : undefined,
+      ...zoomStyle,
+    }}>
       {/* Header row: Title + action buttons */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 8, flexWrap: 'wrap' }}>
         <div>
@@ -744,7 +766,7 @@ export default function DashboardPage() {
               ? '1px solid #0a0a0a'
               : '1px solid var(--border-subtle)',
             overflow: 'hidden',
-            minHeight: 300,
+            minHeight: DARK_PANEL_TABS.includes(tab) ? 'calc(100vh - 240px)' : 300,
             position: 'relative',
           }}
         >
