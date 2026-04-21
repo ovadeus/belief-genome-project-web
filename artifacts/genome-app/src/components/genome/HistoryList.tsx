@@ -117,7 +117,7 @@ export default function HistoryList({ history }: Props) {
             <div key={entry.id} style={{
               padding: '12px 16px', borderRadius: 8,
               background: 'var(--surface-1)',
-              border: '1px solid rgba(255,255,255,0.06)',
+              border: '1px solid var(--border-subtle)',
             }}>
               <div style={{ fontSize: 13, color: 'var(--text-primary)', marginBottom: 8 }}>
                 "{entry.probeText}"
@@ -186,19 +186,19 @@ export default function HistoryList({ history }: Props) {
 
 const inputStyle: React.CSSProperties = {
   padding: '10px 14px', borderRadius: 8,
-  background: 'var(--surface-2)', border: '1px solid rgba(255,255,255,0.1)',
+  background: 'var(--surface-2)', border: '1px solid var(--border-soft)',
   color: 'var(--text-primary)', fontSize: 14, minWidth: 150, minHeight: 44,
 };
 
 const selectStyle: React.CSSProperties = {
   padding: '10px 12px', borderRadius: 8,
-  background: 'var(--surface-2)', border: '1px solid rgba(255,255,255,0.1)',
+  background: 'var(--surface-2)', border: '1px solid var(--border-soft)',
   color: 'var(--text-primary)', fontSize: 13, minHeight: 44, cursor: 'pointer',
 };
 
 const pageBtnStyle: React.CSSProperties = {
   padding: '10px 16px', borderRadius: 8,
-  background: 'var(--border-subtle)', border: '1px solid rgba(255,255,255,0.1)',
+  background: 'var(--border-subtle)', border: '1px solid var(--border-soft)',
   color: 'var(--text-secondary)', fontSize: 13, cursor: 'pointer',
   fontFamily: "'Space Mono', monospace", minHeight: 44,
 };

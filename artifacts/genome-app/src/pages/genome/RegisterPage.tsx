@@ -58,7 +58,7 @@ export default function RegisterPage() {
 
   const inputStyle: React.CSSProperties = {
     width: '100%', padding: '12px 16px', borderRadius: 10,
-    border: '1px solid rgba(255,255,255,0.1)',
+    border: '1px solid var(--border-soft)',
     background: 'var(--border-subtle)', color: 'var(--text-primary)',
     fontSize: 14, outline: 'none', transition: 'border-color 0.2s',
   };
@@ -87,7 +87,7 @@ export default function RegisterPage() {
       <div style={{
         width: '100%', maxWidth: 420, padding: 36, borderRadius: 16,
         background: 'var(--surface-1)',
-        border: '1px solid rgba(255,255,255,0.08)',
+        border: '1px solid var(--border-subtle)',
         boxShadow: '0 8px 40px rgba(0,0,0,0.4)',
       }}>
         <h2 style={{
@@ -191,7 +191,7 @@ export default function RegisterPage() {
             color: 'var(--text-primary)', fontSize: 15, fontWeight: 600,
             cursor: loading ? 'wait' : 'pointer',
             transition: 'all 0.2s', marginTop: 4,
-            boxShadow: loading ? 'none' : '0 4px 16px rgba(108,143,255,0.3)',
+            boxShadow: loading ? 'none' : '0 4px 16px var(--accent-mid)',
           }}>
             {loading ? 'Creating account...' : 'Create Account'}
           </button>

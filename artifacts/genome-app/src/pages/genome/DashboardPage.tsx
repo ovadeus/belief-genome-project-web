@@ -242,7 +242,7 @@ function SubmitGenomeButton() {
             {publicStatus?.submitted && (
               <div style={{
                 padding: 10, borderRadius: 8, marginBottom: 16,
-                background: 'var(--accent-soft)', border: '1px solid rgba(108,143,255,0.15)',
+                background: 'var(--accent-soft)', border: '1px solid var(--accent-soft)',
                 fontSize: 12, color: 'var(--text-muted)', textAlign: 'center',
               }}>
                 You've already submitted. Clicking submit again will update your entry with your latest data.
@@ -277,7 +277,7 @@ function SubmitGenomeButton() {
                 onClick={() => setShowPopup(false)}
                 style={{
                   flex: 1, padding: '12px 20px', borderRadius: 10,
-                  background: 'transparent', border: '1px solid rgba(255,255,255,0.15)',
+                  background: 'transparent', border: '1px solid var(--border-soft)',
                   color: 'var(--text-muted)', fontSize: 14, cursor: 'pointer',
                   fontFamily: 'inherit',
                 }}
@@ -537,7 +537,7 @@ export default function DashboardPage() {
               disabled={zoomIndex <= 0}
               style={{
                 width: 24, height: 24, borderRadius: '50%',
-                border: '1px solid rgba(255,255,255,0.10)',
+                border: '1px solid var(--border-soft)',
                 background: 'var(--panel-glass-bg)', color: 'var(--text-muted)',
                 cursor: zoomIndex <= 0 ? 'default' : 'pointer',
                 display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
@@ -553,7 +553,7 @@ export default function DashboardPage() {
               disabled={zoomIndex >= UI_ZOOM_STEPS.length - 1}
               style={{
                 width: 24, height: 24, borderRadius: '50%',
-                border: '1px solid rgba(255,255,255,0.10)',
+                border: '1px solid var(--border-soft)',
                 background: 'var(--panel-glass-bg)', color: 'var(--text-muted)',
                 cursor: zoomIndex >= UI_ZOOM_STEPS.length - 1 ? 'default' : 'pointer',
                 display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
@@ -601,7 +601,7 @@ export default function DashboardPage() {
         <div style={{
           position: 'relative',
           padding: 20, borderRadius: 12, marginBottom: 16,
-          background: 'var(--accent-soft)', border: '1px solid rgba(108,143,255,0.12)',
+          background: 'var(--accent-soft)', border: '1px solid var(--accent-soft)',
         }}>
           <button
             onClick={() => setAnalysisDismissed(true)}
@@ -612,7 +612,7 @@ export default function DashboardPage() {
               width: 28, height: 28,
               display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
               background: 'transparent',
-              border: '1px solid rgba(255,255,255,0.08)',
+              border: '1px solid var(--border-subtle)',
               borderRadius: 6,
               color: 'var(--text-muted)',
               cursor: 'pointer',
@@ -666,7 +666,7 @@ export default function DashboardPage() {
                       <span key={i} style={{
                         padding: '4px 12px', borderRadius: 14,
                         background: colors[i % colors.length],
-                        border: '1px solid rgba(255,255,255,0.1)',
+                        border: '1px solid var(--border-soft)',
                         fontSize: 11, color: 'var(--text-secondary)',
                         fontFamily: "'Space Mono', monospace",
                       }}>
@@ -695,7 +695,7 @@ export default function DashboardPage() {
           <div key={i} style={{
             flex: 1, minWidth: 90, padding: '12px 16px', textAlign: 'center',
             background: 'var(--surface-1)',
-            border: '1px solid rgba(255,255,255,0.06)', borderRadius: 10,
+            border: '1px solid var(--border-subtle)', borderRadius: 10,
           }}>
             <div style={{
               fontSize: 22, fontWeight: 700, color: 'var(--accent-bright)',
@@ -728,7 +728,7 @@ export default function DashboardPage() {
                 padding: '12px 8px',
                 borderRadius: 2,
                 background: active ? '#0a0a0a' : 'transparent',
-                color: active ? '#ffffff' : 'var(--text-muted)',
+                color: active ? 'var(--text-primary)' : 'var(--text-muted)',
                 border: active
                   ? '1px solid #0a0a0a'
                   : '1px solid var(--border-subtle)',
@@ -747,7 +747,7 @@ export default function DashboardPage() {
             >
               {(() => {
                 const Icon = TAB_ICONS[t.key];
-                return <Icon size={20} strokeWidth={1.5} color={active ? '#ffffff' : 'currentColor'} />;
+                return <Icon size={20} strokeWidth={1.5} color={active ? 'var(--text-primary)' : 'currentColor'} />;
               })()}
               <span style={{ letterSpacing: 0.2 }}>{t.label}</span>
             </button>
@@ -776,7 +776,7 @@ export default function DashboardPage() {
               style={{
                 position: 'absolute', top: 12, right: 12, zIndex: 5,
                 width: 32, height: 32, borderRadius: 8,
-                background: 'var(--border-subtle)', border: '1px solid rgba(255,255,255,0.12)',
+                background: 'var(--border-subtle)', border: '1px solid var(--border-soft)',
                 color: 'var(--text-muted)', cursor: 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}
@@ -801,11 +801,11 @@ export default function DashboardPage() {
             <div style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
               padding: '16px 24px',
-              borderBottom: dark ? '1px solid rgba(255,255,255,0.12)' : '1px solid var(--border-subtle)',
+              borderBottom: dark ? '1px solid var(--border-soft)' : '1px solid var(--border-subtle)',
             }}>
               <div style={{
                 fontFamily: "'Space Grotesk', sans-serif", fontSize: 16, fontWeight: 600,
-                color: dark ? '#ffffff' : 'var(--text-primary)',
+                color: dark ? 'var(--text-primary)' : 'var(--text-primary)',
                 display: 'flex', alignItems: 'center', gap: 8,
               }}>
                 {(() => { const Icon = TAB_ICONS[tab]; return <Icon size={18} strokeWidth={1.5} />; })()}
@@ -814,10 +814,10 @@ export default function DashboardPage() {
               <button
                 onClick={() => setFullscreen(false)}
                 style={{
-                  background: dark ? 'rgba(255,255,255,0.08)' : 'var(--border-subtle)',
-                  border: dark ? '1px solid rgba(255,255,255,0.18)' : '1px solid var(--border-subtle)',
+                  background: dark ? 'var(--border-subtle)' : 'var(--border-subtle)',
+                  border: dark ? '1px solid var(--border-soft)' : '1px solid var(--border-subtle)',
                   borderRadius: 2,
-                  color: dark ? '#ffffff' : 'var(--text-muted)',
+                  color: dark ? 'var(--text-primary)' : 'var(--text-muted)',
                   fontFamily: "'Space Mono', monospace", fontSize: 12,
                   padding: '6px 14px', cursor: 'pointer',
                   display: 'flex', alignItems: 'center', gap: 6,
@@ -841,7 +841,7 @@ export default function DashboardPage() {
 
 const headerBtnStyle: React.CSSProperties = {
   padding: '8px 16px', borderRadius: 8,
-  background: 'transparent', border: '1px solid rgba(108,143,255,0.3)',
+  background: 'transparent', border: '1px solid var(--accent-mid)',
   color: 'var(--text-secondary)', fontSize: 12, cursor: 'pointer',
   display: 'flex', alignItems: 'center', gap: 6,
   fontFamily: "'Space Mono', monospace",

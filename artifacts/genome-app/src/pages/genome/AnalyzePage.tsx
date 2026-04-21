@@ -36,7 +36,7 @@ export default function AnalyzePage() {
       <div style={{
         padding: 28, borderRadius: 16,
         background: 'var(--surface-1)',
-        border: '1px solid rgba(108,143,255,0.12)',
+        border: '1px solid var(--accent-soft)',
         marginBottom: 24, textAlign: 'center',
       }}>
         <div style={{ fontSize: 48, marginBottom: 16, opacity: 0.6 }}>&#x2699;</div>

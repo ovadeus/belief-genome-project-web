@@ -71,7 +71,7 @@ export default function DnaPage() {
           onClick={() => { dnaQ.refetch(); dimsQ.refetch(); }}
           style={{
             padding: '8px 20px', borderRadius: 8,
-            background: 'transparent', border: '1px solid rgba(108,143,255,0.4)',
+            background: 'transparent', border: '1px solid var(--accent-strong)',
             color: 'var(--accent-bright)', fontSize: 13, cursor: 'pointer',
           }}
         >
@@ -97,21 +97,21 @@ export default function DnaPage() {
           <button onClick={() => setShareOpen(true)} style={{
             padding: '8px 14px', borderRadius: 8,
             background: 'var(--accent-mid)',
-            border: '1px solid rgba(108,143,255,0.4)',
+            border: '1px solid var(--accent-strong)',
             color: 'var(--accent-text)',
             fontSize: 12, fontWeight: 600, cursor: 'pointer',
           }}>Share</button>
           <button onClick={() => setExportOpen(true)} style={{
             padding: '8px 14px', borderRadius: 8,
             background: 'transparent',
-            border: '1px solid rgba(108,143,255,0.3)',
+            border: '1px solid var(--accent-mid)',
             color: 'var(--text-secondary)',
             fontSize: 12, fontWeight: 600, cursor: 'pointer',
           }}>Export .bgp</button>
           <button onClick={downloadPng} disabled={downloading} style={{
             padding: '8px 14px', borderRadius: 8,
             background: 'transparent',
-            border: '1px solid rgba(108,143,255,0.3)',
+            border: '1px solid var(--accent-mid)',
             color: 'var(--text-secondary)',
             fontSize: 12, fontWeight: 600,
             cursor: downloading ? 'wait' : 'pointer',
@@ -135,7 +135,7 @@ export default function DnaPage() {
       <div ref={stripRef} style={{
         padding: 24, borderRadius: 16,
         background: 'var(--surface-1)',
-        border: '1px solid rgba(108,143,255,0.12)',
+        border: '1px solid var(--accent-soft)',
         marginBottom: 24,
       }}>
         <DnaStrip
@@ -152,7 +152,7 @@ export default function DnaPage() {
       <div style={{
         padding: 28, borderRadius: 16,
         background: 'var(--surface-1)',
-        border: '1px solid rgba(108,143,255,0.12)',
+        border: '1px solid var(--accent-soft)',
         marginBottom: 24,
       }}>
         <DnaString
@@ -179,7 +179,7 @@ export default function DnaPage() {
       <div style={{
         padding: 20, borderRadius: 12,
         background: 'var(--surface-1)',
-        border: '1px solid rgba(255,255,255,0.06)',
+        border: '1px solid var(--border-subtle)',
       }}>
         <h3 style={{
           fontSize: 11, fontFamily: "'Space Mono', monospace", textTransform: 'uppercase',

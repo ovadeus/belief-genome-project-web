@@ -37,7 +37,7 @@ const COUNTRIES = [
 ];
 
 const inputStyle: React.CSSProperties = {
-  padding: '8px 12px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.12)',
+  padding: '8px 12px', borderRadius: 6, border: '1px solid var(--border-soft)',
   background: 'var(--surface-2)', color: 'var(--text-primary)', fontSize: 14, width: '100%',
 };
 
@@ -90,7 +90,7 @@ export default function ProfilePage() {
       <h1 style={{ fontSize: 24, marginBottom: 32, color: 'var(--text-primary)' }}>Profile</h1>
 
       {/* Account */}
-      <div style={{ padding: 20, borderRadius: 12, background: 'var(--surface-1)', border: '1px solid rgba(255,255,255,0.06)', marginBottom: 24 }}>
+      <div style={{ padding: 20, borderRadius: 12, background: 'var(--surface-1)', border: '1px solid var(--border-subtle)', marginBottom: 24 }}>
         <h3 style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 16 }}>Account</h3>
         <div style={{ display: 'grid', gap: 12 }}>
           <div>
@@ -105,7 +105,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Identity Metadata */}
-      <div style={{ padding: 20, borderRadius: 12, background: 'var(--surface-1)', border: '1px solid rgba(255,255,255,0.06)', marginBottom: 24 }}>
+      <div style={{ padding: 20, borderRadius: 12, background: 'var(--surface-1)', border: '1px solid var(--border-subtle)', marginBottom: 24 }}>
         <h3 style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 16 }}>Identity Metadata</h3>
         <p style={{ fontSize: 12, color: 'var(--text-faint)', marginBottom: 20 }}>
           This data forms the prefix of your 140-character Belief DNA string.
@@ -163,7 +163,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Prefix preview */}
-        <div style={{ background: 'var(--surface-overlay)', borderRadius: 8, padding: '12px 16px', border: '1px solid rgba(255,255,255,0.06)' }}>
+        <div style={{ background: 'var(--surface-overlay)', borderRadius: 8, padding: '12px 16px', border: '1px solid var(--border-subtle)' }}>
           <div style={{ fontSize: 10, color: 'var(--text-faint)', fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
             Belief Genome Prefix
           </div>
@@ -195,7 +195,7 @@ export default function ProfilePage() {
 
       {/* DNA String */}
       {dna && (
-        <div style={{ padding: 20, borderRadius: 12, background: 'var(--surface-1)', border: '1px solid rgba(255,255,255,0.06)' }}>
+        <div style={{ padding: 20, borderRadius: 12, background: 'var(--surface-1)', border: '1px solid var(--border-subtle)' }}>
           <h3 style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 16 }}>Your Belief DNA</h3>
           <DnaString dnaString={dna.dnaString} dimensionsCovered={dna.dimensionsCovered}
             totalResponses={dna.totalResponses} overallConfidence={dna.overallConfidence} />

@@ -41,7 +41,7 @@ export default function KnownDnasList({ selectedId, onSelect }: Props) {
       <div style={{
         padding: 24, borderRadius: 12,
         background: 'var(--surface-1)',
-        border: '1px dashed rgba(255,255,255,0.08)',
+        border: '1px dashed var(--border-subtle)',
         textAlign: 'center',
       }}>
         <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 4px' }}>
@@ -63,7 +63,7 @@ export default function KnownDnasList({ selectedId, onSelect }: Props) {
             key={entry.id}
             style={{
               padding: '12px 14px', borderRadius: 10,
-              background: isSelected ? 'rgba(108,143,255,0.1)' : 'var(--surface-1)',
+              background: isSelected ? 'var(--accent-soft)' : 'var(--surface-1)',
               border: `1px solid ${isSelected ? 'var(--accent-mid)' : 'var(--border-subtle)'}`,
               display: 'flex', alignItems: 'center', gap: 12,
             }}
@@ -116,7 +116,7 @@ export default function KnownDnasList({ selectedId, onSelect }: Props) {
               style={{
                 padding: '6px 10px', borderRadius: 6,
                 background: 'transparent',
-                border: '1px solid rgba(255,255,255,0.1)',
+                border: '1px solid var(--border-soft)',
                 color: 'var(--text-muted)',
                 fontSize: 14, cursor: delM.isPending ? 'wait' : 'pointer',
                 lineHeight: 1,

@@ -43,8 +43,8 @@ export default function DnaStripSkeleton({ message }: { message?: string }) {
                   className="dna-strip-skel-cell"
                   style={{
                     flex: 1, minWidth: 0, height: 14, borderRadius: 2,
-                    background: 'repeating-linear-gradient(45deg, rgba(255,255,255,0.05), rgba(255,255,255,0.05) 2px, transparent 2px, transparent 4px)',
-                    border: '1px solid rgba(255,255,255,0.06)',
+                    background: 'repeating-linear-gradient(45deg, var(--surface-2), var(--surface-2) 2px, transparent 2px, transparent 4px)',
+                    border: '1px solid var(--border-subtle)',
                     animation: `dnaSkelPulse 1.4s ease-in-out ${i * 0.02}s infinite`,
                   }}
                 />

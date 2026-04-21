@@ -86,7 +86,7 @@ export default function ShareDnaModal({ open, onClose, dnaString }: ShareDnaModa
         style={{
           maxWidth: 520, width: '100%',
           background: 'rgba(15,15,25,0.98)',
-          border: '1px solid rgba(108,143,255,0.25)',
+          border: '1px solid var(--accent-mid)',
           borderRadius: 16, padding: 28,
           boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
         }}
@@ -144,7 +144,7 @@ export default function ShareDnaModal({ open, onClose, dnaString }: ShareDnaModa
         <div style={{
           padding: '10px 12px', borderRadius: 8,
           background: 'var(--surface-overlay)',
-          border: '1px solid rgba(255,255,255,0.08)',
+          border: '1px solid var(--border-subtle)',
           marginBottom: 16,
           fontFamily: "'Space Mono', monospace", fontSize: 11,
           color: shareUrl ? 'var(--text-secondary)' : 'var(--text-ghost)',
@@ -176,7 +176,7 @@ export default function ShareDnaModal({ open, onClose, dnaString }: ShareDnaModa
             style={{
               padding: '10px 16px', borderRadius: 8,
               background: 'transparent',
-              border: '1px solid rgba(255,255,255,0.15)',
+              border: '1px solid var(--border-soft)',
               color: 'var(--text-primary)',
               fontSize: 13, fontWeight: 600, cursor: shareUrl ? 'pointer' : 'not-allowed',
               opacity: shareUrl ? 1 : 0.4,
@@ -189,7 +189,7 @@ export default function ShareDnaModal({ open, onClose, dnaString }: ShareDnaModa
             style={{
               padding: '10px 14px', borderRadius: 8,
               background: 'transparent',
-              border: '1px solid rgba(255,255,255,0.1)',
+              border: '1px solid var(--border-soft)',
               color: 'var(--text-muted)',
               fontSize: 13, cursor: 'pointer',
             }}

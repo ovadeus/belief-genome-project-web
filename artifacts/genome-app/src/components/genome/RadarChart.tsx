@@ -72,8 +72,8 @@ export default function RadarChart({ history }: Props) {
           font: { size: 9, family: "'Space Mono', monospace" },
           callback: (v: number) => v === 50 ? 'Neutral' : v === 0 ? 'False' : v === 100 ? 'True' : '',
         },
-        grid: { color: 'rgba(255,255,255,0.07)' },
-        angleLines: { color: 'rgba(255,255,255,0.07)' },
+        grid: { color: 'var(--border-subtle)' },
+        angleLines: { color: 'var(--border-subtle)' },
         pointLabels: {
           color: 'var(--text-secondary)',
           font: { size: 11, family: "'DM Sans', sans-serif" },

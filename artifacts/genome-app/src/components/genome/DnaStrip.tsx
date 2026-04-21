@@ -208,8 +208,8 @@ export default function DnaStrip({
           <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: '#2563eb', marginRight: 4, verticalAlign: 'middle' }} />Absolute True</span>
           <span><span style={{
             display: 'inline-block', width: 10, height: 10, borderRadius: 2, marginRight: 4, verticalAlign: 'middle',
-            background: 'repeating-linear-gradient(45deg, rgba(255,255,255,0.06), rgba(255,255,255,0.06) 2px, transparent 2px, transparent 4px)',
-            border: '1px solid rgba(255,255,255,0.1)',
+            background: 'repeating-linear-gradient(45deg, var(--border-subtle), var(--border-subtle) 2px, transparent 2px, transparent 4px)',
+            border: '1px solid var(--border-soft)',
           }} />Unexplored</span>
         </div>
       )}
@@ -218,7 +218,7 @@ export default function DnaStrip({
         <div style={{
           position: 'fixed', left: tooltip.x, top: tooltip.y,
           transform: 'translateX(-50%) translateY(-100%)',
-          background: 'rgba(15,15,26,0.95)', border: '1px solid rgba(255,255,255,0.15)',
+          background: 'rgba(15,15,26,0.95)', border: '1px solid var(--border-soft)',
           borderRadius: 6, padding: '6px 10px', fontFamily: "'Space Mono', monospace",
           fontSize: 10, color: 'var(--text-primary)', whiteSpace: 'nowrap', zIndex: 9999,
           pointerEvents: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
@@ -230,7 +230,7 @@ export default function DnaStrip({
             </div>
           )}
           {tooltip.score === null && (
-            <div style={{ borderTop: '1px dashed rgba(255,255,255,0.15)', paddingTop: 3, marginTop: 3, color: 'var(--accent-bright)', fontSize: 9 }}>
+            <div style={{ borderTop: '1px dashed var(--border-soft)', paddingTop: 3, marginTop: 3, color: 'var(--accent-bright)', fontSize: 9 }}>
               → Click to Explore Now
             </div>
           )}

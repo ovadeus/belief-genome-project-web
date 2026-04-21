@@ -95,7 +95,7 @@ export default function Forecaster({ history }: Props) {
           placeholder="e.g. The erosion of shared reality is a greater threat to civilisation than any physical crisis..."
           style={{
             width: '100%', minHeight: 100, padding: 16, borderRadius: 8,
-            background: 'var(--surface-2)', border: '1px solid rgba(255,255,255,0.1)',
+            background: 'var(--surface-2)', border: '1px solid var(--border-soft)',
             color: 'var(--text-primary)', fontSize: 14, lineHeight: 1.5, resize: 'vertical',
             fontFamily: 'inherit',
           }}
@@ -125,7 +125,7 @@ export default function Forecaster({ history }: Props) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           <div style={{
             padding: 16, borderRadius: 8,
-            background: 'var(--accent-soft)', border: '1px solid rgba(108,143,255,0.15)',
+            background: 'var(--accent-soft)', border: '1px solid var(--accent-soft)',
           }}>
             <div style={{
               fontSize: 10, fontFamily: "'Space Mono', monospace", textTransform: 'uppercase',

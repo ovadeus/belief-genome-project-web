@@ -244,7 +244,7 @@ function TimelineToolbar({ period, onPeriod, label, count, offset, onBack, onFor
 }
 
 const navBtnStyle: React.CSSProperties = {
-  background: 'var(--border-subtle)', border: '1px solid rgba(255,255,255,0.1)',
+  background: 'var(--border-subtle)', border: '1px solid var(--border-soft)',
   borderRadius: 4, padding: '4px 8px', cursor: 'pointer', color: 'var(--text-muted)',
   fontSize: 12,
 };

@@ -62,7 +62,7 @@ export default function SyncPage() {
         <div style={{
           padding: 20, borderRadius: 12,
           background: 'var(--surface-1)',
-          border: '1px solid rgba(255,255,255,0.08)',
+          border: '1px solid var(--border-subtle)',
           textAlign: 'center',
         }}>
           <div style={{ fontSize: 28, marginBottom: 8 }}>&#x1F310;</div>
@@ -78,7 +78,7 @@ export default function SyncPage() {
         <div style={{
           padding: 20, borderRadius: 12,
           background: 'var(--accent-soft)',
-          border: '1px solid rgba(108,143,255,0.15)',
+          border: '1px solid var(--accent-soft)',
           textAlign: 'center',
         }}>
           <div style={{ fontSize: 28, marginBottom: 8 }}>&#x1F4BB;</div>
@@ -94,7 +94,7 @@ export default function SyncPage() {
         <div style={{
           padding: 20, borderRadius: 12,
           background: 'var(--surface-1)',
-          border: '1px solid rgba(255,255,255,0.08)',
+          border: '1px solid var(--border-subtle)',
           textAlign: 'center',
         }}>
           <div style={{ fontSize: 28, marginBottom: 8 }}>&#x1F5A5;</div>
@@ -111,7 +111,7 @@ export default function SyncPage() {
       <div style={{
         padding: 24, borderRadius: 12,
         background: 'var(--surface-1)',
-        border: '1px solid rgba(255,255,255,0.08)',
+        border: '1px solid var(--border-subtle)',
         marginBottom: 24,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -156,7 +156,7 @@ export default function SyncPage() {
       <div style={{
         padding: 20, borderRadius: 12,
         background: 'var(--surface-1)',
-        border: '1px solid rgba(255,255,255,0.06)',
+        border: '1px solid var(--border-subtle)',
       }}>
         <h3 style={{
           fontSize: 11, textTransform: 'uppercase', letterSpacing: 1,
@@ -183,7 +183,7 @@ export default function SyncPage() {
         <div style={{
           marginTop: 20, padding: 16, borderRadius: 10,
           background: 'var(--accent-soft)',
-          border: '1px solid rgba(108,143,255,0.1)',
+          border: '1px solid var(--accent-soft)',
           textAlign: 'center',
         }}>
           <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>

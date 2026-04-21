@@ -41,7 +41,7 @@ export default function DnaString({ dnaString, dimensionsCovered, totalResponses
         fontFamily: 'monospace', fontSize: 15, letterSpacing: 3,
         wordBreak: 'break-all', lineHeight: 2.2, textAlign: 'center',
         padding: '20px 24px', borderRadius: 12,
-        background: 'var(--surface-1)', border: '1px solid rgba(108,143,255,0.15)',
+        background: 'var(--surface-1)', border: '1px solid var(--accent-soft)',
       }}>
         {dnaString.split('').map((ch, i) => (
           <span

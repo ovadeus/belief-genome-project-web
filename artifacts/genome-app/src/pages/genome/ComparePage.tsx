@@ -128,7 +128,7 @@ export default function ComparePage() {
                       style={{
                         padding: '8px 16px', borderRadius: 8,
                         background: 'var(--accent-soft)',
-                        border: '1px solid rgba(108,143,255,0.4)',
+                        border: '1px solid var(--accent-strong)',
                         color: 'var(--accent-text)', fontSize: 12, cursor: 'pointer',
                       }}
                     >
@@ -139,7 +139,7 @@ export default function ComparePage() {
                     onClick={() => navigate('/dna/compare')}
                     style={{
                       padding: '8px 16px', borderRadius: 8,
-                      background: 'transparent', border: '1px solid rgba(108,143,255,0.4)',
+                      background: 'transparent', border: '1px solid var(--accent-strong)',
                       color: 'var(--accent-bright)', fontSize: 12, cursor: 'pointer',
                     }}
                   >
@@ -217,7 +217,7 @@ function CompareView({
           style={{
             padding: '6px 10px', borderRadius: 6,
             background: 'transparent',
-            border: '1px solid rgba(255,255,255,0.1)',
+            border: '1px solid var(--border-soft)',
             color: 'var(--text-secondary)',
             fontSize: 14, cursor: 'pointer', lineHeight: 1,
           }}
@@ -304,7 +304,7 @@ function CompareView({
         <div style={{
           padding: 14, borderRadius: 10, textAlign: 'center',
           background: 'rgba(0,0,0,0.2)',
-          border: '1px dashed rgba(255,255,255,0.08)',
+          border: '1px dashed var(--border-subtle)',
           fontSize: 12, color: 'var(--text-muted)',
         }}>
           Click any cell above to see both positions and the divergence detail.
@@ -326,7 +326,7 @@ function Stat({ label, value, tone }: { label: string; value: string; tone?: 'pr
       flex: '1 1 140px', minWidth: 140,
       padding: 12, borderRadius: 8,
       background: 'var(--surface-overlay)',
-      border: '1px solid rgba(255,255,255,0.06)',
+      border: '1px solid var(--border-subtle)',
     }}>
       <div style={{ fontSize: 10, color: 'var(--text-muted)', fontFamily: "'Space Mono', monospace", textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>
         {label}
@@ -344,7 +344,7 @@ function SidePill({ label, value }: { label: string; value: number | null }) {
     <div style={{
       padding: 12, borderRadius: 8,
       background: 'var(--surface-1)',
-      border: '1px solid rgba(255,255,255,0.06)',
+      border: '1px solid var(--border-subtle)',
     }}>
       <div style={{ fontSize: 10, color: 'var(--text-muted)', fontFamily: "'Space Mono', monospace", textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>
         {label}
@@ -352,7 +352,7 @@ function SidePill({ label, value }: { label: string; value: number | null }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
         <span style={{
           width: 10, height: 24, borderRadius: 2, background: color,
-          boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+          boxShadow: 'inset 0 0 0 1px var(--border-subtle)',
         }} />
         <div>
           <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1 }}>

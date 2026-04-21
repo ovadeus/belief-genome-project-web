@@ -100,7 +100,7 @@ export default function PublicDnaPage() {
           <Link href="/login" style={{
             display: 'inline-block', marginTop: 20, padding: '10px 20px',
             borderRadius: 8, background: 'var(--accent-mid)',
-            border: '1px solid rgba(108,143,255,0.4)', color: 'var(--accent-text)',
+            border: '1px solid var(--accent-strong)', color: 'var(--accent-text)',
             fontSize: 13, fontWeight: 600, textDecoration: 'none',
           }}>
             Map your own Belief DNA
@@ -141,7 +141,7 @@ export default function PublicDnaPage() {
         <div style={{
           padding: 24, borderRadius: 16,
           background: 'var(--surface-1)',
-          border: '1px solid rgba(108,143,255,0.12)',
+          border: '1px solid var(--accent-soft)',
           marginBottom: 24,
         }}>
           <DnaStrip
@@ -161,7 +161,7 @@ export default function PublicDnaPage() {
           <Link href="/register" style={{
             display: 'inline-block', padding: '12px 24px', borderRadius: 8,
             background: 'var(--accent-mid)',
-            border: '1px solid rgba(108,143,255,0.4)', color: 'var(--accent-text)',
+            border: '1px solid var(--accent-strong)', color: 'var(--accent-text)',
             fontSize: 13, fontWeight: 600, textDecoration: 'none',
           }}>
             Map yours — free

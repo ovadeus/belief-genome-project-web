@@ -364,7 +364,7 @@ export default function TripleHelix({ dimensions, dimensionScores, confidence }:
           ref={tooltipRef}
           style={{
             display: 'none', position: 'absolute', pointerEvents: 'none',
-            background: 'rgba(15,15,30,0.95)', border: '1px solid rgba(108,143,255,0.3)',
+            background: 'rgba(15,15,30,0.95)', border: '1px solid var(--accent-mid)',
             borderRadius: 8, padding: '10px 14px', maxWidth: 220, zIndex: 10,
             backdropFilter: 'blur(8px)',
           }}

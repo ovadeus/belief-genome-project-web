@@ -81,7 +81,7 @@ export default function DnaCell({
       style={{
         height,
         background,
-        boxShadow: hasFill ? 'inset 0 0 0 1px rgba(255,255,255,0.08)' : undefined,
+        boxShadow: hasFill ? 'inset 0 0 0 1px var(--border-subtle)' : undefined,
         cursor: clickable ? 'pointer' : 'default',
       }}
     />

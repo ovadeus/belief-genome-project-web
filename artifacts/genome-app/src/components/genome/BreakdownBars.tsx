@@ -71,7 +71,7 @@ export default function BreakdownBars({ history }: Props) {
                       position: 'absolute', left: `${pct}%`, top: '50%',
                       transform: 'translate(-50%, -50%)',
                       width: 15, height: 15, borderRadius: '50%',
-                      background: col, border: '2.5px solid rgba(255,255,255,0.92)',
+                      background: col, border: '2.5px solid var(--text-primary)',
                       boxShadow: `0 0 8px ${col}, 0 0 2px rgba(0,0,0,0.8)`,
                       zIndex: 4,
                     }} title={lbl} />

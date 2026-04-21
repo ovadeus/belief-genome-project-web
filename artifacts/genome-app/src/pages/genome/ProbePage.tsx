@@ -277,7 +277,7 @@ export default function ProbePage() {
         <button
           onClick={handleSkip}
           style={{
-            padding: '12px 24px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.15)',
+            padding: '12px 24px', borderRadius: 8, border: '1px solid var(--border-soft)',
             background: 'transparent', color: 'var(--text-muted)', fontSize: 14,
             cursor: 'pointer',
           }}

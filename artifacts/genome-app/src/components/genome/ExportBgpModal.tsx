@@ -106,7 +106,7 @@ export default function ExportBgpModal({ open, onClose, dnaString, defaultName }
         style={{
           maxWidth: 520, width: '100%',
           background: 'rgba(15,15,25,0.98)',
-          border: '1px solid rgba(108,143,255,0.25)',
+          border: '1px solid var(--accent-mid)',
           borderRadius: 16, padding: 28,
           boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
           maxHeight: '90vh', overflowY: 'auto',
@@ -175,7 +175,7 @@ export default function ExportBgpModal({ open, onClose, dnaString, defaultName }
               width: '100%', boxSizing: 'border-box',
               padding: '8px 10px', borderRadius: 6,
               background: 'var(--surface-overlay)', color: 'var(--text-primary)',
-              border: '1px solid rgba(255,255,255,0.1)',
+              border: '1px solid var(--border-soft)',
               fontSize: 13, fontFamily: 'inherit',
             }}
           />
@@ -194,7 +194,7 @@ export default function ExportBgpModal({ open, onClose, dnaString, defaultName }
               width: '100%', boxSizing: 'border-box',
               padding: '8px 10px', borderRadius: 6,
               background: 'var(--surface-overlay)', color: 'var(--text-primary)',
-              border: '1px solid rgba(255,255,255,0.1)',
+              border: '1px solid var(--border-soft)',
               fontSize: 13, fontFamily: 'inherit', resize: 'vertical',
             }}
           />
@@ -208,7 +208,7 @@ export default function ExportBgpModal({ open, onClose, dnaString, defaultName }
             style={{
               flex: 1, padding: '10px 16px', borderRadius: 8,
               background: 'var(--accent-mid)',
-              border: '1px solid rgba(108,143,255,0.4)',
+              border: '1px solid var(--accent-strong)',
               color: 'var(--accent-text)',
               fontSize: 13, fontWeight: 600,
               cursor: (canExport && !downloading) ? 'pointer' : 'not-allowed',
@@ -222,7 +222,7 @@ export default function ExportBgpModal({ open, onClose, dnaString, defaultName }
             style={{
               padding: '10px 14px', borderRadius: 8,
               background: 'transparent',
-              border: '1px solid rgba(255,255,255,0.1)',
+              border: '1px solid var(--border-soft)',
               color: 'var(--text-muted)',
               fontSize: 13, cursor: 'pointer',
             }}

@@ -108,7 +108,7 @@ export default function GenomeNav() {
           style={{
             padding: '6px 16px', borderRadius: 6,
             background: 'transparent',
-            border: '1px solid rgba(255, 255, 255, 0.15)',
+            border: '1px solid var(--border-soft)',
             color: 'var(--text-muted)',
             fontSize: 12, cursor: 'pointer',
             transition: 'all 0.15s',

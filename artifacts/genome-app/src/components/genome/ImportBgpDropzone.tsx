@@ -137,7 +137,7 @@ export default function ImportBgpDropzone() {
             width: '100%', boxSizing: 'border-box',
             padding: '10px 12px', borderRadius: 8,
             background: 'var(--surface-overlay)', color: 'var(--text-primary)',
-            border: '1px solid rgba(255,255,255,0.1)',
+            border: '1px solid var(--border-soft)',
             fontSize: 12, fontFamily: "'Space Mono', monospace",
             resize: 'vertical',
           }}
@@ -149,7 +149,7 @@ export default function ImportBgpDropzone() {
             style={{
               padding: '8px 16px', borderRadius: 8,
               background: pasteText.trim() ? 'var(--accent-mid)' : 'transparent',
-              border: '1px solid rgba(108,143,255,0.4)',
+              border: '1px solid var(--accent-strong)',
               color: pasteText.trim() ? 'var(--accent-text)' : 'var(--text-faint)',
               fontSize: 12, fontWeight: 600,
               cursor: pasteText.trim() ? 'pointer' : 'not-allowed',
@@ -166,7 +166,7 @@ export default function ImportBgpDropzone() {
         <div style={{
           padding: 16, borderRadius: 12,
           background: 'var(--accent-soft)',
-          border: '1px solid rgba(108,143,255,0.3)',
+          border: '1px solid var(--accent-mid)',
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12, gap: 12 }}>
             <div style={{ flex: 1, minWidth: 0 }}>
@@ -210,7 +210,7 @@ export default function ImportBgpDropzone() {
               style={{
                 padding: '8px 14px', borderRadius: 8,
                 background: 'transparent',
-                border: '1px solid rgba(255,255,255,0.1)',
+                border: '1px solid var(--border-soft)',
                 color: 'var(--text-muted)',
                 fontSize: 12, cursor: 'pointer',
               }}
