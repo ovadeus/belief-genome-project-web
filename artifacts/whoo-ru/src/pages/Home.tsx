@@ -52,19 +52,13 @@ export default function Home() {
               Beliefs exist in superposition — multiple positions held at once — until a vote, a purchase, or a commitment forces one to collapse. The Belief Genome Project maps that interior landscape across 11 categories and 124 dimensions, producing a 136-character fingerprint of how any mind is structured.
             </p>
             
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Link 
-                href="/about"
-                className="px-8 py-4 rounded-xl font-semibold text-lg bg-primary hover:bg-primary/90 text-primary-foreground transition-all hover:-translate-y-0.5 flex items-center justify-center gap-2"
-              >
-                Learn More
-                <ArrowRight size={20} />
-              </Link>
-              <Link 
+            <div className="flex justify-center">
+              <Link
                 href="/subscribe"
-                className="px-8 py-4 rounded-xl font-semibold text-lg bg-card/50 backdrop-blur-sm border border-border hover:border-border text-foreground transition-all hover:-translate-y-0.5 flex items-center justify-center gap-2"
+                className="px-10 py-4 rounded-xl font-semibold text-lg tracking-[0.15em] uppercase bg-primary hover:bg-primary/90 text-primary-foreground transition-all hover:-translate-y-0.5 flex items-center justify-center gap-3"
               >
-                Follow the Research
+                Join the Project
+                <ArrowRight size={20} />
               </Link>
             </div>
           </motion.div>
