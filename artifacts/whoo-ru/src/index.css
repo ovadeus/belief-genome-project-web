@@ -164,6 +164,42 @@
   --strip-cell-hover-shadow: 0 0 6px rgba(0,0,0,0.12), inset 0 0 0 1px rgba(0,0,0,0.05);
 }
 
+/* ──────────────────────────────────────────────────────────────────────────
+   LIGHT MODE — academic / publication conventions
+   Sharp corners, hairline rules. Scoped so dark mode is untouched.
+   ──────────────────────────────────────────────────────────────────────── */
+[data-theme="light"] .rounded-md,
+[data-theme="light"] .rounded-lg,
+[data-theme="light"] .rounded-xl,
+[data-theme="light"] .rounded-2xl,
+[data-theme="light"] .rounded-3xl {
+  border-radius: 2px;
+}
+
+/* Reusable small-caps section label with hairline rule above. Used like:
+     <div class="academic-section-label">§ II · Features</div>                                                          */
+.academic-section-label {
+  border-top: 1px solid hsl(var(--foreground) / 0.4);
+  padding-top: 0.5rem;
+  margin-bottom: 1.75rem;
+  font-family: var(--theme-font-sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: hsl(var(--foreground));
+}
+
+/* Figure caption (italic, muted, used under "figure" cards) */
+.academic-figure-caption {
+  font-family: var(--theme-font-sans);
+  font-style: italic;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: hsl(var(--muted-foreground));
+  margin-top: 0.5rem;
+}
+
 @layer base {
   * {
     @apply border-border;

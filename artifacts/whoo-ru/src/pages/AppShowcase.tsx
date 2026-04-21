@@ -11,7 +11,9 @@ const GENOME_APP_URL = (
 const engagementOptions = [
   {
     icon: Globe,
-    title: "1: Web App (Beta)",
+    figNum: "1.1",
+    title: "I. Web App (Beta)",
+    caption: "Web application — interactive, browser-based participation.",
     description: "Sign up directly on this site to begin mapping your Belief Genome. Access your dashboard, respond to probes, and watch your cognitive DNA string emerge in real time.",
     buttonText: "Create Account",
     buttonHref: `${GENOME_APP_URL}/register`,
@@ -20,7 +22,9 @@ const engagementOptions = [
   },
   {
     icon: Chrome,
-    title: "2: Chrome Extension",
+    figNum: "1.2",
+    title: "II. Chrome Extension",
+    caption: "Browser extension — passive belief-moment capture.",
     description: "Install our optional Chrome extension to capture belief-relevant moments as you browse. Flag articles, debates, and ideas that shape your worldview — all synced to your Belief Genome.",
     buttonText: "Get Extension",
     buttonHref: "#",
@@ -30,7 +34,9 @@ const engagementOptions = [
   },
   {
     icon: Monitor,
-    title: "3: Desktop App for Mac",
+    figNum: "1.3",
+    title: "III. Desktop App for Mac",
+    caption: "Native macOS application — deep, offline analysis.",
     description: "Download BGP AI Mission Control — a native desktop application for macOS. Deeper analysis, offline access, and an immersive environment for exploring your belief architecture.",
     buttonText: "Download App",
     buttonHref: "#",
@@ -68,31 +74,32 @@ export default function AppShowcase() {
     <PublicLayout>
       <section className="py-20 px-6">
         <div className="max-w-6xl mx-auto">
+          {/* ── § I  Participate ─────────────────────────────────────────── */}
           <motion.div {...fadeUp} className="text-center mb-16">
             <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
               <span className="text-primary">Participate</span> in the Belief Genome Project
             </h1>
-            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               There are three ways to engage with the Belief Genome Project. Choose the path that fits your curiosity — or use all three together for the deepest self-knowledge experience.
             </p>
           </motion.div>
 
+          <div className="academic-section-label">§ I &middot; Three Pathways</div>
           <div className="grid md:grid-cols-3 gap-8 mb-24">
             {engagementOptions.map((opt, i) => (
-              <motion.div
+              <motion.figure
                 key={opt.title}
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.15, duration: 0.6 }}
-                className="bg-card border border-border rounded-2xl overflow-hidden flex flex-col"
+                className="border border-foreground/25 overflow-hidden flex flex-col m-0"
               >
-                <div className="aspect-[4/3] bg-background/50 border-b border-border flex items-center justify-center relative">
-                  <opt.icon className="w-16 h-16 text-primary/30" />
-                  <p className="absolute bottom-3 text-xs text-muted-foreground/50">Hero image placeholder</p>
+                <div className="aspect-[4/3] border-b border-foreground/15 flex items-center justify-center relative">
+                  <opt.icon className="w-16 h-16 text-primary/40" />
                 </div>
                 <div className="p-6 flex flex-col flex-1">
                   <div className="flex items-center gap-3 mb-3">
-                    <opt.icon className="w-6 h-6 text-primary flex-shrink-0" />
+                    <opt.icon className="w-5 h-5 text-primary flex-shrink-0" />
                     <h3 className="text-xl font-bold text-foreground">{opt.title}</h3>
                   </div>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-6 flex-1">
@@ -101,15 +108,14 @@ export default function AppShowcase() {
                   {opt.comingSoon ? (
                     <button
                       disabled
-                      className="w-full px-6 py-3.5 rounded-xl font-semibold text-sm bg-card border border-border text-muted-foreground cursor-not-allowed flex items-center justify-center gap-2"
+                      className="w-full px-6 py-3 font-semibold text-sm border border-foreground/25 text-muted-foreground cursor-not-allowed flex items-center justify-center gap-2"
                     >
-                      {opt.buttonText}
-                      <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">Coming Soon</span>
+                      {opt.buttonText} <span className="font-normal italic text-xs">[forthcoming]</span>
                     </button>
                   ) : opt.internal ? (
                     <Link
                       href={opt.buttonHref}
-                      className="w-full px-6 py-3.5 rounded-xl font-semibold text-sm bg-primary text-primary-foreground hover:brightness-110 transition-all shadow-lg shadow-primary/25 flex items-center justify-center gap-2"
+                      className="w-full px-6 py-3 font-semibold text-sm bg-primary text-primary-foreground hover:brightness-110 transition-all flex items-center justify-center gap-2"
                     >
                       {opt.buttonText}
                       <ArrowRight className="w-4 h-4" />
@@ -117,52 +123,60 @@ export default function AppShowcase() {
                   ) : (
                     <a
                       href={opt.buttonHref}
-                      className="w-full px-6 py-3.5 rounded-xl font-semibold text-sm bg-primary text-primary-foreground hover:brightness-110 transition-all shadow-lg shadow-primary/25 flex items-center justify-center gap-2"
+                      className="w-full px-6 py-3 font-semibold text-sm bg-primary text-primary-foreground hover:brightness-110 transition-all flex items-center justify-center gap-2"
                     >
                       {opt.buttonText}
                       <ArrowRight className="w-4 h-4" />
                     </a>
                   )}
                 </div>
-              </motion.div>
+                <figcaption className="academic-figure-caption px-1">
+                  Fig. {opt.figNum} — {opt.caption}
+                </figcaption>
+              </motion.figure>
             ))}
           </div>
 
-          <div className="mb-20">
-            <h2 className="text-3xl font-bold text-foreground mb-10 text-center">Features</h2>
+          {/* ── § II  Features ───────────────────────────────────────────── */}
+          <div className="mb-24">
+            <div className="academic-section-label">§ II &middot; Features</div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {features.map((f, i) => (
-                <motion.div
+                <motion.figure
                   key={f.title}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.1 }}
-                  className="bg-card border border-border rounded-2xl p-6"
+                  className="border border-foreground/25 p-6 m-0"
                 >
-                  <f.icon className="w-10 h-10 text-primary mb-4" />
+                  <f.icon className="w-8 h-8 text-primary mb-4" />
                   <h3 className="text-lg font-bold text-foreground mb-2">{f.title}</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">{f.description}</p>
-                </motion.div>
+                  <figcaption className="academic-figure-caption">
+                    Fig. 2.{i + 1} — {f.title}.
+                  </figcaption>
+                </motion.figure>
               ))}
             </div>
           </div>
 
+          {/* ── § III  Frequently Asked Questions ────────────────────────── */}
           <div className="mb-20">
-            <h2 className="text-3xl font-bold text-foreground mb-8 text-center">Frequently Asked Questions</h2>
-            <div className="max-w-3xl mx-auto space-y-3">
+            <div className="academic-section-label">§ III &middot; Frequently Asked Questions</div>
+            <div className="max-w-2xl mx-auto divide-y divide-foreground/15 border-t border-b border-foreground/15">
               {faqs.map((faq, i) => (
-                <div key={i} className="bg-card border border-border rounded-xl overflow-hidden">
+                <div key={i}>
                   <button
                     onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                    className="w-full px-6 py-4 flex items-center justify-between text-left"
+                    className="w-full px-2 py-4 flex items-center justify-between text-left"
                   >
                     <span className="font-semibold text-foreground">{faq.q}</span>
                     <ChevronDown className={`w-5 h-5 text-muted-foreground transition-transform ${openFaq === i ? "rotate-180" : ""}`} />
                   </button>
                   {openFaq === i && (
-                    <div className="px-6 pb-4">
-                      <p className="text-sm text-muted-foreground leading-relaxed">{faq.a}</p>
+                    <div className="px-2 pb-4">
+                      <p className="text-sm text-muted-foreground leading-relaxed max-w-prose">{faq.a}</p>
                     </div>
                   )}
                 </div>
@@ -170,11 +184,12 @@ export default function AppShowcase() {
             </div>
           </div>
 
-          <motion.div {...fadeUp} className="text-center bg-card border border-border rounded-2xl p-12">
-            <h2 className="text-2xl font-bold text-foreground mb-4">Ready to discover who you really are?</h2>
+          {/* ── Closing call to action ───────────────────────────────────── */}
+          <motion.div {...fadeUp} className="text-center border-t border-foreground/30 pt-12">
+            <h2 className="text-2xl font-bold text-foreground mb-6">Ready to discover who you really are?</h2>
             <Link
               href={`${GENOME_APP_URL}/register`}
-              className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-xl font-semibold hover:brightness-110 transition-all"
+              className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-3 font-semibold hover:brightness-110 transition-all"
             >
               <ArrowRight className="w-5 h-5" />
               Get Started — Free
