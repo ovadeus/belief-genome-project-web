@@ -42,7 +42,29 @@ const inputStyle: React.CSSProperties = {
 };
 
 export default function ProfilePage() {
-  const { user } = useGenomeAuth();
+  const { user, token } = useGenomeAuth();
+  const [showToken, setShowToken] = useState(false);
+  const [tokenCopied, setTokenCopied] = useState(false);
+
+  const handleCopyToken = async () => {
+    if (!token) return;
+    try {
+      await navigator.clipboard.writeText(token);
+      setTokenCopied(true);
+      setTimeout(() => setTokenCopied(false), 2000);
+    } catch {
+      // Fallback for older browsers / insecure contexts
+      const ta = document.createElement('textarea');
+      ta.value = token;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      setTokenCopied(true);
+      setTimeout(() => setTokenCopied(false), 2000);
+    }
+  };
+
   const [profile, setProfile] = useState({
     birthYear: null as number | null, birthMonth: null as number | null,
     birthDay: null as number | null, sex: '5', countryCode: '', zipCode: '',
@@ -102,6 +124,52 @@ export default function ProfilePage() {
             <div style={{ fontSize: 15, color: 'var(--text-secondary)' }}>{user?.email || 'Unknown'}</div>
           </div>
         </div>
+      </div>
+
+      {/* Desktop App */}
+      <div style={{ padding: 20, borderRadius: 12, background: 'var(--surface-1)', border: '1px solid var(--border-subtle)', marginBottom: 24 }}>
+        <h3 style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 8 }}>Desktop App</h3>
+        <p style={{ fontSize: 12, color: 'var(--text-faint)', marginBottom: 16, lineHeight: 1.6 }}>
+          Paste this token into the Belief Genome desktop app to sync reflections across devices.
+          Treat it like a password — anyone with this token can access your account. Valid for 30 days;
+          log out and back in to generate a new one.
+        </p>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'stretch' }}>
+          <input
+            type={showToken ? 'text' : 'password'}
+            value={token || ''}
+            readOnly
+            style={{ ...inputStyle, fontFamily: 'monospace', fontSize: 12, flex: 1 }}
+            onFocus={e => e.currentTarget.select()}
+          />
+          <button
+            type="button"
+            onClick={() => setShowToken(s => !s)}
+            style={{
+              padding: '8px 14px', borderRadius: 6, border: '1px solid var(--border-soft)',
+              background: 'var(--surface-2)', color: 'var(--text-secondary)', fontSize: 13, cursor: 'pointer',
+            }}
+          >
+            {showToken ? 'Hide' : 'Show'}
+          </button>
+          <button
+            type="button"
+            onClick={handleCopyToken}
+            disabled={!token}
+            style={{
+              padding: '8px 16px', borderRadius: 6, border: 'none',
+              background: 'var(--accent-bright)', color: 'var(--text-primary)', fontSize: 13,
+              cursor: token ? 'pointer' : 'not-allowed', opacity: token ? 1 : 0.5, minWidth: 80,
+            }}
+          >
+            {tokenCopied ? 'Copied!' : 'Copy'}
+          </button>
+        </div>
+        {!token && (
+          <div style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 8 }}>
+            No token available — try logging out and back in.
+          </div>
+        )}
       </div>
 
       {/* Identity Metadata */}
