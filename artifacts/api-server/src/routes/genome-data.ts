@@ -542,7 +542,7 @@ router.get('/timeline', async (req: Request, res: Response) => {
       bucket: 'week',
       from: null,
       to: null,
-      dimensions: DIMENSIONS.map(d => ({ id: d.id, name: d.name, categoryKey: d.categoryKey })),
+      dimensions: DIMENSIONS.map(d => ({ id: d.id, name: d.name, categoryKey: d.cat })),
       buckets: [],
     });
   }
@@ -585,8 +585,8 @@ router.get('/timeline', async (req: Request, res: Response) => {
   const accum: Record<number, Accum> = {};
   const dimsByCategory: Record<string, number[]> = {};
   for (const d of DIMENSIONS) {
-    if (!dimsByCategory[d.categoryKey]) dimsByCategory[d.categoryKey] = [];
-    dimsByCategory[d.categoryKey].push(d.id);
+    if (!dimsByCategory[d.cat]) dimsByCategory[d.cat] = [];
+    dimsByCategory[d.cat].push(d.id);
   }
 
   let respIdx = 0;
@@ -678,7 +678,7 @@ router.get('/timeline', async (req: Request, res: Response) => {
     bucket: bucketName,
     from: new Date(fromTs).toISOString(),
     to: new Date(toTs).toISOString(),
-    dimensions: DIMENSIONS.map(d => ({ id: d.id, name: d.name, categoryKey: d.categoryKey })),
+    dimensions: DIMENSIONS.map(d => ({ id: d.id, name: d.name, categoryKey: d.cat })),
     buckets,
   });
 });

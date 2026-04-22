@@ -8,7 +8,25 @@ import {
 } from 'chart.js';
 import { useLocation } from 'wouter';
 import { genomeApi, useGenomeAuth } from '../../components/genome/GenomeAuthContext';
-import { SHEX, CAT_SHORT, CAT_ORDER } from '../../components/genome/genome-utils';
+import { SHEX } from '../../components/genome/genome-utils';
+
+// Display lookup for the canonical 11-category schema. The page is
+// schema-agnostic — keys are derived from the server response — but this
+// map provides nice labels and a stable render order. Unknown keys (if the
+// server ever introduces a new category) fall back to the raw key.
+const CAT_DISPLAY: Record<string, { label: string; order: number }> = {
+  epistemology:  { label: 'Epistemology',   order: 1 },
+  spirituality:  { label: 'Spirituality',   order: 2 },
+  morality:      { label: 'Morality',       order: 3 },
+  politics:      { label: 'Politics',       order: 4 },
+  social:        { label: 'Social',         order: 5 },
+  economics:     { label: 'Economics',      order: 6 },
+  science_tech:  { label: 'Science & Tech', order: 7 },
+  education:     { label: 'Education',      order: 8 },
+  health:        { label: 'Health',         order: 9 },
+  psychology:    { label: 'Psychology',     order: 10 },
+  relationships: { label: 'Relationships',  order: 11 },
+};
 
 ChartJS.register(LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend, Filler);
 
@@ -234,7 +252,7 @@ export default function EvolutionPage() {
         </div>
       </div>
       <div style={{ fontSize: 12, color: 'var(--text-faint)', marginBottom: 24 }}>
-        {data.buckets.length} {data.bucket} buckets · {currentBucket.totalResponses} reflections to date
+        {data.buckets.length} {data.buckets.length === 1 ? 'bucket' : 'buckets'} ({bucket === 'auto' ? `Auto — ~${data.bucket}ly` : data.bucket}) · {currentBucket.totalResponses} reflections to date
       </div>
 
       {/* Top: overall confidence + coverage */}
@@ -249,7 +267,9 @@ export default function EvolutionPage() {
       <div style={{ padding: 20, borderRadius: 12, background: 'var(--surface-1)', border: '1px solid var(--border-subtle)', marginBottom: 24 }}>
         <h3 style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 16 }}>By Category</h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
-          {CAT_ORDER.map(catKey => {
+          {Object.keys(data.buckets[data.buckets.length - 1]?.categoryAvgs ?? {})
+            .sort((a, b) => (CAT_DISPLAY[a]?.order ?? 999) - (CAT_DISPLAY[b]?.order ?? 999))
+            .map(catKey => {
             const series = data.buckets.map(b => b.categoryAvgs[catKey]);
             const hasData = series.some(v => v !== null);
             const sparkData = {
@@ -281,7 +301,7 @@ export default function EvolutionPage() {
               <div key={catKey} style={{ padding: 12, borderRadius: 8, background: 'var(--surface-2)', border: '1px solid var(--border-subtle)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
                   <div style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 600 }}>
-                    {CAT_SHORT[catKey] || catKey}
+                    {CAT_DISPLAY[catKey]?.label || catKey}
                   </div>
                   <div style={{ fontSize: 11, color: hasData ? 'var(--accent-bright)' : 'var(--text-faint)', fontFamily: 'monospace' }}>
                     {latest != null ? latest.toFixed(2) : '—'}
