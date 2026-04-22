@@ -2,6 +2,7 @@
 // Design: "Belief Genome Project" left | Dashboard | DNA | Analyze | Sync Data | Profile | [Name] | Sign Out
 import { useLocation } from 'wouter';
 import { useGenomeAuth } from './GenomeAuthContext';
+import { useReflectionsModal } from './ReflectionsModalContext';
 
 interface NavItem {
   path: string;
@@ -21,6 +22,7 @@ const NAV_ITEMS: NavItem[] = [
 export default function GenomeNav() {
   const { user, logout } = useGenomeAuth();
   const [location, setLocation] = useLocation();
+  const { open: openReflections, isOpen: reflectionsOpen } = useReflectionsModal();
 
   if (!user) return null;
 
@@ -49,10 +51,11 @@ export default function GenomeNav() {
       {/* Nav links + user + sign out */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
         {NAV_ITEMS.map((item, i) => {
-          const active = location === item.path ||
-            (item.path === '/dashboard' && (
-              location === '/dashboard' || location === '/probe'
-            ));
+          const isReflections = item.path === '/probe';
+          const active = isReflections
+            ? reflectionsOpen
+            : (location === item.path ||
+                (item.path === '/dashboard' && location === '/dashboard'));
 
           return (
             <div key={item.path} style={{ display: 'flex', alignItems: 'center' }}>
@@ -64,7 +67,7 @@ export default function GenomeNav() {
                 }}>|</span>
               )}
               <button
-                onClick={() => setLocation(item.path)}
+                onClick={() => isReflections ? openReflections() : setLocation(item.path)}
                 style={{
                   padding: '6px 12px', border: 'none',
                   background: 'transparent',

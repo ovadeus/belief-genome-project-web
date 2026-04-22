@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import { GenomeAuthProvider, useGenomeAuth } from "./components/genome/GenomeAuthContext";
 import { ExploreProvider } from "./components/genome/ExploreContext";
+import { ReflectionsModalProvider } from "./components/genome/ReflectionsModalContext";
 import GenomeLayout from "./components/genome/GenomeLayout";
 import LoginPage from "./pages/genome/LoginPage";
 import RegisterPage from "./pages/genome/RegisterPage";
@@ -117,7 +118,9 @@ function App() {
       <GenomeAuthProvider>
         <ExploreProvider>
           <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-            <Router />
+            <ReflectionsModalProvider>
+              <Router />
+            </ReflectionsModalProvider>
           </WouterRouter>
           <Toaster theme="dark" position="top-right" richColors closeButton />
         </ExploreProvider>
