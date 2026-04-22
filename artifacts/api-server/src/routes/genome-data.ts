@@ -500,6 +500,189 @@ router.post('/sync', async (req: Request, res: Response) => {
   return res.json({ merged });
 });
 
+// ── GET /timeline — belief evolution over time ──────────────
+//
+// Replays the user's belief_responses chronologically and snapshots
+// the cumulative dimension state at each bucket boundary, so the
+// client can render an evolution chart of how the user's DNA has
+// shifted across days/weeks/months.
+//
+// Query params:
+//   bucket: 'auto' | 'day' | 'week' | 'month'  (default: 'auto')
+//   from:   ISO timestamp                       (default: earliest response)
+//   to:     ISO timestamp                       (default: now)
+//
+// 'auto' picks: day if span < 60d, week if < 1y, else month — and is
+// always capped to ~60 buckets to keep payload bounded.
+router.get('/timeline', async (req: Request, res: Response) => {
+  const { userId } = (req as any).genomeUser;
+  const bucketParam = String(req.query.bucket || 'auto').toLowerCase();
+  const fromQ = req.query.from ? new Date(String(req.query.from)) : null;
+  const toQ = req.query.to ? new Date(String(req.query.to)) : null;
+
+  // Pull every response in ascending order (we need full replay).
+  const responses = await db
+    .select({
+      probeText: beliefResponses.probeText,
+      probeCategory: beliefResponses.probeCategory,
+      probeSource: beliefResponses.probeSource,
+      dimensionWeights: beliefResponses.dimensionWeights,
+      quality: beliefResponses.quality,
+      value: beliefResponses.value,
+      createdAt: beliefResponses.createdAt,
+    })
+    .from(beliefResponses)
+    .where(eq(beliefResponses.userId, userId))
+    .orderBy(beliefResponses.createdAt);
+
+  const [user] = await db.select().from(users).where(eq(users.id, userId));
+
+  if (responses.length === 0) {
+    return res.json({
+      bucket: 'week',
+      from: null,
+      to: null,
+      dimensions: DIMENSIONS.map(d => ({ id: d.id, name: d.name, categoryKey: d.categoryKey })),
+      buckets: [],
+    });
+  }
+
+  const firstTs = (responses[0].createdAt as Date).getTime();
+  const lastTs = (responses[responses.length - 1].createdAt as Date).getTime();
+  const fromTs = fromQ ? fromQ.getTime() : firstTs;
+  const toTs = toQ ? toQ.getTime() : Math.max(lastTs, Date.now());
+  const spanMs = Math.max(toTs - fromTs, 1);
+  const DAY = 86_400_000;
+
+  // Determine bucket size in ms.
+  let bucketSize: number;
+  let bucketName: 'day' | 'week' | 'month';
+  if (bucketParam === 'day') { bucketSize = DAY; bucketName = 'day'; }
+  else if (bucketParam === 'week') { bucketSize = 7 * DAY; bucketName = 'week'; }
+  else if (bucketParam === 'month') { bucketSize = 30 * DAY; bucketName = 'month'; }
+  else {
+    // auto
+    if (spanMs < 60 * DAY) { bucketSize = DAY; bucketName = 'day'; }
+    else if (spanMs < 365 * DAY) { bucketSize = 7 * DAY; bucketName = 'week'; }
+    else { bucketSize = 30 * DAY; bucketName = 'month'; }
+  }
+
+  // Cap to ~60 buckets to keep payload bounded — bump bucket size if needed.
+  const MAX_BUCKETS = 60;
+  while (Math.ceil(spanMs / bucketSize) > MAX_BUCKETS) {
+    bucketSize *= 2;
+    if (bucketSize >= 30 * DAY) bucketName = 'month';
+    else if (bucketSize >= 7 * DAY) bucketName = 'week';
+  }
+
+  // Build bucket boundary timestamps (inclusive end).
+  const boundaries: number[] = [];
+  for (let t = fromTs + bucketSize; t < toTs; t += bucketSize) boundaries.push(t);
+  boundaries.push(toTs);
+
+  // Replay responses, snapshotting at each boundary.
+  type Accum = { sum: number; totalWeight: number; count: number };
+  const accum: Record<number, Accum> = {};
+  const dimsByCategory: Record<string, number[]> = {};
+  for (const d of DIMENSIONS) {
+    if (!dimsByCategory[d.categoryKey]) dimsByCategory[d.categoryKey] = [];
+    dimsByCategory[d.categoryKey].push(d.id);
+  }
+
+  let respIdx = 0;
+  let cumulative = 0;
+  let lastBucketCumulative = 0;
+  const buckets: any[] = [];
+
+  for (const boundary of boundaries) {
+    let newInBucket = 0;
+    while (respIdx < responses.length && (responses[respIdx].createdAt as Date).getTime() <= boundary) {
+      const r = responses[respIdx];
+      const weights = (r.dimensionWeights as any) || {};
+      const quality = (r.quality as any) || null;
+      const qualityMult = quality?.weight ?? 0.7;
+      const normalized = (r.value * 2) - 1;
+      for (const [dimIdStr, w] of Object.entries(weights)) {
+        const dimId = parseInt(dimIdStr, 10);
+        const wt = w as { weight: number; direction?: number };
+        if (!accum[dimId]) accum[dimId] = { sum: 0, totalWeight: 0, count: 0 };
+        const directed = normalized * (wt.direction ?? 1);
+        const effectiveW = wt.weight * qualityMult;
+        accum[dimId].sum += directed * effectiveW;
+        accum[dimId].totalWeight += effectiveW;
+        accum[dimId].count += 1;
+      }
+      respIdx++;
+      cumulative++;
+      newInBucket++;
+    }
+
+    // Snapshot if anything has happened up to this point (skip empty leading buckets).
+    if (cumulative === 0) {
+      lastBucketCumulative = cumulative;
+      continue;
+    }
+
+    const dimensionScores: Record<number, number | null> = {};
+    const confidenceMap: Record<number, number> = {};
+    let confSum = 0, confCount = 0;
+    for (const [dimIdStr, a] of Object.entries(accum)) {
+      const v = calcDimensionValue(a as any);
+      const c = calcConfidence(a as any);
+      dimensionScores[parseInt(dimIdStr, 10)] = v;
+      if (v !== null) {
+        confidenceMap[parseInt(dimIdStr, 10)] = c;
+        confSum += c;
+        confCount++;
+      }
+    }
+    const overallConfidence = confCount > 0 ? Math.round(confSum / confCount) : 0;
+    const dimensionsCovered = Object.values(dimensionScores).filter(v => v !== null).length;
+
+    // Category averages — mean of non-null dimension scores within each category.
+    const categoryAvgs: Record<string, number | null> = {};
+    for (const [catKey, dimIds] of Object.entries(dimsByCategory)) {
+      const vals = dimIds.map(id => dimensionScores[id]).filter((v): v is number => v !== null && v !== undefined);
+      categoryAvgs[catKey] = vals.length ? +(vals.reduce((s, v) => s + v, 0) / vals.length).toFixed(2) : null;
+    }
+
+    // DNA string snapshot (uses user metadata for identity prefix; OK if same across buckets).
+    const dnaCleaned: Record<number, number> = {};
+    for (const [k, v] of Object.entries(dimensionScores)) {
+      if (v !== null) dnaCleaned[parseInt(k, 10)] = v;
+    }
+    const dnaString = buildDNAString(dnaCleaned, {
+      birthYear: user?.birthYear ?? undefined,
+      birthMonth: user?.birthMonth ?? undefined,
+      birthDay: user?.birthDay ?? undefined,
+      sex: user?.sex ?? '5',
+      countryCode: user?.countryCode ?? undefined,
+      zipCode: user?.zipCode ?? undefined,
+    });
+
+    buckets.push({
+      ts: new Date(boundary).toISOString(),
+      totalResponses: cumulative,
+      newResponsesInBucket: cumulative - lastBucketCumulative,
+      dimensionsCovered,
+      overallConfidence,
+      dimensionScores,
+      categoryAvgs,
+      dnaString,
+    });
+
+    lastBucketCumulative = cumulative;
+  }
+
+  return res.json({
+    bucket: bucketName,
+    from: new Date(fromTs).toISOString(),
+    to: new Date(toTs).toISOString(),
+    dimensions: DIMENSIONS.map(d => ({ id: d.id, name: d.name, categoryKey: d.categoryKey })),
+    buckets,
+  });
+});
+
 // ── POST /analyse — AI world view portrait (Anthropic Claude) ─
 const analyseRateLimit: Record<number, number> = {};
 
