@@ -9,9 +9,10 @@ import { FormatBadge } from './ImportBgpDropzone';
 interface Props {
   selectedId: number | null;
   onSelect: (entry: KnownDnaEntry) => void;
+  onActiveDeleted?: () => void;
 }
 
-export default function KnownDnasList({ selectedId, onSelect }: Props) {
+export default function KnownDnasList({ selectedId, onSelect, onActiveDeleted }: Props) {
   const q = useKnownDnas();
   const delM = useDeleteKnownDna();
 
@@ -108,7 +109,10 @@ export default function KnownDnasList({ selectedId, onSelect }: Props) {
               onClick={() => {
                 if (delM.isPending) return;
                 if (window.confirm(`Remove "${entry.shareableName || 'this entry'}" from your library?`)) {
-                  delM.mutate(entry.id);
+                  const wasActive = entry.id === selectedId;
+                  delM.mutate(entry.id, {
+                    onSuccess: () => { if (wasActive) onActiveDeleted?.(); },
+                  });
                 }
               }}
               title="Remove from library"

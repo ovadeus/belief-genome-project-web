@@ -99,6 +99,7 @@ export default function ComparePage() {
             onSelect={(e) =>
               navigate(e.id === validEntryId ? '/dna/compare' : `/dna/compare/${e.id}`)
             }
+            onActiveDeleted={() => navigate('/dna/compare')}
           />
         </section>
       </div>
