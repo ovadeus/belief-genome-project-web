@@ -16,6 +16,7 @@ import PublicDnaPage from "./pages/genome/PublicDnaPage";
 import ComparePage from "./pages/genome/ComparePage";
 import AnalyzePage from "./pages/genome/AnalyzePage";
 import SyncPage from "./pages/genome/SyncPage";
+import EvolutionPage from "./pages/genome/EvolutionPage";
 import ProfilePage from "./pages/genome/ProfilePage";
 
 const queryClient = new QueryClient();
@@ -98,6 +99,9 @@ function Router() {
       </Route>
       <Route path="/analyze">
         <RequireAuth><GenomeLayout><AnalyzePage /></GenomeLayout></RequireAuth>
+      </Route>
+      <Route path="/evolution">
+        <RequireAuth><GenomeLayout><EvolutionPage /></GenomeLayout></RequireAuth>
       </Route>
       <Route path="/sync">
         <RequireAuth><GenomeLayout><SyncPage /></GenomeLayout></RequireAuth>

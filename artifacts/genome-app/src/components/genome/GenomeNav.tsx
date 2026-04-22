@@ -13,6 +13,7 @@ const NAV_ITEMS: NavItem[] = [
   { path: '/probe',     label: 'Reflections' },
   { path: '/dashboard', label: 'Dashboard' },
   { path: '/dna',         label: 'DNA' },
+  { path: '/evolution',   label: 'Evolution' },
   { path: '/dna/compare', label: 'Compare' },
   { path: '/analyze',     label: 'Analyze' },
   { path: '/sync',      label: 'Sync Data' },
