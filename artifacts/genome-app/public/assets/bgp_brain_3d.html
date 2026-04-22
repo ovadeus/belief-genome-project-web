@@ -748,13 +748,18 @@ function doHover(e){
 
 // ── ANIMATE ──────────────────────────────────────────────────────────────────
 const clock=new THREE.Clock(),_v=new THREE.Vector3();
+// Randomized slow Z-axis drift to showcase the 3D effect — picked once per load
+const autoRotZ=(Math.random()*0.0009+0.0004)*(Math.random()<0.5?-1:1);
 function animate(){
   requestAnimationFrame(animate);
   const t=clock.getElapsedTime();
   if(!drag&&!touching&&!shiftPaused){
     brain.rotation.y+=vy;brain.rotation.x=Math.max(-1.15,Math.min(1.15,brain.rotation.x+vx));
     vx*=0.88;vy*=0.88;
-    if(Math.abs(vx)<0.0003&&Math.abs(vy)<0.0003) brain.rotation.y+=0.0018;
+    if(Math.abs(vx)<0.0003&&Math.abs(vy)<0.0003){
+      brain.rotation.y+=0.0018;
+      brain.rotation.z+=autoRotZ;
+    }
   }
   LD.forEach((l,i)=>PL[i].intensity=l.b+Math.sin(t*l.s+l.p)*l.b*0.22);
   // Smooth zoom — scale distance from origin preserving direction
