@@ -460,15 +460,38 @@ router.get('/sync/status', async (req: Request, res: Response) => {
 });
 
 // ── POST /sync — merge external responses ───────────────────
+//
+// Accounting contract: returns { received, merged, deduped, rejected: [...] }.
+// Each rejected entry has a `reason` so the client can stop showing falsely-
+// green "0 PENDING". A single bad row never kills the batch — every row is
+// validated and inserted independently with its own try/catch.
+//
+// Dedup key normalises createdAt to an ISO string on both sides so it
+// actually matches across the wire.
+type SyncReject = { idx: number; reason: string; probeText?: string };
+
+function dedupKey(probeText: string, value: number, createdAt: unknown): string {
+  let iso: string;
+  if (createdAt instanceof Date) iso = createdAt.toISOString();
+  else if (typeof createdAt === 'string') {
+    const d = new Date(createdAt);
+    iso = isNaN(d.getTime()) ? createdAt : d.toISOString();
+  } else iso = String(createdAt);
+  return `${probeText}|${value}|${iso}`;
+}
+
 router.post('/sync', async (req: Request, res: Response) => {
   const { userId } = (req as any).genomeUser;
   const { responses: incoming } = req.body;
 
   if (!Array.isArray(incoming)) {
-    return res.json({ merged: 0 });
+    console.log(`[/sync] user=${userId} body.responses is not an array — rejecting whole request`);
+    return res.json({ received: 0, merged: 0, deduped: 0, rejected: [{ idx: -1, reason: 'body_not_array' }] });
   }
 
-  // Get existing to deduplicate
+  const received = incoming.length;
+
+  // Existing rows for dedup
   const existing = await db.select({
     probeText: beliefResponses.probeText,
     value: beliefResponses.value,
@@ -476,28 +499,74 @@ router.post('/sync', async (req: Request, res: Response) => {
   }).from(beliefResponses).where(eq(beliefResponses.userId, userId));
 
   const existingKeys = new Set(
-    existing.map(r => `${r.probeText}|${r.value}|${r.createdAt}`)
+    existing.map(r => dedupKey(r.probeText, r.value, r.createdAt))
   );
 
   let merged = 0;
-  for (const r of incoming) {
-    const key = `${r.probeText || r.probe_text}|${r.value}|${r.createdAt || r.created_at}`;
-    if (existingKeys.has(key)) continue;
+  let deduped = 0;
+  const rejected: SyncReject[] = [];
 
-    await db.insert(beliefResponses).values({
-      userId,
-      probeText: r.probeText || r.probe_text,
-      probeCategory: r.probeCategory || r.probe_category || 'life',
-      probeSource: r.probeSource || r.probe_source || 'extension',
-      value: r.value,
-      confidence: r.confidence || 2,
-      dimensionWeights: r.dimensionWeights || null,
-    });
-    existingKeys.add(key);
-    merged++;
+  for (let idx = 0; idx < incoming.length; idx++) {
+    const r = incoming[idx] as any;
+    const probeText = r.probeText ?? r.probe_text;
+    const probeCategory = r.probeCategory ?? r.probe_category ?? 'life';
+    const probeSource = r.probeSource ?? r.probe_source ?? 'extension';
+    const value = typeof r.value === 'number' ? r.value : Number(r.value);
+    const dimensionWeights = r.dimensionWeights ?? r.dimension_weights;
+    const createdAt = r.createdAt ?? r.created_at;
+
+    // Validate
+    if (!probeText || typeof probeText !== 'string') {
+      rejected.push({ idx, reason: 'missing_probeText' });
+      continue;
+    }
+    if (!Number.isFinite(value)) {
+      rejected.push({ idx, reason: 'invalid_value', probeText });
+      continue;
+    }
+    if (!dimensionWeights || typeof dimensionWeights !== 'object') {
+      rejected.push({ idx, reason: 'missing_dimensionWeights', probeText });
+      continue;
+    }
+
+    // Dedup
+    const key = dedupKey(probeText, value, createdAt);
+    if (existingKeys.has(key)) {
+      deduped++;
+      continue;
+    }
+
+    // Insert (per-row try/catch so one bad row never kills the batch)
+    try {
+      await db.insert(beliefResponses).values({
+        userId,
+        probeText,
+        probeCategory,
+        probeSource,
+        value,
+        confidence: r.confidence ?? 50,
+        dimensionWeights,
+      });
+      existingKeys.add(key);
+      merged++;
+    } catch (e: any) {
+      rejected.push({ idx, reason: `db_error:${e?.code || e?.message || 'unknown'}`, probeText });
+    }
   }
 
-  return res.json({ merged });
+  // Summary log + sample of rejection reasons
+  const reasonCounts: Record<string, number> = {};
+  for (const r of rejected) reasonCounts[r.reason] = (reasonCounts[r.reason] || 0) + 1;
+  const reasonsStr = Object.entries(reasonCounts).map(([k, v]) => `${k}=${v}`).join(' ') || 'none';
+  console.log(
+    `[/sync] user=${userId} received=${received} merged=${merged} deduped=${deduped} ` +
+    `rejected=${rejected.length} (${reasonsStr})`
+  );
+  if (rejected.length > 0) {
+    console.log(`[/sync] user=${userId} first rejects:`, JSON.stringify(rejected.slice(0, 20)));
+  }
+
+  return res.json({ received, merged, deduped, rejected });
 });
 
 // ── GET /timeline — belief evolution over time ──────────────
