@@ -596,7 +596,7 @@ brain.add(hoverGlowCore);
 let hoveredNode=null;
 
 // ── SHIFT PAUSE ───────────────────────────────────────────────────────────────
-let shiftPaused=true; // paused by default
+let shiftPaused=false; // auto-rotate by default
 window.addEventListener('keydown',e=>{
   if(e.key==='Shift'){
     shiftPaused=true; e.preventDefault();
@@ -622,10 +622,10 @@ const btnZoomOut=document.getElementById('btn-zoom-out');
 
 const DEFAULT_Z=6.5;
 
-// Sync initial UI state to paused=true
-btnToggle.textContent='▶ Play';
-btnToggle.classList.add('paused');
-document.getElementById('ch').textContent='paused — click Play to begin rotation';
+// Sync initial UI state to playing
+btnToggle.textContent='⏸ Pause';
+btnToggle.classList.remove('paused');
+document.getElementById('ch').textContent='drag · hover · shift to pause';
 
 btnToggle.addEventListener('click',()=>{
   shiftPaused=!shiftPaused;
