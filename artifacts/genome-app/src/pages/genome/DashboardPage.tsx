@@ -12,6 +12,7 @@ import Forecaster from '../../components/genome/Forecaster';
 import Neuromap from '../../components/genome/Neuromap';
 import DnaString from '../../components/genome/DnaString';
 import DnaStrip from '../../components/genome/DnaStrip';
+import LineageDrawer from '../../components/genome/LineageDrawer';
 import {
   Minus, Plus, Maximize2, X,
   Dna, RotateCw, Target, CircleDot, RectangleVertical, Activity, Menu, Settings,
@@ -366,6 +367,7 @@ export default function DashboardPage() {
   const [analysisDismissed, setAnalysisDismissed] = useState(false);
   const [zoomIndex, setZoomIndex] = useState(0);
   const [fullscreen, setFullscreen] = useState(false);
+  const [lineageDimId, setLineageDimId] = useState<number | null>(null);
 
   const greeting = useMemo(() => getGreeting(user?.name), [user?.name]);
   const dailyQuote = useMemo(() => getDailyQuote(), []);
@@ -481,6 +483,7 @@ export default function DashboardPage() {
             totalResponses={dna?.totalResponses || 0}
             dimensionsCovered={dna?.dimensionsCovered || 0}
             overallConfidence={dna?.overallConfidence || 0}
+            onExploredClick={(dimId) => setLineageDimId(dimId)}
           />
         )}
         {tab === 'helix' && (
@@ -838,6 +841,12 @@ export default function DashboardPage() {
       })()}
 
       <style>{`@keyframes vizFadeIn { from { opacity: 0 } to { opacity: 1 } }`}</style>
+
+      <LineageDrawer
+        dimensionId={lineageDimId}
+        open={lineageDimId !== null}
+        onOpenChange={(o) => { if (!o) setLineageDimId(null); }}
+      />
 
     </div>
   );

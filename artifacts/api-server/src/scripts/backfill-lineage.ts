@@ -46,19 +46,20 @@ async function main() {
 
     if (rows.length === 0) continue;
 
-    // Find which response ids already have lineage so we can skip them.
-    // We can't just "if any exist, skip user" because a partial run may have
-    // covered the first N responses but not the rest.
+    // Find which (response_id, dimension_id) pairs already have lineage so
+    // we can skip them. We track at the PAIR level — not per-response —
+    // because a previous run could have crashed mid-response after writing
+    // some of its impacts but not all. Skipping at response granularity
+    // would permanently lose the missing impacts. Pair-level granularity
+    // matches the unique index on (response_id, dimension_id).
     const existingLineage = await db
-      .select({ responseId: beliefLineage.responseId })
+      .select({ responseId: beliefLineage.responseId, dimensionId: beliefLineage.dimensionId })
       .from(beliefLineage)
       .where(sql`${beliefLineage.userId} = ${userId}`);
-    const lineageSet = new Set<number>(existingLineage.map(r => r.responseId));
-
-    if (lineageSet.size === rows.length) {
-      totalSkippedUsers++;
-      continue;
-    }
+    const pairKey = (r: number, d: number) => `${r}:${d}`;
+    const lineagePairSet = new Set<string>(
+      existingLineage.map(r => pairKey(r.responseId, r.dimensionId)),
+    );
 
     // Replay every response through the engine — even ones that already have
     // lineage — because we need the running accumulator to be correct when we
@@ -80,12 +81,13 @@ async function main() {
         accMap[parseInt(dimIdStr, 10)] = next[parseInt(dimIdStr, 10)];
       }
 
-      if (lineageSet.has(r.id)) {
-        totalSkippedResponses++;
-        continue;
-      }
-
+      // Filter out only the (response, dim) pairs that already exist.
+      // Anything missing — including partial-failure leftovers from a
+      // previous run — gets queued for insert.
+      let alreadyHadAll = true;
       for (const i of impacts) {
+        if (lineagePairSet.has(pairKey(r.id, i.dimensionId))) continue;
+        alreadyHadAll = false;
         inserts.push({
           userId,
           responseId: r.id,
@@ -98,15 +100,28 @@ async function main() {
           createdAt: r.createdAt,
         });
       }
+      if (alreadyHadAll && impacts.length > 0) totalSkippedResponses++;
+    }
+
+    if (inserts.length === 0) {
+      totalSkippedUsers++;
     }
 
     if (inserts.length > 0) {
+      // ON CONFLICT DO NOTHING is the belt to the pair-set's suspenders —
+      // protects against a parallel live ingest writing the same pair while
+      // this backfill is mid-flight (the unique index enforces it).
       const CHUNK = 1000;
       for (let i = 0; i < inserts.length; i += CHUNK) {
-        await db.insert(beliefLineage).values(inserts.slice(i, i + CHUNK));
+        await db
+          .insert(beliefLineage)
+          .values(inserts.slice(i, i + CHUNK))
+          .onConflictDoNothing({
+            target: [beliefLineage.responseId, beliefLineage.dimensionId],
+          });
       }
       totalInserted += inserts.length;
-      console.log(`[backfill-lineage] user=${userId} inserted=${inserts.length} (responses=${rows.length}, prior_lineage=${lineageSet.size})`);
+      console.log(`[backfill-lineage] user=${userId} inserted=${inserts.length} (responses=${rows.length}, prior_lineage_pairs=${lineagePairSet.size})`);
     }
   }
 
