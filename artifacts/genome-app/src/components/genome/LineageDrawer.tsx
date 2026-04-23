@@ -84,8 +84,9 @@ export default function LineageDrawer({ dimensionId, open, onOpenChange }: Props
   const q = useLineage(open ? dimensionId : null);
 
   const data = q.data;
+  // API returns timeline in chronological-ascending order; render as-is.
   const list: LineageRow[] = data
-    ? (showAll ? [...data.timeline].reverse() : data.top)
+    ? (showAll ? data.timeline : data.top)
     : [];
 
   const currentScoreInt = data?.currentScore;
@@ -109,7 +110,9 @@ export default function LineageDrawer({ dimensionId, open, onOpenChange }: Props
           <SheetTitle style={{
             color: 'var(--text-primary)', fontSize: 16, fontWeight: 700,
           }}>
-            Belief Lineage
+            {data?.dimension?.name
+              ? `${data.dimension.name} — Score ${currentScoreInt ?? '·'}/9`
+              : 'Belief Lineage'}
           </SheetTitle>
           <SheetDescription style={{ color: 'var(--text-muted)', fontSize: 12 }}>
             Which of your past responses shaped this score.
