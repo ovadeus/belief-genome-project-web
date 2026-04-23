@@ -20,6 +20,7 @@ export const users = pgTable('users', {
 export const beliefResponses = pgTable('belief_responses', {
   id:               serial('id').primaryKey(),
   userId:           integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  clientId:         text('client_id'),  // idempotency key from external clients (desktop bulk-import)
   probeText:        text('probe_text').notNull(),
   probeCategory:    text('probe_category').notNull(),
   probeSource:      text('probe_source').notNull().default('bank'),
@@ -30,7 +31,9 @@ export const beliefResponses = pgTable('belief_responses', {
   confidence:       integer('confidence').default(50),
   note:             text('note'),
   createdAt:        timestamp('created_at').defaultNow().notNull(),
-});
+}, (table) => [
+  uniqueIndex('belief_responses_user_client_idx').on(table.userId, table.clientId),
+]);
 
 export const probes = pgTable('probes', {
   id:               serial('id').primaryKey(),

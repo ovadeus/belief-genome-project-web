@@ -569,6 +569,237 @@ router.post('/sync', async (req: Request, res: Response) => {
   return res.json({ received, merged, deduped, rejected });
 });
 
+// ── POST /responses/bulk-import — desktop bulk push ─────────
+//
+// Accepts up to 500 belief responses in a single request from the BGP
+// Desktop app. Idempotent on (user_id, client_id) — re-sending the same
+// chunk is safe and will report skipped counts instead of creating
+// duplicates.
+//
+// Performance: validates and inserts in-memory, then applies dimension
+// score deltas in ONE pass per affected dimension at the end (not per row).
+//
+// Request body:
+//   {
+//     responses: [
+//       {
+//         client_id:        string  REQUIRED  // stable uuid from desktop
+//         created_at:       string  REQUIRED  // ISO-8601 timestamp
+//         probe_id:         string|null
+//         dimension_key:    string             // informational, not stored
+//         value:            number             // accepts 0-1 OR 0-9 (Likert)
+//         confidence:       number             // accepts 0-1 OR 0-100
+//         dimensionWeights: { [dimId]: { weight, direction } }
+//         source:           string             // e.g. "desktop"
+//       },
+//       ...
+//     ]
+//   }
+//
+// Response 200:
+//   { ok, imported, skipped, errors: [{ index, reason }] }
+const BULK_MAX = 500;
+
+router.post('/responses/bulk-import', async (req: Request, res: Response) => {
+  const { userId } = (req as any).genomeUser;
+  const incoming = req.body?.responses;
+
+  if (!Array.isArray(incoming)) {
+    return res.status(400).json({ ok: false, error: 'responses must be an array' });
+  }
+  if (incoming.length > BULK_MAX) {
+    return res.status(413).json({ ok: false, error: `batch too large: ${incoming.length} > ${BULK_MAX}` });
+  }
+  if (incoming.length === 0) {
+    return res.json({ ok: true, imported: 0, skipped: 0, errors: [] });
+  }
+
+  // Pre-fetch existing client_ids for this user so we can dedup without
+  // a per-row SELECT. The unique index on (user_id, client_id) also gives
+  // us a hard-stop second line of defense at insert time.
+  const existingRows = await db
+    .select({ clientId: beliefResponses.clientId })
+    .from(beliefResponses)
+    .where(eq(beliefResponses.userId, userId));
+  const seenClientIds = new Set<string>(
+    existingRows.map(r => r.clientId).filter((x): x is string => !!x)
+  );
+
+  type ValidRow = {
+    index: number;
+    clientId: string;
+    createdAt: Date;
+    probeText: string;
+    probeCategory: string;
+    probeSource: string;
+    value: number;        // normalized 0-1
+    confidence: number;   // 0-100
+    dimensionWeights: Record<string, { weight: number; direction?: number }>;
+  };
+
+  const valid: ValidRow[] = [];
+  const errors: Array<{ index: number; reason: string }> = [];
+  let skipped = 0;
+
+  // Validate + dedup in-memory.
+  for (let i = 0; i < incoming.length; i++) {
+    const r = incoming[i] as any;
+
+    const clientId = r.client_id ?? r.clientId;
+    if (!clientId || typeof clientId !== 'string') {
+      errors.push({ index: i, reason: 'missing_client_id' });
+      continue;
+    }
+    if (seenClientIds.has(clientId)) {
+      skipped++;
+      continue;
+    }
+
+    const createdAtRaw = r.created_at ?? r.createdAt;
+    if (!createdAtRaw) {
+      errors.push({ index: i, reason: 'missing_created_at' });
+      continue;
+    }
+    const createdAt = new Date(createdAtRaw);
+    if (isNaN(createdAt.getTime())) {
+      errors.push({ index: i, reason: 'invalid_created_at' });
+      continue;
+    }
+
+    const rawValue = r.value;
+    if (typeof rawValue !== 'number' || !Number.isFinite(rawValue)) {
+      errors.push({ index: i, reason: 'invalid_value' });
+      continue;
+    }
+    // Accept either 0-1 normalized or 0-9 Likert; store as 0-1.
+    const value = rawValue > 1 ? rawValue / 9 : rawValue;
+    if (value < 0 || value > 1) {
+      errors.push({ index: i, reason: 'value_out_of_range' });
+      continue;
+    }
+
+    const dimensionWeights = r.dimensionWeights ?? r.dimension_weights;
+    if (!dimensionWeights || typeof dimensionWeights !== 'object' || Object.keys(dimensionWeights).length === 0) {
+      errors.push({ index: i, reason: 'missing_dimensionWeights' });
+      continue;
+    }
+
+    // Confidence: accept 0-1 or 0-100, store 0-100.
+    const rawConf = r.confidence;
+    let confidence = 50;
+    if (typeof rawConf === 'number' && Number.isFinite(rawConf)) {
+      confidence = rawConf <= 1 ? Math.round(rawConf * 100) : Math.round(rawConf);
+    }
+
+    const probeText = r.probe_text ?? r.probeText ?? r.dimension_key ?? r.dimensionKey ?? `bulk:${clientId}`;
+    const probeCategory = r.probe_category ?? r.probeCategory ?? 'life';
+    const probeSource = r.source ?? r.probe_source ?? r.probeSource ?? 'desktop';
+
+    valid.push({
+      index: i,
+      clientId,
+      createdAt,
+      probeText,
+      probeCategory,
+      probeSource,
+      value,
+      confidence,
+      dimensionWeights,
+    });
+    seenClientIds.add(clientId);
+  }
+
+  // Run the inserts + dimension score updates in a single transaction so
+  // a mid-batch failure rolls back cleanly. Per-row try/catch inside ensures
+  // a single bad row doesn't poison the whole transaction.
+  let imported = 0;
+  // Aggregate per-dimension deltas across the entire batch.
+  const dimDeltas: Record<number, { weightedSum: number; totalWeight: number; count: number }> = {};
+
+  await db.transaction(async (tx) => {
+    for (const v of valid) {
+      try {
+        await tx.insert(beliefResponses).values({
+          userId,
+          clientId: v.clientId,
+          probeText: v.probeText,
+          probeCategory: v.probeCategory,
+          probeSource: v.probeSource,
+          dimensionWeights: v.dimensionWeights,
+          value: v.value,
+          confidence: v.confidence,
+          createdAt: v.createdAt, // preserve original answer time
+        });
+        imported++;
+
+        // Accumulate dim score contributions (single recompute applied later).
+        const qualityMult = 0.7; // bulk-import has no per-probe quality preset; use default weight
+        const normalized = (v.value * 2) - 1;
+        for (const [dimIdStr, wt] of Object.entries(v.dimensionWeights)) {
+          const dimId = parseInt(dimIdStr, 10);
+          if (!Number.isFinite(dimId)) continue;
+          const direction = (wt as any).direction ?? 1;
+          const weight = (wt as any).weight ?? 0;
+          const directed = normalized * direction;
+          const effectiveW = weight * qualityMult;
+          if (!dimDeltas[dimId]) dimDeltas[dimId] = { weightedSum: 0, totalWeight: 0, count: 0 };
+          dimDeltas[dimId].weightedSum += directed * effectiveW;
+          dimDeltas[dimId].totalWeight += effectiveW;
+          dimDeltas[dimId].count += 1;
+        }
+      } catch (e: any) {
+        // Most likely path here: unique index race (concurrent bulk-import).
+        // Treat as skipped — caller asked for idempotent behavior.
+        const code = e?.code || '';
+        if (code === '23505') {
+          skipped++;
+        } else {
+          errors.push({ index: v.index, reason: `db_error:${code || e?.message || 'unknown'}` });
+        }
+      }
+    }
+
+    // Apply aggregated dimension score deltas — one upsert per touched dim.
+    for (const [dimIdStr, delta] of Object.entries(dimDeltas)) {
+      const dimId = parseInt(dimIdStr, 10);
+      const [existing] = await tx
+        .select()
+        .from(dimensionScores)
+        .where(sql`${dimensionScores.userId} = ${userId} AND ${dimensionScores.dimensionId} = ${dimId}`);
+      if (existing) {
+        await tx.update(dimensionScores).set({
+          weightedSum: existing.weightedSum + delta.weightedSum,
+          totalWeight: existing.totalWeight + delta.totalWeight,
+          count: existing.count + delta.count,
+          lastUpdated: new Date(),
+        }).where(eq(dimensionScores.id, existing.id));
+      } else {
+        await tx.insert(dimensionScores).values({
+          userId,
+          dimensionId: dimId,
+          weightedSum: delta.weightedSum,
+          totalWeight: delta.totalWeight,
+          count: delta.count,
+        });
+      }
+    }
+  });
+
+  // Summary log + capped error sample.
+  const reasonCounts: Record<string, number> = {};
+  for (const e of errors) reasonCounts[e.reason] = (reasonCounts[e.reason] || 0) + 1;
+  const reasonsStr = Object.entries(reasonCounts).map(([k, v]) => `${k}=${v}`).join(' ') || 'none';
+  console.log(
+    `[/responses/bulk-import] user=${userId} received=${incoming.length} ` +
+    `imported=${imported} skipped=${skipped} errors=${errors.length} (${reasonsStr})`
+  );
+  if (errors.length > 0) {
+    console.log(`[/responses/bulk-import] user=${userId} first errors:`, JSON.stringify(errors.slice(0, 20)));
+  }
+
+  return res.json({ ok: true, imported, skipped, errors });
+});
+
 // ── GET /timeline — belief evolution over time ──────────────
 //
 // Replays the user's belief_responses chronologically and snapshots
