@@ -45,6 +45,9 @@ export default function ProfilePage() {
   const { user, token } = useGenomeAuth();
   const [showToken, setShowToken] = useState(false);
   const [tokenCopied, setTokenCopied] = useState(false);
+  // Identity Metadata is collapsed by default — it's PII (DOB, gender,
+  // country, zip) and shouldn't be visible to anyone shoulder-surfing.
+  const [identityOpen, setIdentityOpen] = useState(false);
 
   const handleCopyToken = async () => {
     if (!token) return;
@@ -172,9 +175,41 @@ export default function ProfilePage() {
         )}
       </div>
 
-      {/* Identity Metadata */}
+      {/* Identity Metadata — collapsible (PII) */}
       <div style={{ padding: 20, borderRadius: 12, background: 'var(--surface-1)', border: '1px solid var(--border-subtle)', marginBottom: 24 }}>
-        <h3 style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 16 }}>Identity Metadata</h3>
+        <button
+          type="button"
+          onClick={() => setIdentityOpen(o => !o)}
+          aria-expanded={identityOpen}
+          aria-controls="identity-metadata-body"
+          style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            width: '100%', background: 'transparent', border: 'none', padding: 0,
+            cursor: 'pointer', color: 'var(--text-muted)', fontFamily: 'inherit',
+            marginBottom: identityOpen ? 16 : 0,
+          }}
+        >
+          <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <h3 style={{ fontSize: 14, color: 'var(--text-muted)', margin: 0 }}>Identity Metadata</h3>
+            <span style={{
+              fontSize: 10, color: 'var(--text-faint)', textTransform: 'uppercase',
+              letterSpacing: '0.08em', border: '1px solid var(--border-subtle)',
+              borderRadius: 4, padding: '2px 6px',
+            }}>
+              Personal · {identityOpen ? 'Hide' : 'Show'}
+            </span>
+          </span>
+          <span aria-hidden style={{
+            fontSize: 14, color: 'var(--text-faint)',
+            transform: identityOpen ? 'rotate(90deg)' : 'rotate(0deg)',
+            transition: 'transform 0.15s',
+          }}>
+            ›
+          </span>
+        </button>
+
+        {identityOpen && (
+        <div id="identity-metadata-body">
         <p style={{ fontSize: 12, color: 'var(--text-faint)', marginBottom: 20 }}>
           This data forms the prefix of your 140-character Belief DNA string.
           Used for demographic and geographic belief analysis — never shared individually.
@@ -259,6 +294,8 @@ export default function ProfilePage() {
           </button>
           {saved && <span style={{ fontSize: 13, color: '#22c55e' }}>Saved</span>}
         </div>
+        </div>
+        )}
       </div>
 
       {/* DNA String */}
