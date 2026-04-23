@@ -105,6 +105,81 @@ export function calcDimensionValue(accumulator: Accumulator | null): number | nu
   return Math.round(((avg + 1) / 2) * 9);
 }
 
+// Same as calcDimensionValue but returns the raw 0-9 float (no rounding).
+// Used by lineage so deltas reflect the actual underlying movement, not just
+// integer-step jumps (most responses only nudge the underlying average).
+export function calcDimensionValueRaw(accumulator: Accumulator | null): number | null {
+  if (!accumulator || accumulator.totalWeight === 0) return null;
+  const avg = accumulator.sum / accumulator.totalWeight;
+  return ((avg + 1) / 2) * 9;
+}
+
+// ── Lineage / impact contract ──────────────────────────────────
+// One impact per (response, dimension) pair. scoreBefore is null when this
+// is the first response touching the dimension; in that case delta is taken
+// relative to the 4.5 neutral midpoint of the 0-9 range so first responses
+// still register a meaningful magnitude.
+export interface DimensionImpact {
+  dimensionId: number;
+  scoreBefore: number | null;   // raw 0-9 average pre-write, or null
+  scoreAfter: number;           // raw 0-9 average post-write
+  delta: number;                // scoreAfter - (scoreBefore ?? 4.5)
+  confidenceBefore: number;     // 0-100
+  confidenceAfter: number;      // 0-100
+}
+
+// Apply ONE response to a prior accumulator map and return both the next
+// accumulator state and the per-dimension impacts. This is the single source
+// of truth for "what did this response do?" — both the API ingest path and
+// the backfill replay use it so lineage and final scores stay in lockstep.
+export function applyResponseToScores(
+  prev: Record<number, Accumulator>,
+  response: BeliefHistoryEntry
+): { next: Record<number, Accumulator>; impacts: DimensionImpact[] } {
+  const next = JSON.parse(JSON.stringify(prev || {})) as Record<number, Accumulator>;
+  const impacts: DimensionImpact[] = [];
+  const weights = response.dimensionWeights || {};
+
+  for (const [dimIdStr, wt] of Object.entries(weights)) {
+    const dimId = parseInt(dimIdStr);
+    if (!Number.isFinite(dimId)) continue;
+
+    const beforeAcc = next[dimId] ?? null;
+    const scoreBefore = calcDimensionValueRaw(beforeAcc);
+    const confidenceBefore = calcConfidence(beforeAcc);
+
+    if (!next[dimId]) {
+      next[dimId] = { sum: 0, totalWeight: 0, count: 0 };
+    }
+    const normalized = (response.value * 2) - 1;
+    const directed = normalized * (wt.direction || 1);
+    const qualityMult = response.quality?.weight ?? 0.7;
+    const effectiveW = (wt.weight ?? 0) * qualityMult;
+
+    next[dimId].sum += directed * effectiveW;
+    next[dimId].totalWeight += effectiveW;
+    next[dimId].count += 1;
+
+    const scoreAfter = calcDimensionValueRaw(next[dimId]);
+    const confidenceAfter = calcConfidence(next[dimId]);
+
+    // scoreAfter cannot be null here — we just inserted weight > 0.
+    const after = scoreAfter ?? 4.5;
+    const delta = after - (scoreBefore ?? 4.5);
+
+    impacts.push({
+      dimensionId: dimId,
+      scoreBefore,
+      scoreAfter: after,
+      delta,
+      confidenceBefore,
+      confidenceAfter,
+    });
+  }
+
+  return { next, impacts };
+}
+
 export function calcConfidence(accumulator: Accumulator | null): number {
   if (!accumulator) return 0;
   const coverage = Math.min(accumulator.count / 8, 1);

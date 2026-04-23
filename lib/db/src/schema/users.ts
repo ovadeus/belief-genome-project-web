@@ -1,7 +1,7 @@
 // Belief Genome users — separate from admin auth
 // Add to lib/db/src/schema/ alongside blog.ts, subscribers.ts, etc.
 
-import { pgTable, text, serial, integer, real, boolean, timestamp, json, uniqueIndex } from 'drizzle-orm/pg-core';
+import { pgTable, text, serial, integer, real, boolean, timestamp, json, uniqueIndex, index } from 'drizzle-orm/pg-core';
 
 export const users = pgTable('users', {
   id:           serial('id').primaryKey(),
@@ -66,3 +66,28 @@ export const dnaSnapshots = pgTable('dna_snapshots', {
   dnaString:  text('dna_string').notNull(),
   snapshotAt: timestamp('snapshot_at').defaultNow().notNull(),
 });
+
+// Belief Lineage — provenance record. For every response × dimension touched,
+// captures the score & confidence before/after, so users can trace exactly
+// which past responses moved a given dimension's position.
+export const beliefLineage = pgTable('belief_lineage', {
+  id:               serial('id').primaryKey(),
+  userId:           integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  responseId:       integer('response_id').notNull().references(() => beliefResponses.id, { onDelete: 'cascade' }),
+  dimensionId:      integer('dimension_id').notNull(),
+  // Raw 0-9 averages (before may be null when this was the first response touching the dimension).
+  scoreBefore:      real('score_before'),
+  scoreAfter:       real('score_after').notNull(),
+  // delta = scoreAfter - (scoreBefore ?? 4.5 neutral). Sortable by ABS for "top contributors".
+  delta:            real('delta').notNull(),
+  confidenceBefore: integer('confidence_before').default(0).notNull(),
+  confidenceAfter:  integer('confidence_after').default(0).notNull(),
+  createdAt:        timestamp('created_at').defaultNow().notNull(),
+}, (table) => [
+  // Per-user-per-dim lookup, ordered by time (top-contributors and timeline both pivot on this).
+  index('belief_lineage_user_dim_idx').on(table.userId, table.dimensionId, table.createdAt),
+  // Idempotency lookup for backfill: skip responses that already have lineage rows.
+  index('belief_lineage_response_idx').on(table.responseId),
+  // Hard guarantee that no (response, dim) pair is double-recorded.
+  uniqueIndex('belief_lineage_response_dim_idx').on(table.responseId, table.dimensionId),
+]);
