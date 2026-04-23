@@ -9,6 +9,7 @@ import {
 import { useLocation } from 'wouter';
 import { genomeApi, useGenomeAuth } from '../../components/genome/GenomeAuthContext';
 import { SHEX } from '../../components/genome/genome-utils';
+import { useThemeColors } from '../../hooks/use-theme-colors';
 
 // Display lookup for the canonical 11-category schema. The page is
 // schema-agnostic — keys are derived from the server response — but this
@@ -136,6 +137,19 @@ export default function EvolutionPage() {
     [data]
   );
 
+  // Chart.js draws to canvas which can't read CSS variables. Resolve them to
+  // literal colors here; the hook re-runs on theme switch.
+  const c = useThemeColors([
+    '--accent-bright',
+    '--accent-soft',
+    '--text-faint',
+    '--text-secondary',
+    '--text-ghost',
+    '--surface-2',
+    '--panel-glass-bg',
+    '--accent-mid',
+  ] as const);
+
   const overallChartData = useMemo(() => {
     if (!data) return null;
     return {
@@ -144,8 +158,8 @@ export default function EvolutionPage() {
         {
           label: 'Confidence (%)',
           data: data.buckets.map(b => b.overallConfidence),
-          borderColor: 'var(--accent-bright)',
-          backgroundColor: 'var(--accent-soft)',
+          borderColor: c['--accent-bright'],
+          backgroundColor: c['--accent-soft'],
           tension: 0.3,
           fill: true,
           yAxisID: 'y',
@@ -163,22 +177,22 @@ export default function EvolutionPage() {
         },
       ],
     };
-  }, [data, labels]);
+  }, [data, labels, c]);
 
   const overallChartOptions = useMemo(() => ({
     responsive: true,
     maintainAspectRatio: false,
     interaction: { mode: 'index' as const, intersect: false },
     scales: {
-      x: { ticks: { color: 'var(--text-faint)', maxRotation: 0, autoSkip: true, maxTicksLimit: 10 }, grid: { color: 'var(--surface-2)' } },
-      y: { type: 'linear' as const, position: 'left' as const, min: 0, max: 100, ticks: { color: 'var(--text-faint)' }, grid: { color: 'var(--surface-2)' }, title: { display: true, text: 'Confidence %', color: 'var(--text-faint)' } },
-      y1: { type: 'linear' as const, position: 'right' as const, min: 0, max: 124, ticks: { color: 'var(--text-faint)' }, grid: { drawOnChartArea: false }, title: { display: true, text: 'Dimensions', color: 'var(--text-faint)' } },
+      x: { ticks: { color: c['--text-faint'], maxRotation: 0, autoSkip: true, maxTicksLimit: 10 }, grid: { color: c['--surface-2'] } },
+      y: { type: 'linear' as const, position: 'left' as const, min: 0, max: 100, ticks: { color: c['--text-faint'] }, grid: { color: c['--surface-2'] }, title: { display: true, text: 'Confidence %', color: c['--text-faint'] } },
+      y1: { type: 'linear' as const, position: 'right' as const, min: 0, max: 124, ticks: { color: c['--text-faint'] }, grid: { drawOnChartArea: false }, title: { display: true, text: 'Dimensions', color: c['--text-faint'] } },
     },
     plugins: {
-      legend: { labels: { color: 'var(--text-secondary)', font: { size: 12 } } },
-      tooltip: { backgroundColor: 'var(--panel-glass-bg)', borderColor: 'var(--accent-mid)', borderWidth: 1 },
+      legend: { labels: { color: c['--text-secondary'], font: { size: 12 } } },
+      tooltip: { backgroundColor: c['--panel-glass-bg'], borderColor: c['--accent-mid'], borderWidth: 1 },
     },
-  }), []);
+  }), [c]);
 
   // ── Render branches ────────────────────────────────────────
   if (loading && !data) {
@@ -276,8 +290,8 @@ export default function EvolutionPage() {
               labels,
               datasets: [{
                 data: series,
-                borderColor: hasData ? 'var(--accent-bright)' : 'var(--text-ghost)',
-                backgroundColor: 'var(--accent-soft)',
+                borderColor: hasData ? c['--accent-bright'] : c['--text-ghost'],
+                backgroundColor: c['--accent-soft'],
                 fill: true,
                 tension: 0.35,
                 pointRadius: 0,
