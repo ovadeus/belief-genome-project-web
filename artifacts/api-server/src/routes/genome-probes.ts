@@ -264,48 +264,78 @@ router.post('/respond', async (req: Request, res: Response) => {
 
   const qualityObj = quality || assignProbeQuality(probeSource || 'bank');
 
-  await db.insert(beliefResponses).values({
-    userId,
-    probeText,
-    probeCategory: probeCategory || 'life',
-    probeSource: probeSource || 'bank',
-    dimensionWeights: dimWeights,
-    value: parseFloat(value),
-    confidence: confidence || 50,
-    note: note || null,
-    quality: qualityObj,
-  });
+  // Normalize value (real column, accepts 0-1; if client sent 0-9 Likert, scale).
+  const rawVal = typeof value === 'number' ? value : parseFloat(value);
+  if (!Number.isFinite(rawVal)) {
+    return res.status(400).json({ error: 'value must be a finite number' });
+  }
+  const normValue = rawVal > 1 ? rawVal / 9 : rawVal;
+  if (normValue < 0 || normValue > 1) {
+    return res.status(400).json({ error: 'value out of range (expected 0-1 or 0-9)' });
+  }
 
-  // Update dimension scores incrementally
-  for (const [dimIdStr, wt] of Object.entries(dimWeights as Record<string, { direction: number; weight: number }>)) {
-    const dimId = parseInt(dimIdStr);
-    const normalized = (parseFloat(value) * 2) - 1;
-    const directed = normalized * (wt.direction || 1);
-    const qualityMult = qualityObj.weight ?? 0.7;
-    const effectiveW = wt.weight * qualityMult;
-
-    // Upsert dimension score
-    const [existing] = await db
-      .select()
-      .from(dimensionScores)
-      .where(and(eq(dimensionScores.userId, userId), eq(dimensionScores.dimensionId, dimId)));
-
-    if (existing) {
-      await db.update(dimensionScores).set({
-        weightedSum: existing.weightedSum + (directed * effectiveW),
-        totalWeight: existing.totalWeight + effectiveW,
-        count: existing.count + 1,
-        lastUpdated: new Date(),
-      }).where(eq(dimensionScores.id, existing.id));
-    } else {
-      await db.insert(dimensionScores).values({
-        userId,
-        dimensionId: dimId,
-        weightedSum: directed * effectiveW,
-        totalWeight: effectiveW,
-        count: 1,
-      });
+  // Normalize confidence — schema column is INTEGER 0-100.
+  // Accept 0-1 (fraction) → x100, OR 0-100, OR small Likert (1-2). Clamp + round.
+  let normConfidence = 50;
+  if (confidence !== undefined && confidence !== null && confidence !== '') {
+    const c = typeof confidence === 'number' ? confidence : parseFloat(confidence);
+    if (Number.isFinite(c)) {
+      const scaled = c <= 1 ? c * 100 : (c <= 10 ? c * 10 : c);
+      normConfidence = Math.max(0, Math.min(100, Math.round(scaled)));
     }
+  }
+
+  try {
+    await db.insert(beliefResponses).values({
+      userId,
+      probeText,
+      probeCategory: probeCategory || 'life',
+      probeSource: probeSource || 'bank',
+      dimensionWeights: dimWeights,
+      value: normValue,
+      confidence: normConfidence,
+      note: note || null,
+      quality: qualityObj,
+    });
+
+    // Update dimension scores incrementally
+    for (const [dimIdStr, wt] of Object.entries(dimWeights as Record<string, { direction: number; weight: number }>)) {
+      const dimId = parseInt(dimIdStr);
+      if (!Number.isFinite(dimId)) continue;
+      const normalized = (normValue * 2) - 1;
+      const directed = normalized * (wt.direction || 1);
+      const qualityMult = qualityObj.weight ?? 0.7;
+      const effectiveW = (wt.weight ?? 0) * qualityMult;
+
+      // Upsert dimension score
+      const [existing] = await db
+        .select()
+        .from(dimensionScores)
+        .where(and(eq(dimensionScores.userId, userId), eq(dimensionScores.dimensionId, dimId)));
+
+      if (existing) {
+        await db.update(dimensionScores).set({
+          weightedSum: existing.weightedSum + (directed * effectiveW),
+          totalWeight: existing.totalWeight + effectiveW,
+          count: existing.count + 1,
+          lastUpdated: new Date(),
+        }).where(eq(dimensionScores.id, existing.id));
+      } else {
+        await db.insert(dimensionScores).values({
+          userId,
+          dimensionId: dimId,
+          weightedSum: directed * effectiveW,
+          totalWeight: effectiveW,
+          count: 1,
+        });
+      }
+    }
+  } catch (e: any) {
+    // Return JSON, never let Express's HTML error page reach the client.
+    const code = e?.code || 'unknown';
+    const message = e?.message || String(e);
+    console.error(`[/respond] user=${userId} db_error code=${code} msg=${message.slice(0, 200)}`);
+    return res.status(500).json({ ok: false, error: 'db_error', code, message: message.slice(0, 200) });
   }
 
   return res.json({ ok: true });
