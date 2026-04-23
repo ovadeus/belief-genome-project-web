@@ -164,7 +164,7 @@ export default function Forecaster({ history }: Props) {
                   position: 'absolute', left: `${pct}%`, top: '50%',
                   transform: 'translate(-50%, -50%)',
                   width: 18, height: 18, borderRadius: '50%',
-                  background: color, border: '3px solid #fff',
+                  background: color, border: '3px solid var(--text-primary)',
                   boxShadow: `0 0 10px ${color}, 0 0 22px ${color}66`,
                   transition: 'left 0.4s ease',
                 }} />

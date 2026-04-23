@@ -304,7 +304,7 @@ function CompareView({
       ) : (
         <div style={{
           padding: 14, borderRadius: 10, textAlign: 'center',
-          background: 'rgba(0,0,0,0.2)',
+          background: 'var(--surface-overlay)',
           border: '1px dashed var(--border-subtle)',
           fontSize: 12, color: 'var(--text-muted)',
         }}>

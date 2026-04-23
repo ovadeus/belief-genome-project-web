@@ -174,7 +174,7 @@ export default function PublicDnaPage() {
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--app-bg, #0a0a14)' }}>
+    <div style={{ minHeight: '100vh', background: 'hsl(var(--background))' }}>
       {children}
     </div>
   );

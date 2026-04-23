@@ -152,7 +152,7 @@ export default function DnaStrip({
                   return (
                     <div key={dim.id} style={{
                       flex: 1, minWidth: 0, display: 'flex',
-                      outline: isSelected ? '2px solid #6c8fff' : 'none',
+                      outline: isSelected ? '2px solid var(--accent-bright)' : 'none',
                       outlineOffset: 1, borderRadius: 2,
                     }}>
                       <DnaCell
@@ -218,7 +218,7 @@ export default function DnaStrip({
         <div style={{
           position: 'fixed', left: tooltip.x, top: tooltip.y,
           transform: 'translateX(-50%) translateY(-100%)',
-          background: 'rgba(15,15,26,0.95)', border: '1px solid var(--border-soft)',
+          background: 'var(--panel-glass-bg)', border: '1px solid var(--border-soft)',
           borderRadius: 6, padding: '6px 10px', fontFamily: "'Space Mono', monospace",
           fontSize: 10, color: 'var(--text-primary)', whiteSpace: 'nowrap', zIndex: 9999,
           pointerEvents: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.5)',

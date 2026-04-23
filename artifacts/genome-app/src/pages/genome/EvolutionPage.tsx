@@ -144,8 +144,8 @@ export default function EvolutionPage() {
         {
           label: 'Confidence (%)',
           data: data.buckets.map(b => b.overallConfidence),
-          borderColor: '#6c8fff',
-          backgroundColor: 'rgba(108, 143, 255, 0.12)',
+          borderColor: 'var(--accent-bright)',
+          backgroundColor: 'var(--accent-soft)',
           tension: 0.3,
           fill: true,
           yAxisID: 'y',
@@ -170,13 +170,13 @@ export default function EvolutionPage() {
     maintainAspectRatio: false,
     interaction: { mode: 'index' as const, intersect: false },
     scales: {
-      x: { ticks: { color: '#8a8f99', maxRotation: 0, autoSkip: true, maxTicksLimit: 10 }, grid: { color: 'rgba(255,255,255,0.04)' } },
-      y: { type: 'linear' as const, position: 'left' as const, min: 0, max: 100, ticks: { color: '#8a8f99' }, grid: { color: 'rgba(255,255,255,0.04)' }, title: { display: true, text: 'Confidence %', color: '#8a8f99' } },
-      y1: { type: 'linear' as const, position: 'right' as const, min: 0, max: 124, ticks: { color: '#8a8f99' }, grid: { drawOnChartArea: false }, title: { display: true, text: 'Dimensions', color: '#8a8f99' } },
+      x: { ticks: { color: 'var(--text-faint)', maxRotation: 0, autoSkip: true, maxTicksLimit: 10 }, grid: { color: 'var(--surface-2)' } },
+      y: { type: 'linear' as const, position: 'left' as const, min: 0, max: 100, ticks: { color: 'var(--text-faint)' }, grid: { color: 'var(--surface-2)' }, title: { display: true, text: 'Confidence %', color: 'var(--text-faint)' } },
+      y1: { type: 'linear' as const, position: 'right' as const, min: 0, max: 124, ticks: { color: 'var(--text-faint)' }, grid: { drawOnChartArea: false }, title: { display: true, text: 'Dimensions', color: 'var(--text-faint)' } },
     },
     plugins: {
-      legend: { labels: { color: '#c8ccd4', font: { size: 12 } } },
-      tooltip: { backgroundColor: 'rgba(20,22,30,0.95)', borderColor: 'rgba(108,143,255,0.3)', borderWidth: 1 },
+      legend: { labels: { color: 'var(--text-secondary)', font: { size: 12 } } },
+      tooltip: { backgroundColor: 'var(--panel-glass-bg)', borderColor: 'var(--accent-mid)', borderWidth: 1 },
     },
   }), []);
 
@@ -276,8 +276,8 @@ export default function EvolutionPage() {
               labels,
               datasets: [{
                 data: series,
-                borderColor: hasData ? '#6c8fff' : 'rgba(255,255,255,0.15)',
-                backgroundColor: 'rgba(108,143,255,0.10)',
+                borderColor: hasData ? 'var(--accent-bright)' : 'var(--text-ghost)',
+                backgroundColor: 'var(--accent-soft)',
                 fill: true,
                 tension: 0.35,
                 pointRadius: 0,

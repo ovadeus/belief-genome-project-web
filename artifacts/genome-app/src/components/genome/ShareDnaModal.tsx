@@ -85,7 +85,7 @@ export default function ShareDnaModal({ open, onClose, dnaString }: ShareDnaModa
         onClick={(e) => e.stopPropagation()}
         style={{
           maxWidth: 520, width: '100%',
-          background: 'rgba(15,15,25,0.98)',
+          background: 'hsl(var(--popover))',
           border: '1px solid var(--accent-mid)',
           borderRadius: 16, padding: 28,
           boxShadow: '0 20px 60px rgba(0,0,0,0.6)',

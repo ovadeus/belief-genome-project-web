@@ -31,8 +31,8 @@ export default function GenomeNav() {
     <nav style={{
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       padding: '14px 28px',
-      background: 'rgba(10, 10, 15, 0.95)',
-      borderBottom: '1px solid rgba(108, 143, 255, 0.12)',
+      background: 'var(--panel-glass-bg)',
+      borderBottom: '1px solid var(--accent-soft)',
       backdropFilter: 'blur(12px)',
       position: 'sticky', top: 0, zIndex: 100,
     }}>
@@ -75,7 +75,7 @@ export default function GenomeNav() {
                   color: active ? 'var(--text-primary)' : 'var(--text-muted)',
                   fontSize: 13, cursor: 'pointer',
                   fontWeight: active ? 600 : 400,
-                  borderBottom: active ? '2px solid #6c8fff' : '2px solid transparent',
+                  borderBottom: active ? '2px solid var(--accent-bright)' : '2px solid transparent',
                   transition: 'all 0.15s',
                   fontFamily: 'inherit',
                 }}

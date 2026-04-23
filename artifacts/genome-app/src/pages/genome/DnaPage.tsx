@@ -36,10 +36,14 @@ export default function DnaPage() {
     try {
       // Dynamic import keeps html-to-image out of the initial bundle.
       const { toPng } = await import('html-to-image');
+      // Resolve current theme background to a concrete color for PNG export.
+      const bgHsl = getComputedStyle(document.documentElement)
+        .getPropertyValue('--background').trim();
+      const exportBg = bgHsl ? `hsl(${bgHsl})` : '#0a0a14';
       const dataUrl = await toPng(stripRef.current, {
         cacheBust: true,
         pixelRatio: 2,
-        backgroundColor: '#0a0a14',
+        backgroundColor: exportBg,
       });
       const link = document.createElement('a');
       link.download = `belief-dna-${new Date().toISOString().slice(0, 10)}.png`;

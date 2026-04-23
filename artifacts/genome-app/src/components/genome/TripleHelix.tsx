@@ -257,7 +257,7 @@ export default function TripleHelix({ dimensions, dimensionScores, confidence }:
       tooltip.style.top = ty + 'px';
       tooltip.innerHTML = `
         <div style="font-size:10px;font-family:'Space Mono',monospace;color:${h.strand.color};margin-bottom:2px;">${h.strand.name} · ${h.node.dim.cat}</div>
-        <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:6px;">${h.node.dim.name}</div>
+        <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:6px;">${h.node.dim.name}</div>
         <div style="position:relative;height:6px;border-radius:3px;background:linear-gradient(90deg,#dc2626,#fca5a5 25%,#22c55e 50%,#93c5fd 75%,#2563eb);margin:6px 0 4px;">
           ${score !== null ? `<div style="position:absolute;left:${barW}%;top:50%;transform:translate(-50%,-50%);width:10px;height:10px;border-radius:50%;background:${col};border:2px solid white;"></div>` : ''}
         </div>
@@ -364,7 +364,7 @@ export default function TripleHelix({ dimensions, dimensionScores, confidence }:
           ref={tooltipRef}
           style={{
             display: 'none', position: 'absolute', pointerEvents: 'none',
-            background: 'rgba(15,15,30,0.95)', border: '1px solid var(--accent-mid)',
+            background: 'var(--panel-glass-bg)', border: '1px solid var(--accent-mid)',
             borderRadius: 8, padding: '10px 14px', maxWidth: 220, zIndex: 10,
             backdropFilter: 'blur(8px)',
           }}

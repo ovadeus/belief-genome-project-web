@@ -48,7 +48,7 @@ export function ReflectionsModalProvider({ children }: { children: ReactNode }) 
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(0,0,0,0.65)',
+            background: 'var(--surface-overlay)',
             backdropFilter: 'blur(4px)',
             zIndex: 1000,
             display: 'flex',
@@ -65,7 +65,7 @@ export function ReflectionsModalProvider({ children }: { children: ReactNode }) 
               position: 'relative',
               width: '100%',
               maxWidth: 680,
-              background: 'var(--app-bg, #0a0a0f)',
+              background: 'hsl(var(--popover))',
               border: '1px solid var(--border-strong)',
               borderRadius: 16,
               padding: '28px 28px 32px',
