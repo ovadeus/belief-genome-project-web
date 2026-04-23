@@ -554,4 +554,90 @@ router.delete("/admin/test-data", async (_req, res): Promise<void> => {
   }
 });
 
+// ── POST /admin/genome/responses/wipe-window ──────────────────
+//
+// Admin-only: wipe a window of belief_responses for a single user, with an
+// optional probe_source filter. Used to recover from bad/duplicate desktop
+// pushes. Always wipes that user's dimension_scores so the next sync
+// recomputes from scratch.
+//
+// Body:
+//   {
+//     userId:      number   REQUIRED
+//     fromIso:     string   REQUIRED  ISO-8601 timestamp (inclusive)
+//     toIso:       string   REQUIRED  ISO-8601 timestamp (inclusive)
+//     probeSource: string   OPTIONAL  e.g. "bank" — restrict to this tag
+//     dryRun:      boolean  OPTIONAL  default true on first call
+//     confirm:     string   REQUIRED-when-not-dryRun  must equal "WIPE"
+//   }
+//
+// Response:
+//   { ok, dryRun, matched, deletedResponses, deletedDimensionScores }
+router.post("/admin/genome/responses/wipe-window", async (req, res): Promise<void> => {
+  const { userId, fromIso, toIso, probeSource, dryRun, confirm } = req.body || {};
+
+  if (typeof userId !== "number" || !Number.isInteger(userId)) {
+    res.status(400).json({ ok: false, error: "userId must be an integer" });
+    return;
+  }
+  if (!fromIso || !toIso) {
+    res.status(400).json({ ok: false, error: "fromIso and toIso are required" });
+    return;
+  }
+  const from = new Date(fromIso);
+  const to = new Date(toIso);
+  if (isNaN(from.getTime()) || isNaN(to.getTime())) {
+    res.status(400).json({ ok: false, error: "fromIso/toIso must be valid ISO-8601" });
+    return;
+  }
+  if (from >= to) {
+    res.status(400).json({ ok: false, error: "fromIso must be earlier than toIso" });
+    return;
+  }
+
+  const isDryRun = dryRun !== false; // default true
+  if (!isDryRun && confirm !== "WIPE") {
+    res.status(400).json({ ok: false, error: "confirm must equal 'WIPE' when dryRun is false" });
+    return;
+  }
+
+  try {
+    const conditions = [
+      sql`user_id = ${userId}`,
+      sql`created_at >= ${from.toISOString()}`,
+      sql`created_at <= ${to.toISOString()}`,
+    ];
+    if (probeSource && typeof probeSource === "string") {
+      conditions.push(sql`probe_source = ${probeSource}`);
+    }
+    const whereSql = sql.join(conditions, sql` AND `);
+
+    const [{ matched } = { matched: 0 }] = await db.execute<{ matched: number }>(
+      sql`SELECT COUNT(*)::int AS matched FROM belief_responses WHERE ${whereSql}`
+    ).then((r: any) => r.rows ?? r);
+
+    if (isDryRun) {
+      console.log(`[admin/wipe-window] DRY-RUN user=${userId} window=${from.toISOString()}..${to.toISOString()} src=${probeSource ?? "*"} matched=${matched}`);
+      res.json({ ok: true, dryRun: true, matched, deletedResponses: 0, deletedDimensionScores: 0 });
+      return;
+    }
+
+    const delResp = await db.execute(
+      sql`DELETE FROM belief_responses WHERE ${whereSql}`
+    );
+    const deletedResponses = (delResp as any).rowCount ?? matched;
+
+    const delDim = await db.execute(
+      sql`DELETE FROM dimension_scores WHERE user_id = ${userId}`
+    );
+    const deletedDimensionScores = (delDim as any).rowCount ?? 0;
+
+    console.log(`[admin/wipe-window] EXEC user=${userId} window=${from.toISOString()}..${to.toISOString()} src=${probeSource ?? "*"} deletedResponses=${deletedResponses} deletedDimensionScores=${deletedDimensionScores}`);
+    res.json({ ok: true, dryRun: false, matched, deletedResponses, deletedDimensionScores });
+  } catch (err: any) {
+    console.error("[admin/wipe-window] error:", err);
+    res.status(500).json({ ok: false, error: err?.message ?? "Wipe failed" });
+  }
+});
+
 export default router;
