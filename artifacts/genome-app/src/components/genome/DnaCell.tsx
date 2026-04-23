@@ -45,7 +45,9 @@ export default function DnaCell({
   }, [score]);
 
   const explored = score !== null;
-  const clickable = forceClickable || !explored;
+  // Explored cells are clickable too — the parent decides whether to open
+  // the lineage drawer (explored) or kick off a probe flow (unexplored).
+  const clickable = forceClickable || !!onClick;
 
   const handleKey = useCallback((e: React.KeyboardEvent) => {
     if (clickable && (e.key === 'Enter' || e.key === ' ')) {
@@ -55,7 +57,7 @@ export default function DnaCell({
   }, [clickable, onClick]);
 
   const ariaLabel = explored
-    ? `${catLabel}: ${dimName}, ${BELIEF_LABELS_10[score!] || 'Unknown'} (${score}/9), ${confidence}% confidence`
+    ? `${catLabel}: ${dimName}, ${BELIEF_LABELS_10[score!] || 'Unknown'} (${score}/9), ${confidence}% confidence. Press Enter to view lineage.`
     : `${catLabel}: ${dimName}, Unexplored. Press Enter to explore now.`;
 
   // Background priority: explicit override > SHEX[score] for explored > undefined

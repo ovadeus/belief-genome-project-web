@@ -3,7 +3,9 @@
 
 import { Router, Request, Response } from 'express';
 import { db } from '@workspace/db';
-import { probes, beliefResponses, dimensionScores } from '@workspace/db/schema';
+import { probes, beliefResponses, dimensionScores, beliefLineage } from '@workspace/db/schema';
+import { applyResponseToScores } from '@belief-genome/engine';
+import type { Accumulator } from '@belief-genome/engine';
 import { eq, and, sql } from 'drizzle-orm';
 import {
   PROBE_BANK, QUALITY_PRESETS, DIMENSIONS,
@@ -286,50 +288,92 @@ router.post('/respond', async (req: Request, res: Response) => {
   }
 
   try {
-    await db.insert(beliefResponses).values({
-      userId,
-      probeText,
-      probeCategory: probeCategory || 'life',
-      probeSource: probeSource || 'bank',
-      dimensionWeights: dimWeights,
-      value: normValue,
-      confidence: normConfidence,
-      note: note || null,
-      quality: qualityObj,
-    });
+    // Single transaction so the response, the dim_score upserts, and the
+    // lineage rows all commit together — lineage that doesn't match the final
+    // score table is worse than no lineage at all.
+    await db.transaction(async (tx) => {
+      const dimIds = Object.keys(dimWeights as Record<string, unknown>)
+        .map(s => parseInt(s, 10))
+        .filter(n => Number.isFinite(n));
 
-    // Update dimension scores incrementally
-    for (const [dimIdStr, wt] of Object.entries(dimWeights as Record<string, { direction: number; weight: number }>)) {
-      const dimId = parseInt(dimIdStr);
-      if (!Number.isFinite(dimId)) continue;
-      const normalized = (normValue * 2) - 1;
-      const directed = normalized * (wt.direction || 1);
-      const qualityMult = qualityObj.weight ?? 0.7;
-      const effectiveW = (wt.weight ?? 0) * qualityMult;
-
-      // Upsert dimension score
-      const [existing] = await db
+      // Pre-fetch existing accumulators for the dims this response touches.
+      const existingRows = dimIds.length === 0 ? [] : await tx
         .select()
         .from(dimensionScores)
-        .where(and(eq(dimensionScores.userId, userId), eq(dimensionScores.dimensionId, dimId)));
-
-      if (existing) {
-        await db.update(dimensionScores).set({
-          weightedSum: existing.weightedSum + (directed * effectiveW),
-          totalWeight: existing.totalWeight + effectiveW,
-          count: existing.count + 1,
-          lastUpdated: new Date(),
-        }).where(eq(dimensionScores.id, existing.id));
-      } else {
-        await db.insert(dimensionScores).values({
-          userId,
-          dimensionId: dimId,
-          weightedSum: directed * effectiveW,
-          totalWeight: effectiveW,
-          count: 1,
-        });
+        .where(and(
+          eq(dimensionScores.userId, userId),
+          sql`${dimensionScores.dimensionId} = ANY(${dimIds})`,
+        ));
+      const existingMap = new Map<number, typeof existingRows[number]>();
+      const prevAcc: Record<number, Accumulator> = {};
+      for (const row of existingRows) {
+        existingMap.set(row.dimensionId, row);
+        prevAcc[row.dimensionId] = {
+          sum: row.weightedSum,
+          totalWeight: row.totalWeight,
+          count: row.count,
+        };
       }
-    }
+
+      // Insert the response first so we have its id for lineage rows.
+      const [inserted] = await tx.insert(beliefResponses).values({
+        userId,
+        probeText,
+        probeCategory: probeCategory || 'life',
+        probeSource: probeSource || 'bank',
+        dimensionWeights: dimWeights,
+        value: normValue,
+        confidence: normConfidence,
+        note: note || null,
+        quality: qualityObj,
+      }).returning({ id: beliefResponses.id, createdAt: beliefResponses.createdAt });
+
+      // Engine is the single source of truth — both ingest and the backfill
+      // script call this same function so lineage and scores cannot drift.
+      const { next, impacts } = applyResponseToScores(prevAcc, {
+        value: normValue,
+        dimensionWeights: dimWeights as Record<string, { direction: number; weight: number }>,
+        quality: qualityObj,
+      });
+
+      // Write back updated dim_scores from the engine's `next` accumulators.
+      for (const dimIdStr of Object.keys(next)) {
+        const dimId = parseInt(dimIdStr, 10);
+        const acc = next[dimId];
+        const existing = existingMap.get(dimId);
+        if (existing) {
+          await tx.update(dimensionScores).set({
+            weightedSum: acc.sum,
+            totalWeight: acc.totalWeight,
+            count: acc.count,
+            lastUpdated: new Date(),
+          }).where(eq(dimensionScores.id, existing.id));
+        } else {
+          await tx.insert(dimensionScores).values({
+            userId,
+            dimensionId: dimId,
+            weightedSum: acc.sum,
+            totalWeight: acc.totalWeight,
+            count: acc.count,
+          });
+        }
+      }
+
+      // Lineage rows — one per (response, dim) pair touched by this response.
+      if (impacts.length > 0) {
+        await tx.insert(beliefLineage).values(impacts.map(i => ({
+          userId,
+          responseId: inserted.id,
+          dimensionId: i.dimensionId,
+          scoreBefore: i.scoreBefore,
+          scoreAfter: i.scoreAfter,
+          delta: i.delta,
+          confidenceBefore: i.confidenceBefore,
+          confidenceAfter: i.confidenceAfter,
+          createdAt: inserted.createdAt,
+        })));
+      }
+    });
   } catch (e: any) {
     // Return JSON, never let Express's HTML error page reach the client.
     const code = e?.code || 'unknown';

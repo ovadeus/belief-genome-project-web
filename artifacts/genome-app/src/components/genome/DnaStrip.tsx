@@ -27,6 +27,12 @@ interface Props {
   totalResponses: number;
   dimensionsCovered: number;
   overallConfidence: number;
+  /**
+   * Fires when an EXPLORED cell is clicked — used to open the lineage drawer
+   * for that dimension. Unexplored cells continue to launch the explore flow.
+   * Ignored when compare-mode `onCellSelect` is set.
+   */
+  onExploredClick?: (dimId: number) => void;
   /** When set, only the row for this category key is rendered (used as a mini-strip on the probe page). */
   filterCat?: string;
   /** Compact mode: hides header, legend, totals — useful inside the probe page. */
@@ -57,7 +63,7 @@ interface TooltipState {
 export default function DnaStrip({
   dimensions, dimensionScores, confidence,
   totalResponses, dimensionsCovered, overallConfidence,
-  filterCat, miniMode = false,
+  filterCat, miniMode = false, onExploredClick,
   colorOverride, onCellSelect, selectedDimId, agreementLegend = false,
 }: Props) {
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
@@ -83,7 +89,11 @@ export default function DnaStrip({
       onCellSelect(dim.id);
       return;
     }
-    if (dimensionScores[dim.id] !== undefined) return;
+    // Explored cell → open lineage drawer (when parent provides handler).
+    if (dimensionScores[dim.id] !== undefined) {
+      onExploredClick?.(dim.id);
+      return;
+    }
     const cat = CATEGORIES.find(c => c.id === dim.cat);
     if (!cat) return;
     const allDimsInCat = dimensions.filter(d => d.cat === dim.cat);
@@ -94,7 +104,7 @@ export default function DnaStrip({
     dimNames[dim.id] = dim.name;
     startExplore({ catKey: cat.id, catLabel: cat.label, dimQueue: clickedFirst, dimNames });
     navigate('/probe');
-  }, [dimensions, dimensionScores, startExplore, navigate, onCellSelect]);
+  }, [dimensions, dimensionScores, startExplore, navigate, onCellSelect, onExploredClick]);
 
   const visibleCats = filterCat ? CATEGORIES.filter(c => c.id === filterCat) : CATEGORIES;
 

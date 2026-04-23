@@ -4,6 +4,7 @@ import DnaString from '../../components/genome/DnaString';
 import DnaStrip from '../../components/genome/DnaStrip';
 import ShareDnaModal from '../../components/genome/ShareDnaModal';
 import ExportBgpModal from '../../components/genome/ExportBgpModal';
+import LineageDrawer from '../../components/genome/LineageDrawer';
 import { useDNA, useDimensions } from '../../hooks/use-genome';
 import { useGenomeAuth } from '../../components/genome/GenomeAuthContext';
 import { toast } from 'sonner';
@@ -16,6 +17,7 @@ export default function DnaPage() {
   const [shareOpen, setShareOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [lineageDimId, setLineageDimId] = useState<number | null>(null);
   const stripRef = useRef<HTMLDivElement>(null);
 
   const dna = dnaQ.data;
@@ -94,7 +96,7 @@ export default function DnaPage() {
         <div>
           <h1 style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>Belief DNA</h1>
           <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '4px 0 0' }}>
-            Click any gray cell to explore that belief dimension.
+            Click a gray cell to explore. Click a colored cell to see its lineage.
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -149,6 +151,7 @@ export default function DnaPage() {
           totalResponses={dna.totalResponses}
           dimensionsCovered={dna.dimensionsCovered}
           overallConfidence={dna.overallConfidence}
+          onExploredClick={(dimId) => setLineageDimId(dimId)}
         />
       </div>
 
@@ -166,6 +169,12 @@ export default function DnaPage() {
           overallConfidence={dna.overallConfidence}
         />
       </div>
+
+      <LineageDrawer
+        dimensionId={lineageDimId}
+        open={lineageDimId !== null}
+        onOpenChange={(o) => { if (!o) setLineageDimId(null); }}
+      />
 
       <ShareDnaModal
         open={shareOpen}

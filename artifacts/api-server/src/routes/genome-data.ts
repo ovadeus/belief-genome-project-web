@@ -4,10 +4,10 @@
 import { Router, Request, Response } from 'express';
 import crypto from 'crypto';
 import { db } from '@workspace/db';
-import { users, beliefResponses, dimensionScores, dnaSnapshots, genomeSubmissions, genomeAnalyses } from '@workspace/db/schema';
-import { eq, desc, sql } from 'drizzle-orm';
+import { users, beliefResponses, dimensionScores, dnaSnapshots, genomeSubmissions, genomeAnalyses, beliefLineage } from '@workspace/db/schema';
+import { eq, and, desc, sql, inArray } from 'drizzle-orm';
 import { DIMENSIONS, CATEGORIES } from '@belief-genome/engine';
-import { buildDNAString, calcDimensionValue, calcConfidence } from '@belief-genome/engine';
+import { buildDNAString, calcDimensionValue, calcConfidence, applyResponseToScores } from '@belief-genome/engine';
 import type { Accumulator } from '@belief-genome/engine';
 
 const router = Router();
@@ -101,6 +101,76 @@ router.get('/history', async (req: Request, res: Response) => {
     .limit(limit);
 
   return res.json(history);
+});
+
+// ── GET /lineage/:dimensionId — provenance for one dimension ─
+//
+// Returns every response that contributed to this dimension's score, with
+// the score & confidence before/after each one. Sorted descending by absolute
+// delta so the "biggest movers" are first; the client also gets the same
+// list in chronological order for a timeline view.
+router.get('/lineage/:dimensionId', async (req: Request, res: Response) => {
+  const { userId } = (req as any).genomeUser;
+  const dimensionId = parseInt(req.params.dimensionId, 10);
+  if (!Number.isFinite(dimensionId)) {
+    return res.status(400).json({ error: 'invalid_dimension_id' });
+  }
+
+  // Current score/confidence for header context.
+  const [scoreRow] = await db
+    .select()
+    .from(dimensionScores)
+    .where(and(eq(dimensionScores.userId, userId), eq(dimensionScores.dimensionId, dimensionId)));
+  const currentAcc: Accumulator | null = scoreRow
+    ? { sum: scoreRow.weightedSum, totalWeight: scoreRow.totalWeight, count: scoreRow.count }
+    : null;
+  const currentScore = calcDimensionValue(currentAcc);
+  const currentConfidence = calcConfidence(currentAcc);
+
+  const dim = DIMENSIONS.find(d => d.id === dimensionId);
+  const cat = dim ? CATEGORIES.find(c => c.id === dim.cat) : null;
+
+  // Join lineage with the originating response so the client can show the
+  // probe text and the user's raw answer alongside each impact.
+  const rows = await db
+    .select({
+      id: beliefLineage.id,
+      responseId: beliefLineage.responseId,
+      scoreBefore: beliefLineage.scoreBefore,
+      scoreAfter: beliefLineage.scoreAfter,
+      delta: beliefLineage.delta,
+      confidenceBefore: beliefLineage.confidenceBefore,
+      confidenceAfter: beliefLineage.confidenceAfter,
+      createdAt: beliefLineage.createdAt,
+      probeText: beliefResponses.probeText,
+      probeCategory: beliefResponses.probeCategory,
+      probeSource: beliefResponses.probeSource,
+      value: beliefResponses.value,
+      note: beliefResponses.note,
+    })
+    .from(beliefLineage)
+    .innerJoin(beliefResponses, eq(beliefLineage.responseId, beliefResponses.id))
+    .where(and(
+      eq(beliefLineage.userId, userId),
+      eq(beliefLineage.dimensionId, dimensionId),
+    ))
+    .orderBy(beliefLineage.createdAt);
+
+  // Top contributors = sorted by absolute delta (the magnitude of the push,
+  // signed direction preserved on each row).
+  const top = [...rows]
+    .sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta))
+    .slice(0, 10);
+
+  return res.json({
+    dimensionId,
+    dimension: dim ? { id: dim.id, name: dim.name, short: dim.short, desc: dim.desc, cat: dim.cat, catLabel: cat?.label ?? null } : null,
+    currentScore,
+    currentConfidence,
+    totalContributors: rows.length,
+    top,
+    timeline: rows,
+  });
 });
 
 // ── GET /profile — user profile ─────────────────────────────
@@ -723,17 +793,52 @@ router.post('/responses/bulk-import', async (req: Request, res: Response) => {
     seenClientIds.add(clientId);
   }
 
-  // Run the inserts + dimension score updates in a single transaction so
-  // a mid-batch failure rolls back cleanly. Per-row try/catch inside ensures
-  // a single bad row doesn't poison the whole transaction.
+  // Sort by createdAt ascending so the engine replay produces lineage rows
+  // in the same chronological order they would have been written via the
+  // single-response path. Identical createdAt is broken arbitrarily; ties do
+  // not change the final accumulator state.
+  valid.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+
   let imported = 0;
-  // Aggregate per-dimension deltas across the entire batch.
-  const dimDeltas: Record<number, { weightedSum: number; totalWeight: number; count: number }> = {};
 
   await db.transaction(async (tx) => {
+    // Pre-fetch ALL existing dim_scores for this user once. The engine walk
+    // below mutates an in-memory accumulator map so we never re-read mid-loop.
+    const existingDimRows = await tx
+      .select()
+      .from(dimensionScores)
+      .where(eq(dimensionScores.userId, userId));
+    const existingDimMap = new Map<number, typeof existingDimRows[number]>();
+    const accMap: Record<number, Accumulator> = {};
+    for (const row of existingDimRows) {
+      existingDimMap.set(row.dimensionId, row);
+      accMap[row.dimensionId] = {
+        sum: row.weightedSum,
+        totalWeight: row.totalWeight,
+        count: row.count,
+      };
+    }
+    // Track which dim ids were touched so we know which to write back.
+    const touchedDims = new Set<number>();
+    const lineageInserts: Array<{
+      userId: number;
+      responseId: number;
+      dimensionId: number;
+      scoreBefore: number | null;
+      scoreAfter: number;
+      delta: number;
+      confidenceBefore: number;
+      confidenceAfter: number;
+      createdAt: Date;
+    }> = [];
+
     for (const v of valid) {
       try {
-        await tx.insert(beliefResponses).values({
+        // Bulk-import has no quality preset on the wire; use the historical
+        // 0.7 weight so this stays bit-identical to the prior aggregation
+        // behavior for the score table.
+        const quality = { weight: 0.7 };
+        const [inserted] = await tx.insert(beliefResponses).values({
           userId,
           clientId: v.clientId,
           probeText: v.probeText,
@@ -742,24 +847,34 @@ router.post('/responses/bulk-import', async (req: Request, res: Response) => {
           dimensionWeights: v.dimensionWeights,
           value: v.value,
           confidence: v.confidence,
+          quality,
           createdAt: v.createdAt, // preserve original answer time
-        });
+        }).returning({ id: beliefResponses.id });
         imported++;
 
-        // Accumulate dim score contributions (single recompute applied later).
-        const qualityMult = 0.7; // bulk-import has no per-probe quality preset; use default weight
-        const normalized = (v.value * 2) - 1;
-        for (const [dimIdStr, wt] of Object.entries(v.dimensionWeights)) {
+        const { next, impacts } = applyResponseToScores(accMap, {
+          value: v.value,
+          dimensionWeights: v.dimensionWeights,
+          quality,
+        });
+        // Mutate the running accumulator map for the next iteration.
+        for (const dimIdStr of Object.keys(next)) {
           const dimId = parseInt(dimIdStr, 10);
-          if (!Number.isFinite(dimId)) continue;
-          const direction = (wt as any).direction ?? 1;
-          const weight = (wt as any).weight ?? 0;
-          const directed = normalized * direction;
-          const effectiveW = weight * qualityMult;
-          if (!dimDeltas[dimId]) dimDeltas[dimId] = { weightedSum: 0, totalWeight: 0, count: 0 };
-          dimDeltas[dimId].weightedSum += directed * effectiveW;
-          dimDeltas[dimId].totalWeight += effectiveW;
-          dimDeltas[dimId].count += 1;
+          accMap[dimId] = next[dimId];
+          touchedDims.add(dimId);
+        }
+        for (const i of impacts) {
+          lineageInserts.push({
+            userId,
+            responseId: inserted.id,
+            dimensionId: i.dimensionId,
+            scoreBefore: i.scoreBefore,
+            scoreAfter: i.scoreAfter,
+            delta: i.delta,
+            confidenceBefore: i.confidenceBefore,
+            confidenceAfter: i.confidenceAfter,
+            createdAt: v.createdAt,
+          });
         }
       } catch (e: any) {
         // Most likely path here: unique index race (concurrent bulk-import).
@@ -773,29 +888,33 @@ router.post('/responses/bulk-import', async (req: Request, res: Response) => {
       }
     }
 
-    // Apply aggregated dimension score deltas — one upsert per touched dim.
-    for (const [dimIdStr, delta] of Object.entries(dimDeltas)) {
-      const dimId = parseInt(dimIdStr, 10);
-      const [existing] = await tx
-        .select()
-        .from(dimensionScores)
-        .where(sql`${dimensionScores.userId} = ${userId} AND ${dimensionScores.dimensionId} = ${dimId}`);
+    // Write back final accumulator state — one upsert per touched dim.
+    for (const dimId of touchedDims) {
+      const acc = accMap[dimId];
+      const existing = existingDimMap.get(dimId);
       if (existing) {
         await tx.update(dimensionScores).set({
-          weightedSum: existing.weightedSum + delta.weightedSum,
-          totalWeight: existing.totalWeight + delta.totalWeight,
-          count: existing.count + delta.count,
+          weightedSum: acc.sum,
+          totalWeight: acc.totalWeight,
+          count: acc.count,
           lastUpdated: new Date(),
         }).where(eq(dimensionScores.id, existing.id));
       } else {
         await tx.insert(dimensionScores).values({
           userId,
           dimensionId: dimId,
-          weightedSum: delta.weightedSum,
-          totalWeight: delta.totalWeight,
-          count: delta.count,
+          weightedSum: acc.sum,
+          totalWeight: acc.totalWeight,
+          count: acc.count,
         });
       }
+    }
+
+    // Bulk-insert lineage rows in chunks to keep parameter counts safe
+    // (Postgres caps at 65535 params; 9 cols × ~7000 rows = 63k).
+    const CHUNK = 1000;
+    for (let i = 0; i < lineageInserts.length; i += CHUNK) {
+      await tx.insert(beliefLineage).values(lineageInserts.slice(i, i + CHUNK));
     }
   });
 
