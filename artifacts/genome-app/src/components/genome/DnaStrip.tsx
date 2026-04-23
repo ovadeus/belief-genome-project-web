@@ -1,8 +1,10 @@
-import { useState, useRef, useCallback } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'wouter';
 import { SHEX, BELIEF_LABELS_10 } from './genome-utils';
 import { useExplore } from './ExploreContext';
 import DnaCell from './DnaCell';
+import { useHarmonize } from '../../hooks/use-harmonize';
+import type { HarmonizerCell } from '../../lib/harmonize/types';
 
 const CATEGORIES = [
   { id: 'epistemology',  label: 'Epistemology',   count: 10 },
@@ -107,6 +109,46 @@ export default function DnaStrip({
   }, [dimensions, dimensionScores, startExplore, navigate, onCellSelect, onExploredClick]);
 
   const visibleCats = filterCat ? CATEGORIES.filter(c => c.id === filterCat) : CATEGORIES;
+
+  // Harmonize DNA — only on the main belief-legend view (not compare/agreement,
+  // not mini-strips inside the probe page). Build the cell sequence in the
+  // exact left-to-right, row-by-row order DnaStrip renders so the audio cursor
+  // matches what the user sees.
+  const showHarmonize = !miniMode && !agreementLegend && !onCellSelect;
+  const harmonizerCells = useMemo<HarmonizerCell[]>(() => {
+    if (!showHarmonize) return [];
+    const out: HarmonizerCell[] = [];
+    for (const cat of visibleCats) {
+      const catDims = dimensions
+        .filter(d => d.cat === cat.id)
+        .sort((a, b) => a.id - b.id);
+      for (const d of catDims) {
+        out.push({
+          dimId: d.id,
+          catKey: d.cat,
+          score: dimensionScores[d.id],
+          conf: confidence[d.id] ?? 0,
+        });
+      }
+    }
+    return out;
+  }, [showHarmonize, visibleCats, dimensions, dimensionScores, confidence]);
+
+  const handleCellFlash = useCallback((dimId: number) => {
+    const root = containerRef.current;
+    if (!root) return;
+    const el = root.querySelector(`[data-dim-id="${dimId}"]`);
+    if (!el) return;
+    el.classList.add('harmonize-flash');
+    window.setTimeout(() => el.classList.remove('harmonize-flash'), 220);
+  }, []);
+
+  const harmonize = useHarmonize(harmonizerCells, handleCellFlash);
+  const isPlaying = harmonize.state === 'playing';
+  const handleHarmonizeClick = useCallback(() => {
+    if (isPlaying) harmonize.stop();
+    else void harmonize.play();
+  }, [isPlaying, harmonize]);
 
   // No fallback synthetic dims — show a skeleton if dimensions haven't loaded.
   if (dimensions.length === 0) {
@@ -221,6 +263,30 @@ export default function DnaStrip({
             background: 'repeating-linear-gradient(45deg, var(--border-subtle), var(--border-subtle) 2px, transparent 2px, transparent 4px)',
             border: '1px solid var(--border-soft)',
           }} />Unexplored</span>
+        </div>
+      )}
+
+      {showHarmonize && (
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 14 }}>
+          <button
+            type="button"
+            onClick={handleHarmonizeClick}
+            data-testid="harmonize-dna-btn"
+            aria-pressed={isPlaying}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              padding: '8px 18px', borderRadius: 999,
+              border: '1px solid var(--border-soft)',
+              background: isPlaying ? 'var(--accent-strong)' : 'var(--surface-2)',
+              color: isPlaying ? 'var(--text-primary)' : 'var(--text-secondary)',
+              fontFamily: "'Space Mono', monospace", fontSize: 11,
+              textTransform: 'uppercase', letterSpacing: '0.12em',
+              cursor: 'pointer', transition: 'background 0.15s, color 0.15s',
+            }}
+          >
+            <span aria-hidden style={{ fontSize: 12 }}>{isPlaying ? '■' : '♪'}</span>
+            {isPlaying ? 'Stop' : 'Harmonize DNA'}
+          </button>
         </div>
       )}
 

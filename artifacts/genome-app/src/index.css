@@ -305,7 +305,18 @@
   .dna-strip-cells-scroll { overflow-x: auto; }
   .dna-strip-cell { min-width: 8px; }
 }
+/* Harmonize DNA — per-cell flash that follows the playback cursor.
+   Applied/removed imperatively by DnaStrip via classList for performance
+   (avoids re-rendering 124 React cells on every tick). */
+.dna-strip-cell.harmonize-flash {
+  box-shadow: 0 0 0 2px var(--accent-bright), 0 0 14px var(--accent-bright) !important;
+  z-index: 3;
+}
 @media (prefers-reduced-motion: no-preference) {
+  .dna-strip-cell.harmonize-flash {
+    transform: scaleY(1.6);
+    transition: transform 0.06s ease, box-shadow 0.06s ease;
+  }
   .dna-strip-cell.just-filled {
     animation: dna-cell-pulse 0.9s ease;
   }
