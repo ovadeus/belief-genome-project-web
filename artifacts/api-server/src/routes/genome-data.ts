@@ -5,7 +5,7 @@ import { Router, Request, Response } from 'express';
 import crypto from 'crypto';
 import { db } from '@workspace/db';
 import { users, beliefResponses, dimensionScores, dnaSnapshots, genomeSubmissions, genomeAnalyses, beliefLineage } from '@workspace/db/schema';
-import { eq, and, desc, sql, inArray } from 'drizzle-orm';
+import { eq, and, desc, sql } from 'drizzle-orm';
 import { DIMENSIONS, CATEGORIES } from '@belief-genome/engine';
 import { buildDNAString, calcDimensionValue, calcConfidence, applyResponseToScores } from '@belief-genome/engine';
 import type { Accumulator } from '@belief-genome/engine';

@@ -42,6 +42,7 @@ export default function DnaCell({
       return () => clearTimeout(t);
     }
     if (score === null) wasUnexploredRef.current = true;
+    return undefined;
   }, [score]);
 
   const explored = score !== null;
