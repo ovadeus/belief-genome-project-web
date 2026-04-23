@@ -105,6 +105,11 @@ export default function LineageDrawer({ dimensionId, open, onOpenChange }: Props
         borderLeft: '1px solid var(--border-subtle)',
         color: 'var(--text-primary)',
         overflowY: 'auto',
+        // Page header sits at z-index ~40 with ~64px height; pad the top so
+        // the SheetTitle isn't clipped by the navbar on the DNA/Dashboard
+        // pages.
+        paddingTop: 80,
+        zIndex: 60,
       }}>
         <SheetHeader>
           <SheetTitle style={{
@@ -126,8 +131,16 @@ export default function LineageDrawer({ dimensionId, open, onOpenChange }: Props
         )}
 
         {q.isError && (
-          <div style={{ padding: 24, color: 'var(--text-muted)', fontSize: 13 }}>
-            Couldn't load lineage.
+          <div style={{ padding: 24, color: 'var(--text-muted)', fontSize: 13, lineHeight: 1.5 }}>
+            <div style={{ color: 'var(--text-primary)', fontSize: 14, marginBottom: 6 }}>
+              Couldn't load lineage.
+            </div>
+            <div style={{ fontSize: 12 }}>
+              {(q.error as Error)?.message || 'Unknown error'}
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 8 }}>
+              If this persists on the published app, the production build may still be deploying. Try again in a minute, or test on the dev preview to confirm.
+            </div>
           </div>
         )}
 

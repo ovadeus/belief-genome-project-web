@@ -42,7 +42,13 @@ export function useLineage(dimensionId: number | null) {
     enabled: dimensionId !== null,
     queryFn: async () => {
       const r = await genomeApi(`/lineage/${dimensionId}`);
-      if (!r.ok) throw new Error('Failed to fetch lineage');
+      if (!r.ok) {
+        // Surface the real failure to the drawer's error state so issues like
+        // "endpoint missing on prod build" or "401 expired token" are visible
+        // to the user instead of a generic message.
+        const body = await r.text().catch(() => '');
+        throw new Error(`HTTP ${r.status}${body ? `: ${body.slice(0, 200)}` : ''}`);
+      }
       return r.json();
     },
     staleTime: 30_000,
