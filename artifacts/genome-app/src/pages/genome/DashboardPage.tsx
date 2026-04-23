@@ -731,7 +731,12 @@ export default function DashboardPage() {
               key={t.key}
               onClick={() => setTab(t.key)}
               style={{
-                width: 104,
+                // flex:1 + minWidth lets the tabs justify across the full
+                // container (matching the stats row above) and auto-balance
+                // as more tabs are added; they'll wrap to a second line only
+                // when each cell would drop below ~88px.
+                flex: 1,
+                minWidth: 88,
                 padding: '12px 8px',
                 borderRadius: 2,
                 background: active ? '#0a0a0a' : 'transparent',
