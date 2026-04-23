@@ -355,6 +355,7 @@ export default function DashboardPage() {
   const [tab, setTab] = useState<Tab>('dnastrip');
   const [dna, setDna] = useState<any>(null);
   const [history, setHistory] = useState<any[]>([]);
+  const [responseCount, setResponseCount] = useState<number | null>(null);
   const [dimensions, setDimensions] = useState<any[]>([]);
   const [analysing, setAnalysing] = useState(false);
   const [analysis, setAnalysis] = useState('');
@@ -373,6 +374,7 @@ export default function DashboardPage() {
   useEffect(() => {
     genomeApi('/dna').then(r => r.json()).then(setDna).catch(() => {});
     genomeApi('/history?limit=200').then(r => r.json()).then(setHistory).catch(() => {});
+    genomeApi('/responses/count').then(r => r.json()).then(d => setResponseCount(d?.count ?? null)).catch(() => {});
     genomeApi('/dimensions').then(r => r.json()).then(d => {
       setDimensions(d.dimensions || []);
     }).catch(() => {});
@@ -418,7 +420,9 @@ export default function DashboardPage() {
   }, []);
 
   // Stats
-  const totalResponses = history.length;
+  // `responseCount` is the authoritative server-side COUNT(*) (uncapped).
+  // Fall back to `history.length` only while the count is still loading.
+  const totalResponses = responseCount ?? history.length;
   const cats = [...new Set(history.map((h: any) => h.probeCategory).filter(Boolean))].length;
   const streak = calcStreak(history);
   const newsProbes = history.filter((h: any) => (h.probeSource || '').startsWith('news:')).length;

@@ -65,6 +65,20 @@ router.get('/dna', async (req: Request, res: Response) => {
   });
 });
 
+// ── GET /responses/count — total response count (uncapped) ──
+//
+// The `/history` endpoint hard-caps at 200 rows for performance, which made
+// the Dashboard "Responses" stat plateau. This endpoint returns the real
+// count via a single COUNT(*) so the stat reflects actual DB state.
+router.get('/responses/count', async (req: Request, res: Response) => {
+  const { userId } = (req as any).genomeUser;
+  const [{ count } = { count: 0 }] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(beliefResponses)
+    .where(eq(beliefResponses.userId, userId));
+  return res.json({ count });
+});
+
 // ── GET /history — response history ─────────────────────────
 router.get('/history', async (req: Request, res: Response) => {
   const { userId } = (req as any).genomeUser;
