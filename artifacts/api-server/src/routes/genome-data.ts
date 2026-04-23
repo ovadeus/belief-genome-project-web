@@ -128,7 +128,9 @@ router.get('/lineage/:dimensionId', async (req: Request, res: Response) => {
   const currentConfidence = calcConfidence(currentAcc);
 
   const dim = DIMENSIONS.find(d => d.id === dimensionId);
-  const cat = dim ? CATEGORIES.find(c => c.id === dim.cat) : null;
+  // CATEGORIES is a Record<string, Category> keyed by category id, not an
+  // array — use direct property access, not .find().
+  const cat = dim ? CATEGORIES[dim.cat] ?? null : null;
 
   // Join lineage with the originating response so the client can show the
   // probe text and the user's raw answer alongside each impact.
