@@ -440,21 +440,9 @@ export default function DashboardPage() {
     return () => window.removeEventListener('keydown', onKey);
   }, [fullscreen]);
 
-  // When the active tab is a "dark visualisation" tab, paint the entire page
-  // background black so the panel reads edge-to-edge instead of floating as a
-  // small black rectangle inside a cream page.
+  // Dark visualisation tabs render edge-to-edge using the page background
+  // token (not pure black) so the panel blends seamlessly with the chrome.
   const darkPage = DARK_PANEL_TABS.includes(tab);
-  useEffect(() => {
-    if (!darkPage) return;
-    const prevBody = document.body.style.backgroundColor;
-    const prevHtml = document.documentElement.style.backgroundColor;
-    document.body.style.backgroundColor = '#000000';
-    document.documentElement.style.backgroundColor = '#000000';
-    return () => {
-      document.body.style.backgroundColor = prevBody;
-      document.documentElement.style.backgroundColor = prevHtml;
-    };
-  }, [darkPage]);
 
   const zoomVal = UI_ZOOM_STEPS[zoomIndex];
   const zoomStyle: React.CSSProperties = zoomIndex > 0 ? {
@@ -773,10 +761,8 @@ export default function DashboardPage() {
           style={{
             padding: DARK_PANEL_TABS.includes(tab) ? 20 : 24,
             borderRadius: 2,
-            background: DARK_PANEL_TABS.includes(tab) ? '#000000' : 'var(--surface-1)',
-            border: DARK_PANEL_TABS.includes(tab)
-              ? '1px solid #0a0a0a'
-              : '1px solid var(--border-subtle)',
+            background: DARK_PANEL_TABS.includes(tab) ? 'hsl(var(--background))' : 'var(--surface-1)',
+            border: '1px solid var(--border-subtle)',
             overflow: 'hidden',
             minHeight: DARK_PANEL_TABS.includes(tab) ? 'calc(100vh - 240px)' : 300,
             position: 'relative',
@@ -806,7 +792,7 @@ export default function DashboardPage() {
         return (
           <div style={{
             position: 'fixed', inset: 0, zIndex: 5000,
-            background: dark ? '#000000' : 'hsl(var(--background))',
+            background: 'hsl(var(--background))',
             display: 'flex', flexDirection: 'column',
             animation: 'vizFadeIn 0.25s ease',
           }}>
