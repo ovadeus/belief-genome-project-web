@@ -5,7 +5,7 @@ import { Router, Request, Response } from 'express';
 import crypto from 'crypto';
 import { db } from '@workspace/db';
 import { users, beliefResponses, dimensionScores, dnaSnapshots, genomeSubmissions, genomeAnalyses, beliefLineage } from '@workspace/db/schema';
-import { eq, and, desc, sql } from 'drizzle-orm';
+import { eq, and, gte, desc, sql } from 'drizzle-orm';
 import { DIMENSIONS, CATEGORIES } from '@belief-genome/engine';
 import { buildDNAString, calcDimensionValue, calcConfidence, applyResponseToScores } from '@belief-genome/engine';
 import type { Accumulator } from '@belief-genome/engine';
@@ -77,6 +77,129 @@ router.get('/responses/count', async (req: Request, res: Response) => {
     .from(beliefResponses)
     .where(eq(beliefResponses.userId, userId));
   return res.json({ count });
+});
+
+// ── GET /responses — pull belief responses (desktop sync) ───
+//
+// Inverse of POST /responses/bulk-import. Lets a fresh BGP Desktop install
+// rehydrate from the web DB ("Pull-from-Web sync"), and lets later runs do
+// incremental pulls via the `since` cursor.
+//
+// Auth: Bearer token via the standard genomeAuth middleware (mounted on
+// the parent router). Returns this user's rows only — never another user's.
+//
+// Query params:
+//   limit  integer, default 2000, hard cap 5000
+//   since  ISO-8601 timestamp; returns rows with createdAt >= since
+//
+// Ordering: (createdAt ASC, id ASC). ASC matters for two reasons —
+//   1. Desktop's belief engine replays rows chronologically to rebuild
+//      accumulators, so the natural order is what it wants.
+//   2. The `since` cursor advances forward in time, so paginating large
+//      datasets is just `since = lastReceived.createdAt`.
+// The id tiebreaker keeps ordering deterministic when multiple rows share
+// the same createdAt millisecond.
+//
+// Cursor semantics — note: spec said `> since` but we use `>= since`. With
+// strict `>`, two rows sharing the exact same ms at a page boundary would be
+// silently dropped on the next pull. `>=` re-emits the boundary row(s); the
+// desktop's per-(user, client_id) merge dedup harmlessly skips them. This
+// trades one duplicate row per incremental pull for zero data loss.
+//
+// client_id contract:
+//   The desktop dedups merges on (user, client_id). Web-created rows have
+//   NULL client_ids in the DB, so we synthesize a stable `web-<rowId>` key
+//   for them — same value on every pull so repeated pulls never duplicate.
+//   Desktop-imported rows already have a client_id and are passed through
+//   unchanged, preserving round-trip idempotency through bulk-import.
+//
+// Response 200:
+//   { responses: [
+//       { client_id, probeText, probeCategory, probeSource,
+//         value, confidence, note,
+//         dimensionWeights, primaryDim, quality,
+//         createdAt }, ...
+//     ]
+//   }
+const PULL_DEFAULT = 2000;
+const PULL_MAX = 5000;
+
+router.get('/responses', async (req: Request, res: Response) => {
+  const { userId } = (req as any).genomeUser;
+
+  // limit: clamp to [1, PULL_MAX]; non-numeric → default.
+  const limitRaw = parseInt(req.query.limit as string, 10);
+  const limit = Number.isFinite(limitRaw) && limitRaw > 0
+    ? Math.min(limitRaw, PULL_MAX)
+    : PULL_DEFAULT;
+
+  // since: optional. Bad input is a caller bug, surface it as 400 instead of
+  // silently returning everything (which would mask client-side errors).
+  let since: Date | null = null;
+  if (req.query.since !== undefined && req.query.since !== '') {
+    const d = new Date(String(req.query.since));
+    if (isNaN(d.getTime())) {
+      return res.status(400).json({ error: 'invalid_since', detail: 'expected ISO-8601 timestamp' });
+    }
+    since = d;
+  }
+
+  const whereClause = since
+    ? and(eq(beliefResponses.userId, userId), gte(beliefResponses.createdAt, since))
+    : eq(beliefResponses.userId, userId);
+
+  const rows = await db
+    .select({
+      id:               beliefResponses.id,
+      clientId:         beliefResponses.clientId,
+      probeText:        beliefResponses.probeText,
+      probeCategory:    beliefResponses.probeCategory,
+      probeSource:      beliefResponses.probeSource,
+      value:            beliefResponses.value,
+      confidence:       beliefResponses.confidence,
+      note:             beliefResponses.note,
+      dimensionWeights: beliefResponses.dimensionWeights,
+      primaryDim:       beliefResponses.primaryDim,
+      quality:          beliefResponses.quality,
+      createdAt:        beliefResponses.createdAt,
+    })
+    .from(beliefResponses)
+    .where(whereClause)
+    // (createdAt, id) — id tiebreaker keeps order deterministic when
+    // multiple rows share the same millisecond.
+    .orderBy(beliefResponses.createdAt, beliefResponses.id)
+    .limit(limit);
+
+  // Always normalise createdAt to ISO-8601 — the pg driver can return either
+  // Date or string depending on column type/options, and the wire contract
+  // promises ISO. Defensive: if the parse fails, drop back to the raw value
+  // rather than emit `Invalid Date`.
+  const toIso = (v: unknown): string => {
+    if (v instanceof Date) return v.toISOString();
+    const d = new Date(v as string);
+    return isNaN(d.getTime()) ? String(v) : d.toISOString();
+  };
+
+  const responses = rows.map(r => ({
+    client_id:        r.clientId ?? `web-${r.id}`,
+    probeText:        r.probeText,
+    probeCategory:    r.probeCategory,
+    probeSource:      r.probeSource,
+    value:            r.value,
+    confidence:       r.confidence,
+    note:             r.note,
+    dimensionWeights: r.dimensionWeights,
+    primaryDim:       r.primaryDim,
+    quality:          r.quality,
+    createdAt:        toIso(r.createdAt),
+  }));
+
+  console.log(
+    `[/responses] user=${userId} returned=${responses.length} ` +
+    `since=${since ? since.toISOString() : 'null'} limit=${limit}`
+  );
+
+  return res.json({ responses });
 });
 
 // ── GET /history — response history ─────────────────────────
