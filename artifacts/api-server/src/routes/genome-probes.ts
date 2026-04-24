@@ -6,7 +6,7 @@ import { db } from '@workspace/db';
 import { probes, beliefResponses, dimensionScores, beliefLineage } from '@workspace/db/schema';
 import { applyResponseToScores } from '@belief-genome/engine';
 import type { Accumulator } from '@belief-genome/engine';
-import { eq, and, sql } from 'drizzle-orm';
+import { eq, and, sql, inArray } from 'drizzle-orm';
 import {
   PROBE_BANK, QUALITY_PRESETS, DIMENSIONS,
   buildDimensionWeights, assignProbeQuality,
@@ -297,12 +297,15 @@ router.post('/respond', async (req: Request, res: Response) => {
         .filter(n => Number.isFinite(n));
 
       // Pre-fetch existing accumulators for the dims this response touches.
+      // Use inArray (compiles to `IN (...)` with proper int binding) — raw
+      // `ANY($1)` confuses node-postgres because Drizzle's sql template does
+      // not cast a JS array to int[] and pg rejects the parameter type.
       const existingRows = dimIds.length === 0 ? [] : await tx
         .select()
         .from(dimensionScores)
         .where(and(
           eq(dimensionScores.userId, userId),
-          sql`${dimensionScores.dimensionId} = ANY(${dimIds})`,
+          inArray(dimensionScores.dimensionId, dimIds),
         ));
       const existingMap = new Map<number, typeof existingRows[number]>();
       const prevAcc: Record<number, Accumulator> = {};
@@ -378,8 +381,15 @@ router.post('/respond', async (req: Request, res: Response) => {
     // Return JSON, never let Express's HTML error page reach the client.
     const code = e?.code || 'unknown';
     const message = e?.message || String(e);
-    console.error(`[/respond] user=${userId} db_error code=${code} msg=${message.slice(0, 200)}`);
-    return res.status(500).json({ ok: false, error: 'db_error', code, message: message.slice(0, 200) });
+    // Log the full message + stack to server so root cause is one log line away.
+    console.error(`[/respond] user=${userId} db_error code=${code} msg=${message}`);
+    if (e?.stack) console.error(e.stack);
+    // In production, keep the client payload opaque — raw DB messages can leak
+    // schema internals. Only echo details back in dev/test for easier debugging.
+    const isProd = process.env.NODE_ENV === 'production';
+    const body: Record<string, unknown> = { ok: false, error: 'db_error', code };
+    if (!isProd) body.message = message.slice(0, 200);
+    return res.status(500).json(body);
   }
 
   return res.json({ ok: true });
