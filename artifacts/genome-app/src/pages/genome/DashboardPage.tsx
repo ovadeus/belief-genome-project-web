@@ -764,7 +764,11 @@ export default function DashboardPage() {
             background: DARK_PANEL_TABS.includes(tab) ? 'hsl(var(--background))' : 'var(--surface-1)',
             border: '1px solid var(--border-subtle)',
             overflow: 'hidden',
-            minHeight: DARK_PANEL_TABS.includes(tab) ? 'calc(100vh - 240px)' : 300,
+            // Dark visualisation tabs size to their inner viz height so the
+            // panel never extends past the viewport (was forcing 100vh − 240
+            // and creating dead space + a scrollbar). Non-dark tabs keep a
+            // 300px floor so empty states don't collapse.
+            minHeight: DARK_PANEL_TABS.includes(tab) ? undefined : 300,
             position: 'relative',
           }}
         >
