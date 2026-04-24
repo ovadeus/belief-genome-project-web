@@ -18,8 +18,8 @@ export function createHarmonizer(
   cells: ReadonlyArray<HarmonizerCell>,
   opts: HarmonizerOptions = {},
 ): Harmonizer {
-  const cellMs = opts.cellMs ?? 500;
-  const rowPauseMs = opts.rowPauseMs ?? 180;
+  const cellMs = opts.cellMs ?? 320;
+  const rowPauseMs = opts.rowPauseMs ?? 120;
   const masterGain = opts.masterGain ?? 0.9;
 
   let ctx: AudioContext | null = null;
