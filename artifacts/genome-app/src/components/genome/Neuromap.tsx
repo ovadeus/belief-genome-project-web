@@ -34,7 +34,7 @@ export default function Neuromap({ dnaString, totalResponses, dimensionsCovered,
   };
 
   return (
-    <div style={{ width: '100%', borderRadius: 12, overflow: 'hidden', background: '#080810' }}>
+    <div style={{ width: '100%', borderRadius: 12, overflow: 'hidden', background: 'hsl(var(--background))' }}>
       <iframe
         ref={iframeRef}
         src={`${import.meta.env.BASE_URL}assets/bgp_brain_3d.html`}
