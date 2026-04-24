@@ -61,6 +61,7 @@ export default function RadarChart({ history }: Props) {
 
   const options = {
     responsive: true,
+    maintainAspectRatio: false,
     animation: { duration: 600, easing: 'easeInOutQuart' as const },
     scales: {
       r: {
@@ -121,7 +122,14 @@ export default function RadarChart({ history }: Props) {
           {subtitle}
         </span>
       </div>
-      <Radar data={data} options={options as any} />
+      <div style={{
+        position: 'relative',
+        width: '100%',
+        height: 'min(calc(100vh - 320px), 560px)',
+        minHeight: 320,
+      }}>
+        <Radar data={data} options={options as any} />
+      </div>
     </div>
   );
 }
