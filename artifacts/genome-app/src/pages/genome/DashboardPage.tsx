@@ -493,9 +493,10 @@ export default function DashboardPage() {
             totalResponses={dna.totalResponses || 0}
             dimensionsCovered={dna.dimensionsCovered || 0}
             overallConfidence={dna.overallConfidence || 0}
+            fullscreen={fullscreen}
           />
         )}
-        {tab === 'radar' && <RadarChart history={history} />}
+        {tab === 'radar' && <RadarChart history={history} fullscreen={fullscreen} />}
         {tab === 'breakdown' && <BreakdownBars history={history} />}
         {tab === 'timeline' && <Timeline history={history} />}
         {tab === 'history' && <HistoryList history={history} />}

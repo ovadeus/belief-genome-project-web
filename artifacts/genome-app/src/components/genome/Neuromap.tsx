@@ -5,9 +5,11 @@ interface NeuromapProps {
   totalResponses: number;
   dimensionsCovered: number;
   overallConfidence: number;
+  /** When true, the iframe expands to fill the viewport height instead of the fixed 700 px panel size. */
+  fullscreen?: boolean;
 }
 
-export default function Neuromap({ dnaString, totalResponses, dimensionsCovered, overallConfidence }: NeuromapProps) {
+export default function Neuromap({ dnaString, totalResponses, dimensionsCovered, overallConfidence, fullscreen = false }: NeuromapProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const sentRef = useRef(false);
 
@@ -41,7 +43,10 @@ export default function Neuromap({ dnaString, totalResponses, dimensionsCovered,
         onLoad={sendData}
         style={{
           width: '100%',
-          height: 700,
+          // In fullscreen, fill the viewport (minus the fullscreen header & padding ~130px)
+          // so the 3-D brain reads at full impact instead of floating in a sea of black.
+          height: fullscreen ? 'calc(100vh - 130px)' : 700,
+          minHeight: fullscreen ? 520 : undefined,
           border: 'none',
           borderRadius: 12,
           display: 'block',

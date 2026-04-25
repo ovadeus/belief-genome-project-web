@@ -25,6 +25,8 @@ interface HistoryEntry {
 }
 
 interface Props {
+  /** When true, the chart container expands to fill the viewport instead of using a fixed aspect ratio. */
+  fullscreen?: boolean;
   history: HistoryEntry[];
 }
 
@@ -120,7 +122,7 @@ function drawLEDMeter(
   ctx.restore();
 }
 
-export default function RadarChart({ history }: Props) {
+export default function RadarChart({ history, fullscreen = false }: Props) {
   const themeColors = useThemeColors(THEME_VARS);
   const isLight = (typeof document !== 'undefined'
     ? document.documentElement.dataset.theme
@@ -198,7 +200,9 @@ export default function RadarChart({ history }: Props) {
 
   const options: ChartOptions<'radar'> = {
     responsive: true,
-    maintainAspectRatio: true,
+    // In fullscreen, let the chart fill its (explicit-height) container instead of
+    // sizing to width÷1.25 — that's what was leaving so much black space above & below.
+    maintainAspectRatio: !fullscreen,
     aspectRatio: 1.25,
     layout: { padding: { top: 48, bottom: 64, left: 130, right: 130 } },
     animation: { duration: 600, easing: 'easeInOutQuart' },
@@ -344,7 +348,18 @@ export default function RadarChart({ history }: Props) {
         justifyContent: 'center',
         width: '100%',
       }}>
-        <div style={{ width: '100%', maxWidth: 680, overflow: 'visible' }}>
+        <div style={{
+          width: '100%',
+          // Cap width modestly in fullscreen so spoke labels don't fly off into the corners,
+          // but let it breathe well past the 680px panel cap.
+          maxWidth: fullscreen ? 1100 : 680,
+          // Chart.js needs the parent to have explicit height when maintainAspectRatio is false.
+          // Subtract header (~50) + container padding (~48) + section header (~36) + intro p (~52) + insight panel (~88) = ~274.
+          height: fullscreen ? 'calc(100vh - 290px)' : undefined,
+          minHeight: fullscreen ? 480 : undefined,
+          position: 'relative',
+          overflow: 'visible',
+        }}>
           <Radar data={data} options={options} plugins={[customLabelsPlugin]} />
         </div>
       </div>
