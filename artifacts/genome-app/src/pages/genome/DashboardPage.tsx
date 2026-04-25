@@ -336,7 +336,7 @@ const TABS: { key: Tab; label: string }[] = [
 ];
 
 const UI_ZOOM_STEPS = [1.0, 1.04, 1.08, 1.12, 1.16, 1.20, 1.24, 1.28];
-const FULLSCREEN_TABS: Tab[] = ['dnastrip', 'helix', 'neuromap'];
+const FULLSCREEN_TABS: Tab[] = ['dnastrip', 'helix', 'neuromap', 'radar'];
 
 /* ── Helper: day streak ─────────────────────────────────────── */
 function calcStreak(history: any[]): number {
