@@ -288,7 +288,57 @@ export function useAdminDeleteComment() {
 // ─── Audio upload (audio + cover) — reuses storage presigned-URL flow ──────
 export type UploadedAsset = { objectPath: string; fileName: string; mimeType: string; bytes: number };
 
+/**
+ * Pre-flight check on an audio file picked for upload.
+ *
+ * The HTML5 `<audio>` element on the public episode page can't play a few
+ * container variants that *look* like normal audio files but actually carry
+ * fragmented/streaming layouts. The biggest offender is "DASH-fragmented MP4"
+ * (a `.m4a` whose ftyp brand is literally `dash`) — Safari refuses it and
+ * Chrome is unreliable. We sniff the file header here so the user gets an
+ * instant, clear message instead of waiting through a multi-megabyte upload
+ * only to find the player won't render it.
+ *
+ * We're conservative — only reject the specific known-bad case. Anything we
+ * don't recognize is allowed through; the player's onError handler is the
+ * final safety net.
+ */
+export async function validateAudioFile(
+  file: File,
+): Promise<{ ok: true } | { ok: false; reason: string }> {
+  if (file.size < 16) {
+    return { ok: false, reason: "File is too small to be a valid audio file." };
+  }
+  let buf: Uint8Array;
+  try {
+    buf = new Uint8Array(await file.slice(0, 32).arrayBuffer());
+  } catch {
+    return { ok: true }; // Couldn't read header — let the upload proceed.
+  }
+  const td = new TextDecoder("ascii");
+  // ISO Base Media (MP4 / M4A): bytes 4-7 = "ftyp", bytes 8-11 = major brand.
+  if (td.decode(buf.subarray(4, 8)) === "ftyp") {
+    const brand = td.decode(buf.subarray(8, 12));
+    if (brand === "dash") {
+      return {
+        ok: false,
+        reason:
+          "This M4A is in DASH streaming format, which browsers can't play directly. " +
+          "Please re-export the file as MP3 (or as a standard progressive M4A) " +
+          "and upload again. A quick way: drag the file into Audacity (or any audio " +
+          "editor) and export it as MP3 at 128 kbps.",
+      };
+    }
+  }
+  return { ok: true };
+}
+
 export async function uploadAsset(file: File): Promise<UploadedAsset> {
+  // Catch DASH-fragmented MP4s and other known-unplayable formats *before*
+  // requesting an upload URL — saves the user a multi-megabyte upload.
+  const v = await validateAudioFile(file);
+  if (!v.ok) throw new Error(v.reason);
+
   const u = await fetch(`${API}/storage/uploads/request-url`, {
     method: "POST",
     credentials: "include",
