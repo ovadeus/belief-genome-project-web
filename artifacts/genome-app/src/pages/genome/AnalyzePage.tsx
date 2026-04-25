@@ -104,7 +104,7 @@ export default function AnalyzePage() {
             </div>
             <div>
               <div style={{ fontSize: 24, fontWeight: 700, color: '#22d3ee' }}>
-                {result.overallConfidence ? `${Math.round(result.overallConfidence * 100)}%` : '—'}
+                {result.overallConfidence ? `${Math.round(result.overallConfidence)}%` : '—'}
               </div>
               <div style={{ fontSize: 10, color: 'var(--text-faint)', textTransform: 'uppercase', marginTop: 4 }}>
                 Confidence
