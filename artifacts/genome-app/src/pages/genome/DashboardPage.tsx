@@ -13,6 +13,7 @@ import Neuromap from '../../components/genome/Neuromap';
 import DnaString from '../../components/genome/DnaString';
 import DnaStrip from '../../components/genome/DnaStrip';
 import LineageDrawer from '../../components/genome/LineageDrawer';
+import { useBgpEasterEgg } from '../../hooks/use-bgp-easter-egg';
 import {
   Minus, Plus, Maximize2, X,
   Dna, RotateCw, Target, CircleDot, RectangleVertical, Activity, Menu, Settings,
@@ -352,6 +353,11 @@ function calcStreak(history: any[]): number {
 }
 
 export default function DashboardPage() {
+  // Hidden Easter egg: typing B → G → P within ~1.2s toggles Harmonize DNA
+  // playback (no visible button). Suppressed inside form fields and during
+  // IME composition.
+  useBgpEasterEgg();
+
   const { user } = useGenomeAuth();
   const [tab, setTab] = useState<Tab>('dnastrip');
   const [dna, setDna] = useState<any>(null);

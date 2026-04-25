@@ -1,10 +1,11 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'wouter';
 import { SHEX, BELIEF_LABELS_10 } from './genome-utils';
 import { useExplore } from './ExploreContext';
 import DnaCell from './DnaCell';
 import { useHarmonize } from '../../hooks/use-harmonize';
 import type { HarmonizerCell } from '../../lib/harmonize/types';
+import { BGP_HARMONIZE_TOGGLE_EVENT } from '../../hooks/use-bgp-easter-egg';
 
 const CATEGORIES = [
   { id: 'epistemology',  label: 'Epistemology',   count: 10 },
@@ -144,11 +145,22 @@ export default function DnaStrip({
   }, []);
 
   const harmonize = useHarmonize(harmonizerCells, handleCellFlash);
-  const isPlaying = harmonize.state === 'playing';
-  const handleHarmonizeClick = useCallback(() => {
-    if (isPlaying) harmonize.stop();
-    else void harmonize.play();
-  }, [isPlaying, harmonize]);
+
+  // Hidden Easter-egg trigger: typing B-G-P on the dashboard toggles harmonize
+  // playback. The detector lives in DashboardPage and dispatches a window
+  // event; only DnaStrip instances that actually have harmonize wired
+  // (showHarmonize === true) respond.
+  useEffect(() => {
+    if (!showHarmonize) return;
+    const onToggle = (): void => {
+      if (harmonize.state === 'playing') harmonize.stop();
+      else void harmonize.play();
+    };
+    window.addEventListener(BGP_HARMONIZE_TOGGLE_EVENT, onToggle);
+    return () => {
+      window.removeEventListener(BGP_HARMONIZE_TOGGLE_EVENT, onToggle);
+    };
+  }, [showHarmonize, harmonize]);
 
   // No fallback synthetic dims — show a skeleton if dimensions haven't loaded.
   if (dimensions.length === 0) {
@@ -263,30 +275,6 @@ export default function DnaStrip({
             background: 'repeating-linear-gradient(45deg, var(--border-subtle), var(--border-subtle) 2px, transparent 2px, transparent 4px)',
             border: '1px solid var(--border-soft)',
           }} />Unexplored</span>
-        </div>
-      )}
-
-      {showHarmonize && (
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 14 }}>
-          <button
-            type="button"
-            onClick={handleHarmonizeClick}
-            data-testid="harmonize-dna-btn"
-            aria-pressed={isPlaying}
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: 8,
-              padding: '8px 18px', borderRadius: 999,
-              border: '1px solid var(--border-soft)',
-              background: isPlaying ? 'var(--accent-strong)' : 'var(--surface-2)',
-              color: isPlaying ? 'var(--text-primary)' : 'var(--text-secondary)',
-              fontFamily: "'Space Mono', monospace", fontSize: 11,
-              textTransform: 'uppercase', letterSpacing: '0.12em',
-              cursor: 'pointer', transition: 'background 0.15s, color 0.15s',
-            }}
-          >
-            <span aria-hidden style={{ fontSize: 12 }}>{isPlaying ? '■' : '♪'}</span>
-            {isPlaying ? 'Stop' : 'Harmonize DNA'}
-          </button>
         </div>
       )}
 
