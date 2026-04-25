@@ -208,7 +208,7 @@ export default function DnaStrip({
               }}>
                 {cat.label}
               </span>
-              <div className="dna-strip-cells-scroll" style={{ display: 'flex', gap: 2, flex: 1, minWidth: 0, height: miniMode ? 12 : 14 }}>
+              <div className="dna-strip-cells-scroll" style={{ display: 'flex', gap: 2, flex: 1, minWidth: 0, height: miniMode ? 16 : 20 }}>
                 {catDims.map(dim => {
                   const raw = dimensionScores[dim.id];
                   const score = raw === undefined ? null : raw;
@@ -226,7 +226,7 @@ export default function DnaStrip({
                         catLabel={cat.label}
                         score={score}
                         confidence={confidence[dim.id] ?? 0}
-                        height={miniMode ? 12 : 14}
+                        height={miniMode ? 16 : 20}
                         onClick={() => handleCellClick(dim)}
                         onHover={handleHover}
                         onLeave={handleLeave}
