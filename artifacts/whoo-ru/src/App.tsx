@@ -70,6 +70,8 @@ function Router() {
       <Route path="/support" component={Support} />
       <Route path="/support/web" component={SupportWeb} />
       <Route path="/support/desktop" component={SupportDesktop} />
+      <Route path="/support/desktop/:category" component={SupportDesktop} />
+      <Route path="/support/desktop/:category/:slug" component={SupportDesktop} />
       <Route path="/privacy" component={PrivacyPolicy} />
       <Route path="/terms" component={TermsOfService} />
       <Route path="/subscribe" component={Subscribe} />

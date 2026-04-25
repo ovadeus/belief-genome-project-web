@@ -283,6 +283,67 @@
   @apply border-border my-10;
 }
 
+/* Desktop support article markdown — tighter than blog .prose, with table support */
+.desktop-support-prose {
+  @apply max-w-none text-muted-foreground leading-relaxed;
+}
+.desktop-support-prose h2,
+.desktop-support-prose h3,
+.desktop-support-prose h4 {
+  font-family: var(--font-display);
+  @apply text-foreground font-semibold tracking-tight scroll-mt-24;
+}
+.desktop-support-prose h2 { @apply text-xl md:text-2xl mt-10 mb-3; }
+.desktop-support-prose h3 { @apply text-lg md:text-xl mt-8 mb-2; }
+.desktop-support-prose h4 { @apply text-base mt-6 mb-2; }
+.desktop-support-prose p { @apply mb-4; }
+.desktop-support-prose strong { @apply text-foreground font-semibold; }
+.desktop-support-prose em { @apply italic; }
+.desktop-support-prose a {
+  @apply text-primary hover:text-primary/80 underline underline-offset-4 decoration-primary/30 hover:decoration-primary transition-colors;
+}
+.desktop-support-prose ul,
+.desktop-support-prose ol {
+  @apply mb-4 pl-6 space-y-1;
+}
+.desktop-support-prose ul { @apply list-disc; }
+.desktop-support-prose ol { @apply list-decimal; }
+.desktop-support-prose li { @apply leading-relaxed; }
+.desktop-support-prose li > p { @apply mb-2; }
+.desktop-support-prose blockquote {
+  @apply border-l-2 border-primary/40 pl-4 italic text-foreground/80 my-4;
+}
+.desktop-support-prose code {
+  @apply px-1.5 py-0.5 rounded bg-card border border-border text-xs font-mono text-foreground;
+}
+.desktop-support-prose pre {
+  @apply p-4 rounded-lg bg-card border border-border overflow-x-auto my-4 text-xs;
+}
+.desktop-support-prose pre code {
+  @apply p-0 bg-transparent border-0 text-foreground;
+}
+.desktop-support-prose hr { @apply border-border my-8; }
+.desktop-support-prose table {
+  @apply w-full text-sm my-6 border-collapse;
+}
+.desktop-support-prose thead { @apply border-b border-border; }
+.desktop-support-prose th {
+  @apply text-left py-2 px-3 text-foreground font-display font-semibold;
+}
+.desktop-support-prose tbody tr {
+  @apply border-b border-border/50;
+}
+.desktop-support-prose td {
+  @apply py-2 px-3 align-top;
+}
+.desktop-support-prose td code,
+.desktop-support-prose th code {
+  @apply text-[11px];
+}
+.desktop-support-prose kbd {
+  @apply inline-block px-1.5 py-0.5 rounded bg-foreground/10 text-foreground text-xs font-mono;
+}
+
 .belief-gradient-text {
   background: linear-gradient(
     90deg,
