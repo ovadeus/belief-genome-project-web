@@ -61,10 +61,11 @@ export function Footer() {
           <div>
             <h4 className="font-semibold text-foreground mb-6 font-display uppercase tracking-wider text-sm">Help</h4>
             <ul className="space-y-4">
-              <li><Link href="/support#scoring" className="text-muted-foreground hover:text-primary transition-colors">Belief Scale</Link></li>
-              <li><Link href="/support#visualizations" className="text-muted-foreground hover:text-primary transition-colors">Visualizations</Link></li>
-              <li><Link href="/support#probes-nudges" className="text-muted-foreground hover:text-primary transition-colors">Probes & Nudges</Link></li>
-              <li><Link href="/support#sync" className="text-muted-foreground hover:text-primary transition-colors">Sync Setup</Link></li>
+              <li><Link href="/support/web" className="text-muted-foreground hover:text-primary transition-colors">Web App Guide</Link></li>
+              <li><Link href="/support/desktop" className="text-muted-foreground hover:text-primary transition-colors">Desktop App Guide</Link></li>
+              <li><Link href="/support/web#scoring" className="text-muted-foreground hover:text-primary transition-colors">Belief Scale</Link></li>
+              <li><Link href="/support/web#dashboard" className="text-muted-foreground hover:text-primary transition-colors">Visualizations</Link></li>
+              <li><Link href="/support/web#sync" className="text-muted-foreground hover:text-primary transition-colors">Sync Setup</Link></li>
             </ul>
           </div>
 
