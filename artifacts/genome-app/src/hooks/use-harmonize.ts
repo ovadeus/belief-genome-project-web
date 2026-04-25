@@ -18,7 +18,12 @@ export function useHarmonize(
   onFlashRef.current = onCellFlash;
 
   useEffect(() => {
-    const h = createHarmonizer(cells);
+    // rowPauseMs:0 — overlay flows seamlessly across category boundaries.
+    // The bed regions still crossfade via BED_REGION_OVERLAP_S so chord
+    // changes remain smooth even without the per-cell gap. The default 80ms
+    // gap read as a hiccup once the overlay was re-voiced as a sustained
+    // celesta in v2.1 (see musicbox-synth comment block).
+    const h = createHarmonizer(cells, { rowPauseMs: 0 });
     h.onStateChange(setState);
     h.onCellTick(id => onFlashRef.current(id));
     harmonizerRef.current = h;

@@ -1,15 +1,19 @@
 // Music-box voice + DNA-derived ambient bed.
 //
-// SIGNAL FLOW:
+// SIGNAL FLOW (v2.1 — celesta overlay + airy triangle bed + "ahh" formant branch):
 //
 //   ┌─ overlayBus ─→ HP(700) → peak(+3dB @2.5kHz) ─┐
-//   │                                              ├→ dryMix ────────────→ master → dest
-//   │                                              ├→ wetSend → reverb ──→ master
-//   │                                              └→ delay (70ms FB)  ──→ master
+//   │                                              ├→ dryMix ──────────────────→ master → dest
+//   │                                              ├→ wetSend(0.45) → reverb ─→ master
+//   │                                              └→ delay (70ms FB)        ─→ master
 //   │
 //   └─ bedBus → bedDuck → LP(2200) ────────────────┐
-//                                                  ├→ dryMix(0.85) ─────→ master
-//                                                  └→ wetSend(0.45) → reverb → master
+//                                  │               ├→ bedDry(0.85) ───────────→ master
+//                                  │               ├→ bedWetSend(0.45) → reverb → master
+//                                  │
+//                                  └─→ vocalBPF(850Hz Q=1.1) → vocalBus(0.55) ─┐
+//                                                                              ├→ vocalDry(0.35) ─────→ master
+//                                                                              └→ vocalWetSend(0.65) → reverb → master
 //
 // `bedBus.gain`  : long-form automation (fade-in, fade-out, stop profile).
 // `bedDuck.gain` : short-form sidechain dips on overlay note onsets only.
@@ -90,7 +94,7 @@ export function createMusicboxSynth(ctx: AudioContext, masterGain = 0.9): Synth 
   overlayDry.connect(master);
 
   const overlayWetSend = ctx.createGain();
-  overlayWetSend.gain.value = 0.30;
+  overlayWetSend.gain.value = 0.45; // more reverb wash for the longer celesta ring
   peak.connect(overlayWetSend);
   overlayWetSend.connect(reverb);
 
@@ -133,6 +137,41 @@ export function createMusicboxSynth(ctx: AudioContext, masterGain = 0.9): Synth 
   bedLP.connect(bedWetSend);
   bedWetSend.connect(reverb);
 
+  // ── "Ahh" vocal formant branch ───────────────────────────────────────
+  //
+  // Parallel send that band-passes the bed pad through the human "ah"-
+  // vowel formant region (~850 Hz, moderate Q) and re-mixes it with heavy
+  // reverb. The existing bed (triangle pair + sine) supplies the chord
+  // structure; this branch colors it with breathy/choir-like character so
+  // the underlying track reads as "voices on a vowel" rather than a
+  // synthesizer pad.
+  //
+  // Placed AFTER bedLP so the formant emphasis sits on the already-
+  // softened pad signal — keeps high frequencies from getting harsh when
+  // boosted around the vowel.
+  const vocalBPF = ctx.createBiquadFilter();
+  vocalBPF.type = 'bandpass';
+  vocalBPF.frequency.value = 850; // F1 region for the "ah" vowel
+  vocalBPF.Q.value = 1.1;          // wide enough to span F1, not honky
+  bedLP.connect(vocalBPF);
+
+  const vocalBus = ctx.createGain();
+  vocalBus.gain.value = 0.55;      // sits UNDER the existing bed in level
+  vocalBPF.connect(vocalBus);
+
+  // A bit of dry vocal in the foreground for presence, generous wet send
+  // so most of the "ahh" comes from the reverb tail (that's what makes a
+  // choir feel choral).
+  const vocalDry = ctx.createGain();
+  vocalDry.gain.value = 0.35;
+  vocalBus.connect(vocalDry);
+  vocalDry.connect(master);
+
+  const vocalWetSend = ctx.createGain();
+  vocalWetSend.gain.value = 0.65;
+  vocalBus.connect(vocalWetSend);
+  vocalWetSend.connect(reverb);
+
   // ── State ─────────────────────────────────────────────────────────────
   const overlayActive = new Set<GainNode>();
   let bedVoices: BedVoice[] = [];
@@ -147,13 +186,18 @@ export function createMusicboxSynth(ctx: AudioContext, masterGain = 0.9): Synth 
 
     const oscs: OscillatorNode[] = [];
     for (const freq of region.chordHz) {
-      // Detuned saw pair + soft sine for warmth.
+      // Detuned TRIANGLE pair (was sawtooth) + soft sine for warmth.
+      // Triangles have only odd harmonics at much lower amplitudes than
+      // saws — bed reads as airy / luminous rather than dense / brooding,
+      // and matches the sine overlay timbre. Still carries enough
+      // upper-harmonic content (3f, 5f) to feed the vocal-formant branch
+      // with "ahh" character.
       const sawA = ctx.createOscillator();
-      sawA.type = 'sawtooth';
+      sawA.type = 'triangle';
       sawA.frequency.value = freq;
       sawA.detune.value = -7;
       const sawB = ctx.createOscillator();
-      sawB.type = 'sawtooth';
+      sawB.type = 'triangle';
       sawB.frequency.value = freq;
       sawB.detune.value = +7;
       const sine = ctx.createOscillator();
@@ -238,21 +282,24 @@ export function createMusicboxSynth(ctx: AudioContext, masterGain = 0.9): Synth 
     const confClamped = Math.max(0, Math.min(100, event.conf));
     const peakGain = 0.25 + 0.60 * Math.pow(confClamped / 100, 0.8);
 
-    const attack = 0.005;
-    const decay = 0.120;
-    const sustain = 0.12;
-    const release = 0.180;
+    // Celesta / glass-bell voicing. Bloom attack + long ring + high
+    // sustain so notes overlap into a singing arpeggio rather than
+    // discrete plucks.
+    const attack = 0.030;
+    const decay = 0.250;
+    const sustain = 0.45;
+    const release = 0.400;
     const noteEnd = t + attack + decay + release + 0.05;
 
     const fund = ctx.createOscillator();
-    fund.type = 'triangle';
+    fund.type = 'sine'; // pure sine — purer, glassier core
     fund.frequency.value = event.freq;
 
     const harm = ctx.createOscillator();
     harm.type = 'sine';
     harm.frequency.value = event.freq * 2;
     const harmGain = ctx.createGain();
-    harmGain.gain.value = 0.3;
+    harmGain.gain.value = 0.15; // softer octave — lets fundamental sing
 
     const env = ctx.createGain();
     env.gain.setValueAtTime(0, t);

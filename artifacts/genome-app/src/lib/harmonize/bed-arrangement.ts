@@ -25,16 +25,20 @@ import type {
   HarmonizerCell,
 } from './types';
 
-// One octave of base frequencies for each mode, anchored so the bed sits
-// roughly an octave below the per-cell pentatonic overlay. Each array is the
-// scale degrees [I, II, III, IV, V, VI, VII] in Hz, starting at C3.
+// One octave of base frequencies for each mode. Each array is the scale
+// degrees [I, II, III, IV, V, VI, VII] in Hz.
+//
+// Anchored at C4 (was C3). The C3 register made the bed feel heavy /
+// brooding even in Lydian. C4 sits closer to the pentatonic overlay
+// and reads as "lift." Intervals unchanged so per-DNA mode/chord
+// selection still produces audibly different progressions.
 const SCALE_HZ: Record<BedMode, ReadonlyArray<number>> = {
   // C Lydian: C D E F# G A B  (raised 4th)
-  lydian:  [130.81, 146.83, 164.81, 185.00, 196.00, 220.00, 246.94],
+  lydian:  [261.63, 293.66, 329.63, 369.99, 392.00, 440.00, 493.88],
   // C Ionian: C D E F G A B
-  ionian:  [130.81, 146.83, 164.81, 174.61, 196.00, 220.00, 246.94],
+  ionian:  [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88],
   // C Aeolian: C D Eb F G Ab Bb (natural minor)
-  aeolian: [130.81, 146.83, 155.56, 174.61, 196.00, 207.65, 233.08],
+  aeolian: [261.63, 293.66, 311.13, 349.23, 392.00, 415.30, 466.16],
 };
 
 // Triad templates — scale-degree offsets (0-indexed) relative to the chord root.
