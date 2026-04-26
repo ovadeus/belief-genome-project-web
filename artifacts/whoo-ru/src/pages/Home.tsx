@@ -121,7 +121,7 @@ export default function Home() {
             What is the <span className="text-primary">Belief Genome Project</span>?
           </h2>
           <p className="text-xl text-muted-foreground leading-relaxed">
-            The Belief Genome Project is a psychometric framework and visualization engine designed to map the 124 dimensions of your cognitive, emotional, and philosophical worldview. We examine human beliefs as quantum bits (qubits) holding superpositions that change over time. It is a quantified reflection of your mind, heart, and soul.
+            The Belief Genome Project is a psychometric framework and visualization engine designed to map the 124 dimensions of your cognitive, emotional, and philosophical worldview. We examine human beliefs through entropy harvesting quantum bits (qubits) holding superpositions that change over time. It is a quantified reflection of your mind, heart, and soul.
           </p>
 
           {/* SCREEN CAROUSEL */}
