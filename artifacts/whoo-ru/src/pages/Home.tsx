@@ -76,7 +76,7 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/30" />
         </div>
 
-        <div className="absolute inset-0 z-[1] opacity-40 pointer-events-none flex items-center justify-center">
+        <div className="absolute inset-0 z-[1] opacity-75 pointer-events-none flex items-center justify-center">
           <div className="w-[600px] h-[700px]">
             <TripleHelixCanvas />
           </div>
