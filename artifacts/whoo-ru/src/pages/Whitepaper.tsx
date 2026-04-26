@@ -595,8 +595,6 @@ function EntropyStateSliderDemo() {
       transition={{ duration: 0.5 }}
       className="my-4"
     >
-      <h4 className="text-foreground font-display font-semibold mb-3">Interactive Demo</h4>
-      <p className="text-muted-foreground text-sm mb-4">Drag the slider to see how your position maps to a belief label:</p>
       <div className="p-5 rounded-xl bg-card border border-border">
         <input
           type="range"
