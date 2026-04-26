@@ -10,19 +10,24 @@ const GENOME_APP_URL = (
   (import.meta.env.VITE_GENOME_APP_URL as string | undefined) || "/genome-app/"
 ).replace(/\/$/, "");
 
-type DropdownItem = { href: string; label: string };
+type DropdownItem = {
+  href: string;
+  label: string;
+  /** Render the entry indented under the previous item (e.g. an in-page anchor). */
+  indent?: boolean;
+};
 
 type NavItem =
   | { kind: "link"; href: string; label: string }
   | { kind: "dropdown"; label: string; items: DropdownItem[] };
 
-const AQP_ITEMS: DropdownItem[] = [
-  { href: "/aqp/fracture-rational-actor",   label: "I.   The Fracture of the Rational Actor" },
-  { href: "/aqp/quantum-cognition-midpoint",label: "II.  Quantum Cognition & The Midpoint Revelation" },
-  { href: "/aqp/society-quantum-field",     label: "III. Society as a Quantum Field" },
-  { href: "/aqp/mind-architecture",         label: "IV.  Mapping the Architecture of the Human Mind" },
-  { href: "/aqp/entropy-harvesting",        label: "V.   Entropy Harvesting & Why It Matters" },
-  { href: "/aqp/original-contributions",    label: "VI.  Original Contributions & The Path to Verification" },
+const SCIENCE_ITEMS: DropdownItem[] = [
+  { href: "/science",                        label: "Overview" },
+  { href: "/science#fracture",               label: "I.   The Fracture",        indent: true },
+  { href: "/science#quantum-grammar",        label: "II.  The Quantum Grammar", indent: true },
+  { href: "/science#synthesis",              label: "III. The Synthesis",       indent: true },
+  { href: "/science#horizon",                label: "IV.  The Horizon",         indent: true },
+  { href: "/science/original-contributions", label: "Original Contributions" },
 ];
 
 const MEDIA_ITEMS: DropdownItem[] = [
@@ -33,13 +38,83 @@ const MEDIA_ITEMS: DropdownItem[] = [
 
 const NAV_ITEMS: NavItem[] = [
   { kind: "link",     href: "/",        label: "Home" },
-  { kind: "dropdown", label: "Applied Quantum Psychometrics", items: AQP_ITEMS },
+  { kind: "dropdown", label: "The Science", items: SCIENCE_ITEMS },
   { kind: "link",     href: "/app",     label: "Participate" },
   { kind: "link",     href: "/explore", label: "Explore Beliefs" },
   { kind: "dropdown", label: "Media",   items: MEDIA_ITEMS },
   { kind: "link",     href: "/support", label: "Support" },
   { kind: "link",     href: "/about",   label: "About" },
 ];
+
+/**
+ * Splits "/science#horizon" into ["/science", "horizon"]. Returns hash="" if absent.
+ */
+function splitHashHref(href: string): { path: string; hash: string } {
+  const i = href.indexOf("#");
+  return i < 0 ? { path: href, hash: "" } : { path: href.slice(0, i), hash: href.slice(i + 1) };
+}
+
+/**
+ * Smart link for dropdown entries: if href contains "#", do SPA-friendly
+ * scrolling — same-page hash clicks scroll smoothly without reload, and
+ * cross-page navigation routes through wouter then scrolls once mounted.
+ */
+function DropdownEntry({
+  item,
+  active,
+  onClose,
+  className,
+}: {
+  item: DropdownItem;
+  active: boolean;
+  onClose: () => void;
+  className?: string;
+}) {
+  const [, setLocation] = useLocation();
+  const { path, hash } = splitHashHref(item.href);
+
+  const baseClass = cn(
+    "block px-4 py-2.5 text-sm leading-snug transition-colors hover:bg-foreground/5",
+    item.indent && "pl-9 text-[13px]",
+    active ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground",
+    className,
+  );
+
+  if (!hash) {
+    return (
+      <Link href={path} onClick={onClose} className={baseClass}>
+        {item.label}
+      </Link>
+    );
+  }
+
+  const handleHashClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+    e.preventDefault();
+    onClose();
+    const onPath = window.location.pathname === path;
+    if (onPath) {
+      const el = document.getElementById(hash);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      window.history.replaceState(null, "", `${path}#${hash}`);
+    } else {
+      setLocation(path);
+      // Wait for the route to mount, then scroll. The page also re-runs its
+      // own on-mount hash check, so this is belt-and-suspenders.
+      setTimeout(() => {
+        const el = document.getElementById(hash);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+        window.history.replaceState(null, "", `${path}#${hash}`);
+      }, 60);
+    }
+  };
+
+  return (
+    <a href={item.href} onClick={handleHashClick} className={baseClass}>
+      {item.label}
+    </a>
+  );
+}
 
 function GenomeAuthButton() {
   // The Belief Genome web app now lives on its own subdomain. The marketing
@@ -123,19 +198,15 @@ function NavDropdown({
             )}
           >
             {items.map((item) => {
-              const active = location === item.href || location.startsWith(item.href + "/");
+              const { path } = splitHashHref(item.href);
+              const active = location === path || location.startsWith(path + "/");
               return (
-                <Link
+                <DropdownEntry
                   key={item.href}
-                  href={item.href}
-                  onClick={() => setOpen(false)}
-                  className={cn(
-                    "block px-4 py-2.5 text-sm leading-snug transition-colors hover:bg-foreground/5",
-                    active ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  {item.label}
-                </Link>
+                  item={item}
+                  active={active}
+                  onClose={() => setOpen(false)}
+                />
               );
             })}
           </motion.div>
@@ -254,21 +325,23 @@ export function PublicNavbar() {
                     <div className="text-[11px] font-semibold tracking-[0.16em] uppercase text-muted-foreground mb-2">
                       {item.label}
                     </div>
-                    <ul className="space-y-1 pl-1">
+                    <ul className="space-y-0.5 pl-1">
                       {item.items.map((sub) => {
+                        const { path } = splitHashHref(sub.href);
                         const active =
-                          location === sub.href || location.startsWith(sub.href + "/");
+                          location === path || location.startsWith(path + "/");
                         return (
                           <li key={sub.href}>
-                            <Link
-                              href={sub.href}
+                            <DropdownEntry
+                              item={sub}
+                              active={active}
+                              onClose={() => setMobileMenuOpen(false)}
                               className={cn(
-                                "block py-2 text-base font-medium transition-colors",
-                                active ? "text-primary" : "text-foreground/80 hover:text-foreground"
+                                "py-2 text-base font-medium",
+                                sub.indent && "pl-6 text-sm",
+                                active ? "text-primary" : "text-foreground/80 hover:text-foreground",
                               )}
-                            >
-                              {sub.label}
-                            </Link>
+                            />
                           </li>
                         );
                       })}
