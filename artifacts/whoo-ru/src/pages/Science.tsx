@@ -17,7 +17,7 @@ type Section = {
 const P_CLS = "mb-5 leading-relaxed text-foreground/85";
 const H3_CLS =
   "mt-12 mb-4 text-xl md:text-2xl font-display font-semibold text-foreground";
-const TERM_CLS = "font-semibold text-foreground";
+const TERM_CLS = "font-semibold text-primary";
 
 const FractureBody: ReactNode = (
   <>
