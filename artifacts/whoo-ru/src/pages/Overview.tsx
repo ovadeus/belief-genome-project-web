@@ -128,12 +128,18 @@ export default function Overview() {
           <p className={P_CLS}>
             BGP takes that formal intuition and asks what an instrument would
             look like if it were designed from the start to measure unstable,
-            contradictory, or context-sensitive beliefs. In the current proposal,
-            belief is represented across 11 domains and 124 dimensions, creating a
-            structured state space rather than a short list of disconnected items.
-            The goal is not simply to assign people scores, but to map where
-            beliefs appear stable, where they appear conflicted, and where they
-            appear highly sensitive to context.
+            contradictory, or context-sensitive beliefs. In the current proposal,{" "}
+            <strong className="font-semibold text-foreground">
+              belief is represented across 11 domains and 124 dimensions
+            </strong>
+            , creating a structured state space rather than a short list of
+            disconnected items. The goal is not simply to assign people scores,
+            but to map where beliefs appear stable, where they appear conflicted,
+            and{" "}
+            <strong className="font-semibold text-foreground">
+              where they appear highly sensitive to context
+            </strong>
+            .
           </p>
           <p className={P_CLS}>
             One of the central hypotheses concerns midpoint responses. In many
