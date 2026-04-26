@@ -128,16 +128,22 @@ const SynthesisBody: ReactNode = (
       Within this architecture, the{" "}
       <span className={TERM_CLS}>Cognitive Qubit</span> is introduced as the
       proposed fundamental unit of analysis: a single belief dimension modeled
-      as a state in a low-dimensional Hilbert space. When a decision forces the
-      spinning color wheel to "freeze" — analogous to a strobe light — the
-      individual undergoes what we call a{" "}
-      <span className={TERM_CLS}>Collapse Event</span>, a decision-forcing
-      measurement that projects an indeterminate state onto a particular
-      response. Because intuitive (System 1) and deliberative (System 2)
-      processing can yield different outcomes, the BGP defines the{" "}
+      as a state in a low-dimensional Hilbert space.{" "}
+      <span className={NAME_CLS}>Meyers</span>, a fine art painter, draws on a
+      familiar studio lesson: opposing colors (vivid blue and bright orange)
+      mixed on a palette produce a muddy gray, but the same colors spun on a
+      wheel optically blend into a living, vibrating neutral gray. The BGP
+      uses this as an analogy for contradictory belief — a respondent's "5"
+      on a midpoint scale is often not apathy but the perceptual signature of
+      two honest, competing convictions held at once. When a decision forces
+      the spinning wheel to freeze, the individual undergoes what we call a{" "}
+      <span className={TERM_CLS}>Collapse Event</span>, projecting an
+      indeterminate state onto a single response. Because intuitive (System 1)
+      and deliberative (System 2) processing can yield different outcomes, the
+      BGP defines the{" "}
       <span className={TERM_CLS}>Collapse Gap</span> as an individual-level
-      metric intended to quantify divergence between fast and slow responses on
-      the same belief dimension.
+      metric of the divergence between fast and slow responses on the same
+      dimension.
     </p>
     <figure className="my-8 overflow-hidden rounded-xl border border-border bg-foreground/5 shadow-sm">
       <img
