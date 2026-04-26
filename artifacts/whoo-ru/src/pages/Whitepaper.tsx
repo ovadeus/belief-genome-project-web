@@ -618,13 +618,16 @@ function CollapseEventDemo() {
   };
 
   // Idle sway — gentle back-and-forth oscillation while in the indeterminate
-  // state, evoking quantum jitter rather than stillness.
+  // state, evoking quantum jitter rather than stillness. Uses a local
+  // controller so its cleanup can't accidentally cancel a spin/commit
+  // animation that has already been queued in animRef during the same tick.
   useEffect(() => {
     if (phase !== "idle") return;
     let cancelled = false;
+    let current: AnimationPlaybackControls | null = null;
     const sway = (target: number) => {
       if (cancelled) return;
-      animRef.current = animate(rotation, target, {
+      current = animate(rotation, target, {
         duration: 1.6,
         ease: "easeInOut",
         onComplete: () => sway(target === 3 ? -3 : 3),
@@ -633,7 +636,7 @@ function CollapseEventDemo() {
     sway(3);
     return () => {
       cancelled = true;
-      stopAnim();
+      current?.stop();
     };
   }, [phase, rotation]);
 
