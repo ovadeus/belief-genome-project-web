@@ -13,6 +13,7 @@ import AppShowcase from "./pages/AppShowcase";
 import Book from "./pages/Book";
 import MindMap from "./pages/MindMap";
 import ScoringWeighting from "./pages/ScoringWeighting";
+import AppliedQuantumPsychometrics from "./pages/AppliedQuantumPsychometrics";
 import Support from "./pages/Support";
 import SupportWeb from "./pages/SupportWeb";
 import SupportDesktop from "./pages/SupportDesktop";
@@ -67,6 +68,7 @@ function Router() {
       <Route path="/book" component={Book} />
       <Route path="/mindmap" component={MindMap} />
       <Route path="/scoring" component={ScoringWeighting} />
+      <Route path="/aqp/:slug" component={AppliedQuantumPsychometrics} />
       <Route path="/support" component={Support} />
       <Route path="/support/web" component={SupportWeb} />
       <Route path="/support/desktop" component={SupportDesktop} />

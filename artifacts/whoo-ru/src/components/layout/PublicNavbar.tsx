@@ -10,23 +10,36 @@ const GENOME_APP_URL = (
   (import.meta.env.VITE_GENOME_APP_URL as string | undefined) || "/genome-app/"
 ).replace(/\/$/, "");
 
-const TOP_LINKS = [
-  { href: "/", label: "Home" },
-  { href: "/app", label: "Participate" },
-  { href: "/explore", label: "Explore Beliefs" },
-  { href: "/blog", label: "Blog" },
+type DropdownItem = { href: string; label: string };
+
+type NavItem =
+  | { kind: "link"; href: string; label: string }
+  | { kind: "dropdown"; label: string; items: DropdownItem[] };
+
+const AQP_ITEMS: DropdownItem[] = [
+  { href: "/aqp/fracture-rational-actor",   label: "I.   The Fracture of the Rational Actor" },
+  { href: "/aqp/quantum-cognition-midpoint",label: "II.  Quantum Cognition & The Midpoint Revelation" },
+  { href: "/aqp/society-quantum-field",     label: "III. Society as a Quantum Field" },
+  { href: "/aqp/mind-architecture",         label: "IV.  Mapping the Architecture of the Human Mind" },
+  { href: "/aqp/entropy-harvesting",        label: "V.   Entropy Harvesting & Why It Matters" },
+  { href: "/aqp/original-contributions",    label: "VI.  Original Contributions & The Path to Verification" },
+];
+
+const MEDIA_ITEMS: DropdownItem[] = [
+  { href: "/blog",    label: "Blog" },
   { href: "/podcast", label: "Podcast" },
-  { href: "/book", label: "Book" },
+  { href: "/book",    label: "Book" },
 ];
 
-const MORE_LINKS = [
-  { href: "/support", label: "Support" },
-  { href: "/mindmap", label: "Mind Map" },
-  { href: "/scoring", label: "Scoring & Weights" },
-  { href: "/about", label: "About" },
+const NAV_ITEMS: NavItem[] = [
+  { kind: "link",     href: "/",        label: "Home" },
+  { kind: "dropdown", label: "Applied Quantum Psychometrics", items: AQP_ITEMS },
+  { kind: "link",     href: "/app",     label: "Participate" },
+  { kind: "link",     href: "/explore", label: "Explore Beliefs" },
+  { kind: "dropdown", label: "Media",   items: MEDIA_ITEMS },
+  { kind: "link",     href: "/support", label: "Support" },
+  { kind: "link",     href: "/about",   label: "About" },
 ];
-
-const ALL_MORE_HREFS = MORE_LINKS.map(item => item.href);
 
 function GenomeAuthButton() {
   // The Belief Genome web app now lives on its own subdomain. The marketing
@@ -50,10 +63,20 @@ function GenomeAuthButton() {
   );
 }
 
-function MoreDropdown({ location }: { location: string }) {
+function NavDropdown({
+  label,
+  items,
+  location,
+  align = "left",
+}: {
+  label: string;
+  items: DropdownItem[];
+  location: string;
+  align?: "left" | "right";
+}) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-  const isActive = ALL_MORE_HREFS.some(h => location === h);
+  const isActive = items.some((i) => location === i.href || location.startsWith(i.href + "/"));
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -65,16 +88,19 @@ function MoreDropdown({ location }: { location: string }) {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+  // Auto-close when route changes
+  useEffect(() => { setOpen(false); }, [location]);
+
   return (
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
         className={cn(
-          "text-sm font-medium transition-colors hover:text-primary relative py-2 flex items-center gap-1",
+          "text-sm font-medium transition-colors hover:text-primary relative py-2 flex items-center gap-1 whitespace-nowrap",
           isActive ? "text-foreground" : "text-muted-foreground"
         )}
       >
-        More
+        {label}
         <ChevronDown size={14} className={cn("transition-transform", open && "rotate-180")} />
         {isActive && (
           <motion.div
@@ -91,21 +117,27 @@ function MoreDropdown({ location }: { location: string }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.15 }}
-            className="absolute top-full right-0 mt-2 min-w-[200px] bg-card/95 backdrop-blur-md border border-border rounded-lg shadow-xl shadow-foreground/20 py-2 z-50"
+            className={cn(
+              "absolute top-full mt-2 min-w-[260px] max-w-[420px] bg-card/95 backdrop-blur-md border border-border rounded-lg shadow-xl shadow-foreground/20 py-2 z-50",
+              align === "right" ? "right-0" : "left-0"
+            )}
           >
-            {MORE_LINKS.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setOpen(false)}
-                className={cn(
-                  "block px-4 py-2.5 text-sm transition-colors hover:bg-foreground/5",
-                  location === item.href ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {item.label}
-              </Link>
-            ))}
+            {items.map((item) => {
+              const active = location === item.href || location.startsWith(item.href + "/");
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setOpen(false)}
+                  className={cn(
+                    "block px-4 py-2.5 text-sm leading-snug transition-colors hover:bg-foreground/5",
+                    active ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
           </motion.div>
         )}
       </AnimatePresence>
@@ -135,44 +167,59 @@ export function PublicNavbar() {
       <header
         className={cn(
           "fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b backdrop-blur-xl",
-          isScrolled 
-            ? "bg-background/95 border-border shadow-lg shadow-foreground/10 py-4" 
+          isScrolled
+            ? "bg-background/95 border-border shadow-lg shadow-foreground/10 py-4"
             : "bg-background/90 border-transparent py-6"
         )}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-          <Link href="/" className="group">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-6">
+          <Link href="/" className="group shrink-0">
             <span className="font-display text-sm font-light text-muted-foreground tracking-wide group-hover:text-foreground/80 transition-colors">
               Belief Genome Project
             </span>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-8">
-            {TOP_LINKS.map((link) => (
-              <Link 
-                key={link.href} 
-                href={link.href}
-                className={cn(
-                  "text-sm font-medium transition-colors hover:text-primary relative py-2",
-                  location === link.href ? "text-foreground" : "text-muted-foreground"
-                )}
-              >
-                {link.label}
-                {location === link.href && (
-                  <motion.div
-                    layoutId="navbar-indicator"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"
-                    transition={{ type: "spring", bounce: 0.25, duration: 0.5 }}
-                  />
-                )}
-              </Link>
-            ))}
-            <MoreDropdown location={location} />
+          <nav className="hidden lg:flex items-center gap-6 xl:gap-7">
+            {NAV_ITEMS.map((item, idx) => {
+              if (item.kind === "link") {
+                const active = location === item.href;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cn(
+                      "text-sm font-medium transition-colors hover:text-primary relative py-2 whitespace-nowrap",
+                      active ? "text-foreground" : "text-muted-foreground"
+                    )}
+                  >
+                    {item.label}
+                    {active && (
+                      <motion.div
+                        layoutId="navbar-indicator"
+                        className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"
+                        transition={{ type: "spring", bounce: 0.25, duration: 0.5 }}
+                      />
+                    )}
+                  </Link>
+                );
+              }
+              // Right-align the last dropdown to keep its panel on screen.
+              const align = idx > NAV_ITEMS.length / 2 ? "right" : "left";
+              return (
+                <NavDropdown
+                  key={item.label}
+                  label={item.label}
+                  items={item.items}
+                  location={location}
+                  align={align}
+                />
+              );
+            })}
             <GenomeAuthButton />
           </nav>
 
-          <button 
-            className="md:hidden p-3 -mr-2 text-foreground active:scale-90 transition-transform"
+          <button
+            className="lg:hidden p-3 -mr-2 text-foreground active:scale-90 transition-transform"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle menu"
           >
@@ -187,41 +234,51 @@ export function PublicNavbar() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-0 z-40 bg-background/95 backdrop-blur-xl pt-24 px-4 pb-8 flex flex-col md:hidden overflow-y-auto"
+            className="fixed inset-0 z-40 bg-background/95 backdrop-blur-xl pt-24 px-6 pb-8 flex flex-col lg:hidden overflow-y-auto"
           >
-            <div className="flex flex-col gap-5 items-center justify-center flex-1">
-              {TOP_LINKS.map((link) => (
-                <Link 
-                  key={link.href} 
-                  href={link.href}
-                  className={cn(
-                    "text-2xl font-display font-semibold transition-colors",
-                    location === link.href ? "text-primary" : "text-foreground"
-                  )}
-                >
-                  {link.label}
-                </Link>
-              ))}
+            <div className="flex flex-col gap-3 pb-8">
+              {NAV_ITEMS.map((item) =>
+                item.kind === "link" ? (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cn(
+                      "py-2 text-xl font-display font-semibold transition-colors",
+                      location === item.href ? "text-primary" : "text-foreground"
+                    )}
+                  >
+                    {item.label}
+                  </Link>
+                ) : (
+                  <div key={item.label} className="pt-3">
+                    <div className="text-[11px] font-semibold tracking-[0.16em] uppercase text-muted-foreground mb-2">
+                      {item.label}
+                    </div>
+                    <ul className="space-y-1 pl-1">
+                      {item.items.map((sub) => {
+                        const active =
+                          location === sub.href || location.startsWith(sub.href + "/");
+                        return (
+                          <li key={sub.href}>
+                            <Link
+                              href={sub.href}
+                              className={cn(
+                                "block py-2 text-base font-medium transition-colors",
+                                active ? "text-primary" : "text-foreground/80 hover:text-foreground"
+                              )}
+                            >
+                              {sub.label}
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                )
+              )}
 
-              <div className="w-12 h-px bg-border my-2" />
-
-              {MORE_LINKS.map((item) => (
-                <Link 
-                  key={item.href} 
-                  href={item.href}
-                  className={cn(
-                    "text-2xl font-display font-semibold transition-colors",
-                    location === item.href ? "text-primary" : "text-foreground"
-                  )}
-                >
-                  {item.label}
-                </Link>
-              ))}
-
-              <div className="w-12 h-px bg-border my-2" />
-              <div className="mt-4">
-                <GenomeAuthButton />
-              </div>
+              <div className="w-12 h-px bg-border my-4" />
+              <GenomeAuthButton />
             </div>
           </motion.div>
         )}
