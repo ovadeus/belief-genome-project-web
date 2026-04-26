@@ -131,7 +131,7 @@ const SynthesisBody: ReactNode = (
       as a state in a low-dimensional Hilbert space.{" "}
       <span className={NAME_CLS}>Meyers</span>, a fine art painter, draws on a
       familiar studio lesson: opposing colors (vivid blue and bright orange)
-      mixed on a palette produce a muddy gray, but the same colors spun on a
+      mixed on a palette produce a muddy gray, while the same colors spun on a
       wheel optically blend into a living, vibrating neutral gray. The BGP
       uses this as an analogy for contradictory belief — a respondent's "5"
       on a midpoint scale is often not apathy but the perceptual signature of
