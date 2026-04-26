@@ -1,10 +1,24 @@
+import { useEffect, useState } from "react";
 import { Link } from "wouter";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight, Brain, Compass, Users } from "lucide-react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { TripleHelixCanvas } from "@/components/ui/TripleHelixCanvas";
 import { usePublicBlog } from "@/hooks/use-blog";
 import { format } from "date-fns";
+import bgpScreen01 from "@assets/bgp-screen01_1777227170316.png";
+import bgpScreen02 from "@assets/bgp-screen02_1777227170315.png";
+import bgpScreen03 from "@assets/bgp-screen03_1777227170315.png";
+import bgpScreen04 from "@assets/bgp-screen04_1777227170315.png";
+import bgpScreen05 from "@assets/bgp-screen05_1777227170314.png";
+
+const BGP_SCREENS: { src: string; alt: string }[] = [
+  { src: bgpScreen01, alt: "Belief DNA — dimensional grid across 11 categories" },
+  { src: bgpScreen02, alt: "Triple Helix — Logos, Pathos, and Ethos visualization" },
+  { src: bgpScreen03, alt: "Neuromap — 3D belief network in motion" },
+  { src: bgpScreen04, alt: "World View Radar — ideological position plot" },
+  { src: bgpScreen05, alt: "Mind Map — cross-category belief connections" },
+];
 
 const GENOME_APP_URL = (
   (import.meta.env.VITE_GENOME_APP_URL as string | undefined) || "/genome-app/"
@@ -12,6 +26,14 @@ const GENOME_APP_URL = (
 
 export default function Home() {
   const { data: blogData } = usePublicBlog({ limit: 3 });
+  const [screenIdx, setScreenIdx] = useState(0);
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setScreenIdx((i) => (i + 1) % BGP_SCREENS.length);
+    }, 4500);
+    return () => window.clearInterval(id);
+  }, []);
 
   return (
     <PublicLayout>
@@ -74,6 +96,41 @@ export default function Home() {
           <p className="text-xl text-muted-foreground leading-relaxed">
             The Belief Genome Project is a psychometric framework and visualization engine designed to map the 124 dimensions of your cognitive, emotional, and philosophical worldview. We examine human beliefs as quantum bits (qubits) holding superpositions that change over time. It is a quantified reflection of your mind, heart, and soul.
           </p>
+
+          {/* SCREEN CAROUSEL */}
+          <div className="mt-16 mx-auto w-full" style={{ maxWidth: 980 }}>
+            <div className="relative w-full">
+              <AnimatePresence mode="wait">
+                <motion.img
+                  key={screenIdx}
+                  src={BGP_SCREENS[screenIdx].src}
+                  alt={BGP_SCREENS[screenIdx].alt}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.9, ease: "easeInOut" }}
+                  className="w-full h-auto rounded-xl border border-border/40 shadow-2xl shadow-black/40"
+                />
+              </AnimatePresence>
+            </div>
+
+            <div className="flex justify-center items-center gap-2.5 mt-6">
+              {BGP_SCREENS.map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setScreenIdx(i)}
+                  aria-label={`Show screen ${i + 1}`}
+                  aria-current={i === screenIdx}
+                  className={`h-2.5 rounded-full transition-all duration-300 ${
+                    i === screenIdx
+                      ? "w-2.5 bg-primary"
+                      : "w-2.5 bg-neutral-700 hover:bg-neutral-500"
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
