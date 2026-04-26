@@ -156,7 +156,7 @@ const FRONTIER_AVENUES: { label: string; body: ReactNode }[] = [
     label: "Research on wicked problems",
     body: (
       <>
-        Aggregated BGP-style architectures might provide population-level maps
+        Aggregated BGP-style architectures will provide population-level maps
         of belief configurations that underlie policy preferences and collective
         action, complementing existing survey and modeling tools.
       </>
