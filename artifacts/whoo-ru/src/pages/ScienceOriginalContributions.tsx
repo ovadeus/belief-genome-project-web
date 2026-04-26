@@ -40,9 +40,10 @@ const CONSTRUCTS: Construct[] = [
         Standard psychometric instruments measure a small number of related dimensions, typically
         a single latent construct decomposed into a handful of sub-scales. Quantum cognition
         research, to the project's knowledge, has used the formalism primarily to model specific
-        cognitive effects in laboratory tasks (categorization, question-order effects, decision
-        making) rather than to specify a fixed, high-dimensional whole-worldview architecture.
-        The 124-dimension architecture is designed with the intent of enabling observation of
+        cognitive effects in laboratory tasks — categorization, question-order effects, decision
+        making — rather than to specify a fixed, high-dimensional whole-worldview architecture
+        (Aerts et al., 2013; Wang et al., 2014; reviewed in Pothos &amp; Busemeyer, 2022). The
+        124-dimension architecture is designed with the intent of enabling observation of
         cross-dimensional interference and entanglement at a resolution smaller-scale instruments
         cannot capture. Whether such patterns will in fact emerge in this architecture is an
         empirical question awaiting test.
@@ -63,7 +64,7 @@ const CONSTRUCTS: Construct[] = [
     differs: (
       <>
         The use of two-dimensional Hilbert spaces to represent binary cognitive judgments is
-        standard within quantum cognition. What the{" "}
+        standard within quantum cognition (Busemeyer &amp; Bruza, 2024). What the{" "}
         <span className={TERM_CLS}>Cognitive Que-Bit</span> proposes is the elevation of this
         representation into a standardized cross-domain unit deployed identically across a fixed
         124-dimension architecture, rather than as a per-task modeling choice.{" "}
@@ -71,7 +72,7 @@ const CONSTRUCTS: Construct[] = [
         <span className={NAME_CLS}>Bruza</span>'s framework does not propose a single omnibus
         unit of belief measurement of this kind. <span className={NAME_CLS}>Khrennikov</span>'s
         Social Laser theory models social atoms in terms of social energy and population states
-        rather than detailed internal belief coordinates. The{" "}
+        rather than detailed internal belief coordinates (Khrennikov, 2020). The{" "}
         <span className={TERM_CLS}>Que-Bit</span> is novel in its naming and in its proposed role
         as an architectural primitive — its empirical adequacy in that role remains to be
         demonstrated.
@@ -95,11 +96,12 @@ const CONSTRUCTS: Construct[] = [
       <>
         Quantum cognition has long modeled choices, survey responses, and decisions as
         measurements that collapse cognitive states; this conceptual move is well established
-        within the program. The <span className={TERM_CLS}>Collapse Event</span> proposes a
-        unification of these treatments — formalizing the diverse decision-forcing moments of
-        everyday life as distinct operators within a single structured belief architecture rather
-        than as task-specific modeling choices. The conceptual move is incremental rather than
-        radical, but the unified, architecture-level treatment is original to this proposal.
+        within the program (Pothos &amp; Busemeyer, 2013; Busemeyer &amp; Bruza, 2024). The{" "}
+        <span className={TERM_CLS}>Collapse Event</span> proposes a unification of these
+        treatments — formalizing the diverse decision-forcing moments of everyday life as
+        distinct operators within a single structured belief architecture rather than as
+        task-specific modeling choices. The conceptual move is incremental rather than radical,
+        but the unified, architecture-level treatment is original to this proposal.
       </>
     ),
   },
@@ -116,9 +118,9 @@ const CONSTRUCTS: Construct[] = [
     ),
     differs: (
       <>
-        <span className={NAME_CLS}>Daniel Kahneman</span>'s dual-process theory establishes the
-        qualitative distinction between System 1 and System 2. Quantum cognition models
-        interference between cognitive states. The{" "}
+        <span className={NAME_CLS}>Daniel Kahneman</span>'s dual-process theory (Kahneman, 2011)
+        establishes the qualitative distinction between System 1 and System 2. Quantum cognition
+        models interference between cognitive states (Busemeyer &amp; Bruza, 2024). The{" "}
         <span className={TERM_CLS}>Collapse Gap</span> proposes to fuse these two threads —
         operationalizing the divergence between fast and slow collapse on the same dimension as a
         directly measurable, dimension-level metric routinely produced by the instrument. The
@@ -144,12 +146,13 @@ const CONSTRUCTS: Construct[] = [
       <>
         Classical psychometrics is generally designed to maximize signal-to-noise ratios,
         treating contextual variance and micro-behavioral fluctuation as nuisance. Quantum-like
-        and contextual models within cognitive science take context effects seriously, but the
-        project is not aware of a documented methodology under this or a similar name that
-        systematically captures micro-behavioral signals and contextual drift during low-stakes
-        interactions as primary data. <span className={TERM_CLS}>Entropy Harvesting</span> is
-        offered as a candidate methodology; its instrumentation, validation, and analytical
-        pipelines remain to be developed and tested.
+        and contextual models within cognitive science take context effects seriously (Pothos
+        &amp; Busemeyer, 2022; Wang et al., 2014), but the project is not aware of a documented
+        methodology under this or a similar name that systematically captures micro-behavioral
+        signals and contextual drift during low-stakes interactions as primary data.{" "}
+        <span className={TERM_CLS}>Entropy Harvesting</span> is offered as a candidate
+        methodology; its instrumentation, validation, and analytical pipelines remain to be
+        developed and tested.
       </>
     ),
   },
@@ -169,8 +172,8 @@ const CONSTRUCTS: Construct[] = [
       <>
         Existing quantum-cognition research focuses on modeling response probabilities and
         effects at the level of specific tasks rather than on producing compact, portable
-        fingerprints of individual worldviews. Classical psychometrics produces aggregate scores
-        within particular instruments. The{" "}
+        fingerprints of individual worldviews (Pothos &amp; Busemeyer, 2022). Classical
+        psychometrics produces aggregate scores within particular instruments. The{" "}
         <span className={TERM_CLS}>Belief Genome Serial</span> proposes a novel output format
         intended to make individual belief states portable, comparable, and machine-readable
         across contexts. Its specific length, encoding scheme, and analytical utility are
@@ -206,6 +209,100 @@ const CONSTRUCTS: Construct[] = [
   },
 ];
 
+// References & Further Reading. Each reference renders APA-style with a
+// clickable DOI link (where available) that opens in a new tab.
+type Reference = {
+  authors: string;
+  year: string;
+  title: ReactNode; // ReactNode so we can include &amp;-style entities cleanly
+  source: ReactNode; // includes journal/publisher and trailing punctuation
+  doi?: string;
+};
+
+type ReferenceGroup = {
+  heading: string;
+  refs: Reference[];
+};
+
+const REFERENCES: ReferenceGroup[] = [
+  {
+    heading: "Quantum Cognition: Foundational Texts",
+    refs: [
+      {
+        authors: "Busemeyer, J. R., & Bruza, P. D.",
+        year: "2012",
+        title: "Quantum models of cognition and decision.",
+        source: "Cambridge University Press.",
+      },
+      {
+        authors: "Busemeyer, J. R., & Bruza, P. D.",
+        year: "2024",
+        title: "Quantum models of cognition and decision: Principles and applications",
+        source: " (2nd ed.). Cambridge University Press.",
+        doi: "https://doi.org/10.1017/9781009205351",
+      },
+      {
+        authors: "Pothos, E. M., & Busemeyer, J. R.",
+        year: "2013",
+        title: "Can quantum probability provide a new direction for cognitive modeling?",
+        source: " Behavioral and Brain Sciences, 36(3), 255–274.",
+        doi: "https://doi.org/10.1017/S0140525X12001525",
+      },
+      {
+        authors: "Pothos, E. M., & Busemeyer, J. R.",
+        year: "2022",
+        title: "Quantum cognition.",
+        source: " Annual Review of Psychology, 73, 749–778.",
+        doi: "https://doi.org/10.1146/annurev-psych-033020-123501",
+      },
+    ],
+  },
+  {
+    heading: "The QQ Equality",
+    refs: [
+      {
+        authors: "Wang, Z., Solloway, T., Shiffrin, R. M., & Busemeyer, J. R.",
+        year: "2014",
+        title:
+          "Context effects produced by question orders reveal quantum nature of human judgments.",
+        source: " Proceedings of the National Academy of Sciences, 111(26), 9431–9436.",
+        doi: "https://doi.org/10.1073/pnas.1407756111",
+      },
+    ],
+  },
+  {
+    heading: "Concepts as Quantum-Like States",
+    refs: [
+      {
+        authors: "Aerts, D., Gabora, L., & Sozzo, S.",
+        year: "2013",
+        title:
+          "Concepts and their dynamics: A quantum-theoretic modeling of human thought.",
+        source: " Topics in Cognitive Science, 5(4), 737–772.",
+        doi: "https://doi.org/10.1111/tops.12042",
+      },
+    ],
+  },
+  {
+    heading: "Quantum Social Theory",
+    refs: [
+      {
+        authors: "Khrennikov, A.",
+        year: "2010",
+        title: "Ubiquitous quantum structure: From psychology to finance.",
+        source: "Springer.",
+      },
+      {
+        authors: "Khrennikov, A.",
+        year: "2020",
+        title:
+          "Social laser: Application of quantum information and field theories to modeling of social processes.",
+        source: "Jenny Stanford Publishing.",
+      },
+    ],
+  },
+];
+
 const BODY: ReactNode = (
   <>
     {/* Section 1 — The Inheritance vs. The Original Synthesis */}
@@ -216,12 +313,14 @@ const BODY: ReactNode = (
       The Belief Genome Project draws on a body of peer-reviewed scholarship in quantum cognition
       and quantum-like social theory. The mathematical formalism developed by{" "}
       <span className={NAME_CLS}>Jerome Busemeyer</span> and{" "}
-      <span className={NAME_CLS}>Peter Bruza</span>, the empirical work on the QQ equality by{" "}
-      <span className={NAME_CLS}>Wang, Solloway, Shiffrin, and Busemeyer</span>, the Social Laser
-      theory advanced by <span className={NAME_CLS}>Andrei Khrennikov</span>, and the
-      quantum-social ontology articulated by <span className={NAME_CLS}>Alexander Wendt</span>{" "}
-      are all serious scholarly contributions, each published in peer-reviewed venues and engaged
-      with by other researchers in their respective subfields.
+      <span className={NAME_CLS}>Peter Bruza</span> (2012, 2024), the empirical work on the QQ
+      equality by{" "}
+      <span className={NAME_CLS}>Wang, Solloway, Shiffrin, and Busemeyer</span> (2014), the
+      Social Laser theory advanced by <span className={NAME_CLS}>Andrei Khrennikov</span> (2010,
+      2020), and the quantum-social ontology articulated by{" "}
+      <span className={NAME_CLS}>Alexander Wendt</span> (2015) are all serious scholarly
+      contributions, each published in peer-reviewed venues and engaged with by other researchers
+      in their respective subfields.
     </p>
     <p className={P_CLS}>
       These works are not, however, consensus foundations of mainstream cognitive science. They
@@ -229,13 +328,15 @@ const BODY: ReactNode = (
       niche relative to the broader literature. Their levels of empirical support also differ:
       the QQ equality has the strongest evidence base, demonstrated by{" "}
       <span className={NAME_CLS}>Wang</span> and colleagues across roughly 70 national survey
-      datasets and subsequently applied and extended in additional studies;{" "}
+      datasets and subsequently applied and extended in additional studies (Wang et al., 2014);{" "}
       <span className={NAME_CLS}>Busemeyer</span> and{" "}
       <span className={NAME_CLS}>Bruza</span>'s broader formalism has been used to model a range
-      of decision and judgment phenomena; <span className={NAME_CLS}>Khrennikov</span>'s Social
-      Laser theory remains primarily a theoretical and modeling framework with limited direct
-      empirical replication; <span className={NAME_CLS}>Wendt</span>'s quantum-social ontology is
-      largely theoretical and philosophical, and remains contested within social science.
+      of decision and judgment phenomena (see Pothos &amp; Busemeyer, 2013, 2022, for
+      state-of-the-field reviews); <span className={NAME_CLS}>Khrennikov</span>'s Social Laser
+      theory remains primarily a theoretical and modeling framework with limited direct empirical
+      replication (Khrennikov, 2020); <span className={NAME_CLS}>Wendt</span>'s quantum-social
+      ontology is largely theoretical and philosophical, and remains contested within social
+      science (Wendt, 2015).
     </p>
     <p className={P_CLS}>
       What the Belief Genome Project adds is not new physics or new mathematics. It is a proposed
@@ -316,10 +417,10 @@ const BODY: ReactNode = (
     <p className={P_CLS}>
       The two interpretations are empirically distinguishable in principle. The test requires no
       novel mathematical formalism beyond what <span className={NAME_CLS}>Busemeyer</span> and{" "}
-      <span className={NAME_CLS}>Bruza</span> have developed, and conceptually extends the design{" "}
-      <span className={NAME_CLS}>Wang</span> and colleagues used to test QQ equality on roughly
-      70 national survey datasets. Within-subject designs with subgroup stratification will
-      increase sample-size requirements relative to the original{" "}
+      <span className={NAME_CLS}>Bruza</span> (2024) have developed, and conceptually extends the
+      design <span className={NAME_CLS}>Wang</span> and colleagues used to test QQ equality on
+      roughly 70 national survey datasets (Wang et al., 2014). Within-subject designs with
+      subgroup stratification will increase sample-size requirements relative to the original{" "}
       <span className={NAME_CLS}>Wang et al.</span> studies, but the design appears tractable
       within standard survey research budgets given careful power analysis.
     </p>
@@ -355,6 +456,48 @@ const BODY: ReactNode = (
       We invite the scientific, technological, and research communities to help us test the
       blueprint of the human mind.
     </p>
+
+    {/* Section 6 — References & Further Reading */}
+    <h2 className={H2_CLS}>References &amp; Further Reading</h2>
+    <p className={P_CLS}>
+      The works below are the primary peer-reviewed sources the Belief Genome Project draws on.
+      Readers interested in evaluating the inheritance, the construct claims, or the proposed
+      falsification test will find each citation a useful entry point into the broader
+      literature.
+    </p>
+    <div className="mt-6">
+      {REFERENCES.map((group) => (
+        <section key={group.heading} className="mb-8">
+          <h3 className="text-[11px] font-semibold tracking-[0.18em] uppercase text-primary mt-8 mb-4 font-display">
+            {group.heading}
+          </h3>
+          <ul className="space-y-4 list-none pl-0">
+            {group.refs.map((ref, i) => (
+              <li
+                key={`${group.heading}-${i}`}
+                className="pl-6 -indent-6 text-sm leading-relaxed text-foreground/75"
+              >
+                {ref.authors} ({ref.year}). <em>{ref.title}</em>
+                {ref.source}
+                {ref.doi && (
+                  <>
+                    {" "}
+                    <a
+                      href={ref.doi}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline break-all"
+                    >
+                      {ref.doi}
+                    </a>
+                  </>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+    </div>
   </>
 );
 
