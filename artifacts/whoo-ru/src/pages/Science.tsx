@@ -39,12 +39,12 @@ const FractureBody: ReactNode = (
       fallacy — showed that people routinely rate the conjunction of two events as more probable
       than one of its constituents. This is not a calculation error. It is evidence that human
       cognition operates under different rules than classical probability prescribes. Across the
-      same period, <span className={NAME_CLS}>Allais</span> and{" "}
-      <span className={NAME_CLS}>Ellsberg</span> showed that preferences violate independence and
-      ambiguity axioms in ways no mixture of classical probabilities can repair.{" "}
-      <span className={NAME_CLS}>Festinger</span>'s work on cognitive dissonance established that
-      people hold contradictory beliefs simultaneously — a finding fundamentally incompatible
-      with the classical assumption that belief states are always coherent.
+      same period, <span className={NAME_CLS}>Maurice Allais</span> and{" "}
+      <span className={NAME_CLS}>Daniel Ellsberg</span> showed that preferences violate
+      independence and ambiguity axioms in ways no mixture of classical probabilities can repair.{" "}
+      <span className={NAME_CLS}>Leon Festinger</span>'s work on cognitive dissonance established
+      that people hold contradictory beliefs simultaneously — a finding fundamentally
+      incompatible with the classical assumption that belief states are always coherent.
     </p>
     <p className={P_CLS}>
       The cumulative weight of this evidence points to something the classical framework cannot
