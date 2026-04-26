@@ -163,6 +163,16 @@ const FRONTIER_AVENUES: { label: string; body: ReactNode }[] = [
     ),
   },
   {
+    label: "Self-exploration tools",
+    body: (
+      <>
+        Committed engagement could allow individuals to explore patterns of
+        consistency, conflict, and change in their own beliefs over time, for
+        personal growth and core understanding.
+      </>
+    ),
+  },
+  {
     label: "AI–human preference modeling",
     body: (
       <>
@@ -171,16 +181,6 @@ const FRONTIER_AVENUES: { label: string; body: ReactNode }[] = [
         potential applications in personal assistants, robotics, and broader AI
         systems. Realizing this potential will require rigorous empirical
         validation and robust ethical safeguards.
-      </>
-    ),
-  },
-  {
-    label: "Self-exploration tools",
-    body: (
-      <>
-        Committed engagement could allow individuals to explore patterns of
-        consistency, conflict, and change in their own beliefs over time, for
-        personal growth and core understanding.
       </>
     ),
   },
