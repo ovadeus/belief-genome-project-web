@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { ArrowRight, Brain, Compass, Users } from "lucide-react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { TripleHelixCanvas } from "@/components/ui/TripleHelixCanvas";
@@ -39,13 +39,28 @@ const GENOME_APP_URL = (
 export default function Home() {
   const { data: blogData } = usePublicBlog({ limit: 3 });
   const [screenIdx, setScreenIdx] = useState(0);
+  const [aspectRatios, setAspectRatios] = useState<Record<number, number>>({});
+
+  useEffect(() => {
+    BGP_SCREENS.forEach((s, i) => {
+      const img = new Image();
+      img.onload = () => {
+        setAspectRatios((prev) =>
+          prev[i] ? prev : { ...prev, [i]: img.naturalHeight / img.naturalWidth }
+        );
+      };
+      img.src = s.src;
+    });
+  }, []);
 
   useEffect(() => {
     const id = window.setInterval(() => {
       setScreenIdx((i) => (i + 1) % BGP_SCREENS.length);
-    }, 4500);
+    }, 5000);
     return () => window.clearInterval(id);
   }, []);
+
+  const currentAspect = aspectRatios[screenIdx] ?? 0.78;
 
   return (
     <PublicLayout>
@@ -111,20 +126,25 @@ export default function Home() {
 
           {/* SCREEN CAROUSEL */}
           <div className="mt-16 mx-auto w-full" style={{ maxWidth: 980 }}>
-            <div className="relative w-full">
-              <AnimatePresence mode="wait">
+            <motion.div
+              className="relative w-full rounded-xl border border-border/40 shadow-2xl shadow-black/40 overflow-hidden bg-card/40"
+              animate={{ paddingBottom: `${currentAspect * 100}%` }}
+              transition={{ duration: 1.0, ease: [0.4, 0, 0.2, 1] }}
+            >
+              {BGP_SCREENS.map((s, i) => (
                 <motion.img
-                  key={screenIdx}
-                  src={BGP_SCREENS[screenIdx].src}
-                  alt={BGP_SCREENS[screenIdx].alt}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.9, ease: "easeInOut" }}
-                  className="w-full h-auto rounded-xl border border-border/40 shadow-2xl shadow-black/40"
+                  key={i}
+                  src={s.src}
+                  alt={s.alt}
+                  draggable={false}
+                  initial={false}
+                  animate={{ opacity: i === screenIdx ? 1 : 0 }}
+                  transition={{ duration: 1.0, ease: "easeInOut" }}
+                  className="absolute inset-0 w-full h-full object-contain select-none"
+                  style={{ pointerEvents: i === screenIdx ? "auto" : "none" }}
                 />
-              </AnimatePresence>
-            </div>
+              ))}
+            </motion.div>
 
             <div className="flex justify-center items-center gap-2.5 mt-6">
               {BGP_SCREENS.map((_, i) => (
@@ -134,10 +154,10 @@ export default function Home() {
                   onClick={() => setScreenIdx(i)}
                   aria-label={`Show screen ${i + 1}`}
                   aria-current={i === screenIdx}
-                  className={`h-2.5 rounded-full transition-all duration-300 ${
+                  className={`h-2.5 w-2.5 rounded-full transition-colors duration-300 ${
                     i === screenIdx
-                      ? "w-2.5 bg-primary"
-                      : "w-2.5 bg-neutral-700 hover:bg-neutral-500"
+                      ? "bg-primary"
+                      : "bg-neutral-700 hover:bg-neutral-500"
                   }`}
                 />
               ))}
