@@ -13,7 +13,7 @@ import AppShowcase from "./pages/AppShowcase";
 import Book from "./pages/Book";
 import MindMap from "./pages/MindMap";
 import ScoringWeighting from "./pages/ScoringWeighting";
-import Science from "./pages/Science";
+import Whitepaper from "./pages/Whitepaper";
 import Overview from "./pages/Overview";
 import ScienceOriginalContributions from "./pages/ScienceOriginalContributions";
 import Support from "./pages/Support";
@@ -70,7 +70,7 @@ function Router() {
       <Route path="/book" component={Book} />
       <Route path="/mindmap" component={MindMap} />
       <Route path="/scoring" component={ScoringWeighting} />
-      <Route path="/science" component={Science} />
+      <Route path="/science" component={Whitepaper} />
       <Route path="/science/original-contributions" component={ScienceOriginalContributions} />
       <Route path="/overview" component={Overview} />
       <Route path="/support" component={Support} />
