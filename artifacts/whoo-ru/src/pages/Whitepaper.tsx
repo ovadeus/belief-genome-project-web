@@ -10,6 +10,7 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import { cn } from "@/lib/utils";
+import { BeliefScale } from "@/components/support/BeliefScale";
 import whoAreYouVideo from "@assets/who-are-you_1777238654031.mp4";
 
 type Section = {
@@ -567,6 +568,43 @@ function TimelineDot({ entry }: { entry: TimelineEntry }) {
   );
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Entropy State Slider — interactive demo embedded between Section II
+// (Quantum Grammar) and Section III. Mirrors the slider on the
+// /support/web#scoring page so behavior, styling, and color mapping stay in
+// sync via the shared BeliefScale component.
+// ─────────────────────────────────────────────────────────────────────────────
+
+function EntropyStateSliderDemo() {
+  const [demoSlider, setDemoSlider] = useState(50);
+
+  return (
+    <motion.section
+      aria-label="Entropy State Slider demo"
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-80px" }}
+      transition={{ duration: 0.5 }}
+      className="my-4"
+    >
+      <h4 className="text-foreground font-display font-semibold mb-3">Interactive Demo</h4>
+      <p className="text-muted-foreground text-sm mb-4">Drag the slider to see how your position maps to a belief label:</p>
+      <div className="p-5 rounded-xl bg-card border border-border">
+        <input
+          type="range"
+          min={0}
+          max={100}
+          value={demoSlider}
+          onChange={e => setDemoSlider(parseInt(e.target.value))}
+          aria-label="Belief score demo slider"
+          className="w-full mb-4 accent-primary"
+        />
+        <BeliefScale variant="gradient" value={demoSlider} />
+      </div>
+    </motion.section>
+  );
+}
+
 function HeritageTimeline() {
   // Counts per band — used to size the underlying colored line + legend bar.
   // Adjust these if entries are added/removed and they will stay in proportion.
@@ -880,6 +918,10 @@ export default function Whitepaper() {
 
                   {/* Inject the Heritage Timeline between Section I and II. */}
                   {s.id === "heritage" && <HeritageTimeline />}
+
+                  {/* Inject the Entropy State Slider demo between Section II
+                      and Section III. */}
+                  {s.id === "quantum-grammar" && <EntropyStateSliderDemo />}
                 </Fragment>
               ))}
             </div>
