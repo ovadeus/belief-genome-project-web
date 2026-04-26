@@ -1,11 +1,11 @@
 import { motion } from "framer-motion";
 import { PublicLayout } from "@/components/layout/PublicLayout";
+import { PersonHoverCard } from "@/components/PersonHoverCard";
 
 const P_CLS = "mb-5 leading-relaxed text-foreground/85";
 const H2_CLS =
   "mt-14 mb-5 text-2xl md:text-3xl font-display font-bold text-foreground";
 const TERM_CLS = "font-semibold text-primary";
-const NAME_CLS = "font-semibold text-primary";
 
 type Concept = { term: string; body: string };
 
@@ -87,18 +87,22 @@ export default function Overview() {
           <p className={P_CLS}>
             The framework is inspired by three adjacent lines of work. The first
             is quantum cognition, especially the work of{" "}
-            <span className={NAME_CLS}>Jerome R. Busemeyer</span> and{" "}
-            <span className={NAME_CLS}>Peter D. Bruza</span>, which shows how
-            quantum probability can be used to model judgment and decision
-            phenomena that classical probability often struggles to capture. The
-            second is the empirical literature on question-order effects,
-            particularly the <span className={TERM_CLS}>QQ equality</span>, which
-            provides one of the strongest demonstrations that context-sensitive
-            judgments can display lawful statistical structure rather than mere
-            noise. The third is quantum-like social theory, including work by{" "}
-            <span className={NAME_CLS}>Alexander Wendt</span> and{" "}
-            <span className={NAME_CLS}>Andrei Khrennikov</span>, which extends
-            similar ideas to social ontology and population-level dynamics.
+            <PersonHoverCard name="Jerome R. Busemeyer" slug="Jerome_Busemeyer" />
+            {" "}and{" "}
+            <PersonHoverCard name="Peter D. Bruza" slug="Peter_Bruza" />, which
+            shows how quantum probability can be used to model judgment and
+            decision phenomena that classical probability often struggles to
+            capture. The second is the empirical literature on question-order
+            effects, particularly the <span className={TERM_CLS}>QQ equality</span>,
+            which provides one of the strongest demonstrations that
+            context-sensitive judgments can display lawful statistical structure
+            rather than mere noise. The third is quantum-like social theory,
+            including work by{" "}
+            <PersonHoverCard name="Alexander Wendt" slug="Alexander_Wendt" />
+            {" "}and{" "}
+            <PersonHoverCard name="Andrei Khrennikov" slug="Andrei_Khrennikov" />,
+            which extends similar ideas to social ontology and population-level
+            dynamics.
           </p>
 
           <h2 className={H2_CLS}>Why Existing Models Fall Short</h2>
