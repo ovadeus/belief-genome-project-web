@@ -377,6 +377,14 @@ export default function Science() {
                   <li key={s.id}>
                     <a
                       href={`#${s.id}`}
+                      onClick={(e) => {
+                        const el = document.getElementById(s.id);
+                        if (!el) return;
+                        e.preventDefault();
+                        el.scrollIntoView({ behavior: "smooth", block: "start" });
+                        window.history.replaceState(null, "", `#${s.id}`);
+                        setActiveId(s.id);
+                      }}
                       className={cn(
                         "block rounded-lg px-3 py-2 text-sm leading-snug transition-colors",
                         active
