@@ -281,7 +281,7 @@ const EmpiricalHorizonBody: ReactNode = (
   </>
 );
 
-export const SCIENCE_SECTIONS: Section[] = [
+export const WHITEPAPER_SECTIONS: Section[] = [
   {
     id: "heritage",
     numeral: "I",
@@ -366,13 +366,13 @@ const REFERENCES: Reference[] = [
   },
 ];
 
-const ORIGINAL_CONTRIBUTIONS_HREF = "/science/original-contributions";
+const ORIGINAL_CONTRIBUTIONS_HREF = "/whitepaper/original-contributions";
 
-export default function Science() {
-  const [activeId, setActiveId] = useState<string>(SCIENCE_SECTIONS[0].id);
+export default function Whitepaper() {
+  const [activeId, setActiveId] = useState<string>(WHITEPAPER_SECTIONS[0].id);
 
   // Smooth-scroll to a hash on mount (handles deep-link navigation from the
-  // navbar dropdown, e.g. /science#quantum-grammar).
+  // navbar dropdown, e.g. /whitepaper#quantum-grammar).
   useEffect(() => {
     const hash = window.location.hash.replace(/^#/, "");
     if (!hash) return;
@@ -381,7 +381,7 @@ export default function Science() {
     });
   }, []);
 
-  // Listen for in-page hash changes (clicking a sidebar anchor while already on /science).
+  // Listen for in-page hash changes (clicking a sidebar anchor while already on /whitepaper).
   useEffect(() => {
     const onHashChange = () => {
       const hash = window.location.hash.replace(/^#/, "");
@@ -393,7 +393,7 @@ export default function Science() {
 
   // Sidebar scroll-spy — highlights the section currently in view.
   useEffect(() => {
-    const ids = [...SCIENCE_SECTIONS.map((s) => s.id), "references"];
+    const ids = [...WHITEPAPER_SECTIONS.map((s) => s.id), "references"];
     const els = ids.map((id) => document.getElementById(id)).filter(Boolean) as HTMLElement[];
     if (els.length === 0) return;
     const observer = new IntersectionObserver(
@@ -410,7 +410,7 @@ export default function Science() {
   }, []);
 
   const sidebarItems: { id: string; numeral?: string; label: string }[] = [
-    ...SCIENCE_SECTIONS.map((s) => ({ id: s.id, numeral: s.numeral, label: s.title })),
+    ...WHITEPAPER_SECTIONS.map((s) => ({ id: s.id, numeral: s.numeral, label: s.title })),
     { id: "references", label: "Selected References" },
   ];
 
@@ -513,7 +513,7 @@ export default function Science() {
             </motion.header>
 
             <div className="space-y-20">
-              {SCIENCE_SECTIONS.map((s, i) => (
+              {WHITEPAPER_SECTIONS.map((s, i) => (
                 <motion.section
                   key={s.id}
                   id={s.id}

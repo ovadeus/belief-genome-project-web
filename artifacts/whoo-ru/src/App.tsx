@@ -1,4 +1,5 @@
-import { Switch, Route, Router as WouterRouter } from "wouter";
+import { useEffect } from "react";
+import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -15,7 +16,7 @@ import MindMap from "./pages/MindMap";
 import ScoringWeighting from "./pages/ScoringWeighting";
 import Whitepaper from "./pages/Whitepaper";
 import Overview from "./pages/Overview";
-import ScienceOriginalContributions from "./pages/ScienceOriginalContributions";
+import WhitepaperContributions from "./pages/WhitepaperContributions";
 import Support from "./pages/Support";
 import SupportWeb from "./pages/SupportWeb";
 import SupportDesktop from "./pages/SupportDesktop";
@@ -58,6 +59,17 @@ function GenomeRedirect({ path }: { path: string }) {
   return null;
 }
 
+// Preserves any URL hash (e.g. /science#heritage → /whitepaper#heritage) so
+// that legacy bookmarks and inbound links keep landing on the right section.
+function WhitepaperRedirect({ subpath = "" }: { subpath?: string }) {
+  const [, setLocation] = useLocation();
+  useEffect(() => {
+    const hash = typeof window !== "undefined" ? window.location.hash : "";
+    setLocation(`/whitepaper${subpath}${hash}`, { replace: true });
+  }, [setLocation, subpath]);
+  return null;
+}
+
 function Router() {
   usePageTracker();
   return (
@@ -70,8 +82,15 @@ function Router() {
       <Route path="/book" component={Book} />
       <Route path="/mindmap" component={MindMap} />
       <Route path="/scoring" component={ScoringWeighting} />
-      <Route path="/science" component={Whitepaper} />
-      <Route path="/science/original-contributions" component={ScienceOriginalContributions} />
+      <Route path="/whitepaper" component={Whitepaper} />
+      <Route path="/whitepaper/original-contributions" component={WhitepaperContributions} />
+      {/* Legacy /science URLs redirect to /whitepaper, preserving any #anchor. */}
+      <Route path="/science">
+        <WhitepaperRedirect />
+      </Route>
+      <Route path="/science/original-contributions">
+        <WhitepaperRedirect subpath="/original-contributions" />
+      </Route>
       <Route path="/overview" component={Overview} />
       <Route path="/support" component={Support} />
       <Route path="/support/web" component={SupportWeb} />

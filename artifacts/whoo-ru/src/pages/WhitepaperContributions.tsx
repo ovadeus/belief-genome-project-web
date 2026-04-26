@@ -507,7 +507,7 @@ const BODY: ReactNode = (
   </>
 );
 
-export default function ScienceOriginalContributions() {
+export default function WhitepaperContributions() {
   return (
     <PublicLayout>
       <article className="px-6 py-16 max-w-3xl mx-auto">
@@ -518,11 +518,11 @@ export default function ScienceOriginalContributions() {
           className="mb-10"
         >
           <Link
-            href="/science"
+            href="/whitepaper"
             className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground hover:text-primary transition-colors"
           >
             <ArrowLeft size={12} />
-            <span className="font-display">The Science · Overview</span>
+            <span className="font-display">White Paper · Overview</span>
           </Link>
         </motion.div>
 
@@ -553,7 +553,7 @@ export default function ScienceOriginalContributions() {
 
         <nav className="mt-16 pt-8 border-t border-border">
           <Link
-            href="/science"
+            href="/whitepaper"
             className="group inline-flex items-center gap-3 rounded-xl border border-border bg-card/40 hover:bg-card/80 hover:border-primary/40 transition-colors px-5 py-4"
           >
             <ArrowLeft

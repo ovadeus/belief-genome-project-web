@@ -21,16 +21,16 @@ type NavItem =
   | { kind: "link"; href: string; label: string }
   | { kind: "dropdown"; label: string; items: DropdownItem[] };
 
-const SCIENCE_ITEMS: DropdownItem[] = [
-  { href: "/science",                        label: "White Paper" },
-  { href: "/science#heritage",               label: "I.   The Heritage",         indent: true },
-  { href: "/science#quantum-grammar",        label: "II.  The Quantum Grammar",  indent: true },
-  { href: "/science#macro-scale",            label: "III. The Macro Scale",      indent: true },
-  { href: "/science#synthesis",              label: "IV.  The Synthesis",        indent: true },
-  { href: "/science#frontier",               label: "V.   The Frontier",         indent: true },
-  { href: "/science#horizon",                label: "VI.  The Empirical Horizon", indent: true },
-  { href: "/science#references",             label: "Selected References",       indent: true },
-  { href: "/science/original-contributions", label: "Original Contributions" },
+const WHITEPAPER_ITEMS: DropdownItem[] = [
+  { href: "/whitepaper",                        label: "White Paper" },
+  { href: "/whitepaper#heritage",               label: "I.   The Heritage",          indent: true },
+  { href: "/whitepaper#quantum-grammar",        label: "II.  The Quantum Grammar",   indent: true },
+  { href: "/whitepaper#macro-scale",            label: "III. The Macro Scale",       indent: true },
+  { href: "/whitepaper#synthesis",              label: "IV.  The Synthesis",         indent: true },
+  { href: "/whitepaper#frontier",               label: "V.   The Frontier",          indent: true },
+  { href: "/whitepaper#horizon",                label: "VI.  The Empirical Horizon", indent: true },
+  { href: "/whitepaper#references",             label: "Selected References",        indent: true },
+  { href: "/whitepaper/original-contributions", label: "Original Contributions" },
 ];
 
 const MEDIA_ITEMS: DropdownItem[] = [
@@ -41,7 +41,7 @@ const MEDIA_ITEMS: DropdownItem[] = [
 
 const NAV_ITEMS: NavItem[] = [
   { kind: "link",     href: "/",        label: "Home" },
-  { kind: "dropdown", label: "White Paper", items: SCIENCE_ITEMS },
+  { kind: "dropdown", label: "White Paper", items: WHITEPAPER_ITEMS },
   { kind: "link",     href: "/overview", label: "Overview" },
   { kind: "link",     href: "/app",     label: "Participate" },
   { kind: "link",     href: "/explore", label: "Explore Beliefs" },
@@ -51,7 +51,7 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 /**
- * Splits "/science#horizon" into ["/science", "horizon"]. Returns hash="" if absent.
+ * Splits "/whitepaper#horizon" into ["/whitepaper", "horizon"]. Returns hash="" if absent.
  */
 function splitHashHref(href: string): { path: string; hash: string } {
   const i = href.indexOf("#");
