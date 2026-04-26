@@ -82,6 +82,7 @@ const QuantumGrammarBody: ReactNode = (
       measurement device aimed at quantifying the degree of perceived
       uncertainty and conflict rather than forcing a single binary choice.
     </p>
+    <EntropyStateSliderDemo />
   </>
 );
 
@@ -1172,10 +1173,6 @@ export default function Whitepaper() {
 
                   {/* Inject the Heritage Timeline between Section I and II. */}
                   {s.id === "heritage" && <HeritageTimeline />}
-
-                  {/* Inject the Entropy State Slider demo between Section II
-                      and Section III. */}
-                  {s.id === "quantum-grammar" && <EntropyStateSliderDemo />}
                 </Fragment>
               ))}
             </div>
