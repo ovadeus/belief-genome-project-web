@@ -1,6 +1,6 @@
-import { Fragment, useEffect, useState, type ReactNode } from "react";
+import { Fragment, useEffect, useRef, useState, type ReactNode } from "react";
 import { Link } from "wouter";
-import { motion } from "framer-motion";
+import { motion, useMotionValue, animate, type AnimationPlaybackControls } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { PersonHoverCard } from "@/components/PersonHoverCard";
@@ -123,6 +123,7 @@ const SynthesisBody: ReactNode = (
       <span className={NAME_CLS}>Meyers</span> defines an architecture that
       represents reported beliefs across 11 categories and 124 dimensions.
     </p>
+    <CollapseEventDemo />
     <p className={P_CLS}>
       Within this architecture, the{" "}
       <span className={TERM_CLS}>Cognitive Qubit</span> is introduced as the
@@ -573,6 +574,240 @@ function TimelineDot({ entry }: { entry: TimelineEntry }) {
         </div>
       </HoverCardContent>
     </HoverCard>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Collapse Event Demo — interactive 6-color wheel embedded inside Section IV
+// (The Synthesis). Visualizes the Cognitive Qubit metaphor: the wheel idles in
+// an indeterminate state, spins into a "vibrating gray" superposition, then
+// collapses onto one definite color when committed.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const COLLAPSE_WHEEL_COLORS = [
+  { name: "Red", hex: "#ef4444" },
+  { name: "Orange", hex: "#f97316" },
+  { name: "Yellow", hex: "#eab308" },
+  { name: "Green", hex: "#22c55e" },
+  { name: "Blue", hex: "#3b82f6" },
+  { name: "Purple", hex: "#a855f7" },
+] as const;
+
+type CollapsePhase = "idle" | "spinning" | "collapsed";
+
+function CollapseEventDemo() {
+  const N = COLLAPSE_WHEEL_COLORS.length;
+  const SEG = 360 / N;
+  const HALF = SEG / 2;
+
+  const rotation = useMotionValue(0);
+  const [phase, setPhase] = useState<CollapsePhase>("idle");
+  const [result, setResult] =
+    useState<(typeof COLLAPSE_WHEEL_COLORS)[number] | null>(null);
+  const animRef = useRef<AnimationPlaybackControls | null>(null);
+
+  const stopAnim = () => {
+    animRef.current?.stop();
+    animRef.current = null;
+  };
+
+  // Idle sway — gentle back-and-forth oscillation while in the indeterminate
+  // state, evoking quantum jitter rather than stillness.
+  useEffect(() => {
+    if (phase !== "idle") return;
+    let cancelled = false;
+    const sway = (target: number) => {
+      if (cancelled) return;
+      animRef.current = animate(rotation, target, {
+        duration: 1.6,
+        ease: "easeInOut",
+        onComplete: () => sway(target === 3 ? -3 : 3),
+      });
+    };
+    sway(3);
+    return () => {
+      cancelled = true;
+      stopAnim();
+    };
+  }, [phase, rotation]);
+
+  const handleSpin = () => {
+    stopAnim();
+    setResult(null);
+    setPhase("spinning");
+    // Long, fast linear spin — overshoots the demo lifetime so it never stops
+    // on its own. Stop & Commit will interrupt and animate to a target.
+    animRef.current = animate(rotation, rotation.get() + 360 * 600, {
+      duration: 600,
+      ease: "linear",
+    });
+  };
+
+  const handleCommit = () => {
+    stopAnim();
+    const idx = Math.floor(Math.random() * N);
+    // Center segment idx at the top: rotation must satisfy
+    // (idx * SEG + R) ≡ 0  (mod 360). Pick the next such R after current.
+    const targetMod = ((-idx * SEG) % 360 + 360) % 360;
+    const current = rotation.get();
+    const currentMod = ((current % 360) + 360) % 360;
+    let delta = targetMod - currentMod;
+    if (delta < 0) delta += 360;
+    const target = current + delta + 720; // 2 extra revolutions for drama
+    setPhase("collapsed");
+    setResult(COLLAPSE_WHEEL_COLORS[idx]);
+    animRef.current = animate(rotation, target, {
+      duration: 2.4,
+      ease: [0.16, 1, 0.3, 1],
+    });
+  };
+
+  const handleReset = () => {
+    stopAnim();
+    setResult(null);
+    setPhase("idle");
+    animRef.current = animate(rotation, 0, {
+      duration: 0.6,
+      ease: "easeOut",
+    });
+  };
+
+  useEffect(() => () => stopAnim(), []);
+
+  // Build the six pie segments. Segment 0 is centered at the top (-90°).
+  const cx = 110;
+  const cy = 110;
+  const r = 100;
+  const segments = COLLAPSE_WHEEL_COLORS.map((c, i) => {
+    const a1 = ((-90 + i * SEG - HALF) * Math.PI) / 180;
+    const a2 = ((-90 + i * SEG + HALF) * Math.PI) / 180;
+    const x1 = cx + r * Math.cos(a1);
+    const y1 = cy + r * Math.sin(a1);
+    const x2 = cx + r * Math.cos(a2);
+    const y2 = cy + r * Math.sin(a2);
+    return {
+      d: `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 0 1 ${x2} ${y2} Z`,
+      color: c.hex,
+    };
+  });
+
+  return (
+    <motion.div
+      aria-label="Cognitive Qubit collapse demo"
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-80px" }}
+      transition={{ duration: 0.5 }}
+      className="my-8 rounded-xl border border-border bg-card px-6 py-8"
+    >
+      <div className="flex flex-col items-center">
+        {/* Wheel + pointer */}
+        <div className="relative">
+          {/* Pointer triangle, sits just above the top edge of the wheel */}
+          <svg
+            width="22"
+            height="14"
+            viewBox="0 0 22 14"
+            className="absolute left-1/2 -translate-x-1/2 -top-1 z-10 drop-shadow"
+            aria-hidden="true"
+          >
+            <path d="M 11 14 L 0 0 L 22 0 Z" className="fill-foreground" />
+          </svg>
+
+          {/* Wheel */}
+          <motion.svg
+            width={220}
+            height={220}
+            viewBox="0 0 220 220"
+            style={{ rotate: rotation }}
+            className={cn(
+              "drop-shadow-md transition-[filter] duration-500",
+              phase === "spinning" && "blur-[3px] saturate-[0.55]"
+            )}
+            aria-hidden="true"
+          >
+            {segments.map((s, i) => (
+              <path
+                key={i}
+                d={s.d}
+                fill={s.color}
+                stroke="hsl(var(--background, 0 0% 100%))"
+                strokeWidth="1.5"
+              />
+            ))}
+            {/* Center hub — uses foreground for cohesion with the page palette */}
+            <circle cx={cx} cy={cy} r={22} className="fill-foreground" />
+          </motion.svg>
+        </div>
+
+        {/* State / result label */}
+        <div className="mt-6 text-center min-h-[68px] flex flex-col items-center justify-center">
+          {phase === "collapsed" && result ? (
+            <>
+              <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground mb-1">
+                Collapse Event
+              </div>
+              <div
+                className="font-display text-2xl font-bold leading-none"
+                style={{ color: result.hex }}
+              >
+                {result.name}
+              </div>
+            </>
+          ) : phase === "spinning" ? (
+            <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-primary/80">
+              Vibrating gray · Superposition
+            </div>
+          ) : (
+            <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+              Indeterminate state
+            </div>
+          )}
+        </div>
+
+        {/* Action button — single button that morphs by phase */}
+        <div className="mt-2">
+          {phase === "idle" && (
+            <button
+              type="button"
+              onClick={handleSpin}
+              className="px-5 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+            >
+              Spin the wheel
+            </button>
+          )}
+          {phase === "spinning" && (
+            <button
+              type="button"
+              onClick={handleCommit}
+              className="px-5 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+            >
+              Stop &amp; commit
+            </button>
+          )}
+          {phase === "collapsed" && (
+            <button
+              type="button"
+              onClick={handleReset}
+              className="px-5 py-2 rounded-lg border border-border bg-background text-foreground text-sm font-medium hover:bg-foreground/5 transition-colors"
+            >
+              Reset
+            </button>
+          )}
+        </div>
+
+        {/* Caption */}
+        <p className="mt-6 max-w-md text-center text-sm italic leading-relaxed text-muted-foreground">
+          The wheel sways gently — uncertainty in an indeterminate state. Press{" "}
+          <span className="font-medium not-italic text-foreground">Spin</span>{" "}
+          to set it spinning into a vibrating gray superposition. Press{" "}
+          <span className="font-medium not-italic text-foreground">
+            Stop &amp; Commit
+          </span>{" "}
+          to force a Collapse Event onto one definite color.
+        </p>
+      </div>
+    </motion.div>
   );
 }
 
