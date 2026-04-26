@@ -10,6 +10,7 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import { cn } from "@/lib/utils";
+import whoAreYouVideo from "@assets/who-are-you_1777238654031.mp4";
 
 type Section = {
   id: string;
@@ -811,6 +812,18 @@ export default function Whitepaper() {
               transition={{ duration: 0.5, delay: 0.05 }}
               className="mb-12 pb-8 border-b border-border"
             >
+              <div className="mb-8 overflow-hidden rounded-xl border border-border bg-foreground/5 shadow-sm">
+                <video
+                  src={whoAreYouVideo}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  preload="metadata"
+                  aria-hidden="true"
+                  className="block w-full h-auto"
+                />
+              </div>
               <h1 className="text-3xl md:text-5xl font-display font-bold text-foreground leading-tight">
                 WHO ARE YOU?
               </h1>
