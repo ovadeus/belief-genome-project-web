@@ -11,6 +11,9 @@ import bgpScreen02 from "@assets/bgp-screen02_1777227170315.png";
 import bgpScreen03 from "@assets/bgp-screen03_1777227170315.png";
 import bgpScreen04 from "@assets/bgp-screen04_1777227170315.png";
 import bgpScreen05 from "@assets/bgp-screen05_1777227170314.png";
+import bgpScreen06 from "@assets/bgp-screen06_1777227341782.png";
+import bgpScreen07 from "@assets/bgp-screen07_1777227338455.png";
+import bgpScreen08 from "@assets/bgp-screen08_1777227338455.png";
 
 const BGP_SCREENS: { src: string; alt: string }[] = [
   { src: bgpScreen01, alt: "Belief DNA — dimensional grid across 11 categories" },
@@ -18,6 +21,9 @@ const BGP_SCREENS: { src: string; alt: string }[] = [
   { src: bgpScreen03, alt: "Neuromap — 3D belief network in motion" },
   { src: bgpScreen04, alt: "World View Radar — ideological position plot" },
   { src: bgpScreen05, alt: "Mind Map — cross-category belief connections" },
+  { src: bgpScreen06, alt: "Category Breakdown — pole-to-pole belief positioning" },
+  { src: bgpScreen07, alt: "Timeline — belief drift over time" },
+  { src: bgpScreen08, alt: "Evolution — confidence, coverage, and category trends" },
 ];
 
 const GENOME_APP_URL = (
