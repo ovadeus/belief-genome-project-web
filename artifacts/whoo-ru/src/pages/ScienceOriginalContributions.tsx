@@ -55,7 +55,7 @@ const CONSTRUCTS: Construct[] = [
   },
   {
     number: "02",
-    title: "The Cognitive Que-Bit",
+    title: "The Cognitive Qubit",
     description: (
       <>
         The proposed architectural unit of belief measurement — a single dimension of belief
@@ -68,7 +68,7 @@ const CONSTRUCTS: Construct[] = [
       <>
         The use of two-dimensional Hilbert spaces to represent binary cognitive judgments is
         standard within quantum cognition (Busemeyer &amp; Bruza, 2024). What the{" "}
-        <span className={TERM_CLS}>Cognitive Que-Bit</span> proposes is the elevation of this
+        <span className={TERM_CLS}>Cognitive Qubit</span> proposes is the elevation of this
         representation into a standardized cross-domain unit deployed identically across a fixed
         124-dimension architecture, rather than as a per-task modeling choice.{" "}
         <span className={NAME_CLS}>Busemeyer</span> and{" "}
@@ -76,7 +76,7 @@ const CONSTRUCTS: Construct[] = [
         unit of belief measurement of this kind. <span className={NAME_CLS}>Khrennikov</span>'s
         Social Laser theory models social atoms in terms of social energy and population states
         rather than detailed internal belief coordinates (Khrennikov, 2020). The{" "}
-        <span className={TERM_CLS}>Que-Bit</span> is novel in its naming and in its proposed role
+        <span className={TERM_CLS}>Qubit</span> is novel in its naming and in its proposed role
         as an architectural primitive — its empirical adequacy in that role remains to be
         demonstrated.
       </>
@@ -390,7 +390,7 @@ const BODY: ReactNode = (
       peer-reviewed prior work in quantum cognition — but the architecture itself, and each of
       the seven constructs above, has not yet been empirically verified. Its specific commitments
       — that midpoints encode genuine superposition, that the 124-dimension space is structured
-      to reveal interference, that the <span className={TERM_CLS}>Cognitive Que-Bit</span> is the
+      to reveal interference, that the <span className={TERM_CLS}>Cognitive Qubit</span> is the
       appropriate architectural primitive, that the{" "}
       <span className={TERM_CLS}>Collapse Gap</span> carries predictive information — are claims
       awaiting experimental test.

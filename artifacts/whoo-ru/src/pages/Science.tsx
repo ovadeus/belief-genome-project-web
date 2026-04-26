@@ -176,7 +176,7 @@ const SynthesisBody: ReactNode = (
     </p>
     <p className={P_CLS}>
       The fundamental unit is not a binary bit but the{" "}
-      <span className={TERM_CLS}>Cognitive que-bit</span>: a single dimension of belief
+      <span className={TERM_CLS}>Cognitive Qubit</span>: a single dimension of belief
       represented as a vector in a two-dimensional Hilbert space, where the midpoint explicitly
       encodes superposition rather than indifference.
     </p>
