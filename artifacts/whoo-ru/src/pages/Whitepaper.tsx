@@ -12,6 +12,7 @@ import {
 import { cn } from "@/lib/utils";
 import { BeliefScale } from "@/components/support/BeliefScale";
 import whoAreYouVideo from "@assets/who-are-you_1777238654031.mp4";
+import bgpSerialKeyImage from "@assets/bgp-serial-key_1777239539043.png";
 
 type Section = {
   id: string;
@@ -137,6 +138,13 @@ const SynthesisBody: ReactNode = (
       metric intended to quantify divergence between fast and slow responses on
       the same belief dimension.
     </p>
+    <figure className="my-8 overflow-hidden rounded-xl border border-border bg-foreground/5 shadow-sm">
+      <img
+        src={bgpSerialKeyImage}
+        alt="A 136-character Belief Genome Serial Key, color-coded across Identity, Country, Zip, and Beliefs segments, with response, dimension, and confidence counters above."
+        className="block w-full h-auto"
+      />
+    </figure>
     <p className={P_CLS}>
       Over repeated measurements,{" "}
       <span className={TERM_CLS}>Longitudinal Worldview Mapping</span> is
