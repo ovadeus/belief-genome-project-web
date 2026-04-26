@@ -617,23 +617,25 @@ function CollapseEventDemo() {
     animRef.current = null;
   };
 
-  // Idle sway — gentle back-and-forth oscillation while in the indeterminate
-  // state, evoking quantum jitter rather than stillness. Uses a local
-  // controller so its cleanup can't accidentally cancel a spin/commit
-  // animation that has already been queued in animRef during the same tick.
+  // Idle sway — wide, contemplative oscillation that drifts the pointer past
+  // the red segment into its purple and orange neighbors, hinting at the
+  // indeterminate state. Uses a local controller so its cleanup can't
+  // accidentally cancel a spin/commit animation that has already been queued
+  // in animRef during the same tick.
   useEffect(() => {
     if (phase !== "idle") return;
+    const SWAY = 35; // degrees; segments are 60° wide, so this clearly enters neighbors
     let cancelled = false;
     let current: AnimationPlaybackControls | null = null;
     const sway = (target: number) => {
       if (cancelled) return;
       current = animate(rotation, target, {
-        duration: 1.6,
+        duration: 2.6,
         ease: "easeInOut",
-        onComplete: () => sway(target === 3 ? -3 : 3),
+        onComplete: () => sway(target === SWAY ? -SWAY : SWAY),
       });
     };
-    sway(3);
+    sway(SWAY);
     return () => {
       cancelled = true;
       current?.stop();
@@ -644,9 +646,11 @@ function CollapseEventDemo() {
     stopAnim();
     setResult(null);
     setPhase("spinning");
-    // Long, fast linear spin — overshoots the demo lifetime so it never stops
-    // on its own. Stop & Commit will interrupt and animate to a target.
-    animRef.current = animate(rotation, rotation.get() + 360 * 600, {
+    // Very fast linear spin — ~6 revolutions per second so the segments blur
+    // into a perceptual neutral gray (the studio "spinning wheel" effect).
+    // Overshoots the demo lifetime so it never stops on its own; Stop &
+    // commit will interrupt and animate to a chosen target.
+    animRef.current = animate(rotation, rotation.get() + 360 * 6 * 600, {
       duration: 600,
       ease: "linear",
     });
@@ -707,7 +711,7 @@ function CollapseEventDemo() {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-80px" }}
       transition={{ duration: 0.5 }}
-      className="my-8 rounded-xl border border-border bg-card px-6 py-8"
+      className="my-8 rounded-xl border border-border bg-card px-6 py-6"
     >
       <div className="flex flex-col items-center">
         {/* Wheel + pointer */}
@@ -731,7 +735,7 @@ function CollapseEventDemo() {
             style={{ rotate: rotation }}
             className={cn(
               "drop-shadow-md transition-[filter] duration-500",
-              phase === "spinning" && "blur-[3px] saturate-[0.55]"
+              phase === "spinning" && "blur-[1.5px] saturate-[0.45]"
             )}
             aria-hidden="true"
           >
@@ -750,7 +754,7 @@ function CollapseEventDemo() {
         </div>
 
         {/* State / result label */}
-        <div className="mt-6 text-center min-h-[68px] flex flex-col items-center justify-center">
+        <div className="mt-3 text-center min-h-[56px] flex flex-col items-center justify-center">
           {phase === "collapsed" && result ? (
             <>
               <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground mb-1">
@@ -775,7 +779,7 @@ function CollapseEventDemo() {
         </div>
 
         {/* Action button — single button that morphs by phase */}
-        <div className="mt-2">
+        <div className="mt-1">
           {phase === "idle" && (
             <button
               type="button"
@@ -806,7 +810,7 @@ function CollapseEventDemo() {
         </div>
 
         {/* Caption */}
-        <p className="mt-6 max-w-md text-center text-sm italic leading-relaxed text-muted-foreground">
+        <p className="mt-5 max-w-md text-center text-sm italic leading-relaxed text-muted-foreground">
           The wheel sways gently — uncertainty in an indeterminate state. Press{" "}
           <span className="font-medium not-italic text-foreground">Spin</span>{" "}
           to set it spinning into a vibrating gray superposition. Press{" "}
