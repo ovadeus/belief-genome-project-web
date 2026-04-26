@@ -221,7 +221,7 @@ export default function Home() {
             <div className="flex-1 z-10">
               <h2 className="text-4xl md:text-5xl font-display font-bold mb-6">The Forecaster</h2>
               <p className="text-xl text-muted-foreground mb-8">
-                What if you could predict your own reactions? The Forecaster uses your Belief Genome to model how you'll respond to new information, news, and complex situations before they even happen.
+                What if you could predict your own reactions? The Forecaster uses your Belief Genome DNA to model how you'll respond to new information, news, and complex situations before they even happen.
               </p>
               <Link href={`${GENOME_APP_URL}/register`} className="text-primary font-semibold flex items-center gap-2 hover:gap-3 transition-all">
                 Start Mapping Your Beliefs <ArrowRight size={18} />
