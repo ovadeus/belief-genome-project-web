@@ -49,7 +49,7 @@ export default function Home() {
             </h1>
             
             <p className="text-lg sm:text-xl text-muted-foreground font-light leading-relaxed mb-12 max-w-3xl mx-auto">
-              Beliefs exist in superposition — multiple positions held at once — until a vote, a purchase, or a commitment forces one to collapse. The Belief Genome Project maps that interior landscape across 11 categories and 124 dimensions, producing a 136-character fingerprint of how any mind is structured.
+              The Belief Genome Project is a new paradigm in behavioral science — a Quantum-Cognitive Measurement Architecture built to map that interior tension directly. It honors the foundational lineage of decision science and quantum cognition, and it extends that lineage into territory the field has not yet occupied: an operational instrument for measuring belief in superposition.
             </p>
             
             <div className="flex justify-center">
