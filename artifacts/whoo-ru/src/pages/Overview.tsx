@@ -144,6 +144,14 @@ export default function Overview() {
 
           <h2 className={H2_CLS}>Main Architectural Concepts</h2>
           <p className={P_CLS}>
+            The concepts introduced here are original to the Belief Genome Project
+            and represent, to the best of current knowledge, the first
+            formulation of this particular measurement architecture in the
+            behavioral-science literature. They are explicitly framed as
+            proposals: they build on prior theory, but their novelty and
+            usefulness must be established through future empirical work.
+          </p>
+          <p className={P_CLS}>
             For a general technical audience, the easiest way to read BGP is as a
             layered measurement design.
           </p>
