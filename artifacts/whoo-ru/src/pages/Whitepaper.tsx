@@ -1115,7 +1115,7 @@ export default function Whitepaper() {
               <h1 className="text-3xl md:text-5xl font-display font-bold text-foreground leading-tight">
                 WHO ARE YOU?
               </h1>
-              <div className="mt-6 space-y-5 text-base md:text-[17px] text-foreground/85 max-w-2xl">
+              <div className="mt-6 space-y-5 text-base md:text-[17px] text-foreground/85">
                 <p className="leading-relaxed">
                   Everyone thinks they know. Almost no one does. Society's
                   wicked problems have been studied from the outside in for
