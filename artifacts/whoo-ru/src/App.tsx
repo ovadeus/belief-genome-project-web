@@ -14,6 +14,7 @@ import Book from "./pages/Book";
 import MindMap from "./pages/MindMap";
 import ScoringWeighting from "./pages/ScoringWeighting";
 import Science from "./pages/Science";
+import Overview from "./pages/Overview";
 import ScienceOriginalContributions from "./pages/ScienceOriginalContributions";
 import Support from "./pages/Support";
 import SupportWeb from "./pages/SupportWeb";
@@ -71,6 +72,7 @@ function Router() {
       <Route path="/scoring" component={ScoringWeighting} />
       <Route path="/science" component={Science} />
       <Route path="/science/original-contributions" component={ScienceOriginalContributions} />
+      <Route path="/overview" component={Overview} />
       <Route path="/support" component={Support} />
       <Route path="/support/web" component={SupportWeb} />
       <Route path="/support/desktop" component={SupportDesktop} />
