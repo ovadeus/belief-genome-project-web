@@ -315,7 +315,10 @@ const BODY: ReactNode = (
       <span className={NAME_CLS}>Jerome Busemeyer</span> and{" "}
       <span className={NAME_CLS}>Peter Bruza</span> (2012, 2024), the empirical work on the QQ
       equality by{" "}
-      <span className={NAME_CLS}>Wang, Solloway, Shiffrin, and Busemeyer</span> (2014), the
+      <span className={NAME_CLS}>
+        Zheng Wang, Tyler Solloway, Richard Shiffrin, and Jerome Busemeyer
+      </span>{" "}
+      (2014), the
       Social Laser theory advanced by <span className={NAME_CLS}>Andrei Khrennikov</span> (2010,
       2020), and the quantum-social ontology articulated by{" "}
       <span className={NAME_CLS}>Alexander Wendt</span> (2015) are all serious scholarly
