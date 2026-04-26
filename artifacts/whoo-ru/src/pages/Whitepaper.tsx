@@ -166,10 +166,11 @@ const FRONTIER_AVENUES: { label: string; body: ReactNode }[] = [
     label: "AI–human preference modeling",
     body: (
       <>
-        Encoded representations of individual belief states could be explored
-        as one ingredient in more personalized and transparent preference
-        models for AI systems, though this remains a speculative direction that
-        will require careful empirical validation and ethical safeguards.
+        Encoded representations of individual belief states may offer one input
+        to future approaches to transparent, personalized AI alignment, with
+        potential applications in personal assistants, robotics, and broader AI
+        systems. Realizing this potential will require rigorous empirical
+        validation and robust ethical safeguards.
       </>
     ),
   },
@@ -177,9 +178,9 @@ const FRONTIER_AVENUES: { label: string; body: ReactNode }[] = [
     label: "Self-exploration tools",
     body: (
       <>
-        Interactive interfaces could allow individuals to explore patterns of
-        consistency, conflict, and change in their own reported beliefs over
-        time.
+        Committed engagement could allow individuals to explore patterns of
+        consistency, conflict, and change in their own beliefs over time, for
+        personal growth and core understanding.
       </>
     ),
   },
