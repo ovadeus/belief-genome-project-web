@@ -31,8 +31,11 @@ const CONSTRUCTS: Construct[] = [
         A proposed structured measurement space distributing human belief across 11 categories —
         epistemology, spirituality, morality, psychology, relationships, social, political,
         economics, science and technology, education, and health — and 124 specific dimensions
-        within them. Each dimension is scored on a 0–9 scale where the value 5 is explicitly
-        defined as genuine superposition, not neutrality, indifference, or weak preference.
+        within them. Each dimension is scored on a 0–9 scale{" "}
+        <strong className="font-semibold text-foreground">
+          where the value 5 is explicitly defined as genuine superposition
+        </strong>
+        , not neutrality, indifference, or weak preference.
       </>
     ),
     differs: (
