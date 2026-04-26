@@ -1,9 +1,14 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { Fragment, useEffect, useState, type ReactNode } from "react";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { PersonHoverCard } from "@/components/PersonHoverCard";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 import { cn } from "@/lib/utils";
 
 type Section = {
@@ -368,6 +373,324 @@ const REFERENCES: Reference[] = [
 
 const ORIGINAL_CONTRIBUTIONS_HREF = "/whitepaper/original-contributions";
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Heritage Timeline — interactive interlude rendered between Section I and II.
+// Three-band horizontal rail (Classical → Quantum Cognition → Synthesis) with
+// always-visible year/name/theory and a hover-card revealing the full
+// contribution detail.
+// ─────────────────────────────────────────────────────────────────────────────
+
+type Band = 1 | 2 | 3;
+
+type TimelineEntry = {
+  year: string;
+  name: string;
+  theory: string;
+  detail: ReactNode;
+  band: Band;
+};
+
+const TIMELINE_ENTRIES: TimelineEntry[] = [
+  {
+    year: "1763",
+    name: "Thomas Bayes",
+    theory: "Bayesian probability",
+    band: 1,
+    detail:
+      "The mathematical principle that lets us treat belief as a quantity that can be revised in light of new evidence — the foundational insight for everything that followed in the formal study of belief under uncertainty.",
+  },
+  {
+    year: "1944",
+    name: "von Neumann & Morgenstern",
+    theory: "Expected Utility Theory",
+    band: 1,
+    detail:
+      "Formalized the “rational actor” as a classical bit — humans modeled as utility-optimizing agents with stable preferences. The dominant decision-making model for half a century, and the assumption the next two generations of cognitive science set out to test.",
+  },
+  {
+    year: "1949",
+    name: "Donald Hebb",
+    theory: "Hebbian Learning",
+    band: 1,
+    detail:
+      "“Cells that fire together wire together.” Established the neural basis of belief formation, anchoring cognition in biology and providing the substrate later inherited by connectionist and modern AI models.",
+  },
+  {
+    year: "1974",
+    name: "Tversky & Kahneman",
+    theory: "Heuristics & Biases",
+    band: 1,
+    detail:
+      "The heuristics-and-biases program demonstrated that humans systematically violate the laws of classical probability — exposing the gap between the rational-actor ideal and how minds actually decide.",
+  },
+  {
+    year: "1983",
+    name: "Tversky & Kahneman",
+    theory: "The Linda Problem",
+    band: 1,
+    detail:
+      "The conjunction fallacy — concrete empirical evidence that classical probability cannot account for context-dependent, contradictory human judgments. The wedge that opened the door to alternative formalisms.",
+  },
+  {
+    year: "2010",
+    name: "Andrei Khrennikov",
+    theory: "Quantum-Like Models",
+    band: 2,
+    detail:
+      "Developed the formal apparatus for applying non-classical (quantum-like) probability to human judgment in cognition and the social sciences — a mathematics willing to treat ambiguity, order effects, and context as first-class citizens.",
+  },
+  {
+    year: "2012",
+    name: "Busemeyer & Bruza",
+    theory: "Quantum Models of Cognition",
+    band: 2,
+    detail: (
+      <>
+        The canonical text (
+        <em className="not-italic font-medium">Cambridge University Press</em>)
+        formalizing superposition, interference, and non-commutativity in human
+        judgment — the mathematical grammar the BGP inherits.
+      </>
+    ),
+  },
+  {
+    year: "2013",
+    name: "Wang, Busemeyer et al.",
+    theory: "The QQ Equality",
+    band: 2,
+    detail:
+      "First precise, parameter-free empirical signature of quantum-like question-order effects observed in real survey data — a falsifiable prediction satisfied across many datasets.",
+  },
+  {
+    year: "2015",
+    name: "Alexander Wendt",
+    theory: "Quantum Mind & Social Science",
+    band: 2,
+    detail:
+      "Ontological bridge proposing that human beings and social systems can be modeled as “walking wave functions” — extending quantum-like reasoning from cognition to society at large.",
+  },
+  {
+    year: "≈2015–20",
+    name: "Andrei Khrennikov",
+    theory: "Social Laser Theory",
+    band: 2,
+    detail:
+      "Mean-field quantum-like model showing how populations exhibit coherent amplification, polarization, and phase-transition–like behavior under social-information stimulation.",
+  },
+  {
+    year: "2026",
+    name: "Belief Genome Project",
+    theory: "Operational Synthesis",
+    band: 3,
+    detail:
+      "David Edwin Meyers integrates quantum cognition, social-laser dynamics, and quantum social ontology into a unified measurement architecture: 11 categories, 124 dimensions, the Cognitive Qubit, the Collapse Event, the Collapse Gap, Entropy Harvesting, the 136-character Belief Genome Serial, and Longitudinal Worldview Mapping.",
+  },
+];
+
+const BAND_TEXT: Record<Band, string> = {
+  1: "text-muted-foreground",
+  2: "text-primary",
+  3: "text-emerald-600",
+};
+
+function TimelineLabel({ entry }: { entry: TimelineEntry }) {
+  return (
+    <div className="space-y-0.5 px-0.5">
+      <div className={cn("font-display font-bold text-[13px] leading-none tabular-nums", BAND_TEXT[entry.band])}>
+        {entry.year}
+      </div>
+      <div className="text-[10px] font-semibold text-foreground leading-tight">
+        {entry.name}
+      </div>
+      <div className="text-[9.5px] text-muted-foreground leading-tight italic">
+        {entry.theory}
+      </div>
+    </div>
+  );
+}
+
+function TimelineDot({ entry }: { entry: TimelineEntry }) {
+  const dotClasses =
+    entry.band === 1
+      ? "border-foreground/50 bg-background group-hover:bg-foreground/10 group-hover:border-foreground"
+      : entry.band === 2
+        ? "border-primary bg-background group-hover:bg-primary/10"
+        : "border-emerald-500 bg-emerald-50 ring-4 ring-emerald-500/20 group-hover:ring-emerald-500/40";
+
+  return (
+    <HoverCard openDelay={120} closeDelay={120}>
+      <HoverCardTrigger asChild>
+        <button
+          type="button"
+          aria-label={`${entry.year} — ${entry.name}: ${entry.theory}`}
+          className="group relative flex h-8 w-8 items-center justify-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        >
+          <span
+            className={cn(
+              "block h-3.5 w-3.5 rounded-full border-2 transition-all group-hover:scale-125",
+              dotClasses
+            )}
+          />
+        </button>
+      </HoverCardTrigger>
+      <HoverCardContent side="top" align="center" className="w-80 p-4">
+        <div className="space-y-2.5">
+          <div className="flex items-baseline gap-2 flex-wrap">
+            <span
+              className={cn(
+                "font-mono text-xs font-semibold tabular-nums",
+                BAND_TEXT[entry.band]
+              )}
+            >
+              {entry.year}
+            </span>
+            <span className="font-display font-semibold text-foreground text-[15px] leading-tight">
+              {entry.name}
+            </span>
+          </div>
+          <div
+            className={cn(
+              "text-[10px] font-semibold uppercase tracking-[0.16em]",
+              BAND_TEXT[entry.band]
+            )}
+          >
+            {entry.theory}
+          </div>
+          <p className="text-sm leading-relaxed text-foreground/85">
+            {entry.detail}
+          </p>
+        </div>
+      </HoverCardContent>
+    </HoverCard>
+  );
+}
+
+function HeritageTimeline() {
+  // Counts per band — used to size the underlying colored line + legend bar.
+  // Adjust these if entries are added/removed and they will stay in proportion.
+  const bandCounts = TIMELINE_ENTRIES.reduce(
+    (acc, e) => {
+      acc[e.band] += 1;
+      return acc;
+    },
+    { 1: 0, 2: 0, 3: 0 } as Record<Band, number>
+  );
+
+  return (
+    <motion.section
+      aria-label="Heritage timeline"
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-80px" }}
+      transition={{ duration: 0.5 }}
+      className="my-4"
+    >
+      <header className="mb-8 max-w-2xl">
+        <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-primary/80 mb-2">
+          Interlude
+        </div>
+        <h3 className="text-xl md:text-2xl font-display font-bold text-foreground leading-tight">
+          A Heritage Timeline
+        </h3>
+        <p className="mt-3 text-sm md:text-base text-muted-foreground leading-relaxed">
+          The intellectual lineage that prepares the ground for the Belief
+          Genome Project. Hover any milestone to read the contribution it made.
+        </p>
+      </header>
+
+      <div className="relative overflow-x-auto pb-3 -mx-2 sm:mx-0">
+        {/* Desktop body column is ~796px on lg; min-w of 760px keeps the
+            timeline scroll-free at lg+ while still allowing horizontal scroll
+            on tablet/mobile. */}
+        <div className="min-w-[760px] px-2">
+          {/* Top labels — even-indexed entries (0, 2, 4, …) */}
+          <div className="grid grid-cols-11 gap-1.5 items-end mb-3 min-h-[72px]">
+            {TIMELINE_ENTRIES.map((e, i) => (
+              <div key={`top-${i}`} className="text-center">
+                {i % 2 === 0 && <TimelineLabel entry={e} />}
+              </div>
+            ))}
+          </div>
+
+          {/* Rail with colored band line + dot row */}
+          <div className="relative h-8">
+            {/* Colored line in three segments matching the band counts */}
+            <div className="absolute inset-y-0 left-0 right-0 flex items-center">
+              <div className="flex h-[2px] w-full">
+                <div
+                  className="bg-foreground/30"
+                  style={{ flex: bandCounts[1] }}
+                />
+                <div
+                  className="bg-primary/70"
+                  style={{ flex: bandCounts[2] }}
+                />
+                <div
+                  className="bg-emerald-500"
+                  style={{ flex: bandCounts[3] }}
+                />
+              </div>
+            </div>
+
+            {/* Dots — perfectly aligned with the labels above/below */}
+            <div className="relative grid grid-cols-11 gap-1.5 h-full items-center">
+              {TIMELINE_ENTRIES.map((e, i) => (
+                <div key={`dot-${i}`} className="flex justify-center">
+                  <TimelineDot entry={e} />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Bottom labels — odd-indexed entries (1, 3, 5, …) */}
+          <div className="grid grid-cols-11 gap-1.5 items-start mt-3 min-h-[72px]">
+            {TIMELINE_ENTRIES.map((e, i) => (
+              <div key={`bot-${i}`} className="text-center">
+                {i % 2 !== 0 && <TimelineLabel entry={e} />}
+              </div>
+            ))}
+          </div>
+
+          {/* Band legend bar — same proportions as the rail above */}
+          <div className="mt-8 grid grid-cols-11 gap-1.5">
+            <div
+              className="flex flex-col gap-1.5"
+              style={{ gridColumn: `span ${bandCounts[1]} / span ${bandCounts[1]}` }}
+            >
+              <div className="h-1.5 rounded-full bg-foreground/30" />
+              <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                Classical &amp; Behavioral Foundations
+              </div>
+            </div>
+            <div
+              className="flex flex-col gap-1.5"
+              style={{ gridColumn: `span ${bandCounts[2]} / span ${bandCounts[2]}` }}
+            >
+              <div className="h-1.5 rounded-full bg-primary/70" />
+              <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">
+                Quantum Cognition Programs
+              </div>
+            </div>
+            <div
+              className="flex flex-col gap-1.5"
+              style={{ gridColumn: `span ${bandCounts[3]} / span ${bandCounts[3]}` }}
+            >
+              <div className="h-1.5 rounded-full bg-emerald-500" />
+              <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-emerald-600">
+                Synthesis
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p className="mt-4 text-xs text-muted-foreground italic md:hidden">
+        Scroll horizontally to explore the full timeline.
+      </p>
+    </motion.section>
+  );
+}
+
 export default function Whitepaper() {
   const [activeId, setActiveId] = useState<string>(WHITEPAPER_SECTIONS[0].id);
 
@@ -514,32 +837,36 @@ export default function Whitepaper() {
 
             <div className="space-y-20">
               {WHITEPAPER_SECTIONS.map((s, i) => (
-                <motion.section
-                  key={s.id}
-                  id={s.id}
-                  initial={{ opacity: 0, y: 16 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-80px" }}
-                  transition={{ duration: 0.5, delay: i * 0.04 }}
-                  className="scroll-mt-28"
-                >
-                  <header className="mb-6">
-                    <div className="font-mono text-sm text-primary/80 mb-2 tracking-wider">
-                      {s.numeral}.
+                <Fragment key={s.id}>
+                  <motion.section
+                    id={s.id}
+                    initial={{ opacity: 0, y: 16 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-80px" }}
+                    transition={{ duration: 0.5, delay: i * 0.04 }}
+                    className="scroll-mt-28"
+                  >
+                    <header className="mb-6">
+                      <div className="font-mono text-sm text-primary/80 mb-2 tracking-wider">
+                        {s.numeral}.
+                      </div>
+                      <h2 className="text-2xl md:text-3xl font-display font-bold text-foreground leading-tight">
+                        {s.title}
+                      </h2>
+                      {s.teaser && (
+                        <p className="mt-3 text-base text-muted-foreground leading-relaxed max-w-2xl">
+                          {s.teaser}
+                        </p>
+                      )}
+                    </header>
+                    <div className="text-base md:text-[17px] text-foreground/85">
+                      {s.body ?? <ComingSoonCard title={s.title} />}
                     </div>
-                    <h2 className="text-2xl md:text-3xl font-display font-bold text-foreground leading-tight">
-                      {s.title}
-                    </h2>
-                    {s.teaser && (
-                      <p className="mt-3 text-base text-muted-foreground leading-relaxed max-w-2xl">
-                        {s.teaser}
-                      </p>
-                    )}
-                  </header>
-                  <div className="text-base md:text-[17px] text-foreground/85">
-                    {s.body ?? <ComingSoonCard title={s.title} />}
-                  </div>
-                </motion.section>
+                  </motion.section>
+
+                  {/* Inject the Heritage Timeline between Section I and II. */}
+                  {s.id === "heritage" && <HeritageTimeline />}
+                </Fragment>
               ))}
             </div>
 
