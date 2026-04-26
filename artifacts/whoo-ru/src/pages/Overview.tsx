@@ -139,10 +139,12 @@ export default function Overview() {
             One of the central hypotheses concerns midpoint responses. In many
             ordinary surveys, a midpoint such as 5 on a 0–9 or 1–9 scale is
             treated as neutrality, weak preference, indecision, or low engagement.
-            BGP proposes a different possibility: some midpoint responses may
-            represent genuine superposition-like states in which a respondent is
-            simultaneously holding competing but meaningful inclinations. That is
-            not yet an established result. It is a testable hypothesis derived
+            <strong className="font-semibold text-foreground">
+              BGP proposes a different possibility: some midpoint responses may
+              represent genuine superposition-like states in which a respondent
+              is simultaneously holding competing but meaningful inclinations.
+            </strong>{" "}
+            That is not yet an established result. It is a testable hypothesis derived
             from the broader logic of quantum cognition.
           </p>
 
