@@ -14,6 +14,9 @@ import bgpScreen05 from "@assets/bgp-screen05_1777227170314.png";
 import bgpScreen06 from "@assets/bgp-screen06_1777227341782.png";
 import bgpScreen07 from "@assets/bgp-screen07_1777227338455.png";
 import bgpScreen08 from "@assets/bgp-screen08_1777227338455.png";
+import bgpScreen09 from "@assets/bgp-screen09_1777227610719.png";
+import bgpScreen10 from "@assets/bgp-screen10_1777227610719.png";
+import bgpScreen11 from "@assets/bgp-screen11_1777227610718.png";
 
 const BGP_SCREENS: { src: string; alt: string }[] = [
   { src: bgpScreen01, alt: "Belief DNA — dimensional grid across 11 categories" },
@@ -24,6 +27,9 @@ const BGP_SCREENS: { src: string; alt: string }[] = [
   { src: bgpScreen06, alt: "Category Breakdown — pole-to-pole belief positioning" },
   { src: bgpScreen07, alt: "Timeline — belief drift over time" },
   { src: bgpScreen08, alt: "Evolution — confidence, coverage, and category trends" },
+  { src: bgpScreen09, alt: "History — searchable archive of past responses" },
+  { src: bgpScreen10, alt: "Compare — import another DNA to compare with yours" },
+  { src: bgpScreen11, alt: "Forecaster — AI-powered belief prediction engine" },
 ];
 
 const GENOME_APP_URL = (
