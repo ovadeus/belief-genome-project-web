@@ -42,7 +42,6 @@ const MEDIA_ITEMS: DropdownItem[] = [
 const NAV_ITEMS: NavItem[] = [
   { kind: "link",     href: "/",        label: "Home" },
   { kind: "dropdown", label: "White Paper", items: WHITEPAPER_ITEMS },
-  { kind: "link",     href: "/overview", label: "Overview" },
   { kind: "link",     href: "/app",     label: "Participate" },
   { kind: "link",     href: "/explore", label: "Explore Beliefs" },
   { kind: "dropdown", label: "Media",   items: MEDIA_ITEMS },
