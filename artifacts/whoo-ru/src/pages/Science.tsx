@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
+import { PersonHoverCard } from "@/components/PersonHoverCard";
 import { cn } from "@/lib/utils";
 
 type Section = {
@@ -13,48 +14,35 @@ type Section = {
   body?: ReactNode;
 };
 
-// Shared prose styling for the four section bodies.
+// Shared prose styling for the section bodies.
 const P_CLS = "mb-5 leading-relaxed text-foreground/85";
-const H3_CLS =
-  "mt-12 mb-4 text-xl md:text-2xl font-display font-semibold text-foreground";
 const TERM_CLS = "font-semibold text-primary";
-const NAME_CLS = "font-semibold text-foreground";
+// For names without a Wikipedia page (e.g. David Edwin Meyers, the BGP author).
+// Visually identical to the hover-card trigger color/weight, just without the
+// dotted underline that signals "hover for more".
+const NAME_CLS = "font-semibold text-primary";
 
-const FractureBody: ReactNode = (
+const HeritageBody: ReactNode = (
   <>
     <p className={P_CLS}>
-      The dominant framework for measuring human decision-making was built in the 1940s on the
-      foundations laid by <span className={NAME_CLS}>John von Neumann</span> and{" "}
-      <span className={NAME_CLS}>Oskar Morgenstern</span>. Their{" "}
-      <span className={TERM_CLS}>rational actor model</span> treated the human mind like a
-      classical computer bit — strictly binary, with stable preferences that could be represented
-      as definite, coherent positions along a probability distribution.
-    </p>
-    <p className={P_CLS}>That ideal fractured under empirical scrutiny.</p>
-    <p className={P_CLS}>
-      <span className={NAME_CLS}>Amos Tversky</span> and{" "}
-      <span className={NAME_CLS}>Daniel Kahneman</span>, beginning in the 1970s, demonstrated that
-      human judgment systematically violates the basic axioms of classical probability. Their
-      heuristics-and-biases program — culminating in the famous Linda problem and the conjunction
-      fallacy — showed that people routinely rate the conjunction of two events as more probable
-      than one of its constituents. This is not a calculation error. It is evidence that human
-      cognition operates under different rules than classical probability prescribes. Across the
-      same period, <span className={NAME_CLS}>Maurice Allais</span> and{" "}
-      <span className={NAME_CLS}>Daniel Ellsberg</span> showed that preferences violate
-      independence and ambiguity axioms in ways no mixture of classical probabilities can repair.{" "}
-      <span className={NAME_CLS}>Leon Festinger</span>'s work on cognitive dissonance established
-      that people hold contradictory beliefs simultaneously — a finding fundamentally
-      incompatible with the classical assumption that belief states are always coherent.
+      Our understanding of decision-making is built on the profound 1940s
+      foundations laid by{" "}
+      <PersonHoverCard name="John von Neumann" slug="John_von_Neumann" /> and{" "}
+      <PersonHoverCard name="Oskar Morgenstern" slug="Oskar_Morgenstern" />.
+      This classical ideal assumed humans were "rational actors" operating like
+      classical computer bits — strictly binary, 1 or 0.
     </p>
     <p className={P_CLS}>
-      The cumulative weight of this evidence points to something the classical framework cannot
-      accommodate. Human beings do not make occasional mistakes against a classical baseline. We
-      routinely hold superposed, contradictory realities at once — and classical science had no
-      mathematical language to describe that.
-    </p>
-    <p className={P_CLS}>
-      This is why polls and surveys keep failing to predict behavior. They are designed to record
-      the moment of resolution. They cannot see the state that existed seconds before.
+      However, as behavioral science advanced, researchers like{" "}
+      <PersonHoverCard name="Amos Tversky" slug="Amos_Tversky" /> and{" "}
+      <PersonHoverCard name="Daniel Kahneman" slug="Daniel_Kahneman" />{" "}
+      demonstrated through their heuristics and biases program that humans
+      systematically violate the basic laws of classical probability. As
+      illustrated by their famous "Linda problem," we do not simply make random
+      errors; people often give responses that appear contradictory under
+      classical probability assumptions. The classical model provided a vital
+      foundation, but it lacked the mathematical language to explain this
+      dynamic contradiction.
     </p>
   </>
 );
@@ -62,61 +50,56 @@ const FractureBody: ReactNode = (
 const QuantumGrammarBody: ReactNode = (
   <>
     <p className={P_CLS}>
-      The mathematical language the field needed was already on the shelf — developed for
-      microphysical systems, but abstractable from physics into a formalism for any system where
-      states can exist in superposition until measurement forces resolution.
+      To explain the messy reality of human cognition, the Belief Genome
+      Project is deeply indebted to the foundational quantum cognition research
+      of <PersonHoverCard name="Jerome Busemeyer" slug="Jerome_Busemeyer" /> and{" "}
+      <PersonHoverCard name="Peter Bruza" slug="Peter_Bruza" />. Their work and
+      subsequent developments show that the mathematical formalism of quantum
+      probability — including concepts such as superposition, interference, and
+      non-commutativity — can capture important context effects and judgment
+      patterns that classical probability struggles to model.
     </p>
     <p className={P_CLS}>
-      The Brussels school (<span className={NAME_CLS}>Diederik Aerts</span> and colleagues) was
-      among the first to apply quantum-theoretic models to cognition, demonstrating that concepts
-      behave less like classical sets and more like superposition states whose exemplar structure
-      depends on context. <span className={NAME_CLS}>Jerome Busemeyer</span> and{" "}
-      <span className={NAME_CLS}>Peter Bruza</span> consolidated this scattered work into a
-      unified research program, formalizing superposition, interference, non-commutative
-      measurement, and entanglement as cognitive modeling tools.{" "}
-      <span className={NAME_CLS}>Emmanuel Pothos</span>,{" "}
-      <span className={NAME_CLS}>Andrei Khrennikov</span>, and{" "}
-      <span className={NAME_CLS}>Zheng Wang</span> extended the program through the QQ equality —
-      a parameter-free mathematical constraint on question-order effects that has now been
-      validated across dozens of nationally representative survey datasets at a precision more
-      commonly seen in physics than psychology.
+      Researcher{" "}
+      <span className={NAME_CLS}>David Edwin Meyers</span> uses the analogy of
+      a full color wheel. When a 12-color wheel spins at high velocity, the
+      individual colors optically mix into a dynamic, vibrating gray. In much
+      classical survey practice, a midpoint response (like a 5 out of 10) is
+      often interpreted as apathy or indecision. Inspired by quantum-cognitive
+      models, the BGP instead treats midpoints as candidate superposition
+      states: the "vibrating gray" of the spinning wheel, potentially encoding
+      tension between competing but meaningful inclinations. To explore this
+      empirically, the BGP introduces the{" "}
+      <span className={TERM_CLS}>Entropy State Slider</span> as a proposed
+      measurement device aimed at quantifying the degree of perceived
+      uncertainty and conflict rather than forcing a single binary choice.
     </p>
-    <p className={P_CLS}>
-      The Belief Genome Project inherits this grammar in full. It does not claim cognition is a
-      quantum physical process. It claims — with the field — that the mathematical structure of
-      quantum probability provides a more accurate descriptive framework for human judgment than
-      classical probability does.
-    </p>
+  </>
+);
 
-    <h3 className={H3_CLS}>The Midpoint Revelation</h3>
+const MacroScaleBody: ReactNode = (
+  <>
     <p className={P_CLS}>
-      This is where the Belief Genome Project departs from prior practice and stakes original
-      ground.
+      At the macro level, our architecture builds upon the ontological bridge
+      proposed by{" "}
+      <PersonHoverCard name="Alexander Wendt" slug="Alexander_Wendt" />, who
+      argues that human beings and social systems can fruitfully be modeled as
+      "walking wave functions." We also draw on{" "}
+      <PersonHoverCard name="Andrei Khrennikov" slug="Andrei_Khrennikov" />'s{" "}
+      <span className={TERM_CLS}>Social Laser Theory</span> and related
+      mean-field models, which use quantum-like formalisms to analyze how
+      populations can exhibit coherent amplification and phase-transition–like
+      behavior under the influence of social information.
     </p>
     <p className={P_CLS}>
-      In classical psychometrics, the midpoint of a survey scale — the &ldquo;neutral,&rdquo; the
-      &ldquo;neither agree nor disagree,&rdquo; the 5 on a 0–9 scale — is treated as the absence
-      of signal. Apathy. Indifference. A weak preference, or no preference at all.
-    </p>
-    <p className={P_CLS}>
-      The Belief Genome Project rejects this entirely. Under the quantum-cognitive
-      interpretation, the midpoint is genuine superposition — a cognitively active state in which
-      a person holds multiple, contradictory belief positions simultaneously, each with its own
-      quantum amplitude, resolvable only when context forces a decision.
-    </p>
-    <p className={P_CLS}>
-      Picture a color wheel with all twelve basic hues. Spinning slowly, you see each color in
-      turn. Spinning fast enough, the colors optically mix into a vibrating, dynamic gray. That
-      gray is not the absence of color. It is the simultaneous presence of all twelve. The
-      midpoint of a belief scale is that gray. It is where the most cognitive activity is
-      happening — not where it is missing.
-    </p>
-    <p className={P_CLS}>
-      To capture this, the platform introduces the{" "}
-      <span className={TERM_CLS}>Entropy State Slider</span> — a measurement tool that abandons
-      the binary on/off switch in favor of an instrument designed to register active tension.
-      Where classical scales force resolution, the slider preserves the superposition long enough
-      to measure it.
+      These models illustrate that quantum-inspired tools can be extended from
+      individual judgments to population-level dynamics, including phenomena
+      reminiscent of polarization and viral cascades. However, in many such
+      models the "social atom" is treated as a relatively undifferentiated
+      agent. The Belief Genome Project seeks to provide a complementary layer:
+      a candidate internal coordinate system for the social atom, specifying
+      where and how individual belief dimensions may contribute to emerging
+      societal coherence or fragmentation.
     </p>
   </>
 );
@@ -124,144 +107,106 @@ const QuantumGrammarBody: ReactNode = (
 const SynthesisBody: ReactNode = (
   <>
     <p className={P_CLS}>
-      Quantum cognition explained the individual. The next intellectual move was to ask what
-      happens when superposed minds aggregate into societies.
+      While we inherit this theoretical lineage, the Belief Genome Project
+      proposes an operational measurement architecture that, to our knowledge,
+      has not yet been implemented in a unified form. Operating within a
+      broadly methodological individualist framework while incorporating
+      quantum-probabilistic indeterminacy,{" "}
+      <span className={NAME_CLS}>Meyers</span> defines an architecture that
+      represents reported beliefs across 11 categories and 124 dimensions.
     </p>
     <p className={P_CLS}>
-      <span className={NAME_CLS}>Alexander Wendt</span> provided the philosophical bridge. He
-      argued that human beings and societies should be understood as macroscopic quantum
-      phenomena — that we are, in his framing, walking wave functions.{" "}
-      <span className={NAME_CLS}>Wendt</span> established the ontology. He did not specify how to
-      measure it.
+      Within this architecture, the{" "}
+      <span className={TERM_CLS}>Cognitive Qubit</span> is introduced as the
+      proposed fundamental unit of analysis: a single belief dimension modeled
+      as a state in a low-dimensional Hilbert space. When a decision forces the
+      spinning color wheel to "freeze" — analogous to a strobe light — the
+      individual undergoes what we call a{" "}
+      <span className={TERM_CLS}>Collapse Event</span>, a decision-forcing
+      measurement that projects an indeterminate state onto a particular
+      response. Because intuitive (System 1) and deliberative (System 2)
+      processing can yield different outcomes, the BGP defines the{" "}
+      <span className={TERM_CLS}>Collapse Gap</span> as an individual-level
+      metric intended to quantify divergence between fast and slow responses on
+      the same belief dimension.
     </p>
     <p className={P_CLS}>
-      <span className={NAME_CLS}>Andrei Khrennikov</span> built the macro-scale dynamics. His
-      Social Laser Theory demonstrates how populations undergo coherent amplification — like a
-      physical laser — when stimulated by social information, producing the phase transitions we
-      recognize as mass polarization and viral outrage.{" "}
-      <span className={NAME_CLS}>Khrennikov</span> scaled quantum formalism to entire populations.
-      But to make the math work at that scale, he treated individuals as largely undifferentiated
-      social atoms, abstracting away their interior structure to focus on field dynamics.
-    </p>
-    <p className={P_CLS}>
-      This is the unoccupied territory the Belief Genome Project enters.{" "}
-      <span className={NAME_CLS}>Wendt</span> told us what humans are under a quantum framework.{" "}
-      <span className={NAME_CLS}>Busemeyer</span> and <span className={NAME_CLS}>Bruza</span> gave
-      us the grammar to model isolated cognitive effects.{" "}
-      <span className={NAME_CLS}>Khrennikov</span> showed how that grammar scales. None of them
-      built an instrument to map the internal coordinate system of the social atom itself.
-    </p>
-    <p className={P_CLS}>
-      The Belief Genome Project is the first framework to bridge the micro and the macro — not by
-      observing the social laser from outside, but by resolving the interior architecture of the
-      individuals that power it.
-    </p>
-
-    <h3 className={H3_CLS}>
-      Methodological Individualism, Corrected for Quantum Indeterminacy
-    </h3>
-    <p className={P_CLS}>
-      This bridging requires a particular philosophical stance, which the project states plainly:
-      it preserves the individual as the fundamental unit of measurement, but rejects the
-      classical assumption of a stable, fixed rational actor. It adjusts methodological
-      individualism for structural indeterminacy and contextual superposition. The individual
-      remains the unit. What the unit is has changed.
-    </p>
-
-    <h3 className={H3_CLS}>The Architecture</h3>
-    <p className={P_CLS}>
-      On that foundation, the project maps the human mind across 11 categories — epistemology,
-      spirituality, morality, psychology, relationships, social, political, economics, science
-      and technology, education, and health — distributed across 124 precise dimensions.
-    </p>
-    <p className={P_CLS}>
-      The fundamental unit is not a binary bit but the{" "}
-      <span className={TERM_CLS}>Cognitive Qubit</span>: a single dimension of belief
-      represented as a vector in a two-dimensional Hilbert space, where the midpoint explicitly
-      encodes superposition rather than indifference.
-    </p>
-    <p className={P_CLS}>
-      When a decision-forcing event freezes the spinning wheel — a vote cast, a survey answered,
-      a purchase made — the project calls this a <span className={TERM_CLS}>Collapse Event</span>.
-      Because intuition (System 1) and deliberation (System 2) often disagree about which outcome
-      the collapse should produce, the project measures the{" "}
-      <span className={TERM_CLS}>Collapse Gap</span>: the quantitative signature of internal
-      doubt and tension between fast and slow cognition.
-    </p>
-    <p className={P_CLS}>
-      Over a lifetime, repeated collapses leave traces.{" "}
-      <span className={TERM_CLS}>Longitudinal Worldview Mapping</span> tracks how superposition
-      narrows into stable belief — how, over time, certain dimensions develop scars where the
-      wheel no longer spins freely.
-    </p>
-    <p className={P_CLS}>
-      The architecture's output is the 136-character{" "}
-      <span className={TERM_CLS}>Belief Genome Serial</span> — a transmissible, quantifiable
-      encoding of a single worldview at a single moment in time. The serial is designed to be
-      analyzable at the dimension level, the cluster level, and the whole-state level. Serials
-      from the same person at different times reveal evolution. Serials from different people
-      reveal structural similarity. Serials from the same person under different framing contexts
-      reveal context-dependence.
-    </p>
-    <p className={P_CLS}>
-      The Belief Genome Project is, in its own framing, not a solution — an instrument to guide
-      solutions. The architecture is what makes the solutions possible. Visualizations like the{" "}
-      <span className={TERM_CLS}>Triple Helix DNA</span> (mapping ethos, logos, and pathos) and
-      the <span className={TERM_CLS}>3D Neuro Map</span> translate the serial into shapes the
-      human eye can see.
+      Over repeated measurements,{" "}
+      <span className={TERM_CLS}>Longitudinal Worldview Mapping</span> is
+      proposed as a way to track how patterns of responses move from more
+      indeterminate to more stable over time. The architecture yields a
+      136-character{" "}
+      <span className={TERM_CLS}>Belief Genome Serial Key</span>: a compact
+      code summarizing an individual's responses across the 124 dimensions at a
+      given point in time. Conceptually, this representation can be used to
+      generate visualizations — such as triple-helix or 3D state-space plots —
+      intended to aid interpretation, though these visual formats are currently
+      at the prototype and design stage.
     </p>
   </>
 );
 
-const HORIZON_FRONTIERS: { label: string; body: ReactNode }[] = [
+const FRONTIER_AVENUES: { label: string; body: ReactNode }[] = [
   {
-    label: "AI Alignment",
+    label: "Research on wicked problems",
     body: (
       <>
-        Current AI systems are trained on data that treats midpoints as noise, leaving them to
-        mischaracterize cognitively active superposition states as weak preferences to be
-        resolved arbitrarily. An AI cannot align with belief states it cannot accurately
-        represent. The Belief Genome Project offers a candidate representation — one that anchors
-        models to the contradictory, contextual, dynamic worldviews that humans actually hold.
+        Aggregated BGP-style architectures might provide population-level maps
+        of belief configurations that underlie policy preferences and collective
+        action, complementing existing survey and modeling tools.
       </>
     ),
   },
   {
-    label: "Self-Exploration",
+    label: "AI–human preference modeling",
     body: (
       <>
-        The serial gives individuals a structured, honest mirror. Not a personality type. Not a
-        label. A map of the specific dimensions where a person's belief is resolved, where it is
-        in superposition, and where it is collapsing in real time.
+        Encoded representations of individual belief states could be explored
+        as one ingredient in more personalized and transparent preference
+        models for AI systems, though this remains a speculative direction that
+        will require careful empirical validation and ethical safeguards.
       </>
     ),
   },
   {
-    label: "The Forecaster",
+    label: "Self-exploration tools",
     body: (
       <>
-        Using a person's specific serial, the project simulates how their unique superposition
-        will collapse in response to new information, breaking news, or complex social
-        situations — predicting the resolution before the event itself forces one.
+        Interactive interfaces could allow individuals to explore patterns of
+        consistency, conflict, and change in their own reported beliefs over
+        time.
+      </>
+    ),
+  },
+  {
+    label: "Forecasting experiments",
+    body: (
+      <>
+        Pilot studies might test whether architectures like the Serial Key
+        improve prediction of how people respond to new information or
+        scenarios, relative to simpler baselines.
       </>
     ),
   },
 ];
 
-const HorizonBody: ReactNode = (
+const FrontierBody: ReactNode = (
   <>
     <p className={P_CLS}>
-      The architecture is only as useful as the data feeding it. The project gathers that data
-      through <span className={TERM_CLS}>Entropy Harvesting</span> — the systematic collection of
-      micro-behavioral signals and probability responses during ambient, low-stakes interactions.
-      What classical psychometrics treats as noise — hesitation, drift, contextual variance — the
-      Belief Genome Project treats as the highest-value signal in the dataset. Entropy is where
-      the superposition lives.
+      The BGP framework aspires to capture richer data through what we term{" "}
+      <span className={TERM_CLS}>Entropy Harvesting</span>: collecting response
+      patterns, probability estimates, and potentially micro-behavioral signals
+      (e.g., hesitation times, changes under reframing) that classical
+      instruments often treat as noise. The goal is to transform this
+      variability into structured indicators of contextual sensitivity and
+      internal conflict rather than discard it.
     </p>
-    <p className={P_CLS}>Three applied frontiers follow from this map.</p>
+    <p className={P_CLS}>
+      In principle, such data could support several applied avenues:
+    </p>
 
     <div className="mt-6 grid gap-3 sm:gap-4">
-      {HORIZON_FRONTIERS.map((f) => (
+      {FRONTIER_AVENUES.map((f) => (
         <div
           key={f.label}
           className="rounded-2xl border border-border bg-card/40 p-5 sm:p-6"
@@ -276,34 +221,148 @@ const HorizonBody: ReactNode = (
   </>
 );
 
+const ARCHITECTURAL_CONSTRUCTS = [
+  "The 124-dimension belief architecture",
+  "The Cognitive Qubit",
+  "The Collapse Event",
+  "The Collapse Gap",
+  "Entropy Harvesting",
+  "The 136-character Belief Genome Serial",
+  "Longitudinal Worldview Mapping",
+];
+
+const EmpiricalHorizonBody: ReactNode = (
+  <>
+    <p className={P_CLS}>
+      The Belief Genome Project does not claim to introduce a new underlying
+      physics or probability calculus; rather, it represents an operational
+      synthesis of three strands of prior work: quantum cognition and decision
+      models, quantum-like social modeling (including{" "}
+      <span className={TERM_CLS}>Social Laser Theory</span>), and ontological
+      proposals in quantum social science. Building on this foundation,{" "}
+      <span className={NAME_CLS}>Meyers</span> introduces seven architectural
+      constructs:
+    </p>
+
+    <ol className="mt-6 mb-6 grid gap-2.5 sm:grid-cols-2">
+      {ARCHITECTURAL_CONSTRUCTS.map((c, i) => (
+        <li
+          key={c}
+          className="flex items-start gap-3 rounded-xl border border-border bg-card/40 px-4 py-3"
+        >
+          <span className="font-mono text-[11px] text-primary/80 mt-0.5 shrink-0 tabular-nums">
+            {String(i + 1).padStart(2, "0")}
+          </span>
+          <span className={`${TERM_CLS} text-[15px] leading-snug`}>{c}</span>
+        </li>
+      ))}
+    </ol>
+
+    <p className={P_CLS}>
+      Crucially, the BGP is presently a candidate architecture. While it draws
+      on peer-reviewed mathematical and empirical work, the architecture as a
+      whole — and its specific commitments about midpoints, dimensional
+      structure, and qubit-like units — requires systematic experimental
+      testing. One proposed empirical program is to extend the established "QQ
+      equality" framework to within-subject designs that stratify participants
+      by their use of midpoints versus adjacent scale values, with the aim of
+      testing whether midpoint-heavy responders exhibit distinctive context
+      effects beyond what a classical mixture model would predict.
+    </p>
+    <p className={P_CLS}>
+      In this sense, the theoretical ingredients are available and a
+      preliminary empirical blueprint can be articulated, but the decisive
+      tests remain to be conducted. We invite collaboration from the scientific
+      and technical communities to refine these designs, critically evaluate
+      the underlying assumptions, and test whether architectures of this kind
+      provide incremental explanatory and predictive value over existing
+      models.
+    </p>
+  </>
+);
+
 export const SCIENCE_SECTIONS: Section[] = [
   {
-    id: "fracture",
+    id: "heritage",
     numeral: "I",
-    title: "The Fracture",
-    teaser: "Why classical models failed.",
-    body: FractureBody,
+    title: "The Heritage",
+    teaser: "The limits of the rational actor.",
+    body: HeritageBody,
   },
   {
     id: "quantum-grammar",
     numeral: "II",
     title: "The Quantum Grammar",
-    teaser: "A new mathematics for cognition.",
+    teaser: "A new mathematical vocabulary.",
     body: QuantumGrammarBody,
   },
   {
-    id: "synthesis",
+    id: "macro-scale",
     numeral: "III",
+    title: "The Macro Scale",
+    teaser: "Society as a quantum field.",
+    body: MacroScaleBody,
+  },
+  {
+    id: "synthesis",
+    numeral: "IV",
     title: "The Synthesis",
-    teaser: "From walking wave functions to a mapped architecture.",
+    teaser: "Mapping the architecture of human belief.",
     body: SynthesisBody,
   },
   {
+    id: "frontier",
+    numeral: "V",
+    title: "The Frontier",
+    teaser: "Entropy Harvesting and applied solutions.",
+    body: FrontierBody,
+  },
+  {
     id: "horizon",
-    numeral: "IV",
-    title: "The Horizon",
-    teaser: "Entropy Harvesting and what this map makes possible.",
-    body: HorizonBody,
+    numeral: "VI",
+    title: "The Empirical Horizon",
+    teaser: "Architectural contributions and verification.",
+    body: EmpiricalHorizonBody,
+  },
+];
+
+type Reference = { authors: string; title: string; venue?: string };
+
+const REFERENCES: Reference[] = [
+  {
+    authors: "Busemeyer, J. R., & Bruza, P. D.",
+    title: "Quantum Models of Cognition and Decision",
+    venue: "Cambridge University Press.",
+  },
+  {
+    authors: "Busemeyer, J. R., & Yearsley, J. M.",
+    title: "\u201CQuantum cognition and decision theories.\u201D",
+    venue: "Trends in Cognitive Sciences.",
+  },
+  {
+    authors: "Wang, Z., Solloway, T., Shiffrin, R. M., & Busemeyer, J. R.",
+    title:
+      "\u201CContext effects produced by question orders reveal quantum nature of human judgments.\u201D",
+    venue: "PNAS.",
+  },
+  {
+    authors: "Khrennikov, A.",
+    title: "Social Laser and related articles on mean-field social laser models.",
+  },
+  {
+    authors: "Wendt, A.",
+    title: "Quantum Mind and Social Science",
+    venue: "Cambridge University Press.",
+  },
+  {
+    authors: "Tversky, A., & Kahneman, D.",
+    title: "\u201CJudgment under Uncertainty: Heuristics and Biases.\u201D",
+    venue: "Science.",
+  },
+  {
+    authors: "von Neumann, J., & Morgenstern, O.",
+    title: "Theory of Games and Economic Behavior",
+    venue: "Princeton University Press.",
   },
 ];
 
@@ -334,7 +393,8 @@ export default function Science() {
 
   // Sidebar scroll-spy — highlights the section currently in view.
   useEffect(() => {
-    const els = SCIENCE_SECTIONS.map((s) => document.getElementById(s.id)).filter(Boolean) as HTMLElement[];
+    const ids = [...SCIENCE_SECTIONS.map((s) => s.id), "references"];
+    const els = ids.map((id) => document.getElementById(id)).filter(Boolean) as HTMLElement[];
     if (els.length === 0) return;
     const observer = new IntersectionObserver(
       (entries) => {
@@ -349,6 +409,11 @@ export default function Science() {
     return () => observer.disconnect();
   }, []);
 
+  const sidebarItems: { id: string; numeral?: string; label: string }[] = [
+    ...SCIENCE_SECTIONS.map((s) => ({ id: s.id, numeral: s.numeral, label: s.title })),
+    { id: "references", label: "Selected References" },
+  ];
+
   return (
     <PublicLayout>
       <article className="px-6 py-16 max-w-6xl mx-auto">
@@ -360,7 +425,7 @@ export default function Science() {
           className="mb-10"
         >
           <span className="inline-block text-xs font-semibold uppercase tracking-[0.18em] text-primary/80 font-display">
-            The Science
+            White Paper
           </span>
         </motion.div>
 
@@ -368,10 +433,10 @@ export default function Science() {
           {/* Sidebar — section index + sub-page link */}
           <aside className="lg:sticky lg:top-28 lg:self-start">
             <div className="text-[11px] font-semibold tracking-[0.16em] uppercase text-muted-foreground mb-4">
-              Overview
+              Contents
             </div>
             <ol className="space-y-1 mb-6">
-              {SCIENCE_SECTIONS.map((s) => {
+              {sidebarItems.map((s) => {
                 const active = s.id === activeId;
                 return (
                   <li key={s.id}>
@@ -392,8 +457,12 @@ export default function Science() {
                           : "text-muted-foreground hover:text-foreground hover:bg-foreground/5 border-l-2 border-transparent"
                       )}
                     >
-                      <span className="font-mono text-[11px] mr-2 opacity-70">{s.numeral}.</span>
-                      {s.title}
+                      {s.numeral && (
+                        <span className="font-mono text-[11px] mr-2 opacity-70">
+                          {s.numeral}.
+                        </span>
+                      )}
+                      {s.label}
                     </a>
                   </li>
                 );
@@ -419,13 +488,28 @@ export default function Science() {
               className="mb-12 pb-8 border-b border-border"
             >
               <h1 className="text-3xl md:text-5xl font-display font-bold text-foreground leading-tight">
-                Overview
+                WHO ARE YOU?
               </h1>
-              <p className="mt-5 text-lg text-muted-foreground leading-relaxed max-w-2xl">
-                A four-part walk through the science behind the Belief Genome Project — from the
-                breakdown of the Rational Actor, through the quantum grammar of cognition, to the
-                synthesis that makes the framework work and the horizon it opens.
-              </p>
+              <div className="mt-6 space-y-5 text-base md:text-[17px] text-foreground/85 max-w-2xl">
+                <p className="leading-relaxed">
+                  Everyone thinks they know. Almost no one does. Society's
+                  wicked problems have been studied from the outside in for
+                  decades, yet they persist because the interior states that
+                  actually drive every vote, purchase, and commitment remain
+                  only coarsely mapped by existing methods. Classical models
+                  show important limitations because polls and surveys{" "}
+                  <em className="text-foreground/95">
+                    "measure the collapse, not the state."
+                  </em>
+                </p>
+                <p className="leading-relaxed">
+                  The Belief Genome Project (BGP) is a measurement architecture
+                  designed to map that interior landscape. By synthesizing
+                  decades of cognitive science and quantum probability, the BGP
+                  provides an empirical framework to measure human contradiction
+                  not as an error, but as a feature of a highly complex mind.
+                </p>
+              </div>
             </motion.header>
 
             <div className="space-y-20">
@@ -459,6 +543,41 @@ export default function Science() {
               ))}
             </div>
 
+            {/* Selected References */}
+            <motion.section
+              id="references"
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.5 }}
+              className="scroll-mt-28 mt-20 pt-10 border-t border-border"
+            >
+              <header className="mb-6">
+                <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-primary/80 mb-2">
+                  References
+                </div>
+                <h2 className="text-2xl md:text-3xl font-display font-bold text-foreground leading-tight">
+                  Selected References
+                </h2>
+              </header>
+              <ol className="space-y-3 text-sm md:text-[15px] text-foreground/80 leading-relaxed list-decimal pl-5 marker:text-primary/60 marker:font-mono">
+                {REFERENCES.map((r) => (
+                  <li key={r.authors + r.title} className="pl-1">
+                    <span className="text-foreground/90">{r.authors}</span>{" "}
+                    <em className="not-italic text-foreground">{r.title}</em>
+                    {r.venue && (
+                      <>
+                        {". "}
+                        <span className="italic text-foreground/75">
+                          {r.venue}
+                        </span>
+                      </>
+                    )}
+                  </li>
+                ))}
+              </ol>
+            </motion.section>
+
             {/* Read next: Original Contributions */}
             <nav className="mt-20 pt-8 border-t border-border">
               <Link
@@ -473,8 +592,9 @@ export default function Science() {
                     Original Contributions
                   </div>
                   <p className="mt-1 text-sm text-muted-foreground max-w-md">
-                    The seven constructs, the candidate-architecture qualification, and the
-                    falsification test that anchors the project.
+                    The seven constructs, the candidate-architecture
+                    qualification, and the falsification test that anchors the
+                    project.
                   </p>
                 </div>
                 <ArrowRight

@@ -22,11 +22,14 @@ type NavItem =
   | { kind: "dropdown"; label: string; items: DropdownItem[] };
 
 const SCIENCE_ITEMS: DropdownItem[] = [
-  { href: "/science",                        label: "Overview" },
-  { href: "/science#fracture",               label: "I.   The Fracture",        indent: true },
-  { href: "/science#quantum-grammar",        label: "II.  The Quantum Grammar", indent: true },
-  { href: "/science#synthesis",              label: "III. The Synthesis",       indent: true },
-  { href: "/science#horizon",                label: "IV.  The Horizon",         indent: true },
+  { href: "/science",                        label: "White Paper" },
+  { href: "/science#heritage",               label: "I.   The Heritage",         indent: true },
+  { href: "/science#quantum-grammar",        label: "II.  The Quantum Grammar",  indent: true },
+  { href: "/science#macro-scale",            label: "III. The Macro Scale",      indent: true },
+  { href: "/science#synthesis",              label: "IV.  The Synthesis",        indent: true },
+  { href: "/science#frontier",               label: "V.   The Frontier",         indent: true },
+  { href: "/science#horizon",                label: "VI.  The Empirical Horizon", indent: true },
+  { href: "/science#references",             label: "Selected References",       indent: true },
   { href: "/science/original-contributions", label: "Original Contributions" },
 ];
 
