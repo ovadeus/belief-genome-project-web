@@ -1,8 +1,21 @@
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { motion } from "framer-motion";
 import { ArrowRight, Dna, Activity, Eye, ChevronDown, Globe, Chrome, Monitor } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "wouter";
+import bgpApp01 from "@assets/bgp-app01_1777242346220.png";
+import bgpApp02 from "@assets/bgp-app02_1777242346219.png";
+import bgpApp03 from "@assets/bgp-app03_1777242346219.png";
+import bgpApp04 from "@assets/bgp-app04_1777242346219.png";
+import bgpApp05 from "@assets/bgp-app05_1777242346218.png";
+
+const BGP_APP_SCREENS: { src: string; alt: string }[] = [
+  { src: bgpApp01, alt: "BGP Mission Control — splash screen featuring the Note G companion" },
+  { src: bgpApp02, alt: "BGP Mission Control — dashboard fading in over the splash" },
+  { src: bgpApp03, alt: "BGP Mission Control — Note G and Ada Lovelace identity panel" },
+  { src: bgpApp04, alt: "BGP Mission Control — Bookmarks, Inbox Summary, Countdowns, and Agenda dashboard" },
+  { src: bgpApp05, alt: "BGP Mission Control — full layout editor with column and row sizing controls" },
+];
 
 const GENOME_APP_URL = (
   (import.meta.env.VITE_GENOME_APP_URL as string | undefined) || "/genome-app/"
@@ -69,6 +82,32 @@ const fadeUp = {
 
 export default function AppShowcase() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [appScreenIdx, setAppScreenIdx] = useState(0);
+  const [appAspectRatios, setAppAspectRatios] = useState<Record<number, number>>({});
+
+  // Pre-measure each screenshot so the frame can animate to its true aspect
+  // ratio on slide change (mirrors the Home carousel behavior).
+  useEffect(() => {
+    BGP_APP_SCREENS.forEach((s, i) => {
+      const img = new Image();
+      img.onload = () => {
+        setAppAspectRatios((prev) =>
+          prev[i] ? prev : { ...prev, [i]: img.naturalHeight / img.naturalWidth }
+        );
+      };
+      img.src = s.src;
+    });
+  }, []);
+
+  // Auto-advance every 5s.
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setAppScreenIdx((i) => (i + 1) % BGP_APP_SCREENS.length);
+    }, 5000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  const appCurrentAspect = appAspectRatios[appScreenIdx] ?? 0.7;
 
   return (
     <PublicLayout>
@@ -135,6 +174,59 @@ export default function AppShowcase() {
                 </figcaption>
               </motion.figure>
             ))}
+          </div>
+
+          {/* ── App Preview Carousel — auto-cycling tour of Mission Control ─ */}
+          <div className="mb-24">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="mx-auto w-full"
+              style={{ maxWidth: 980 }}
+            >
+              <motion.div
+                className="relative w-full overflow-hidden border border-foreground/25 bg-card/40"
+                animate={{ paddingBottom: `${appCurrentAspect * 100}%` }}
+                transition={{ duration: 1.0, ease: [0.4, 0, 0.2, 1] }}
+              >
+                {BGP_APP_SCREENS.map((s, i) => (
+                  <motion.img
+                    key={i}
+                    src={s.src}
+                    alt={s.alt}
+                    draggable={false}
+                    initial={false}
+                    animate={{ opacity: i === appScreenIdx ? 1 : 0 }}
+                    transition={{ duration: 1.0, ease: "easeInOut" }}
+                    className="absolute inset-0 w-full h-full object-contain select-none"
+                    style={{ pointerEvents: i === appScreenIdx ? "auto" : "none" }}
+                  />
+                ))}
+              </motion.div>
+
+              <div className="flex justify-center items-center gap-2.5 mt-6">
+                {BGP_APP_SCREENS.map((_, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => setAppScreenIdx(i)}
+                    aria-label={`Show app screen ${i + 1}`}
+                    aria-current={i === appScreenIdx}
+                    className={`h-2.5 w-2.5 rounded-full transition-colors duration-300 ${
+                      i === appScreenIdx
+                        ? "bg-primary"
+                        : "bg-neutral-700 hover:bg-neutral-500"
+                    }`}
+                  />
+                ))}
+              </div>
+
+              <figcaption className="academic-figure-caption text-center mt-3">
+                Fig. 1.4 &mdash; BGP Mission Control: a tour of the desktop interface.
+              </figcaption>
+            </motion.div>
           </div>
 
           {/* ── § II  Features ───────────────────────────────────────────── */}
