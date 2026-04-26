@@ -18,29 +18,33 @@ const P_CLS = "mb-5 leading-relaxed text-foreground/85";
 const H3_CLS =
   "mt-12 mb-4 text-xl md:text-2xl font-display font-semibold text-foreground";
 const TERM_CLS = "font-semibold text-primary";
+const NAME_CLS = "font-semibold text-foreground";
 
 const FractureBody: ReactNode = (
   <>
     <p className={P_CLS}>
       The dominant framework for measuring human decision-making was built in the 1940s on the
-      foundations laid by John von Neumann and Oskar Morgenstern. Their{" "}
+      foundations laid by <span className={NAME_CLS}>John von Neumann</span> and{" "}
+      <span className={NAME_CLS}>Oskar Morgenstern</span>. Their{" "}
       <span className={TERM_CLS}>rational actor model</span> treated the human mind like a
       classical computer bit — strictly binary, with stable preferences that could be represented
       as definite, coherent positions along a probability distribution.
     </p>
     <p className={P_CLS}>That ideal fractured under empirical scrutiny.</p>
     <p className={P_CLS}>
-      Amos Tversky and Daniel Kahneman, beginning in the 1970s, demonstrated that human judgment
-      systematically violates the basic axioms of classical probability. Their
+      <span className={NAME_CLS}>Amos Tversky</span> and{" "}
+      <span className={NAME_CLS}>Daniel Kahneman</span>, beginning in the 1970s, demonstrated that
+      human judgment systematically violates the basic axioms of classical probability. Their
       heuristics-and-biases program — culminating in the famous Linda problem and the conjunction
       fallacy — showed that people routinely rate the conjunction of two events as more probable
       than one of its constituents. This is not a calculation error. It is evidence that human
       cognition operates under different rules than classical probability prescribes. Across the
-      same period, Allais and Ellsberg showed that preferences violate independence and ambiguity
-      axioms in ways no mixture of classical probabilities can repair. Festinger's work on
-      cognitive dissonance established that people hold contradictory beliefs simultaneously — a
-      finding fundamentally incompatible with the classical assumption that belief states are
-      always coherent.
+      same period, <span className={NAME_CLS}>Allais</span> and{" "}
+      <span className={NAME_CLS}>Ellsberg</span> showed that preferences violate independence and
+      ambiguity axioms in ways no mixture of classical probabilities can repair.{" "}
+      <span className={NAME_CLS}>Festinger</span>'s work on cognitive dissonance established that
+      people hold contradictory beliefs simultaneously — a finding fundamentally incompatible
+      with the classical assumption that belief states are always coherent.
     </p>
     <p className={P_CLS}>
       The cumulative weight of this evidence points to something the classical framework cannot
@@ -63,16 +67,19 @@ const QuantumGrammarBody: ReactNode = (
       states can exist in superposition until measurement forces resolution.
     </p>
     <p className={P_CLS}>
-      The Brussels school (Diederik Aerts and colleagues) was among the first to apply
-      quantum-theoretic models to cognition, demonstrating that concepts behave less like
-      classical sets and more like superposition states whose exemplar structure depends on
-      context. Jerome Busemeyer and Peter Bruza consolidated this scattered work into a unified
-      research program, formalizing superposition, interference, non-commutative measurement, and
-      entanglement as cognitive modeling tools. Emmanuel Pothos, Andrei Khrennikov, and Zheng
-      Wang extended the program through the QQ equality — a parameter-free mathematical
-      constraint on question-order effects that has now been validated across dozens of
-      nationally representative survey datasets at a precision more commonly seen in physics than
-      psychology.
+      The Brussels school (<span className={NAME_CLS}>Diederik Aerts</span> and colleagues) was
+      among the first to apply quantum-theoretic models to cognition, demonstrating that concepts
+      behave less like classical sets and more like superposition states whose exemplar structure
+      depends on context. <span className={NAME_CLS}>Jerome Busemeyer</span> and{" "}
+      <span className={NAME_CLS}>Peter Bruza</span> consolidated this scattered work into a
+      unified research program, formalizing superposition, interference, non-commutative
+      measurement, and entanglement as cognitive modeling tools.{" "}
+      <span className={NAME_CLS}>Emmanuel Pothos</span>,{" "}
+      <span className={NAME_CLS}>Andrei Khrennikov</span>, and{" "}
+      <span className={NAME_CLS}>Zheng Wang</span> extended the program through the QQ equality —
+      a parameter-free mathematical constraint on question-order effects that has now been
+      validated across dozens of nationally representative survey datasets at a precision more
+      commonly seen in physics than psychology.
     </p>
     <p className={P_CLS}>
       The Belief Genome Project inherits this grammar in full. It does not claim cognition is a
@@ -121,24 +128,28 @@ const SynthesisBody: ReactNode = (
       happens when superposed minds aggregate into societies.
     </p>
     <p className={P_CLS}>
-      Alexander Wendt provided the philosophical bridge. He argued that human beings and
-      societies should be understood as macroscopic quantum phenomena — that we are, in his
-      framing, walking wave functions. Wendt established the ontology. He did not specify how to
+      <span className={NAME_CLS}>Alexander Wendt</span> provided the philosophical bridge. He
+      argued that human beings and societies should be understood as macroscopic quantum
+      phenomena — that we are, in his framing, walking wave functions.{" "}
+      <span className={NAME_CLS}>Wendt</span> established the ontology. He did not specify how to
       measure it.
     </p>
     <p className={P_CLS}>
-      Andrei Khrennikov built the macro-scale dynamics. His Social Laser Theory demonstrates how
-      populations undergo coherent amplification — like a physical laser — when stimulated by
-      social information, producing the phase transitions we recognize as mass polarization and
-      viral outrage. Khrennikov scaled quantum formalism to entire populations. But to make the
-      math work at that scale, he treated individuals as largely undifferentiated social atoms,
-      abstracting away their interior structure to focus on field dynamics.
+      <span className={NAME_CLS}>Andrei Khrennikov</span> built the macro-scale dynamics. His
+      Social Laser Theory demonstrates how populations undergo coherent amplification — like a
+      physical laser — when stimulated by social information, producing the phase transitions we
+      recognize as mass polarization and viral outrage.{" "}
+      <span className={NAME_CLS}>Khrennikov</span> scaled quantum formalism to entire populations.
+      But to make the math work at that scale, he treated individuals as largely undifferentiated
+      social atoms, abstracting away their interior structure to focus on field dynamics.
     </p>
     <p className={P_CLS}>
-      This is the unoccupied territory the Belief Genome Project enters. Wendt told us what
-      humans are under a quantum framework. Busemeyer and Bruza gave us the grammar to model
-      isolated cognitive effects. Khrennikov showed how that grammar scales. None of them built
-      an instrument to map the internal coordinate system of the social atom itself.
+      This is the unoccupied territory the Belief Genome Project enters.{" "}
+      <span className={NAME_CLS}>Wendt</span> told us what humans are under a quantum framework.{" "}
+      <span className={NAME_CLS}>Busemeyer</span> and <span className={NAME_CLS}>Bruza</span> gave
+      us the grammar to model isolated cognitive effects.{" "}
+      <span className={NAME_CLS}>Khrennikov</span> showed how that grammar scales. None of them
+      built an instrument to map the internal coordinate system of the social atom itself.
     </p>
     <p className={P_CLS}>
       The Belief Genome Project is the first framework to bridge the micro and the macro — not by
