@@ -1,5 +1,5 @@
 import { AppLayout } from "@/components/layout/AppLayout";
-import { useEhGetMe } from "@workspace/api-client-react";
+import { useEhGetMe, type EhMe } from "@workspace/api-client-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, BarChart3, Users } from "lucide-react";
@@ -7,19 +7,25 @@ import { Plus, BarChart3, Users } from "lucide-react";
 export default function Dashboard() {
   const { data: me } = useEhGetMe();
 
-  if (!me) return null;
+  return (
+    <AppLayout>
+      {me ? <DashboardContent me={me} /> : null}
+    </AppLayout>
+  );
+}
 
-  const planName = me.subscription?.plan 
+function DashboardContent({ me }: { me: EhMe }) {
+  const planName = me.subscription?.plan
     ? me.subscription.plan.charAt(0).toUpperCase() + me.subscription.plan.slice(1)
     : "Free";
   const responseCap = me.subscription?.responseCap || 100;
   // Currently we mock actual usage to 0 for Phase 1 as responses aren't implemented yet
-  const responsesUsed = 0; 
-  
+  const responsesUsed = 0;
+
   const usagePercentage = Math.min(100, (responsesUsed / responseCap) * 100);
 
   return (
-    <AppLayout>
+    <>
       <div className="flex flex-col gap-8">
         <div className="flex items-center justify-between">
           <div>
@@ -92,6 +98,6 @@ export default function Dashboard() {
           </Button>
         </Card>
       </div>
-    </AppLayout>
+    </>
   );
 }

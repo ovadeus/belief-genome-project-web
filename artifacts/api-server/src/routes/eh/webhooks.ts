@@ -22,27 +22,11 @@ async function upsertOrgSubscription(orgId: number, sub: Stripe.Subscription): P
     ? new Date(periodEndUnix * 1000)
     : null;
 
-  const [existing] = await db
-    .select({ id: ehSubscriptions.id })
-    .from(ehSubscriptions)
-    .where(eq(ehSubscriptions.orgId, orgId))
-    .limit(1);
-
-  if (existing) {
-    await db
-      .update(ehSubscriptions)
-      .set({
-        stripeSubscriptionId: sub.id,
-        plan,
-        status: sub.status,
-        currentPeriodEnd,
-        responseCap: limits.responseCap,
-        harvesterCap: limits.harvesterCap,
-        updatedAt: new Date(),
-      })
-      .where(eq(ehSubscriptions.id, existing.id));
-  } else {
-    await db.insert(ehSubscriptions).values({
+  // Atomic upsert keyed on the unique eh_subscriptions_org_idx so concurrent
+  // Stripe webhook events for the same org cannot race and both attempt INSERT.
+  await db
+    .insert(ehSubscriptions)
+    .values({
       orgId,
       stripeSubscriptionId: sub.id,
       plan,
@@ -50,8 +34,19 @@ async function upsertOrgSubscription(orgId: number, sub: Stripe.Subscription): P
       currentPeriodEnd,
       responseCap: limits.responseCap,
       harvesterCap: limits.harvesterCap,
+    })
+    .onConflictDoUpdate({
+      target: ehSubscriptions.orgId,
+      set: {
+        stripeSubscriptionId: sub.id,
+        plan,
+        status: sub.status,
+        currentPeriodEnd,
+        responseCap: limits.responseCap,
+        harvesterCap: limits.harvesterCap,
+        updatedAt: new Date(),
+      },
     });
-  }
 
   await db
     .update(ehOrgs)

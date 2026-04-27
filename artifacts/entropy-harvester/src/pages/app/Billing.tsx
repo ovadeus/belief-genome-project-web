@@ -1,5 +1,5 @@
 import { AppLayout } from "@/components/layout/AppLayout";
-import { useEhGetMe, useEhCreateCheckoutSession, useEhCreatePortalSession } from "@workspace/api-client-react";
+import { useEhGetMe, useEhCreateCheckoutSession, useEhCreatePortalSession, type EhMe } from "@workspace/api-client-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useEffect } from "react";
@@ -27,8 +27,26 @@ export default function Billing() {
     }
   }, []);
 
-  if (!me) return null;
+  return (
+    <AppLayout>
+      {me ? (
+        <BillingContent
+          me={me}
+          createCheckout={createCheckout}
+          createPortal={createPortal}
+        />
+      ) : null}
+    </AppLayout>
+  );
+}
 
+type BillingContentProps = {
+  me: EhMe;
+  createCheckout: ReturnType<typeof useEhCreateCheckoutSession>;
+  createPortal: ReturnType<typeof useEhCreatePortalSession>;
+};
+
+function BillingContent({ me, createCheckout, createPortal }: BillingContentProps) {
   const plan = me.subscription?.plan || "free";
   const isFree = plan === "free";
 

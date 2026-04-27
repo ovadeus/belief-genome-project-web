@@ -91,32 +91,45 @@ router.post("/auth/signup", signupLimiter, async (req, res): Promise<void> => {
   const slug = await uniqueSlug(slugify(orgName));
   const passwordHash = await bcrypt.hash(password, 12);
 
-  const created = await db.transaction(async (tx) => {
-    const [org] = await tx
-      .insert(ehOrgs)
-      .values({ name: orgName.trim(), slug, plan: "free" })
-      .returning();
-    const [user] = await tx
-      .insert(ehUsers)
-      .values({ orgId: org.id, email: normalizedEmail, passwordHash, role: "owner" })
-      .returning();
-    const limits = EH_PLAN_LIMITS.free;
-    await tx.insert(ehSubscriptions).values({
-      orgId: org.id,
-      plan: "free",
-      status: "active",
-      responseCap: limits.responseCap,
-      harvesterCap: limits.harvesterCap,
+  let created: { org: EhOrg; user: EhUser };
+  try {
+    created = await db.transaction(async (tx) => {
+      const [org] = await tx
+        .insert(ehOrgs)
+        .values({ name: orgName.trim(), slug, plan: "free" })
+        .returning();
+      const [user] = await tx
+        .insert(ehUsers)
+        .values({ orgId: org.id, email: normalizedEmail, passwordHash, role: "owner" })
+        .returning();
+      const limits = EH_PLAN_LIMITS.free;
+      await tx.insert(ehSubscriptions).values({
+        orgId: org.id,
+        plan: "free",
+        status: "active",
+        responseCap: limits.responseCap,
+        harvesterCap: limits.harvesterCap,
+      });
+      await tx.insert(ehAuditLog).values({
+        orgId: org.id,
+        userId: user.id,
+        action: "signup",
+        targetType: "user",
+        targetId: String(user.id),
+      });
+      return { org, user };
     });
-    await tx.insert(ehAuditLog).values({
-      orgId: org.id,
-      userId: user.id,
-      action: "signup",
-      targetType: "user",
-      targetId: String(user.id),
-    });
-    return { org, user };
-  });
+  } catch (err) {
+    // Map Postgres unique-violation (SQLSTATE 23505) to a deterministic 409
+    // so concurrent signups racing past the pre-check return the right status
+    // instead of the default 500/HTML error page.
+    const code = (err as { code?: string } | null)?.code;
+    if (code === "23505") {
+      res.status(409).json({ error: "Email or organization already in use" });
+      return;
+    }
+    throw err;
+  }
 
   const token = signEhToken({
     userId: created.user.id,
