@@ -4,7 +4,6 @@ import cookieParser from "cookie-parser";
 import path from "path";
 import fs from "fs";
 import router from "./routes";
-import { ehStripeWebhookHandler } from "./routes/eh";
 
 const app: Express = express();
 
@@ -46,14 +45,6 @@ app.use(cors({
   },
   credentials: true
 }));
-// Stripe webhook MUST receive the raw body for signature verification, so it
-// is registered BEFORE express.json() gets a chance to consume the stream.
-app.post(
-  "/api/eh/webhooks/stripe",
-  express.raw({ type: "application/json", limit: "1mb" }),
-  cookieParser(),
-  ehStripeWebhookHandler,
-);
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));

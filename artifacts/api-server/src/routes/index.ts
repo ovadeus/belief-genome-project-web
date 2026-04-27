@@ -18,7 +18,6 @@ import genomeKnownDnasRouter from "./genome-known-dnas";
 import genomeCompareRouter from "./genome-compare";
 import analyticsRouter from "./analytics";
 import podcastsRouter, { podcastAdminRouter } from "./podcasts";
-import ehRouter from "./eh";
 import { requireAuth } from "../middlewares/auth";
 
 const router: IRouter = Router();
@@ -47,9 +46,5 @@ router.use("/genome", genomeAuth, genomeDataRouter);
 router.use("/genome", genomeAuth, genomeCompareRouter);
 router.use("/genome/probes", genomeAuth, genomeProbesRouter);
 router.use("/genome/known-dnas", genomeAuth, genomeKnownDnasRouter);
-
-// Entropy Harvester — multi-tenant SaaS (auth + billing).
-// Webhook is mounted separately at the app level (raw body required).
-router.use("/eh", ehRouter);
 
 export default router;
