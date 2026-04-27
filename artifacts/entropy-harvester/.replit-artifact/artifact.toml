@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/entropy-harvester/"
+title = "Entropy Harvester"
+version = "1.0.0"
+id = "artifacts/entropy-harvester"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/entropy-harvester/" ]
+localPort = 19319
+
+[services.development]
+run = "pnpm --filter @workspace/entropy-harvester run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/entropy-harvester", "run", "build" ]
+publicDir = "artifacts/entropy-harvester/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19319"
+BASE_PATH = "/entropy-harvester/"
