@@ -610,6 +610,25 @@ paths:
         "204":
           description: Deleted
 
+  /admin/subscribers/{id}/toggle-member:
+    patch:
+      operationId: toggleSubscriberMember
+      tags: [admin]
+      summary: Toggle subscriber member status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Updated subscriber
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subscriber"
+
   /admin/subscribers/export:
     get:
       operationId: exportSubscribers
@@ -915,11 +934,14 @@ components:
           format: date-time
         isActive:
           type: boolean
+        isMember:
+          type: boolean
       required:
         - id
         - email
         - createdAt
         - isActive
+        - isMember
 
     SubscriberListResponse:
       type: object

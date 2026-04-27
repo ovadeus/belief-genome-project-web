@@ -87,6 +87,7 @@ export interface Subscriber {
   source?: string | null;
   createdAt: string;
   isActive: boolean;
+  isMember: boolean;
 }
 
 export interface SubscriberListResponse {

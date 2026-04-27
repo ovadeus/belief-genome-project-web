@@ -263,6 +263,7 @@ export const GetAdminStatsResponse = zod.object({
       source: zod.string().nullish(),
       createdAt: zod.date(),
       isActive: zod.boolean(),
+      isMember: zod.boolean(),
     }),
   ),
   recentPosts: zod.array(
@@ -451,6 +452,7 @@ export const ListSubscribersResponse = zod.object({
       source: zod.string().nullish(),
       createdAt: zod.date(),
       isActive: zod.boolean(),
+      isMember: zod.boolean(),
     }),
   ),
   total: zod.number(),
@@ -463,6 +465,23 @@ export const ListSubscribersResponse = zod.object({
  */
 export const DeleteSubscriberParams = zod.object({
   id: zod.coerce.number(),
+});
+
+/**
+ * @summary Toggle subscriber member status
+ */
+export const ToggleSubscriberMemberParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const ToggleSubscriberMemberResponse = zod.object({
+  id: zod.number(),
+  name: zod.string().nullish(),
+  email: zod.string(),
+  source: zod.string().nullish(),
+  createdAt: zod.date(),
+  isActive: zod.boolean(),
+  isMember: zod.boolean(),
 });
 
 /**
