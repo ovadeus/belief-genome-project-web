@@ -76,7 +76,7 @@ export default function Pricing() {
       return;
     }
     if (planKey === "enterprise") {
-      window.location.href = "mailto:enterprise@bgpanalytics.com";
+      window.location.href = "mailto:enterprise@beliefmetrics.com";
       return;
     }
     

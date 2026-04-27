@@ -48,7 +48,7 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
       <footer className="border-t border-border/40 py-6 md:py-0">
         <div className="container flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row px-4 md:px-8 text-sm text-muted-foreground">
           <p>
-            Built by <a href="https://bgpanalytics.com" target="_blank" rel="noreferrer" className="underline underline-offset-4 font-medium">BGPanalytics</a>.
+            Built by <a href="https://beliefmetrics.com" target="_blank" rel="noreferrer" className="underline underline-offset-4 font-medium">Belief Metrics</a>.
           </p>
           <div className="flex gap-4">
             <Link href="/methodology" className="hover:underline underline-offset-4">Methodology</Link>

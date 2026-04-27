@@ -15,7 +15,7 @@ Do not make changes to files in the `lib/belief-engine` directory without explic
 
 The project utilizes a pnpm workspace monorepo with TypeScript, Node.js 24, and pnpm. The monorepo is structured into `artifacts` (deployable applications like `api-server`, `whoo-ru` frontend, `genome-app`, `entropy-harvester`, and `mockup-sandbox`) and `lib` (shared libraries such as `api-spec`, `api-client-react`, `api-zod`, `db`, and `belief-engine`).
 
-**Entropy Harvester (`artifacts/entropy-harvester`, served at `/entropy-harvester/`):** A separate commercial product (BGPanalytics.com) being built in phases per `attached_assets/EntropyHarvester-Replit-PromptSheet-v1.3.md`. Mirrors `whoo-ru`'s package shape, vite config, and Tailwind v4 token system (including the `--color-belief-*` identity palette). Locked product decisions: do NOT modify `lib/belief-engine`, do NOT fork `api-server`, do NOT introduce new color tokens beyond the existing palette.
+**Entropy Harvester (`artifacts/entropy-harvester`, served at `/entropy-harvester/`):** A separate commercial product (beliefmetrics.com) being built in phases per `attached_assets/EntropyHarvester-Replit-PromptSheet-v1.3.md`. Mirrors `whoo-ru`'s package shape, vite config, and Tailwind v4 token system (including the `--color-belief-*` identity palette). Locked product decisions: do NOT modify `lib/belief-engine`, do NOT fork `api-server`, do NOT introduce new color tokens beyond the existing palette.
 
 - **Phase 0 (complete):** empty artifact registered, dark-theme placeholder route at `/` with the locked tagline "A survey instrument that preserves superposition."
 - **Phase 1 (complete):** Multi-tenant auth + Stripe billing + marketing site + authenticated app shell.
