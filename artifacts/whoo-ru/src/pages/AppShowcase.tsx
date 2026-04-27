@@ -187,7 +187,7 @@ export default function AppShowcase() {
               style={{ maxWidth: 980 }}
             >
               <motion.div
-                className="relative w-full overflow-hidden border border-foreground/25 bg-card/40"
+                className="relative w-full overflow-hidden border border-black bg-card/40"
                 animate={{ paddingBottom: `${appCurrentAspect * 100}%` }}
                 transition={{ duration: 1.0, ease: [0.4, 0, 0.2, 1] }}
               >
