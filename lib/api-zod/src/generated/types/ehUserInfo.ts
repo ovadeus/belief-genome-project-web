@@ -5,14 +5,10 @@
  * WhooRU API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { EhUserInfoRole } from "./ehUserInfoRole";
 
-export interface Subscriber {
+export interface EhUserInfo {
   id: number;
-  /** @nullable */
-  name?: string | null;
   email: string;
-  /** @nullable */
-  source?: string | null;
-  createdAt: Date;
-  isActive: boolean;
+  role: EhUserInfoRole;
 }

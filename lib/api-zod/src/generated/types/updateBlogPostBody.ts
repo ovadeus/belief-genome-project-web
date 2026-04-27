@@ -16,7 +16,6 @@ export interface UpdateBlogPostBody {
   status?: string;
   /** @nullable */
   publishedAt?: Date | null;
-  isPrivate?: boolean;
   customCss?: string;
   customJs?: string;
 }

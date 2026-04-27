@@ -1,31 +1,55 @@
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "sonner";
+import { PublicLayout } from "@/components/layout/PublicLayout";
 
-const queryClient = new QueryClient();
+// Pages
+import Home from "./pages/Home";
+import Pricing from "./pages/Pricing";
+import Methodology from "./pages/Methodology";
+import Dimensions from "./pages/Dimensions";
+import Signup from "./pages/Signup";
+import Login from "./pages/Login";
+import Dashboard from "./pages/app/Dashboard";
+import Billing from "./pages/app/Billing";
+import Account from "./pages/app/Account";
 
-function ComingSoon() {
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
+function NotFound() {
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-background text-foreground px-6">
-      <div className="text-center max-w-xl">
-        <h1 className="font-display text-4xl md:text-5xl font-semibold tracking-tight">
-          Entropy Harvester
-        </h1>
-        <p className="mt-4 text-base md:text-lg text-muted-foreground">
-          A survey instrument that preserves superposition.
-        </p>
-        <p className="mt-8 text-sm uppercase tracking-[0.2em] text-muted-foreground">
-          Coming soon
-        </p>
+    <PublicLayout>
+      <div className="min-h-[70vh] flex flex-col items-center justify-center text-center px-4">
+        <h1 className="font-display text-6xl font-bold tracking-tight mb-4">404</h1>
+        <p className="text-xl text-muted-foreground mb-8">Page not found.</p>
       </div>
-    </div>
+    </PublicLayout>
   );
 }
 
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={ComingSoon} />
-      <Route component={ComingSoon} />
+      <Route path="/" component={Home} />
+      <Route path="/pricing" component={Pricing} />
+      <Route path="/methodology" component={Methodology} />
+      <Route path="/dimensions" component={Dimensions} />
+      <Route path="/signup" component={Signup} />
+      <Route path="/login" component={Login} />
+      
+      {/* App Shell */}
+      <Route path="/app/dashboard" component={Dashboard} />
+      <Route path="/app/billing" component={Billing} />
+      <Route path="/app/account" component={Account} />
+      
+      <Route component={NotFound} />
     </Switch>
   );
 }
@@ -33,6 +57,7 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
+      <Toaster richColors position="top-right" />
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
         <Router />
       </WouterRouter>

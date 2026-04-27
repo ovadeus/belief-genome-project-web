@@ -35,11 +35,6 @@ export interface BlogPost {
   updatedAt: string;
   /** @nullable */
   readTimeMins?: number | null;
-  isPrivate: boolean;
-  /** @nullable */
-  customCss?: string | null;
-  /** @nullable */
-  customJs?: string | null;
 }
 
 export interface BlogPostListResponse {
@@ -59,7 +54,6 @@ export interface CreateBlogPostBody {
   status?: string;
   /** @nullable */
   publishedAt?: string | null;
-  isPrivate?: boolean;
   customCss?: string;
   customJs?: string;
 }
@@ -74,7 +68,6 @@ export interface UpdateBlogPostBody {
   status?: string;
   /** @nullable */
   publishedAt?: string | null;
-  isPrivate?: boolean;
   customCss?: string;
   customJs?: string;
 }
@@ -94,7 +87,6 @@ export interface Subscriber {
   source?: string | null;
   createdAt: string;
   isActive: boolean;
-  isMember: boolean;
 }
 
 export interface SubscriberListResponse {
@@ -207,6 +199,95 @@ export interface ErrorEnvelope {
   error: string;
 }
 
+export interface EhSignupBody {
+  /**
+   * @minLength 1
+   * @maxLength 200
+   */
+  orgName: string;
+  email: string;
+  /**
+   * @minLength 8
+   * @maxLength 200
+   */
+  password: string;
+}
+
+export interface EhLoginBody {
+  email: string;
+  /**
+   * @minLength 1
+   * @maxLength 200
+   */
+  password: string;
+}
+
+export type EhUserInfoRole =
+  (typeof EhUserInfoRole)[keyof typeof EhUserInfoRole];
+
+export const EhUserInfoRole = {
+  owner: "owner",
+  member: "member",
+} as const;
+
+export interface EhUserInfo {
+  id: number;
+  email: string;
+  role: EhUserInfoRole;
+}
+
+export type EhOrgInfoPlan = (typeof EhOrgInfoPlan)[keyof typeof EhOrgInfoPlan];
+
+export const EhOrgInfoPlan = {
+  free: "free",
+  researcher: "researcher",
+  pro: "pro",
+} as const;
+
+export interface EhOrgInfo {
+  id: number;
+  name: string;
+  slug: string;
+  plan: EhOrgInfoPlan;
+}
+
+export interface EhSubscriptionInfo {
+  plan: string;
+  status: string;
+  currentPeriodEnd?: string | null;
+  responseCap: number;
+  harvesterCap: number;
+}
+
+export interface EhAuthResponse {
+  user: EhUserInfo;
+  org: EhOrgInfo;
+}
+
+export interface EhMe {
+  user: EhUserInfo;
+  org: EhOrgInfo;
+  subscription?: EhSubscriptionInfo | null;
+}
+
+export type EhCheckoutSessionBodyPlan =
+  (typeof EhCheckoutSessionBodyPlan)[keyof typeof EhCheckoutSessionBodyPlan];
+
+export const EhCheckoutSessionBodyPlan = {
+  researcher: "researcher",
+  pro: "pro",
+} as const;
+
+export interface EhCheckoutSessionBody {
+  plan: EhCheckoutSessionBodyPlan;
+}
+
+export interface EhUrlResponse {
+  url: string;
+}
+
+export type EhStripeWebhookBody = { [key: string]: unknown };
+
 export type ListBlogPostsParams = {
   page?: number;
   limit?: number;
@@ -217,8 +298,6 @@ export type ListBlogPostsParams = {
 export type ListAdminBlogPostsParams = {
   page?: number;
   limit?: number;
-  search?: string;
-  status?: string;
 };
 
 export type UploadBlogImageBody = {

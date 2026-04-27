@@ -156,6 +156,10 @@ overrides:
 importers:
 
   .:
+    dependencies:
+      stripe:
+        specifier: ^22.1.0
+        version: 22.1.0(@types/node@25.3.5)
     devDependencies:
       prettier:
         specifier: ^3.8.1
@@ -363,6 +367,9 @@ importers:
       '@workspace/api-client-react':
         specifier: workspace:*
         version: link:../../lib/api-client-react
+      '@workspace/api-zod':
+        specifier: workspace:*
+        version: link:../../lib/api-zod
       class-variance-authority:
         specifier: 'catalog:'
         version: 0.7.1
@@ -4135,6 +4142,15 @@ packages:
   strip-final-newline@4.0.0:
     resolution: {integrity: sha512-aulFJcD6YK8V1G7iRB5tigAP4TsHBZZrOV8pjV++zdUwmeV8uzbY7yn6h9MswN62adStNZFuCIx4haBnRuMDaw==}
     engines: {node: '>=18'}
+
+  stripe@22.1.0:
+    resolution: {integrity: sha512-w/xHyJGxXWnLPbNHG13sz/fae0MrFGC80Oz7YbICQymbfpqfEcsoG+6yG+9BWb81PWc4rrkeSO4wmTcmefmbLw==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@types/node': '>=18'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
 
   strnum@2.2.0:
     resolution: {integrity: sha512-Y7Bj8XyJxnPAORMZj/xltsfo55uOiyHcU2tnAVzHUnSJR/KsEX+9RoDeXEnsXtl/CX4fAcrt64gZ13aGaWPeBg==}
@@ -7938,6 +7954,10 @@ snapshots:
       ansi-regex: 5.0.1
 
   strip-final-newline@4.0.0: {}
+
+  stripe@22.1.0(@types/node@25.3.5):
+    optionalDependencies:
+      '@types/node': 25.3.5
 
   strnum@2.2.0: {}
 

@@ -8,6 +8,110 @@
 import * as zod from "zod";
 
 /**
+ * @summary Create org and first user
+ */
+export const ehSignupBodyOrgNameMax = 200;
+
+export const ehSignupBodyPasswordMin = 8;
+export const ehSignupBodyPasswordMax = 200;
+
+export const EhSignupBody = zod.object({
+  orgName: zod.string().min(1).max(ehSignupBodyOrgNameMax),
+  email: zod.string().email(),
+  password: zod
+    .string()
+    .min(ehSignupBodyPasswordMin)
+    .max(ehSignupBodyPasswordMax),
+});
+
+/**
+ * @summary Log in to an Entropy Harvester org
+ */
+export const ehLoginBodyPasswordMax = 200;
+
+export const EhLoginBody = zod.object({
+  email: zod.string().email(),
+  password: zod.string().min(1).max(ehLoginBodyPasswordMax),
+});
+
+export const EhLoginResponse = zod.object({
+  user: zod.object({
+    id: zod.number(),
+    email: zod.string(),
+    role: zod.enum(["owner", "member"]),
+  }),
+  org: zod.object({
+    id: zod.number(),
+    name: zod.string(),
+    slug: zod.string(),
+    plan: zod.enum(["free", "researcher", "pro"]),
+  }),
+});
+
+/**
+ * @summary Clear the eh_token cookie
+ */
+export const EhLogoutResponse = zod.object({
+  message: zod.string(),
+});
+
+/**
+ * @summary Current Entropy Harvester user, org, and subscription
+ */
+export const EhGetMeResponse = zod.object({
+  user: zod.object({
+    id: zod.number(),
+    email: zod.string(),
+    role: zod.enum(["owner", "member"]),
+  }),
+  org: zod.object({
+    id: zod.number(),
+    name: zod.string(),
+    slug: zod.string(),
+    plan: zod.enum(["free", "researcher", "pro"]),
+  }),
+  subscription: zod
+    .object({
+      plan: zod.string(),
+      status: zod.string(),
+      currentPeriodEnd: zod.date().nullish(),
+      responseCap: zod.number(),
+      harvesterCap: zod.number(),
+    })
+    .nullish(),
+});
+
+/**
+ * @summary Create a Stripe Checkout Session for a paid plan
+ */
+export const EhCreateCheckoutSessionBody = zod.object({
+  plan: zod.enum(["researcher", "pro"]),
+});
+
+export const EhCreateCheckoutSessionResponse = zod.object({
+  url: zod.string().url(),
+});
+
+/**
+ * @summary Create a Stripe Billing Portal Session
+ */
+export const EhCreatePortalSessionResponse = zod.object({
+  url: zod.string().url(),
+});
+
+/**
+ * Receives Stripe events. The request body MUST be the raw bytes Stripe
+sent (not JSON-parsed) so the signature verification can succeed.
+
+ * @summary Stripe webhook receiver (raw body, signature-verified)
+ */
+export const EhStripeWebhookBody = zod.object({}).passthrough();
+
+export const EhStripeWebhookResponse = zod.object({
+  message: zod.string(),
+});
+
+/**
  * @summary Health check
  */
 export const HealthCheckResponse = zod.object({
@@ -42,10 +146,6 @@ export const ListBlogPostsResponse = zod.object({
       createdAt: zod.date(),
       updatedAt: zod.date(),
       readTimeMins: zod.number().nullish(),
-      isPrivate: zod.boolean(),
-      visibility: zod.enum(["public", "subscribers", "admin"]).optional().default("public"),
-      customCss: zod.string().nullish(),
-      customJs: zod.string().nullish(),
     }),
   ),
   total: zod.number(),
@@ -73,10 +173,6 @@ export const GetBlogPostResponse = zod.object({
   createdAt: zod.date(),
   updatedAt: zod.date(),
   readTimeMins: zod.number().nullish(),
-      isPrivate: zod.boolean(),
-      visibility: zod.enum(["public", "subscribers", "admin"]).optional().default("public"),
-  customCss: zod.string().nullish(),
-  customJs: zod.string().nullish(),
 });
 
 /**
@@ -99,8 +195,6 @@ export const GetRelatedPostsResponseItem = zod.object({
   createdAt: zod.date(),
   updatedAt: zod.date(),
   readTimeMins: zod.number().nullish(),
-      isPrivate: zod.boolean(),
-      visibility: zod.enum(["public", "subscribers", "admin"]).optional().default("public"),
 });
 export const GetRelatedPostsResponse = zod.array(GetRelatedPostsResponseItem);
 
@@ -169,7 +263,6 @@ export const GetAdminStatsResponse = zod.object({
       source: zod.string().nullish(),
       createdAt: zod.date(),
       isActive: zod.boolean(),
-      isMember: zod.boolean(),
     }),
   ),
   recentPosts: zod.array(
@@ -186,8 +279,6 @@ export const GetAdminStatsResponse = zod.object({
       createdAt: zod.date(),
       updatedAt: zod.date(),
       readTimeMins: zod.number().nullish(),
-      isPrivate: zod.boolean(),
-      visibility: zod.enum(["public", "subscribers", "admin"]).optional().default("public"),
     }),
   ),
 });
@@ -201,8 +292,6 @@ export const listAdminBlogPostsQueryLimitDefault = 25;
 export const ListAdminBlogPostsQueryParams = zod.object({
   page: zod.coerce.number().default(listAdminBlogPostsQueryPageDefault),
   limit: zod.coerce.number().default(listAdminBlogPostsQueryLimitDefault),
-  search: zod.string().optional(),
-  status: zod.string().optional(),
 });
 
 export const ListAdminBlogPostsResponse = zod.object({
@@ -220,10 +309,6 @@ export const ListAdminBlogPostsResponse = zod.object({
       createdAt: zod.date(),
       updatedAt: zod.date(),
       readTimeMins: zod.number().nullish(),
-      isPrivate: zod.boolean(),
-      visibility: zod.enum(["public", "subscribers", "admin"]).optional().default("public"),
-      customCss: zod.string().nullish(),
-      customJs: zod.string().nullish(),
     }),
   ),
   total: zod.number(),
@@ -243,8 +328,6 @@ export const CreateBlogPostBody = zod.object({
   hashtags: zod.array(zod.string()).optional(),
   status: zod.string().optional(),
   publishedAt: zod.date().nullish(),
-  isPrivate: zod.boolean().optional(),
-  visibility: zod.enum(["public", "subscribers", "admin"]).optional(),
   customCss: zod.string().optional(),
   customJs: zod.string().optional(),
 });
@@ -269,10 +352,6 @@ export const GetAdminBlogPostResponse = zod.object({
   createdAt: zod.date(),
   updatedAt: zod.date(),
   readTimeMins: zod.number().nullish(),
-      isPrivate: zod.boolean(),
-      visibility: zod.enum(["public", "subscribers", "admin"]).optional().default("public"),
-  customCss: zod.string().nullish(),
-  customJs: zod.string().nullish(),
 });
 
 /**
@@ -291,8 +370,6 @@ export const UpdateBlogPostBody = zod.object({
   hashtags: zod.array(zod.string()).optional(),
   status: zod.string().optional(),
   publishedAt: zod.date().nullish(),
-  isPrivate: zod.boolean().optional(),
-  visibility: zod.enum(["public", "subscribers", "admin"]).optional(),
   customCss: zod.string().optional(),
   customJs: zod.string().optional(),
 });
@@ -310,10 +387,6 @@ export const UpdateBlogPostResponse = zod.object({
   createdAt: zod.date(),
   updatedAt: zod.date(),
   readTimeMins: zod.number().nullish(),
-      isPrivate: zod.boolean(),
-      visibility: zod.enum(["public", "subscribers", "admin"]).optional().default("public"),
-  customCss: zod.string().nullish(),
-  customJs: zod.string().nullish(),
 });
 
 /**
@@ -343,8 +416,6 @@ export const ToggleBlogPostStatusResponse = zod.object({
   createdAt: zod.date(),
   updatedAt: zod.date(),
   readTimeMins: zod.number().nullish(),
-      isPrivate: zod.boolean(),
-      visibility: zod.enum(["public", "subscribers", "admin"]).optional().default("public"),
 });
 
 /**
@@ -380,7 +451,6 @@ export const ListSubscribersResponse = zod.object({
       source: zod.string().nullish(),
       createdAt: zod.date(),
       isActive: zod.boolean(),
-      isMember: zod.boolean(),
     }),
   ),
   total: zod.number(),
