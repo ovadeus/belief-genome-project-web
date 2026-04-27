@@ -131,15 +131,15 @@ export default function RegisterPage() {
             }}>
               <li style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
                 <span style={{ color: 'var(--accent-bright)', flexShrink: 0, fontWeight: 700 }}>✓</span>
-                <span>Your <strong style={{ color: 'var(--text-primary)' }}>Belief Genome Dashboard</strong> with personal analytics</span>
+                <span>Your <strong style={{ color: 'var(--text-primary)' }}>Belief Genome Dashboard</strong> with stunning visual analytics.</span>
               </li>
               <li style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
                 <span style={{ color: 'var(--accent-bright)', flexShrink: 0, fontWeight: 700 }}>✓</span>
-                <span>A growing map of your <strong style={{ color: 'var(--text-primary)' }}>Belief DNA</strong> across dimensions</span>
+                <span>A growing map of your <strong style={{ color: 'var(--text-primary)' }}>Belief DNA</strong> across dimensions and over time.</span>
               </li>
               <li style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
                 <span style={{ color: 'var(--accent-bright)', flexShrink: 0, fontWeight: 700 }}>✓</span>
-                <span>Patterns and insights drawn from your own responses</span>
+                <span>Patterns, insights, and forecasting drawn from your own responses.</span>
               </li>
             </ul>
           </div>
@@ -163,7 +163,7 @@ export default function RegisterPage() {
                   display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: 12, fontWeight: 700,
                 }}>1</span>
-                <span>Create your account &mdash; takes a few seconds.</span>
+                <span><strong style={{ color: 'var(--text-primary)' }}>Register:</strong> create your account &mdash; takes a few seconds.</span>
               </li>
               <li style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
                 <span style={{
@@ -172,7 +172,7 @@ export default function RegisterPage() {
                   display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: 12, fontWeight: 700,
                 }}>2</span>
-                <span>Engage with prompts to populate your genome &mdash; the more you respond, the richer it gets.</span>
+                <span><strong style={{ color: 'var(--text-primary)' }}>Engage:</strong> answer prompts to populate your genome &mdash; the more you respond, the richer it gets.</span>
               </li>
               <li style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
                 <span style={{
@@ -181,7 +181,7 @@ export default function RegisterPage() {
                   display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: 12, fontWeight: 700,
                 }}>3</span>
-                <span><strong style={{ color: 'var(--text-primary)' }}>Flexibility:</strong> respond on the web, in the browser extension, or via the desktop app.</span>
+                <span><strong style={{ color: 'var(--text-primary)' }}>Flexibility:</strong> engage from the web app, in the browser extension, or via the mission control desktop app.</span>
               </li>
               <li style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
                 <span style={{
@@ -190,7 +190,7 @@ export default function RegisterPage() {
                   display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: 12, fontWeight: 700,
                 }}>4</span>
-                <span><strong style={{ color: 'var(--text-primary)' }}>Control:</strong> set how often prompts arrive in Settings &mdash; daily, weekly, or paused.</span>
+                <span><strong style={{ color: 'var(--text-primary)' }}>Control:</strong> set how often prompts arrive in Settings &mdash; hourly, daily, weekly, or just manually.</span>
               </li>
             </ol>
           </div>
