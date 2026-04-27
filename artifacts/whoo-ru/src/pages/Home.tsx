@@ -146,7 +146,7 @@ export default function Home() {
               ))}
             </motion.div>
 
-            <div className="flex justify-center items-center gap-2.5 mt-6">
+            <div className="flex justify-center items-center gap-1.5 sm:gap-2.5 mt-6">
               {BGP_SCREENS.map((_, i) => (
                 <button
                   key={i}
@@ -154,7 +154,7 @@ export default function Home() {
                   onClick={() => setScreenIdx(i)}
                   aria-label={`Show screen ${i + 1}`}
                   aria-current={i === screenIdx}
-                  className={`h-2.5 w-2.5 rounded-full transition-colors duration-300 ${
+                  className={`h-1.5 w-1.5 sm:h-2.5 sm:w-2.5 rounded-full transition-colors duration-300 ${
                     i === screenIdx
                       ? "bg-primary"
                       : "bg-neutral-700 hover:bg-neutral-500"

@@ -206,7 +206,7 @@ export default function AppShowcase() {
                 ))}
               </motion.div>
 
-              <div className="flex justify-center items-center gap-2.5 mt-6">
+              <div className="flex justify-center items-center gap-1.5 sm:gap-2.5 mt-6">
                 {BGP_APP_SCREENS.map((_, i) => (
                   <button
                     key={i}
@@ -214,7 +214,7 @@ export default function AppShowcase() {
                     onClick={() => setAppScreenIdx(i)}
                     aria-label={`Show app screen ${i + 1}`}
                     aria-current={i === appScreenIdx}
-                    className={`h-2.5 w-2.5 rounded-full transition-colors duration-300 ${
+                    className={`h-1.5 w-1.5 sm:h-2.5 sm:w-2.5 rounded-full transition-colors duration-300 ${
                       i === appScreenIdx
                         ? "bg-primary"
                         : "bg-neutral-700 hover:bg-neutral-500"
