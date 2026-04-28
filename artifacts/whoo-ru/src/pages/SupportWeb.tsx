@@ -17,6 +17,8 @@ import spotDnaColorBand from "@assets/spot-dna-color-band_1777370069638.png";
 import spotTripleHelix from "@assets/spot-triple-helix_1777370069638.png";
 import spotBrainMap from "@assets/spot-brain-map_1777370069639.png";
 import spotRadar from "@assets/spot-radar_1777370069639.png";
+import spotBreakdown from "@assets/spot-break-down_1777372434710.png";
+import spotTimeline from "@assets/spot-timeline_1777372434709.png";
 
 const SECTIONS = [
   { id: "getting-started", label: "Getting Started", icon: LogIn },
@@ -453,11 +455,13 @@ export default function SupportWeb() {
               <VizBlock
                 icon={<BarChart2 size={18} />}
                 title="5. Breakdown"
+                image={{ src: spotBreakdown, alt: "Category Breakdown showing each domain on a left-to-right axis with your position marker, sample count, and the dominant pole label per category" }}
                 items={["Horizontal bars showing your average position per category with explicit pole labels at each end. The fastest way to spot which categories are dominant in your current map."]}
               />
               <VizBlock
                 icon={<Clock size={18} />}
                 title="6. Timeline"
+                image={{ src: spotTimeline, alt: "Belief Drift Over Time chart with daily/weekly/monthly/quarterly/yearly toggles, plotting individual responses and a rolling-average line from Disagree to Agree" }}
                 items={["A time-series chart of how your beliefs have shifted (or hardened) over time. Each line is a category."]}
               />
               <VizBlock
