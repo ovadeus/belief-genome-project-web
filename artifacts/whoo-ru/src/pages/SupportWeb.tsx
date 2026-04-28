@@ -14,6 +14,10 @@ import {
   BELIEF_COLORS, BELIEF_LABELS, BELIEF_THRESHOLDS,
   DOMAIN_AXES,
 } from "@/lib/beliefScale";
+import spotDnaColorBand from "@assets/spot-dna-color-band_1777370069638.png";
+import spotTripleHelix from "@assets/spot-triple-helix_1777370069638.png";
+import spotBrainMap from "@assets/spot-brain-map_1777370069639.png";
+import spotRadar from "@assets/spot-radar_1777370069639.png";
 
 const SECTIONS = [
   { id: "getting-started", label: "Getting Started", icon: LogIn },
@@ -354,6 +358,7 @@ export default function SupportWeb() {
               <VizBlock
                 icon={<Dna size={18} />}
                 title="1. Belief DNA"
+                image={{ src: spotDnaColorBand, alt: "Belief DNA color-band strip showing dimensions grouped by category, with each cell colored by score on the 9-point belief scale" }}
                 items={[
                   "A horizontal strip showing every dimension you've been probed on, grouped by category (Philosophy, Religion, Psychology, Relationships, Society, Economics, Sci & Tech, Politics, Life, Morality, Education, Health, Spirituality).",
                   "Each cell = one dimension you've explored",
@@ -369,6 +374,7 @@ export default function SupportWeb() {
               <VizBlock
                 icon={<RefreshCw size={18} />}
                 title="2. Triple Helix"
+                image={{ src: spotTripleHelix, alt: "Triple Helix visualization showing Logos, Pathos, and Ethos strands woven together with belief points along each strand" }}
                 items={[
                   "A 3D DNA-style helix animating your belief vectors as interwoven strands.",
                   "Three strands: stated belief, inferred conviction, domain tension",
@@ -382,6 +388,7 @@ export default function SupportWeb() {
               <VizBlock
                 icon={<BrainCircuit size={18} />}
                 title="3. Neuromap"
+                image={{ src: spotBrainMap, alt: "Neuromap 3D brain visualization clustering belief dimensions by anatomical region, with category labels and a detail panel for the selected region" }}
                 items={[
                   "A 3D brain showing how your beliefs cluster anatomically.",
                   "Click regions to see which dimensions fire there",
@@ -407,6 +414,14 @@ export default function SupportWeb() {
                   with theme-aware labels, LED-style strength meters, and an auto-generated
                   insight panel.
                 </p>
+                <div className="my-4 rounded-xl overflow-hidden border border-border bg-black">
+                  <img
+                    src={spotRadar}
+                    alt="World View Radar showing nine domain spokes with LED-style strength meters and pole labels for each axis"
+                    loading="lazy"
+                    className="w-full h-auto block"
+                  />
+                </div>
                 <ul className="list-disc pl-6 text-muted-foreground leading-relaxed space-y-1 mb-4 text-sm">
                   <li>Dashed green ring = neutral reference (50%)</li>
                   <li>Points near center → lean toward the left pole; near the edge → right pole</li>
@@ -840,9 +855,10 @@ function SectionHead({ icon, title }: { icon: React.ReactNode; title: string }) 
   );
 }
 
-function VizBlock({ icon, title, items, footer, fullscreen }: {
+function VizBlock({ icon, title, items, footer, fullscreen, image }: {
   icon: React.ReactNode; title: string; items: string[];
   footer?: string; fullscreen?: boolean;
+  image?: { src: string; alt: string };
 }) {
   return (
     <div className="mb-8">
@@ -855,6 +871,16 @@ function VizBlock({ icon, title, items, footer, fullscreen }: {
           </span>
         )}
       </div>
+      {image && (
+        <div className="my-4 rounded-xl overflow-hidden border border-border bg-black">
+          <img
+            src={image.src}
+            alt={image.alt}
+            loading="lazy"
+            className="w-full h-auto block"
+          />
+        </div>
+      )}
       <ul className="list-disc pl-6 text-muted-foreground leading-relaxed space-y-1 text-sm">
         {items.map((item, i) => <li key={i}>{item}</li>)}
       </ul>
