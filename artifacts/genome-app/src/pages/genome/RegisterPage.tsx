@@ -122,37 +122,6 @@ export default function RegisterPage() {
               fontSize: 16, fontWeight: 700, margin: 0, marginBottom: 12,
               color: 'var(--text-primary)', letterSpacing: '0.01em',
             }}>
-              What you get
-            </h3>
-            <ul style={{
-              listStyle: 'none', padding: 0, margin: 0,
-              display: 'flex', flexDirection: 'column', gap: 10,
-              fontSize: 14, lineHeight: 1.5, color: 'var(--text-muted)',
-            }}>
-              <li style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                <span style={{ color: 'var(--accent-bright)', flexShrink: 0, fontWeight: 700 }}>✓</span>
-                <span>Your <strong style={{ color: 'var(--text-primary)' }}>Belief Genome Dashboard</strong> with stunning visual analytics.</span>
-              </li>
-              <li style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                <span style={{ color: 'var(--accent-bright)', flexShrink: 0, fontWeight: 700 }}>✓</span>
-                <span>A growing map of your <strong style={{ color: 'var(--text-primary)' }}>Belief DNA</strong> across dimensions and over time.</span>
-              </li>
-              <li style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                <span style={{ color: 'var(--accent-bright)', flexShrink: 0, fontWeight: 700 }}>✓</span>
-                <span>Patterns, insights, and forecasting drawn from your own responses.</span>
-              </li>
-              <li style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                <span style={{ color: 'var(--accent-bright)', flexShrink: 0, fontWeight: 700 }}>✓</span>
-                <span>A better understanding of self.</span>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 style={{
-              fontSize: 16, fontWeight: 700, margin: 0, marginBottom: 12,
-              color: 'var(--text-primary)', letterSpacing: '0.01em',
-            }}>
               How it works
             </h3>
             <ol style={{
@@ -197,6 +166,37 @@ export default function RegisterPage() {
                 <span><strong style={{ color: 'var(--text-primary)' }}>Control:</strong> set how often prompts arrive in Settings &mdash; hourly, daily, weekly, or just manually.</span>
               </li>
             </ol>
+          </div>
+
+          <div>
+            <h3 style={{
+              fontSize: 16, fontWeight: 700, margin: 0, marginBottom: 12,
+              color: 'var(--text-primary)', letterSpacing: '0.01em',
+            }}>
+              What you get
+            </h3>
+            <ul style={{
+              listStyle: 'none', padding: 0, margin: 0,
+              display: 'flex', flexDirection: 'column', gap: 10,
+              fontSize: 14, lineHeight: 1.5, color: 'var(--text-muted)',
+            }}>
+              <li style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                <span style={{ color: 'var(--accent-bright)', flexShrink: 0, fontWeight: 700 }}>✓</span>
+                <span>Your <strong style={{ color: 'var(--text-primary)' }}>Belief Genome Dashboard</strong> with stunning visual analytics.</span>
+              </li>
+              <li style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                <span style={{ color: 'var(--accent-bright)', flexShrink: 0, fontWeight: 700 }}>✓</span>
+                <span>A growing map of your <strong style={{ color: 'var(--text-primary)' }}>Belief DNA</strong> across dimensions and over time.</span>
+              </li>
+              <li style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                <span style={{ color: 'var(--accent-bright)', flexShrink: 0, fontWeight: 700 }}>✓</span>
+                <span>Patterns, insights, and forecasting drawn from your own responses.</span>
+              </li>
+              <li style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                <span style={{ color: 'var(--accent-bright)', flexShrink: 0, fontWeight: 700 }}>✓</span>
+                <span>A better understanding of self.</span>
+              </li>
+            </ul>
           </div>
         </div>
 
