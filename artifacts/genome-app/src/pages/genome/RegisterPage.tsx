@@ -141,6 +141,10 @@ export default function RegisterPage() {
                 <span style={{ color: 'var(--accent-bright)', flexShrink: 0, fontWeight: 700 }}>✓</span>
                 <span>Patterns, insights, and forecasting drawn from your own responses.</span>
               </li>
+              <li style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                <span style={{ color: 'var(--accent-bright)', flexShrink: 0, fontWeight: 700 }}>✓</span>
+                <span>A better understanding of self.</span>
+              </li>
             </ul>
           </div>
 
