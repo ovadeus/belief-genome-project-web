@@ -2,6 +2,10 @@ import { Link } from "wouter";
 import { Twitter, Linkedin, Github } from "lucide-react";
 import { useGetPublicSettings } from "@workspace/api-client-react";
 
+const GENOME_APP_URL = (
+  (import.meta.env.VITE_GENOME_APP_URL as string | undefined) || "/genome-app/"
+).replace(/\/$/, "");
+
 export function Footer() {
   const { data: settings } = useGetPublicSettings();
 
@@ -41,11 +45,11 @@ export function Footer() {
           <div>
             <h4 className="font-semibold text-foreground mb-6 font-display uppercase tracking-wider text-sm">Platform</h4>
             <ul className="space-y-4">
-              <li><Link href="/about" className="text-muted-foreground hover:text-primary transition-colors">About the Research</Link></li>
-              <li><Link href="/app" className="text-muted-foreground hover:text-primary transition-colors">Participate</Link></li>
+              <li><Link href="/about" className="text-muted-foreground hover:text-primary transition-colors">About the Project</Link></li>
+              <li><a href={`${GENOME_APP_URL}/register`} className="text-muted-foreground hover:text-primary transition-colors">Participate</a></li>
               <li><Link href="/book" className="text-muted-foreground hover:text-primary transition-colors">The Book</Link></li>
               <li><Link href="/explore" className="text-muted-foreground hover:text-primary transition-colors">Explore Beliefs</Link></li>
-              <li><Link href="/support" className="text-muted-foreground hover:text-primary transition-colors">Support</Link></li>
+              <li><Link href="/support" className="text-muted-foreground hover:text-primary transition-colors">Help</Link></li>
             </ul>
           </div>
 
@@ -78,7 +82,7 @@ export function Footer() {
           <div className="flex gap-6 text-sm text-muted-foreground">
             <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
             <Link href="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>
-            <Link href="/support" className="hover:text-foreground transition-colors">Support</Link>
+            <Link href="/support" className="hover:text-foreground transition-colors">Help</Link>
           </div>
         </div>
       </div>

@@ -45,7 +45,7 @@ const NAV_ITEMS: NavItem[] = [
   { kind: "link",     href: "/app",     label: "Participate" },
   { kind: "link",     href: "/explore", label: "Explore Beliefs" },
   { kind: "dropdown", label: "Media",   items: MEDIA_ITEMS },
-  { kind: "link",     href: "/support", label: "Support" },
+  { kind: "link",     href: "/support", label: "Help" },
   { kind: "link",     href: "/about",   label: "About" },
 ];
 
