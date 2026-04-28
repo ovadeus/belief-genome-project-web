@@ -9,7 +9,6 @@ import {
   Activity, GitCompare, Share2, UserCircle, KeyRound, LogIn,
 } from "lucide-react";
 import { BeliefScale } from "@/components/support/BeliefScale";
-import { MiniRadar } from "@/components/support/MiniRadar";
 import {
   BELIEF_COLORS, BELIEF_LABELS, BELIEF_THRESHOLDS,
   DOMAIN_AXES,
@@ -414,14 +413,6 @@ export default function SupportWeb() {
                   with theme-aware labels, LED-style strength meters, and an auto-generated
                   insight panel.
                 </p>
-                <div className="my-4 rounded-xl overflow-hidden border border-border bg-black">
-                  <img
-                    src={spotRadar}
-                    alt="World View Radar showing nine domain spokes with LED-style strength meters and pole labels for each axis"
-                    loading="lazy"
-                    className="w-full h-auto block"
-                  />
-                </div>
                 <ul className="list-disc pl-6 text-muted-foreground leading-relaxed space-y-1 mb-4 text-sm">
                   <li>Dashed green ring = neutral reference (50%)</li>
                   <li>Points near center → lean toward the left pole; near the edge → right pole</li>
@@ -429,8 +420,13 @@ export default function SupportWeb() {
                   <li>"Strongest leans" panel auto-surfaces your three most distinctive positions</li>
                   <li>In fullscreen the radar grows vertically to use your full viewport height</li>
                 </ul>
-                <div className="flex justify-center my-6">
-                  <MiniRadar size={380} />
+                <div className="my-4 rounded-xl overflow-hidden border border-border bg-black">
+                  <img
+                    src={spotRadar}
+                    alt="World View Radar showing nine domain spokes with LED-style strength meters and pole labels for each axis"
+                    loading="lazy"
+                    className="w-full h-auto block"
+                  />
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
@@ -871,8 +867,11 @@ function VizBlock({ icon, title, items, footer, fullscreen, image }: {
           </span>
         )}
       </div>
+      <ul className="list-disc pl-6 text-muted-foreground leading-relaxed space-y-1 text-sm">
+        {items.map((item, i) => <li key={i}>{item}</li>)}
+      </ul>
       {image && (
-        <div className="my-4 rounded-xl overflow-hidden border border-border bg-black">
+        <div className="mt-4 rounded-xl overflow-hidden border border-border bg-black">
           <img
             src={image.src}
             alt={image.alt}
@@ -881,9 +880,6 @@ function VizBlock({ icon, title, items, footer, fullscreen, image }: {
           />
         </div>
       )}
-      <ul className="list-disc pl-6 text-muted-foreground leading-relaxed space-y-1 text-sm">
-        {items.map((item, i) => <li key={i}>{item}</li>)}
-      </ul>
       {footer && (
         <p className="mt-3 text-sm text-muted-foreground italic">What it's for: {footer}</p>
       )}
