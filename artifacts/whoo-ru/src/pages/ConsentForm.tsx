@@ -5,19 +5,33 @@ import { useState } from "react";
 import { useCreateConsent } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 
+const GENOME_APP_URL = (
+  (import.meta.env.VITE_GENOME_APP_URL as string | undefined) || "/genome-app/"
+).replace(/\/$/, "");
+const REGISTER_URL = `${GENOME_APP_URL}/register`;
+
 export default function ConsentForm() {
   const [agreed, setAgreed] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState<string | null>(null);
   const [confirmation, setConfirmation] = useState<string | null>(null);
+  const [redirecting, setRedirecting] = useState(false);
   const { toast } = useToast();
 
   const createConsent = useCreateConsent({
     mutation: {
       onSuccess: (res) => {
-        setConfirmation(res?.message || "Thank you. Your consent has been recorded.");
+        setConfirmation(
+          (res?.message || "Thank you. Your consent has been recorded.") +
+            " Taking you to the registration page…",
+        );
         setEmail("");
+        setRedirecting(true);
+        // Brief pause so the user sees the confirmation, then send them on.
+        window.setTimeout(() => {
+          window.location.href = REGISTER_URL;
+        }, 1600);
       },
       onError: (err: any) => {
         const msg = err?.message || "Something went wrong. Please try again.";
@@ -228,14 +242,14 @@ export default function ConsentForm() {
                 </div>
                 <h3 className="text-xl font-display font-bold text-foreground mb-2">Consent Recorded</h3>
                 <p className="text-muted-foreground leading-relaxed mb-6">{confirmation}</p>
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-all"
-                  data-testid="button-modal-done"
+                <a
+                  href={REGISTER_URL}
+                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-all"
+                  data-testid="button-modal-continue"
                 >
-                  Done
-                </button>
+                  {redirecting && <Loader2 className="animate-spin" size={16} />}
+                  Continue to Registration
+                </a>
               </div>
             ) : (
               <form onSubmit={onSubmit}>
