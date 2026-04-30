@@ -29,7 +29,10 @@ const engagementOptions = [
     caption: "Web application — interactive, browser-based participation.",
     description: "Sign up directly on this site to begin mapping your Belief Genome. Access your dashboard, respond to probes, and watch your cognitive DNA string emerge in real time.",
     buttonText: "Create Account",
-    buttonHref: `${GENOME_APP_URL}/register`,
+    // Route through the consent page first so the user reads and agrees
+    // before reaching the registration form. The consent form hands their
+    // email off to /register automatically on success.
+    buttonHref: "/consent",
     internal: true,
     imagePlaceholder: "Web App",
   },
