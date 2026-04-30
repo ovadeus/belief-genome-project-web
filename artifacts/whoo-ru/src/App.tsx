@@ -21,6 +21,7 @@ import Support from "./pages/Support";
 import SupportWeb from "./pages/SupportWeb";
 import SupportDesktop from "./pages/SupportDesktop";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import ConsentForm from "./pages/ConsentForm";
 import TermsOfService from "./pages/TermsOfService";
 import Subscribe from "./pages/Subscribe";
 import AdminLogin from "./pages/AdminLogin";
@@ -98,6 +99,7 @@ function Router() {
       <Route path="/support/desktop/:category" component={SupportDesktop} />
       <Route path="/support/desktop/:category/:slug" component={SupportDesktop} />
       <Route path="/privacy" component={PrivacyPolicy} />
+      <Route path="/consent" component={ConsentForm} />
       <Route path="/terms" component={TermsOfService} />
       <Route path="/subscribe" component={Subscribe} />
       <Route path="/explore" component={ExploreBeliefs} />
