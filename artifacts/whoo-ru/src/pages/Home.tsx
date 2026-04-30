@@ -213,67 +213,67 @@ export default function Home() {
         </div>
       </section>
 
-      {/* FORECASTER PREVIEW */}
+      {/* FORECASTER + INTERACTIVE BELIEF SUPERPOSITION — paired in one card */}
       <section className="py-32 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-card border border-border rounded-[2.5rem] p-8 md:p-16 flex flex-col lg:flex-row items-center gap-16 relative overflow-hidden">
+          <div className="bg-card border border-border rounded-[2.5rem] p-8 md:p-16 relative overflow-hidden">
+            {/* Soft glows in opposite corners tie the two halves together visually */}
             <div className="absolute top-0 right-0 w-96 h-96 bg-primary/10 blur-[100px] rounded-full pointer-events-none" />
-            
-            <div className="flex-1 z-10">
-              <h2 className="text-4xl md:text-5xl font-display font-bold mb-6">The Forecaster</h2>
-              <p className="text-xl text-muted-foreground mb-8">
-                What if you could predict your own reactions? The Forecaster uses your Belief Genome DNA to model how you'll respond to new information, news, and complex situations before they even happen.
-              </p>
-              <Link href={`${GENOME_APP_URL}/register`} className="text-primary font-semibold flex items-center gap-2 hover:gap-3 transition-all">
-                Start Mapping Your Beliefs <ArrowRight size={18} />
-              </Link>
-            </div>
-            
-            <div className="flex-1 w-full max-w-md bg-background border border-border rounded-2xl p-6 shadow-2xl relative z-10">
-              <div className="space-y-6">
-                <div className="flex justify-between items-end mb-2">
-                  <span className="font-medium text-foreground">Cognitive Flexibility</span>
-                  <span className="text-primary font-bold">84%</span>
-                </div>
-                <div className="h-3 bg-card rounded-full overflow-hidden">
-                  <motion.div 
-                    initial={{ width: 0 }}
-                    whileInView={{ width: '84%' }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 1.5, ease: "easeOut" }}
-                    className="h-full bg-gradient-to-r from-primary to-secondary rounded-full"
-                  />
-                </div>
-                
-                <div className="flex justify-between items-end mb-2 mt-6">
-                  <span className="font-medium text-foreground">Authority Skepticism</span>
-                  <span className="text-secondary font-bold">62%</span>
-                </div>
-                <div className="h-3 bg-card rounded-full overflow-hidden">
-                  <motion.div 
-                    initial={{ width: 0 }}
-                    whileInView={{ width: '62%' }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 1.5, delay: 0.2, ease: "easeOut" }}
-                    className="h-full bg-gradient-to-r from-secondary to-accent rounded-full"
-                  />
+            <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary/10 blur-[100px] rounded-full pointer-events-none" />
+
+            {/* Top half — Forecaster intro + sample dimensions */}
+            <div className="flex flex-col lg:flex-row items-center gap-16 relative z-10">
+              <div className="flex-1">
+                <h2 className="text-4xl md:text-5xl font-display font-bold mb-6">The Forecaster</h2>
+                <p className="text-xl text-muted-foreground mb-8">
+                  What if you could predict your own reactions? The Forecaster uses your Belief Genome DNA to model how you'll respond to new information, news, and complex situations before they even happen.
+                </p>
+                <Link href={`${GENOME_APP_URL}/register`} className="text-primary font-semibold flex items-center gap-2 hover:gap-3 transition-all">
+                  Start Mapping Your Beliefs <ArrowRight size={18} />
+                </Link>
+              </div>
+
+              <div className="flex-1 w-full max-w-md bg-background border border-border rounded-2xl p-6 shadow-2xl">
+                <div className="space-y-6">
+                  <div className="flex justify-between items-end mb-2">
+                    <span className="font-medium text-foreground">Cognitive Flexibility</span>
+                    <span className="text-primary font-bold">84%</span>
+                  </div>
+                  <div className="h-3 bg-card rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      whileInView={{ width: '84%' }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 1.5, ease: "easeOut" }}
+                      className="h-full bg-gradient-to-r from-primary to-secondary rounded-full"
+                    />
+                  </div>
+
+                  <div className="flex justify-between items-end mb-2 mt-6">
+                    <span className="font-medium text-foreground">Authority Skepticism</span>
+                    <span className="text-secondary font-bold">62%</span>
+                  </div>
+                  <div className="h-3 bg-card rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      whileInView={{ width: '62%' }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 1.5, delay: 0.2, ease: "easeOut" }}
+                      className="h-full bg-gradient-to-r from-secondary to-accent rounded-full"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
 
-      {/* PROBE WAVE INTERFERENCE — interactive belief-superposition demo */}
-      <section className="pb-32 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-card border border-border rounded-[2.5rem] p-8 md:p-16 relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-96 h-96 bg-primary/10 blur-[100px] rounded-full pointer-events-none" />
+            {/* Soft divider between the two halves */}
+            <div className="relative z-10 my-12 md:my-16 border-t border-border" />
 
+            {/* Bottom half — interactive belief-superposition demo */}
             <div className="relative z-10 mb-10 max-w-3xl">
-              <h2 className="text-4xl md:text-5xl font-display font-bold mb-6">
+              <h3 className="text-3xl md:text-4xl font-display font-bold mb-6">
                 A Belief in Superposition
-              </h2>
+              </h3>
               <p className="text-xl text-muted-foreground">
                 Each probe is a small wave on a belief dimension. Drag the sliders to move where a probe points (position) and how its question is framed (phase). The bold curve is your combined belief; the shaded area below is the probability of where it would land if you had to commit right now. Hit <em>Force collapse</em> to make it choose.
               </p>
