@@ -16,8 +16,9 @@ import { pgTable, serial, varchar, timestamp, index } from 'drizzle-orm/pg-core'
  */
 export const dnaShareEvents = pgTable('dna_share_events', {
   id:        serial('id').primaryKey(),
-  signature:  varchar('signature', { length: 200 }).notNull(),
-  signatureB: varchar('signature_b', { length: 200 }),
+  // 280 chars: fits V2 signed signatures (s: + 265 + - + 4 = 272) with margin.
+  signature:  varchar('signature', { length: 280 }).notNull(),
+  signatureB: varchar('signature_b', { length: 280 }),
   kind:       varchar('kind', { length: 20 }).notNull(), // 'view' | 'share_click' | 'compare_view'
   utmSource: varchar('utm_source', { length: 64 }),
   utmMedium: varchar('utm_medium', { length: 64 }),

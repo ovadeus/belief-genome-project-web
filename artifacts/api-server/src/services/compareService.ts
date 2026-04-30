@@ -13,10 +13,9 @@
 
 import {
   decodeSignature,
-  beliefSegmentToScores,
-  parseDemographicPrefix,
   DIMENSIONS,
   type DecodedSignature,
+  type DemographicPrefix,
 } from '@belief-genome/engine';
 
 export type AgreementBucket = 'strong' | 'mild' | 'moderate' | 'strong_diff' | 'none';
@@ -28,7 +27,7 @@ export interface CompareSidePublic {
   note: string | null;
   dimensionScores: Record<number, number>;
   dimensionsCovered: number;
-  demographics: ReturnType<typeof parseDemographicPrefix> | null;
+  demographics: DemographicPrefix | null;
 }
 
 export interface CompareSideOwn {
@@ -92,12 +91,12 @@ export function bucketAgreement(yours: number | null | undefined, theirs: number
  * supply optional library metadata (shareableName, note) when the signature
  * came from a known_dnas row.
  */
-export function buildTheirSide(
+export async function buildTheirSide(
   signature: string,
   meta?: { shareableName?: string | null; note?: string | null },
-): CompareSidePublic {
-  const decoded = decodeSignature(signature);
-  if (!decoded.valid || !decoded.format) {
+): Promise<CompareSidePublic> {
+  const decoded = await decodeSignature(signature);
+  if (!decoded.valid) {
     throw new Error('compareService.buildTheirSide: invalid signature');
   }
   return buildTheirSideFromDecoded(decoded, meta);
@@ -107,14 +106,19 @@ export function buildTheirSideFromDecoded(
   decoded: DecodedSignature,
   meta?: { shareableName?: string | null; note?: string | null },
 ): CompareSidePublic {
-  if (!decoded.valid || !decoded.format) {
+  if (!decoded.valid) {
     throw new Error('compareService.buildTheirSideFromDecoded: decoded must be valid');
   }
-  const dimensionScores = beliefSegmentToScores(decoded.beliefSegment);
-  // Privacy: anonymous => demographics MUST be null.
-  const demographics = decoded.format === 'signed' && decoded.fullDna
-    ? parseDemographicPrefix(decoded.fullDna)
-    : null;
+  // Walk the engine's already-parsed amplitudes array (works for V1 and V2
+  // identically). Dim ids start at 4 — see DIMENSIONS in beliefDNA.ts.
+  const dimensionScores: Record<number, number> = {};
+  for (let i = 0; i < decoded.amplitudes.length; i++) {
+    const v = decoded.amplitudes[i];
+    if (v !== null) dimensionScores[i + 4] = v;
+  }
+  // Privacy: anonymous => demographics MUST be null. Engine guarantees
+  // demographicPrefix is null for anonymous, but double-check defensively.
+  const demographics = decoded.format === 'signed' ? decoded.demographicPrefix : null;
   return {
     signature: decoded.signature,
     format: decoded.format,

@@ -16,7 +16,8 @@ import { users } from './users';
 export const knownDnas = pgTable('known_dnas', {
   id:             serial('id').primaryKey(),
   userId:         integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  signature:      varchar('signature', { length: 200 }).notNull(),
+  // 280 chars: fits V2 signed signatures (s: + 265 + - + 4 = 272) with margin.
+  signature:      varchar('signature', { length: 280 }).notNull(),
   format:         varchar('format', { length: 16 }).notNull(),  // 'anonymous' | 'signed'
   shareableName:  varchar('shareable_name', { length: 80 }),
   note:           varchar('note', { length: 500 }),

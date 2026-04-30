@@ -56,7 +56,7 @@ router.get('/compare', async (req: Request, res: Response) => {
 
   let theirs;
   try {
-    theirs = buildTheirSide(theirSignature, meta);
+    theirs = await buildTheirSide(theirSignature, meta);
   } catch {
     return res.status(404).json({ error: 'not_found' });
   }

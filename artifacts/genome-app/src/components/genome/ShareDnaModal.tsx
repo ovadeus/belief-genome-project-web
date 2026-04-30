@@ -19,6 +19,7 @@ export default function ShareDnaModal({ open, onClose, dnaString }: ShareDnaModa
   const [mode, setMode] = useState<Mode>('anonymous');
   const [signedAcknowledged, setSignedAcknowledged] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [signature, setSignature] = useState('');
 
   // Reset state every time the modal reopens — defense in depth so the
   // signed-mode checkbox can't survive across opens.
@@ -27,8 +28,32 @@ export default function ShareDnaModal({ open, onClose, dnaString }: ShareDnaModa
       setMode('anonymous');
       setSignedAcknowledged(false);
       setCopied(false);
+      setSignature('');
     }
   }, [open]);
+
+  // Re-compute the signature whenever the mode or DNA changes. The encoders
+  // are async (SHA-256 via Web Crypto), so this runs in an effect and writes
+  // to state. A `cancelled` flag avoids a setState on a stale render if the
+  // user flips the mode again before the previous hash resolves.
+  useEffect(() => {
+    if (!open || !dnaString) {
+      setSignature('');
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const sig = mode === 'anonymous'
+          ? await encodeAnonymous(dnaString)
+          : await encodeSigned(dnaString);
+        if (!cancelled) setSignature(sig);
+      } catch {
+        if (!cancelled) setSignature('');
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [open, mode, dnaString]);
 
   // ESC to close
   useEffect(() => {
@@ -41,13 +66,9 @@ export default function ShareDnaModal({ open, onClose, dnaString }: ShareDnaModa
   if (!open) return null;
 
   const canShare = mode === 'anonymous' || (mode === 'signed' && signedAcknowledged);
-  let signature = '';
-  try {
-    signature = mode === 'anonymous' ? encodeAnonymous(dnaString) : encodeSigned(dnaString);
-  } catch {
-    signature = '';
-  }
-  const baseUrl = `${window.location.origin}${import.meta.env.BASE_URL}dna/${signature}`;
+  const baseUrl = signature
+    ? `${window.location.origin}${import.meta.env.BASE_URL}dna/${signature}`
+    : '';
   const shareUrl = canShare && signature ? baseUrl : '';
 
   const copyLink = async () => {

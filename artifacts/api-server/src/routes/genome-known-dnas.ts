@@ -50,8 +50,8 @@ router.post('/', async (req, res) => {
     return res.status(400).json({ error: 'signature_required' });
   }
 
-  const decoded = decodeSignature(signature);
-  if (!decoded.valid || !decoded.format) {
+  const decoded = await decodeSignature(signature);
+  if (!decoded.valid) {
     return res.status(400).json({ error: 'invalid_signature' });
   }
 
@@ -127,7 +127,7 @@ router.delete('/:id', async (req, res) => {
 
 // POST /api/genome/known-dnas/parse — validate any-shape input without storing.
 // Body: { text }. Returns { valid: true, parsed: {...} } or { valid: false }.
-router.post('/parse', (req: Request, res: Response) => {
+router.post('/parse', async (req: Request, res: Response) => {
   const uid = userId(req);
   if (!rateLimit(`parse:${uid}`, 60, 60_000)) {
     return res.status(429).json({ error: 'rate_limited' });
@@ -138,28 +138,28 @@ router.post('/parse', (req: Request, res: Response) => {
     return res.json({ valid: false });
   }
 
-  const parsed = parseSignatureFromAnyInput(text);
+  const parsed = await parseSignatureFromAnyInput(text);
   if (!parsed) return res.json({ valid: false });
 
   // Don't echo fullDna in the parse response — it would leak the signed-side
   // demographic prefix to anyone who pastes a string. The Add step re-decodes
-  // server-side from `signature` anyway.
+  // server-side from `signature` anyway. `dimensionsCovered` is derived from
+  // the engine's already-parsed amplitudes array (works for V1 and V2).
+  let dimensionsCovered = 0;
+  for (const v of parsed.amplitudes) if (v !== null) dimensionsCovered++;
+
   return res.json({
     valid: true,
     parsed: {
       format: parsed.format,
+      version: parsed.version,
       signature: parsed.signature,
       shareableName: parsed.shareableName,
       note: parsed.note,
       exportedAt: parsed.exportedAt,
       exportedFrom: parsed.exportedFrom,
       fileFormat: parsed.fileFormat,
-      dimensionsCovered: Object.keys(
-        parsed.beliefSegment.split('').reduce<Record<number, true>>((acc, ch, i) => {
-          if (ch >= '0' && ch <= '9') acc[i + 4] = true;
-          return acc;
-        }, {})
-      ).length,
+      dimensionsCovered,
     },
   });
 });

@@ -52,12 +52,14 @@ export default function ExportBgpModal({ open, onClose, dnaString, defaultName }
 
   const canExport = mode === 'anonymous' || (mode === 'signed' && signedAcknowledged);
 
-  const doExport = () => {
+  const doExport = async () => {
     if (!canExport || !dnaString || downloading) return;
     setDownloading(true);
     try {
-      const signature = mode === 'anonymous' ? encodeAnonymous(dnaString) : encodeSigned(dnaString);
-      const file = buildBgpFile({
+      const signature = mode === 'anonymous'
+        ? await encodeAnonymous(dnaString)
+        : await encodeSigned(dnaString);
+      const file = await buildBgpFile({
         signature,
         shareableName: shareableName.trim() || null,
         note: note.trim() || null,

@@ -2,8 +2,21 @@ import { Router, type IRouter } from 'express';
 import rateLimit from 'express-rate-limit';
 import crypto from 'crypto';
 import { db, dnaShareEvents } from '@workspace/db';
-import { decodeSignature, beliefSegmentToScores, parseDemographicPrefix, DIMENSIONS } from '@belief-genome/engine';
+import { decodeSignature, DIMENSIONS } from '@belief-genome/engine';
 import { buildTheirSide, computeComparison } from '../services/compareService';
+
+// Build the dim-id → amplitude map from a decoded signature's amplitudes
+// array. Dimension ids start at 4 (per DIMENSIONS in beliefDNA.ts), so the
+// array index `i` corresponds to dimension id `i + 4`. Works for both V1
+// and V2 — `decoded.amplitudes` is always length 124 regardless of version.
+function amplitudesToScores(amplitudes: (number | null)[]): Record<number, number> {
+  const out: Record<number, number> = {};
+  for (let i = 0; i < amplitudes.length; i++) {
+    const v = amplitudes[i];
+    if (v !== null) out[i + 4] = v;
+  }
+  return out;
+}
 
 // Pre-compute the public dimensions payload once at module load. The
 // dimension catalog is static, so we don't need a per-request DB lookup
@@ -55,7 +68,7 @@ router.get('/dimensions', (_req, res) => {
 // minimal demographic block for signed signatures only.
 router.get('/:signature', async (req, res) => {
   const { signature } = req.params;
-  const decoded = decodeSignature(signature);
+  const decoded = await decodeSignature(signature);
 
   if (!decoded.valid) {
     // Generic 404 — never leak why decoding failed (would help URL tampering)
@@ -65,7 +78,7 @@ router.get('/:signature', async (req, res) => {
   // Validate that all decoded dim ids exist in our dimension catalog. Any
   // unknown id means the signature was minted against a different (likely
   // future) version of the engine; we reject rather than silently drop dims.
-  const dimensionScores = beliefSegmentToScores(decoded.beliefSegment);
+  const dimensionScores = amplitudesToScores(decoded.amplitudes);
   const validDimIds = new Set(DIMENSIONS.map(d => d.id));
   for (const idStr of Object.keys(dimensionScores)) {
     const id = parseInt(idStr, 10);
@@ -101,8 +114,8 @@ router.get('/:signature', async (req, res) => {
     dimensionCount: Object.keys(dimensionScores).length,
   };
 
-  if (decoded.format === 'signed' && decoded.fullDna) {
-    payload.demographics = parseDemographicPrefix(decoded.fullDna);
+  if (decoded.format === 'signed' && decoded.demographicPrefix) {
+    payload.demographics = decoded.demographicPrefix;
   }
 
   return res.json(payload);
@@ -117,8 +130,8 @@ router.get('/compare/:sigA/:sigB', async (req, res) => {
 
   let sideA, sideB;
   try {
-    sideA = buildTheirSide(sigA);
-    sideB = buildTheirSide(sigB);
+    sideA = await buildTheirSide(sigA);
+    sideB = await buildTheirSide(sigB);
   } catch {
     return res.status(404).json({ error: 'not_found' });
   }
@@ -160,7 +173,7 @@ router.get('/compare/:sigA/:sigB', async (req, res) => {
 // Rate-limited via the same 30/min limiter.
 router.post('/:signature/share-click', async (req, res) => {
   const { signature } = req.params;
-  const decoded = decodeSignature(signature);
+  const decoded = await decodeSignature(signature);
   if (!decoded.valid) return res.status(404).json({ error: 'not_found' });
 
   const ip = (req.headers['x-forwarded-for']?.toString().split(',')[0] || req.ip || '').trim();
