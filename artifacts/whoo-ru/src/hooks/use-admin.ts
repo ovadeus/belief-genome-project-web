@@ -11,6 +11,8 @@ import {
   useToggleSubscriberMember,
   useListEarlyBird,
   useDeleteEarlyBird,
+  useListConsents,
+  useDeleteConsent,
   useGetSettings,
   useUpdateSettings,
   useChangeAdminPassword,
@@ -18,6 +20,7 @@ import {
   getGetAdminStatsQueryKey,
   getListSubscribersQueryKey,
   getListEarlyBirdQueryKey,
+  getListConsentsQueryKey,
   getGetSettingsQueryKey
 } from "@workspace/api-client-react";
 import { useToast } from "./use-toast";
@@ -150,6 +153,29 @@ export function useAdminDeleteEarlyBird() {
         queryClient.invalidateQueries({ queryKey: getGetAdminStatsQueryKey() });
         toast({ title: "Entry removed", description: "The early bird signup has been deleted." });
       }
+    }
+  });
+}
+
+// Consents Admin
+export function useAdminConsents(params: { page?: number, limit?: number, search?: string } = {}) {
+  return useListConsents(params);
+}
+
+export function useAdminDeleteConsent() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useDeleteConsent({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getListConsentsQueryKey() });
+        queryClient.invalidateQueries({ queryKey: getGetAdminStatsQueryKey() });
+        toast({ title: "Consent removed", description: "The consent record has been deleted." });
+      },
+      onError: (err: any) => {
+        toast({ title: "Error", description: err?.message || "Failed to delete consent", variant: "destructive" });
+      },
     }
   });
 }

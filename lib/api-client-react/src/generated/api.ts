@@ -22,7 +22,9 @@ import type {
   BlogPost,
   BlogPostListResponse,
   ChangePasswordBody,
+  ConsentListResponse,
   CreateBlogPostBody,
+  CreateConsentBody,
   CreateEarlyBirdBody,
   CreateSubscriberBody,
   EarlyBirdListResponse,
@@ -31,6 +33,7 @@ import type {
   ImageUploadResponse,
   ListAdminBlogPostsParams,
   ListBlogPostsParams,
+  ListConsentsParams,
   ListEarlyBirdParams,
   ListSubscribersParams,
   LoginBody,
@@ -567,6 +570,92 @@ export const useCreateEarlyBird = <
   TContext
 > => {
   return useMutation(getCreateEarlyBirdMutationOptions(options));
+};
+
+/**
+ * @summary Submit a participant consent agreement
+ */
+export const getCreateConsentUrl = () => {
+  return `/api/consent`;
+};
+
+export const createConsent = async (
+  createConsentBody: CreateConsentBody,
+  options?: RequestInit,
+): Promise<SuccessResponse> => {
+  return customFetch<SuccessResponse>(getCreateConsentUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(createConsentBody),
+  });
+};
+
+export const getCreateConsentMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createConsent>>,
+    TError,
+    { data: BodyType<CreateConsentBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createConsent>>,
+  TError,
+  { data: BodyType<CreateConsentBody> },
+  TContext
+> => {
+  const mutationKey = ["createConsent"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createConsent>>,
+    { data: BodyType<CreateConsentBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createConsent(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateConsentMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createConsent>>
+>;
+export type CreateConsentMutationBody = BodyType<CreateConsentBody>;
+export type CreateConsentMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Submit a participant consent agreement
+ */
+export const useCreateConsent = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createConsent>>,
+    TError,
+    { data: BodyType<CreateConsentBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createConsent>>,
+  TError,
+  { data: BodyType<CreateConsentBody> },
+  TContext
+> => {
+  return useMutation(getCreateConsentMutationOptions(options));
 };
 
 /**
@@ -1828,6 +1917,259 @@ export function useExportSubscribers<
   request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getExportSubscribersQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary List consent agreements
+ */
+export const getListConsentsUrl = (params?: ListConsentsParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/admin/consents?${stringifiedParams}`
+    : `/api/admin/consents`;
+};
+
+export const listConsents = async (
+  params?: ListConsentsParams,
+  options?: RequestInit,
+): Promise<ConsentListResponse> => {
+  return customFetch<ConsentListResponse>(getListConsentsUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getListConsentsQueryKey = (params?: ListConsentsParams) => {
+  return [`/api/admin/consents`, ...(params ? [params] : [])] as const;
+};
+
+export const getListConsentsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listConsents>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: ListConsentsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listConsents>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListConsentsQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listConsents>>> = ({
+    signal,
+  }) => listConsents(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listConsents>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListConsentsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listConsents>>
+>;
+export type ListConsentsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List consent agreements
+ */
+
+export function useListConsents<
+  TData = Awaited<ReturnType<typeof listConsents>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: ListConsentsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listConsents>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListConsentsQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Delete consent agreement
+ */
+export const getDeleteConsentUrl = (id: number) => {
+  return `/api/admin/consents/${id}`;
+};
+
+export const deleteConsent = async (
+  id: number,
+  options?: RequestInit,
+): Promise<void> => {
+  return customFetch<void>(getDeleteConsentUrl(id), {
+    ...options,
+    method: "DELETE",
+  });
+};
+
+export const getDeleteConsentMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteConsent>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteConsent>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  const mutationKey = ["deleteConsent"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteConsent>>,
+    { id: number }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return deleteConsent(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteConsentMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteConsent>>
+>;
+
+export type DeleteConsentMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Delete consent agreement
+ */
+export const useDeleteConsent = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteConsent>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof deleteConsent>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  return useMutation(getDeleteConsentMutationOptions(options));
+};
+
+/**
+ * @summary Export consent agreements as CSV
+ */
+export const getExportConsentsUrl = () => {
+  return `/api/admin/consents/export`;
+};
+
+export const exportConsents = async (
+  options?: RequestInit,
+): Promise<string> => {
+  return customFetch<string>(getExportConsentsUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getExportConsentsQueryKey = () => {
+  return [`/api/admin/consents/export`] as const;
+};
+
+export const getExportConsentsQueryOptions = <
+  TData = Awaited<ReturnType<typeof exportConsents>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof exportConsents>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getExportConsentsQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof exportConsents>>> = ({
+    signal,
+  }) => exportConsents({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof exportConsents>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ExportConsentsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof exportConsents>>
+>;
+export type ExportConsentsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Export consent agreements as CSV
+ */
+
+export function useExportConsents<
+  TData = Awaited<ReturnType<typeof exportConsents>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof exportConsents>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getExportConsentsQueryOptions(options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;

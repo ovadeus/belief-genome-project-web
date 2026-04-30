@@ -18,6 +18,7 @@ import genomeKnownDnasRouter from "./genome-known-dnas";
 import genomeCompareRouter from "./genome-compare";
 import analyticsRouter from "./analytics";
 import podcastsRouter, { podcastAdminRouter } from "./podcasts";
+import consentsRouter from "./consents";
 import { requireAuth } from "../middlewares/auth";
 
 const router: IRouter = Router();
@@ -33,6 +34,7 @@ router.use(storageRouter);
 router.use(blogAssetsRouter);
 router.use(analyticsRouter);
 router.use(podcastsRouter);
+router.use(consentsRouter);
 router.use("/admin", podcastAdminRouter);
 
 // Public, unauthenticated DNA share routes — MUST be mounted before the

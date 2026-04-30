@@ -31,6 +31,7 @@ import BlogEditor from "./pages/admin/BlogEditor";
 import AdminSubscribers from "./pages/admin/Subscribers";
 import AdminUsers from "./pages/admin/Users";
 import AdminEarlyBird from "./pages/admin/EarlyBird";
+import AdminConsents from "./pages/admin/Consents";
 import AdminSettings from "./pages/admin/Settings";
 import MediaLibrary from "./pages/admin/MediaLibrary";
 import GenomeSubmissions from "./pages/admin/GenomeSubmissions";
@@ -114,6 +115,7 @@ function Router() {
       <Route path="/admin/subscribers" component={AdminSubscribers} />
       <Route path="/admin/users" component={AdminUsers} />
       <Route path="/admin/earlybird" component={AdminEarlyBird} />
+      <Route path="/admin/consents" component={AdminConsents} />
       <Route path="/admin/media" component={MediaLibrary} />
       <Route path="/admin/settings" component={AdminSettings} />
       <Route path="/admin/genome" component={GenomeSubmissions} />

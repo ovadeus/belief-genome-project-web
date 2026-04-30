@@ -112,6 +112,15 @@ export const CreateEarlyBirdBody = zod.object({
 });
 
 /**
+ * @summary Submit a participant consent agreement
+ */
+export const CreateConsentBody = zod.object({
+  email: zod.string().email(),
+  agreed: zod.boolean(),
+  source: zod.enum(["web", "extension", "desktop"]).optional(),
+});
+
+/**
  * @summary Admin login
  */
 export const AdminLoginBody = zod.object({
@@ -378,6 +387,40 @@ export const ToggleSubscriberMemberResponse = zod.object({
   createdAt: zod.date(),
   isActive: zod.boolean(),
   isMember: zod.boolean(),
+});
+
+/**
+ * @summary List consent agreements
+ */
+export const listConsentsQueryPageDefault = 1;
+export const listConsentsQueryLimitDefault = 25;
+
+export const ListConsentsQueryParams = zod.object({
+  page: zod.coerce.number().default(listConsentsQueryPageDefault),
+  limit: zod.coerce.number().default(listConsentsQueryLimitDefault),
+  search: zod.coerce.string().optional(),
+});
+
+export const ListConsentsResponse = zod.object({
+  consents: zod.array(
+    zod.object({
+      id: zod.number(),
+      email: zod.string(),
+      status: zod.string(),
+      source: zod.string().nullish(),
+      createdAt: zod.date(),
+    }),
+  ),
+  total: zod.number(),
+  page: zod.number(),
+  totalPages: zod.number(),
+});
+
+/**
+ * @summary Delete consent agreement
+ */
+export const DeleteConsentParams = zod.object({
+  id: zod.coerce.number(),
 });
 
 /**

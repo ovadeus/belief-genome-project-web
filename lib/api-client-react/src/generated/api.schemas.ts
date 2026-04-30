@@ -117,6 +117,37 @@ export interface EarlyBirdListResponse {
   totalPages: number;
 }
 
+export type CreateConsentBodySource =
+  (typeof CreateConsentBodySource)[keyof typeof CreateConsentBodySource];
+
+export const CreateConsentBodySource = {
+  web: "web",
+  extension: "extension",
+  desktop: "desktop",
+} as const;
+
+export interface CreateConsentBody {
+  email: string;
+  agreed: boolean;
+  source?: CreateConsentBodySource;
+}
+
+export interface ConsentAgreement {
+  id: number;
+  email: string;
+  status: string;
+  /** @nullable */
+  source?: string | null;
+  createdAt: string;
+}
+
+export interface ConsentListResponse {
+  consents: ConsentAgreement[];
+  total: number;
+  page: number;
+  totalPages: number;
+}
+
 export interface LoginBody {
   username: string;
   password: string;
@@ -220,6 +251,12 @@ export type ListSubscribersParams = {
   page?: number;
   limit?: number;
   source?: string;
+  search?: string;
+};
+
+export type ListConsentsParams = {
+  page?: number;
+  limit?: number;
   search?: string;
 };
 

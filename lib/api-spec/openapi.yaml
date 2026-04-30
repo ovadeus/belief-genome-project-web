@@ -23,6 +23,8 @@ tags:
     description: Site settings operations
   - name: Storage
     description: Object storage upload and serving endpoints.
+  - name: consents
+    description: Participant consent agreement operations
 paths:
   /healthz:
     get:
@@ -166,6 +168,37 @@ paths:
                 $ref: "#/components/schemas/SuccessResponse"
         "409":
           description: Already signed up
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /consent:
+    post:
+      operationId: createConsent
+      tags: [consents]
+      summary: Submit a participant consent agreement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateConsentBody"
+      responses:
+        "201":
+          description: Consent recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Already agreed
           content:
             application/json:
               schema:
@@ -456,6 +489,62 @@ paths:
       operationId: exportSubscribers
       tags: [admin]
       summary: Export subscribers as CSV
+      responses:
+        "200":
+          description: CSV file
+          content:
+            text/csv:
+              schema:
+                type: string
+
+  /admin/consents:
+    get:
+      operationId: listConsents
+      tags: [admin]
+      summary: List consent agreements
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 25
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Consent agreements list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConsentListResponse"
+
+  /admin/consents/{id}:
+    delete:
+      operationId: deleteConsent
+      tags: [admin]
+      summary: Delete consent agreement
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /admin/consents/export:
+    get:
+      operationId: exportConsents
+      tags: [admin]
+      summary: Export consent agreements as CSV
       responses:
         "200":
           description: CSV file
@@ -827,6 +916,60 @@ components:
           type: integer
       required:
         - entries
+        - total
+        - page
+        - totalPages
+
+    CreateConsentBody:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        agreed:
+          type: boolean
+        source:
+          type: string
+          enum: [web, extension, desktop]
+      required:
+        - email
+        - agreed
+
+    ConsentAgreement:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        status:
+          type: string
+        source:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - email
+        - status
+        - createdAt
+
+    ConsentListResponse:
+      type: object
+      properties:
+        consents:
+          type: array
+          items:
+            $ref: "#/components/schemas/ConsentAgreement"
+        total:
+          type: integer
+        page:
+          type: integer
+        totalPages:
+          type: integer
+      required:
+        - consents
         - total
         - page
         - totalPages

@@ -1,8 +1,56 @@
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { Link } from "wouter";
-import { FileCheck2 } from "lucide-react";
+import { FileCheck2, X, Check, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { useCreateConsent } from "@workspace/api-client-react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ConsentForm() {
+  const [agreed, setAgreed] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [confirmation, setConfirmation] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  const createConsent = useCreateConsent({
+    mutation: {
+      onSuccess: (res) => {
+        setConfirmation(res?.message || "Thank you. Your consent has been recorded.");
+        setEmail("");
+      },
+      onError: (err: any) => {
+        const msg = err?.message || "Something went wrong. Please try again.";
+        setEmailError(msg);
+        toast({ title: "Submission failed", description: msg, variant: "destructive" });
+      },
+    },
+  });
+
+  const openModal = () => {
+    if (!agreed) return;
+    setEmailError(null);
+    setConfirmation(null);
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setEmail("");
+    setEmailError(null);
+  };
+
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = email.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      setEmailError("Please enter a valid email address.");
+      return;
+    }
+    setEmailError(null);
+    createConsent.mutate({ data: { email: trimmed, agreed: true, source: "web" } });
+  };
+
   return (
     <PublicLayout>
       <section className="py-20 px-6 max-w-4xl mx-auto">
@@ -114,14 +162,133 @@ export default function ConsentForm() {
               Terms of Service: <Link href="/terms" className="text-primary hover:underline">beliefgenomeproject.org/terms</Link>
             </address>
           </Section>
+        </div>
 
-          <div className="text-sm text-muted-foreground border-t border-border pt-8">
+        {/* Agreement form */}
+        <div className="mt-16 rounded-2xl border border-border bg-card p-6 md:p-8">
+          <h2 className="text-2xl font-display font-bold text-foreground mb-4">Record your agreement</h2>
+          <p className="text-muted-foreground leading-relaxed mb-6">
+            If you have read and accepted the terms above, please confirm your agreement and submit your email so we can record your consent on file.
+          </p>
+
+          <label className="flex items-start gap-3 cursor-pointer select-none mb-6">
+            <input
+              type="checkbox"
+              checked={agreed}
+              onChange={(e) => setAgreed(e.target.checked)}
+              className="mt-1 w-5 h-5 rounded border-border accent-primary cursor-pointer"
+              data-testid="checkbox-agree-consent"
+            />
+            <span className="text-foreground leading-relaxed">
+              I have read and <strong>Agree to the Consent Form</strong> above. I understand that my belief responses will be collected and used as described, and that no personally identifying information will be attached to those responses.
+            </span>
+          </label>
+
+          <button
+            type="button"
+            onClick={openModal}
+            disabled={!agreed}
+            className="px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold transition-all shadow-lg shadow-primary/20 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-primary/90 active:scale-95"
+            data-testid="button-agree-and-submit"
+          >
+            Agree and Submit
+          </button>
+
+          <div className="mt-6 text-sm text-muted-foreground border-t border-border pt-6">
             <p>
               This consent form is provided for transparency and is not a substitute for legal advice. It does not replace the <Link href="/privacy" className="text-primary hover:underline">Privacy Policy</Link> or <Link href="/terms" className="text-primary hover:underline">Terms of Service</Link>, which together govern your use of the Services.
             </p>
           </div>
         </div>
       </section>
+
+      {/* Email modal */}
+      {modalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={closeModal}>
+          <div
+            className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-md p-6 md:p-8 relative"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+          >
+            <button
+              type="button"
+              onClick={closeModal}
+              className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Close"
+              data-testid="button-close-modal"
+            >
+              <X size={20} />
+            </button>
+
+            {confirmation ? (
+              <div className="text-center py-4">
+                <div className="w-12 h-12 rounded-full bg-[#22c55e]/15 flex items-center justify-center mx-auto mb-4">
+                  <Check className="text-[#22c55e]" size={24} />
+                </div>
+                <h3 className="text-xl font-display font-bold text-foreground mb-2">Consent Recorded</h3>
+                <p className="text-muted-foreground leading-relaxed mb-6">{confirmation}</p>
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  className="px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-all"
+                  data-testid="button-modal-done"
+                >
+                  Done
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={onSubmit}>
+                <h3 className="text-xl font-display font-bold text-foreground mb-2">Confirm your email</h3>
+                <p className="text-muted-foreground leading-relaxed mb-6">
+                  Enter the email address you want associated with your consent record. We use it only to confirm your agreement is on file.
+                </p>
+
+                <label className="block text-sm font-medium text-muted-foreground mb-2">Email address</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  autoFocus
+                  required
+                  placeholder="you@example.com"
+                  className="w-full px-4 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-foreground"
+                  data-testid="input-consent-email"
+                />
+                {emailError && (
+                  <p className="text-destructive text-sm mt-2" data-testid="text-consent-error">{emailError}</p>
+                )}
+
+                <div className="flex gap-3 mt-6">
+                  <button
+                    type="button"
+                    onClick={closeModal}
+                    className="flex-1 px-5 py-3 rounded-xl bg-background border border-border text-foreground font-semibold hover:bg-foreground/5 transition-all"
+                    data-testid="button-modal-cancel"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={createConsent.isPending}
+                    className="flex-1 px-5 py-3 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    data-testid="button-modal-submit"
+                  >
+                    {createConsent.isPending ? (
+                      <>
+                        <Loader2 size={16} className="animate-spin" />
+                        Submitting...
+                      </>
+                    ) : (
+                      "Submit"
+                    )}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </PublicLayout>
   );
 }
