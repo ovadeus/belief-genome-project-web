@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, Brain, Compass, Users } from "lucide-react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { TripleHelixCanvas } from "@/components/ui/TripleHelixCanvas";
+import { ProbeWaveInterference } from "@/components/ProbeWaveInterference";
 import { usePublicBlog } from "@/hooks/use-blog";
 import { format } from "date-fns";
 import bgpScreen01 from "@assets/bgp-screen01_1777227170316.png";
@@ -258,6 +259,28 @@ export default function Home() {
                   />
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* PROBE WAVE INTERFERENCE — interactive belief-superposition demo */}
+      <section className="pb-32 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-card border border-border rounded-[2.5rem] p-8 md:p-16 relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-96 h-96 bg-primary/10 blur-[100px] rounded-full pointer-events-none" />
+
+            <div className="relative z-10 mb-10 max-w-3xl">
+              <h2 className="text-4xl md:text-5xl font-display font-bold mb-6">
+                A Belief in Superposition
+              </h2>
+              <p className="text-xl text-muted-foreground">
+                Each probe is a small wave on a belief dimension. Drag the sliders to move where a probe points (position) and how its question is framed (phase). The bold curve is your combined belief; the shaded area below is the probability of where it would land if you had to commit right now. Hit <em>Force collapse</em> to make it choose.
+              </p>
+            </div>
+
+            <div className="relative z-10 bg-background border border-border rounded-2xl p-6 md:p-10 shadow-2xl">
+              <ProbeWaveInterference />
             </div>
           </div>
         </div>
