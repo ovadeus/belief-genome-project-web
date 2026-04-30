@@ -7,7 +7,7 @@ import { db } from '@workspace/db';
 import { users, beliefResponses, dimensionScores, dnaSnapshots, genomeSubmissions, genomeAnalyses, beliefLineage } from '@workspace/db/schema';
 import { eq, and, gte, desc, sql } from 'drizzle-orm';
 import { DIMENSIONS, CATEGORIES } from '@belief-genome/engine';
-import { buildDNAString, calcDimensionValue, calcConfidence, applyResponseToScores } from '@belief-genome/engine';
+import { buildDNAString, calcDimensionValue, calcConfidence, calcCoherence, applyResponseToScores } from '@belief-genome/engine';
 import type { Accumulator } from '@belief-genome/engine';
 
 const router = Router();
@@ -25,13 +25,20 @@ router.get('/dna', async (req: Request, res: Response) => {
 
   const dimScores: Record<number, number> = {};
   const confidence: Record<number, number> = {};
+  const coherence: Record<number, string | null> = {};
 
   for (const s of scores) {
-    const accum: Accumulator = { sum: s.weightedSum, totalWeight: s.totalWeight, count: s.count };
+    const accum: Accumulator = {
+      sum: s.weightedSum,
+      totalWeight: s.totalWeight,
+      sumSquares: s.sumSquares,
+      count: s.count,
+    };
     const val = calcDimensionValue(accum);
     if (val !== null) {
       dimScores[s.dimensionId] = val;
       confidence[s.dimensionId] = calcConfidence(accum);
+      coherence[s.dimensionId] = calcCoherence(accum);
     }
   }
 
@@ -48,7 +55,7 @@ router.get('/dna', async (req: Request, res: Response) => {
     sex: user.sex ?? '5',
     countryCode: user.countryCode ?? undefined,
     zipCode: user.zipCode ?? undefined,
-  });
+  }, coherence);
 
   const confValues = Object.values(confidence);
   const overallConfidence = confValues.length
@@ -245,7 +252,12 @@ router.get('/lineage/:dimensionId', async (req: Request, res: Response) => {
     .from(dimensionScores)
     .where(and(eq(dimensionScores.userId, userId), eq(dimensionScores.dimensionId, dimensionId)));
   const currentAcc: Accumulator | null = scoreRow
-    ? { sum: scoreRow.weightedSum, totalWeight: scoreRow.totalWeight, count: scoreRow.count }
+    ? {
+        sum: scoreRow.weightedSum,
+        totalWeight: scoreRow.totalWeight,
+        sumSquares: scoreRow.sumSquares,
+        count: scoreRow.count,
+      }
     : null;
   const currentScore = calcDimensionValue(currentAcc);
   const currentConfidence = calcConfidence(currentAcc);
@@ -426,7 +438,12 @@ router.post('/forecast', async (req: Request, res: Response) => {
   let totalDimensions = 0;
   if (scores.length) {
     const scored = scores.map(s => {
-      const accum: Accumulator = { sum: s.weightedSum, totalWeight: s.totalWeight, count: s.count };
+      const accum: Accumulator = {
+        sum: s.weightedSum,
+        totalWeight: s.totalWeight,
+        sumSquares: s.sumSquares,
+        count: s.count,
+      };
       const val = calcDimensionValue(accum);
       return val !== null ? { id: s.dimensionId, val } : null;
     }).filter(Boolean) as { id: number; val: number }[];
@@ -541,40 +558,42 @@ Return ONLY valid JSON, nothing else:
 router.post('/analyze', async (req: Request, res: Response) => {
   const { userId } = (req as any).genomeUser;
 
-  // Get all responses
+  // Get all responses (now also reading `quality` so the canonical engine
+  // path can apply the quality-weight multiplier — keeps /analyze in sync
+  // with live ingest math and desktop parity). Deterministic ordering
+  // on (createdAt, id) is required: floating-point accumulation is
+  // order-sensitive, and without an explicit ORDER BY the result would
+  // depend on the planner's row order — could produce sub-epsilon drift
+  // between runs and break bit-identical parity guarantees.
   const responses = await db
     .select({
       probeCategory: beliefResponses.probeCategory,
       value: beliefResponses.value,
       dimensionWeights: beliefResponses.dimensionWeights,
+      quality: beliefResponses.quality,
     })
     .from(beliefResponses)
-    .where(eq(beliefResponses.userId, userId));
+    .where(eq(beliefResponses.userId, userId))
+    .orderBy(beliefResponses.createdAt, beliefResponses.id);
 
   if (responses.length === 0) {
     return res.json({ totalResponses: 0, dimensionsCovered: 0, overallConfidence: 0, dnaString: null });
   }
 
-  // Rebuild all accumulators from scratch
-  const accumulators: Record<number, Accumulator> = {};
-
+  // Rebuild all accumulators by replaying responses through the canonical
+  // engine path. This guarantees the rebuilt scores are bit-identical to
+  // what live ingest (genome-probes /respond) would have produced and to
+  // what scripts/backfill-sum-squares.ts replays.
+  let accumulators: Record<number, Accumulator> = {};
   for (const r of responses) {
     const weights = r.dimensionWeights as Record<string, { direction: number; weight: number }> | null;
     if (!weights) continue;
-
-    for (const [dimIdStr, { direction, weight }] of Object.entries(weights)) {
-      const dimId = parseInt(dimIdStr);
-      if (isNaN(dimId)) continue;
-
-      if (!accumulators[dimId]) {
-        accumulators[dimId] = { sum: 0, totalWeight: 0, count: 0 };
-      }
-
-      const normalizedValue = (r.value - 0.5) * 2 * direction; // -1 to +1
-      accumulators[dimId].sum += normalizedValue * weight;
-      accumulators[dimId].totalWeight += weight;
-      accumulators[dimId].count += 1;
-    }
+    const entry = {
+      value: r.value,
+      dimensionWeights: weights,
+      quality: (r.quality as { weight?: number } | null) ?? undefined,
+    };
+    ({ next: accumulators } = applyResponseToScores(accumulators, entry));
   }
 
   // Save rebuilt scores to database
@@ -588,12 +607,12 @@ router.post('/analyze', async (req: Request, res: Response) => {
 
     if (existing) {
       await db.update(dimensionScores)
-        .set({ weightedSum: accum.sum, totalWeight: accum.totalWeight, count: accum.count })
+        .set({ weightedSum: accum.sum, totalWeight: accum.totalWeight, sumSquares: accum.sumSquares, count: accum.count })
         .where(eq(dimensionScores.id, existing.id));
     } else {
       await db.insert(dimensionScores).values({
         userId, dimensionId: dimId,
-        weightedSum: accum.sum, totalWeight: accum.totalWeight, count: accum.count,
+        weightedSum: accum.sum, totalWeight: accum.totalWeight, sumSquares: accum.sumSquares, count: accum.count,
       });
     }
   }
@@ -602,6 +621,7 @@ router.post('/analyze', async (req: Request, res: Response) => {
   const [user] = await db.select().from(users).where(eq(users.id, userId));
   const dimScores: Record<number, number> = {};
   const confidence: Record<number, number> = {};
+  const coherence: Record<number, string | null> = {};
 
   for (const [dimIdStr, accum] of Object.entries(accumulators)) {
     const dimId = parseInt(dimIdStr);
@@ -609,6 +629,7 @@ router.post('/analyze', async (req: Request, res: Response) => {
     if (val !== null) {
       dimScores[dimId] = val;
       confidence[dimId] = calcConfidence(accum);
+      coherence[dimId] = calcCoherence(accum);
     }
   }
 
@@ -619,7 +640,7 @@ router.post('/analyze', async (req: Request, res: Response) => {
     sex: user?.sex ?? '5',
     countryCode: user?.countryCode ?? undefined,
     zipCode: user?.zipCode ?? undefined,
-  });
+  }, coherence);
 
   const confValues = Object.values(confidence);
   const overallConfidence = confValues.length
@@ -940,6 +961,7 @@ router.post('/responses/bulk-import', async (req: Request, res: Response) => {
       accMap[row.dimensionId] = {
         sum: row.weightedSum,
         totalWeight: row.totalWeight,
+        sumSquares: row.sumSquares,
         count: row.count,
       };
     }
@@ -1021,6 +1043,7 @@ router.post('/responses/bulk-import', async (req: Request, res: Response) => {
         await tx.update(dimensionScores).set({
           weightedSum: acc.sum,
           totalWeight: acc.totalWeight,
+          sumSquares: acc.sumSquares,
           count: acc.count,
           lastUpdated: new Date(),
         }).where(eq(dimensionScores.id, existing.id));
@@ -1030,6 +1053,7 @@ router.post('/responses/bulk-import', async (req: Request, res: Response) => {
           dimensionId: dimId,
           weightedSum: acc.sum,
           totalWeight: acc.totalWeight,
+          sumSquares: acc.sumSquares,
           count: acc.count,
         });
       }
@@ -1139,7 +1163,7 @@ router.get('/timeline', async (req: Request, res: Response) => {
   boundaries.push(toTs);
 
   // Replay responses, snapshotting at each boundary.
-  type Accum = { sum: number; totalWeight: number; count: number };
+  type Accum = { sum: number; totalWeight: number; sumSquares: number; count: number };
   const accum: Record<number, Accum> = {};
   const dimsByCategory: Record<string, number[]> = {};
   for (const d of DIMENSIONS) {
@@ -1163,10 +1187,11 @@ router.get('/timeline', async (req: Request, res: Response) => {
       for (const [dimIdStr, w] of Object.entries(weights)) {
         const dimId = parseInt(dimIdStr, 10);
         const wt = w as { weight: number; direction?: number };
-        if (!accum[dimId]) accum[dimId] = { sum: 0, totalWeight: 0, count: 0 };
+        if (!accum[dimId]) accum[dimId] = { sum: 0, totalWeight: 0, sumSquares: 0, count: 0 };
         const directed = normalized * (wt.direction ?? 1);
         const effectiveW = wt.weight * qualityMult;
         accum[dimId].sum += directed * effectiveW;
+        accum[dimId].sumSquares += directed * directed * effectiveW;
         accum[dimId].totalWeight += effectiveW;
         accum[dimId].count += 1;
       }
@@ -1183,6 +1208,7 @@ router.get('/timeline', async (req: Request, res: Response) => {
 
     const dimensionScores: Record<number, number | null> = {};
     const confidenceMap: Record<number, number> = {};
+    const coherenceMap: Record<number, string | null> = {};
     let confSum = 0, confCount = 0;
     for (const [dimIdStr, a] of Object.entries(accum)) {
       const v = calcDimensionValue(a as any);
@@ -1190,6 +1216,7 @@ router.get('/timeline', async (req: Request, res: Response) => {
       dimensionScores[parseInt(dimIdStr, 10)] = v;
       if (v !== null) {
         confidenceMap[parseInt(dimIdStr, 10)] = c;
+        coherenceMap[parseInt(dimIdStr, 10)] = calcCoherence(a as any);
         confSum += c;
         confCount++;
       }
@@ -1216,7 +1243,7 @@ router.get('/timeline', async (req: Request, res: Response) => {
       sex: user?.sex ?? '5',
       countryCode: user?.countryCode ?? undefined,
       zipCode: user?.zipCode ?? undefined,
-    });
+    }, coherenceMap);
 
     buckets.push({
       ts: new Date(boundary).toISOString(),
@@ -1290,7 +1317,12 @@ router.post('/analyse', async (req: Request, res: Response) => {
   const scores = await db.select().from(dimensionScores).where(eq(dimensionScores.userId, userId));
   const dimScores: Record<number, number> = {};
   for (const s of scores) {
-    const accum: Accumulator = { sum: s.weightedSum, totalWeight: s.totalWeight, count: s.count };
+    const accum: Accumulator = {
+      sum: s.weightedSum,
+      totalWeight: s.totalWeight,
+      sumSquares: s.sumSquares,
+      count: s.count,
+    };
     const val = calcDimensionValue(accum);
     if (val !== null) dimScores[s.dimensionId] = val;
   }
@@ -1387,10 +1419,19 @@ router.post('/submit-public', async (req: Request, res: Response) => {
     const scores = await db.select().from(dimensionScores).where(eq(dimensionScores.userId, userId));
 
     const dimScores: Record<number, number> = {};
+    const coherence: Record<number, string | null> = {};
     for (const s of scores) {
-      const accum: Accumulator = { sum: s.weightedSum, totalWeight: s.totalWeight, count: s.count };
+      const accum: Accumulator = {
+        sum: s.weightedSum,
+        totalWeight: s.totalWeight,
+        sumSquares: s.sumSquares,
+        count: s.count,
+      };
       const val = calcDimensionValue(accum);
-      if (val !== null) dimScores[s.dimensionId] = val;
+      if (val !== null) {
+        dimScores[s.dimensionId] = val;
+        coherence[s.dimensionId] = calcCoherence(accum);
+      }
     }
 
     if (Object.keys(dimScores).length < 5) {
@@ -1406,7 +1447,7 @@ router.post('/submit-public', async (req: Request, res: Response) => {
       sex: user.sex ?? '5',
       countryCode: user.countryCode ?? undefined,
       zipCode: user.zipCode ?? undefined,
-    });
+    }, coherence);
 
     const anonymousKey = deriveAnonymousKey(user.email);
 
@@ -1420,13 +1461,16 @@ router.post('/submit-public', async (req: Request, res: Response) => {
     const countryCode = dnaString.slice(8, 11);
     const zipCode = dnaString.slice(11, 16);
 
-    const beliefs = dnaString.slice(16);
+    // dnaString is V2: 16-char prefix + '-' + 248-char interleaved segment
+    // ([amp][coh] per dim × 124). Walk amplitudes only here — coherence is
+    // already stored separately on the dimension_scores rows.
+    const beliefSegment = dnaString.slice(17);
     const beliefValues: Record<string, number | null> = {};
     let dimensionsExplored = 0;
-    for (let j = 0; j < beliefs.length && j < 124; j++) {
-      const ch = beliefs[j];
+    for (let j = 0; j < 124; j++) {
+      const ch = beliefSegment[j * 2];
       const dimId = j + 4;
-      if (ch === '.') {
+      if (ch === undefined || ch === '\u00B7' || ch === '.') {
         beliefValues[String(dimId)] = null;
       } else {
         beliefValues[String(dimId)] = parseInt(ch);

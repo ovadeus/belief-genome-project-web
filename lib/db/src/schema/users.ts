@@ -54,6 +54,13 @@ export const dimensionScores = pgTable('dimension_scores', {
   dimensionId: integer('dimension_id').notNull(),
   weightedSum: real('weighted_sum').default(0).notNull(),
   totalWeight: real('total_weight').default(0).notNull(),
+  // sumSquares: Σ(directed_value^2 × effective_weight). Used to derive
+  // the per-dimension coherence letter (A–E) for V2 DNA signatures via
+  // weighted population variance: var = sumSquares/totalWeight − (sum/totalWeight)^2.
+  // Default 0 means "not yet measured" — calcCoherence treats variance ≤ 0
+  // as null (emits `·`) so stale rows never claim spurious settledness.
+  // Back-filled by scripts/backfill-sum-squares.ts (one-time, idempotent).
+  sumSquares:  real('sum_squares').default(0).notNull(),
   count:       integer('count').default(0).notNull(),
   lastUpdated: timestamp('last_updated').defaultNow().notNull(),
 }, (table) => [

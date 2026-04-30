@@ -69,7 +69,12 @@ router.get('/compare', async (req: Request, res: Response) => {
   const yourScores: Record<number, number> = {};
   const conf: Record<number, number> = {};
   for (const s of scores) {
-    const accum: Accumulator = { sum: s.weightedSum, totalWeight: s.totalWeight, count: s.count };
+    const accum: Accumulator = {
+      sum: s.weightedSum,
+      totalWeight: s.totalWeight,
+      sumSquares: s.sumSquares,
+      count: s.count,
+    };
     const val = calcDimensionValue(accum);
     if (val !== null) {
       yourScores[s.dimensionId] = val;

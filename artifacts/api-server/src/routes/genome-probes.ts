@@ -314,6 +314,7 @@ router.post('/respond', async (req: Request, res: Response) => {
         prevAcc[row.dimensionId] = {
           sum: row.weightedSum,
           totalWeight: row.totalWeight,
+          sumSquares: row.sumSquares,
           count: row.count,
         };
       }
@@ -348,6 +349,7 @@ router.post('/respond', async (req: Request, res: Response) => {
           await tx.update(dimensionScores).set({
             weightedSum: acc.sum,
             totalWeight: acc.totalWeight,
+            sumSquares: acc.sumSquares,
             count: acc.count,
             lastUpdated: new Date(),
           }).where(eq(dimensionScores.id, existing.id));
@@ -357,6 +359,7 @@ router.post('/respond', async (req: Request, res: Response) => {
             dimensionId: dimId,
             weightedSum: acc.sum,
             totalWeight: acc.totalWeight,
+            sumSquares: acc.sumSquares,
             count: acc.count,
           });
         }

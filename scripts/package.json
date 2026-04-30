@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "migrate:checksums": "tsx migrate-checksums-to-sha256.ts",
-    "migrate:checksums:dry": "tsx migrate-checksums-to-sha256.ts --dry-run"
+    "migrate:checksums:dry": "tsx migrate-checksums-to-sha256.ts --dry-run",
+    "backfill:sumsq": "tsx backfill-sum-squares.ts",
+    "backfill:sumsq:dry": "tsx backfill-sum-squares.ts --dry-run"
   },
   "dependencies": {
     "@workspace/db": "workspace:*",

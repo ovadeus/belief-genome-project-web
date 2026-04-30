@@ -1,20 +1,36 @@
-// Calculates the 140-character Belief DNA string from user responses
+// Calculates the V2 Belief DNA string from user responses
 // Pure domain logic — no framework dependencies
 import { DIMENSIONS } from './beliefDNA';
 
-// ── DNA String format (140 characters) ────────────────────────
-// Pos 0:      Century (0=1900s, 1=2000s)
-// Pos 1-2:    Birth year within century (00-99)
-// Pos 3-4:    Birth month (01-12)
-// Pos 5-6:    Birth day (01-31)
-// Pos 7:      Sex (0=F,1=M,2=Intersex,5=PNS,9=NB)
-// Pos 8-10:   Country code (ISO 3166-1 numeric, e.g. 840=US, 826=GB)
-// Pos 11-15:  Zip/postal code (5 chars, "00000" if unavailable)
-// Pos 16-139: 124 belief dimensions (0-9 each, ·=unresolved)
+// ── DNA String format ────────────────────────────────────────
+// 16-char demographic prefix (identical between V1 and V2):
+//   Pos 0:      Century (0=1900s, 1=2000s)
+//   Pos 1-2:    Birth year within century (00-99)
+//   Pos 3-4:    Birth month (01-12)
+//   Pos 5-6:    Birth day (01-31)
+//   Pos 7:      Sex (0=F,1=M,2=Intersex,5=PNS,9=NB)
+//   Pos 8-10:   Country code (ISO 3166-1 numeric, e.g. 840=US, 826=GB)
+//   Pos 11-15:  Zip/postal code (5 chars, "00000" if unavailable)
+//
+// V2 belief segment (248 chars): for each of 124 dimensions, two chars:
+//   amplitude `[0-9·]` (0-9 belief score, · if unresolved) followed by
+//   coherence `[A-E·]` (A=most internally conflicted, E=most settled,
+//   · when there isn't enough evidence to estimate variance).
+// Full V2 DNA string: 16-prefix + `-` + 248-segment = 265 chars.
+//
+// V1 (140 chars, no separator, amplitudes only) is still emitted by
+// `buildDNAStringV1` — kept for tests and any narrow back-compat case.
+
+const V2_SEPARATOR = '-';
 
 export interface Accumulator {
   sum: number;
   totalWeight: number;
+  // sumSquares: Σ(directed_value^2 × effective_weight). Powers the
+  // weighted-variance coherence calculation. Defaults to 0 on rows
+  // that pre-date V2 — calcCoherence returns null for variance ≤ 0
+  // so legacy rows surface as `·` until back-filled.
+  sumSquares: number;
   count: number;
 }
 
@@ -37,13 +53,18 @@ export interface DNAResult {
   dnaString: string;
   dimensionScores: Record<number, number>;
   confidence: Record<number, number>;
+  // coherence: per-dimension settled-ness letter ('A'..'E') derived from
+  // weighted answer variance. null when count < 3 or variance is degenerate.
+  // Encoded as `·` in the V2 DNA string when null.
+  coherence: Record<number, string | null>;
   totalResponses: number;
   dimensionsCovered: number;
   overallConfidence: number;
   generatedAt: string;
 }
 
-export function buildDNAString(dimensionScores: Record<number, number>, userMeta?: UserMeta): string {
+// Build the 16-char demographic prefix shared by V1 and V2.
+function buildDemographicPrefix(userMeta?: UserMeta): string {
   const meta = userMeta || {};
   const byRaw = meta.birthYear || '';
   const bmRaw = meta.birthMonth || '';
@@ -54,23 +75,61 @@ export function buildDNAString(dimensionScores: Record<number, number>, userMeta
   const birthDay = bdRaw ? String(parseInt(String(bdRaw))).padStart(2, '0') : '00';
   const sex = meta.sex ?? '5';
 
-  // Geographic identity — ISO 3166-1 numeric (3-digit)
   const countryRaw = meta.countryCode || '';
   const countryCode = countryRaw ? String(countryRaw).replace(/[^0-9]/g, '').slice(0, 3).padStart(3, '0') : '000';
   const zipRaw = meta.zipCode || '';
   const zipCode = zipRaw ? String(zipRaw).replace(/[^A-Za-z0-9]/g, '').slice(0, 5).padEnd(5, '0') : '00000';
 
+  return `${century}${birthYear}${birthMonth}${birthDay}${sex}${countryCode}${zipCode}`;
+}
+
+/**
+ * Build a V2 Belief DNA string (265 chars: 16-prefix + `-` + 248-segment).
+ * The segment interleaves amplitude (0-9 / `·`) and coherence (A-E / `·`)
+ * for each of 124 dimensions in canonical DIMENSIONS order. Missing
+ * coherence entries fall back to `·` so callers without coherence data
+ * still produce a structurally valid V2 string.
+ */
+export function buildDNAString(
+  dimensionScores: Record<number, number>,
+  userMeta?: UserMeta,
+  coherence?: Record<number, string | null>,
+): string {
+  const prefix = buildDemographicPrefix(userMeta);
+  const coh = coherence || {};
+
+  let segment = '';
+  for (const dim of DIMENSIONS) {
+    const score = dimensionScores[dim.id];
+    if (score !== undefined && score !== null) {
+      segment += Math.round(Math.min(9, Math.max(0, score))).toString();
+    } else {
+      segment += '\u00B7';
+    }
+    const c = coh[dim.id];
+    segment += (c && c >= 'A' && c <= 'E') ? c : '\u00B7';
+  }
+
+  return `${prefix}${V2_SEPARATOR}${segment}`;
+}
+
+/**
+ * Build the legacy V1 Belief DNA string (140 chars: 16-prefix + 124-segment,
+ * amplitudes only, no separator). Kept for explicit tests and any narrow
+ * back-compat use case. Production paths emit V2 via `buildDNAString`.
+ */
+export function buildDNAStringV1(dimensionScores: Record<number, number>, userMeta?: UserMeta): string {
+  const prefix = buildDemographicPrefix(userMeta);
   let belief = '';
   for (const dim of DIMENSIONS) {
     const score = dimensionScores[dim.id];
     if (score !== undefined && score !== null) {
       belief += Math.round(Math.min(9, Math.max(0, score))).toString();
     } else {
-      belief += '\u00B7'; // · untrained — superposition state
+      belief += '\u00B7';
     }
   }
-
-  return `${century}${birthYear}${birthMonth}${birthDay}${sex}${countryCode}${zipCode}${belief}`;
+  return `${prefix}${belief}`;
 }
 
 export function updateDimensionScores(
@@ -83,7 +142,10 @@ export function updateDimensionScores(
   for (const [dimIdStr, wt] of Object.entries(weights)) {
     const dimId = parseInt(dimIdStr);
     if (!scores[dimId]) {
-      scores[dimId] = { sum: 0, totalWeight: 0, count: 0 };
+      scores[dimId] = { sum: 0, totalWeight: 0, sumSquares: 0, count: 0 };
+    } else if (scores[dimId].sumSquares === undefined) {
+      // Defensive: rehydrate legacy accumulator shape from older snapshots.
+      scores[dimId].sumSquares = 0;
     }
     // Convert 0-1 response value to -1 to +1 range
     const normalized = (response.value * 2) - 1;
@@ -92,6 +154,7 @@ export function updateDimensionScores(
     const effectiveW = wt.weight * qualityMult;
 
     scores[dimId].sum += directed * effectiveW;
+    scores[dimId].sumSquares += directed * directed * effectiveW;
     scores[dimId].totalWeight += effectiveW;
     scores[dimId].count += 1;
   }
@@ -149,7 +212,9 @@ export function applyResponseToScores(
     const confidenceBefore = calcConfidence(beforeAcc);
 
     if (!next[dimId]) {
-      next[dimId] = { sum: 0, totalWeight: 0, count: 0 };
+      next[dimId] = { sum: 0, totalWeight: 0, sumSquares: 0, count: 0 };
+    } else if (next[dimId].sumSquares === undefined) {
+      next[dimId].sumSquares = 0;
     }
     const normalized = (response.value * 2) - 1;
     const directed = normalized * (wt.direction || 1);
@@ -157,6 +222,7 @@ export function applyResponseToScores(
     const effectiveW = (wt.weight ?? 0) * qualityMult;
 
     next[dimId].sum += directed * effectiveW;
+    next[dimId].sumSquares += directed * directed * effectiveW;
     next[dimId].totalWeight += effectiveW;
     next[dimId].count += 1;
 
@@ -188,6 +254,52 @@ export function calcConfidence(accumulator: Accumulator | null): number {
   return Math.round((coverage * 0.3 + weight * 0.4 + consistency * 0.3) * 100);
 }
 
+/**
+ * Per-dimension coherence letter for V2 DNA. Measures **how internally
+ * consistent** the user's answers within this dimension have been —
+ * NOT the same as confidence (which measures evidence amount).
+ *
+ *   E = std < 0.10 (very settled, near-identical answers)
+ *   D = std < 0.20
+ *   C = std < 0.32
+ *   B = std < 0.45
+ *   A = std ≥ 0.45 (most internally conflicted)
+ *   null = insufficient evidence OR stale/unmigrated row
+ *
+ * Std is on the directed-and-weighted answer space (range −1..+1, so
+ * a std of ~0.50 already means answers cover most of the spectrum).
+ *
+ * Stale-row detection: any genuine accumulation with non-zero `sum`
+ * must produce non-zero `sumSquares` (since both come from the same
+ * directed values). The `sumSquares===0 && sum!==0` shape can ONLY
+ * occur on pre-V2 rows that were never back-filled — those return
+ * null. Rows with `sum===0 && sumSquares===0` are either fully
+ * mid-slider answers (perfectly settled at neutral, 'E' is correct)
+ * or genuinely empty — distinguishing those is impossible without
+ * out-of-band metadata, but the count<3 floor catches the empty
+ * case in practice.
+ *
+ * Floating-point cancellation can make variance go slightly negative
+ * for near-identical answers — `Math.max(0, …)` clamps that so
+ * std=0 → 'E' rather than NaN.
+ */
+export function calcCoherence(accumulator: Accumulator | null): string | null {
+  if (!accumulator || accumulator.count < 3 || accumulator.totalWeight === 0) return null;
+  const ss = accumulator.sumSquares ?? 0;
+  // Stale-row marker: real accumulations of non-zero directed values
+  // always produce sumSquares > 0. sumSquares===0 with sum!==0 means
+  // the row predates V2 and was not back-filled → emit · (unknown).
+  if (ss === 0 && accumulator.sum !== 0) return null;
+  const mean = accumulator.sum / accumulator.totalWeight;
+  const variance = Math.max(0, ss / accumulator.totalWeight - mean * mean);
+  const std = Math.sqrt(variance);
+  if (std < 0.10) return 'E';
+  if (std < 0.20) return 'D';
+  if (std < 0.32) return 'C';
+  if (std < 0.45) return 'B';
+  return 'A';
+}
+
 export function rebuildDNA(beliefHistory: BeliefHistoryEntry[], userMeta?: UserMeta): DNAResult {
   let accumScores: Record<number, Accumulator> = {};
 
@@ -199,21 +311,25 @@ export function rebuildDNA(beliefHistory: BeliefHistoryEntry[], userMeta?: UserM
 
   const dimensionScores: Record<number, number> = {};
   const confidence: Record<number, number> = {};
+  const coherence: Record<number, string | null> = {};
   for (const [dimId, accum] of Object.entries(accumScores)) {
     const val = calcDimensionValue(accum);
     if (val !== null) {
-      dimensionScores[parseInt(dimId)] = val;
-      confidence[parseInt(dimId)] = calcConfidence(accum);
+      const id = parseInt(dimId);
+      dimensionScores[id] = val;
+      confidence[id] = calcConfidence(accum);
+      coherence[id] = calcCoherence(accum);
     }
   }
 
-  const dnaString = buildDNAString(dimensionScores, userMeta);
+  const dnaString = buildDNAString(dimensionScores, userMeta, coherence);
   const confValues = Object.values(confidence);
 
   return {
     dnaString,
     dimensionScores,
     confidence,
+    coherence,
     totalResponses: beliefHistory.length,
     dimensionsCovered: Object.keys(dimensionScores).length,
     overallConfidence: confValues.length
