@@ -1,5 +1,5 @@
 // Belief Genome registration page — styled to match BGP Admin login aesthetic
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation } from 'wouter';
 import { useGenomeAuth } from '../../components/genome/GenomeAuthContext';
 
@@ -26,6 +26,21 @@ export default function RegisterPage() {
   const [confirm, setConfirm] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // If the user just submitted the consent form on the marketing site, the
+  // email they entered there is handed to us via per-tab storage. Pre-fill it
+  // and immediately clear the slot so it can't be re-read later.
+  useEffect(() => {
+    try {
+      const handoff = sessionStorage.getItem('bgp:consentEmail');
+      if (handoff) {
+        setEmail(handoff);
+        sessionStorage.removeItem('bgp:consentEmail');
+      }
+    } catch {
+      // sessionStorage may be unavailable (private mode); skip silently.
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

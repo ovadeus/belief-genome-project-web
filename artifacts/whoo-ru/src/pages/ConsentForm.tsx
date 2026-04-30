@@ -21,7 +21,19 @@ export default function ConsentForm() {
 
   const createConsent = useCreateConsent({
     mutation: {
-      onSuccess: (res) => {
+      onSuccess: (res, variables) => {
+        // Hand the email off to the registration page via per-tab storage
+        // (same origin, never appears in URL or server logs). The register
+        // page reads it once on mount and clears it.
+        try {
+          const submittedEmail = (variables as any)?.data?.email;
+          if (submittedEmail) {
+            sessionStorage.setItem("bgp:consentEmail", submittedEmail);
+          }
+        } catch {
+          // sessionStorage may be unavailable (private mode, etc.) — silently
+          // skip the prefill; the user can still type their email.
+        }
         setConfirmation(
           (res?.message || "Thank you. Your consent has been recorded.") +
             " Taking you to the registration page…",
