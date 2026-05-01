@@ -37,10 +37,15 @@ router.get('/dna', async (req: Request, res: Response) => {
   // (that is internal answer-scatter QC); the user-facing A–E letters come
   // from atan2 over framing-pair residuals. Dimensions that have no completed
   // pair yet are reported as '·' by buildCoherenceMap.
+  // Deterministic ordering: same input order across runs → same first-seen
+  // canonical+inverted pairing inside calcPhaseEstimates. Matters when a
+  // user has answered the same probe more than once (allowed: unique
+  // constraint is on (user_id, client_id), not on probe_text).
   const allResponses = await db
     .select({ value: beliefResponses.value, probeV2: beliefResponses.probeV2 })
     .from(beliefResponses)
-    .where(eq(beliefResponses.userId, userId));
+    .where(eq(beliefResponses.userId, userId))
+    .orderBy(beliefResponses.createdAt, beliefResponses.id);
   const coherence = buildCoherenceMap(
     allResponses.map(r => ({ value: r.value, probeV2: r.probeV2 as ProbeV2Meta | null })),
   );
@@ -1144,7 +1149,7 @@ router.get('/timeline', async (req: Request, res: Response) => {
     })
     .from(beliefResponses)
     .where(eq(beliefResponses.userId, userId))
-    .orderBy(beliefResponses.createdAt);
+    .orderBy(beliefResponses.createdAt, beliefResponses.id);
 
   const [user] = await db.select().from(users).where(eq(users.id, userId));
 
@@ -1462,11 +1467,14 @@ router.post('/submit-public', async (req: Request, res: Response) => {
 
     // Phase-residual coherence — fetch the V2-aware history and let
     // buildCoherenceMap derive the A–E letters that get baked into the
-    // public signature.
+    // public signature. Deterministic ordering ensures the public serial
+    // is bit-stable across re-mints when the user has duplicate answers
+    // for the same probe.
     const allResponses = await db
       .select({ value: beliefResponses.value, probeV2: beliefResponses.probeV2 })
       .from(beliefResponses)
-      .where(eq(beliefResponses.userId, userId));
+      .where(eq(beliefResponses.userId, userId))
+      .orderBy(beliefResponses.createdAt, beliefResponses.id);
     const coherence = buildCoherenceMap(
       allResponses.map(r => ({ value: r.value, probeV2: r.probeV2 as ProbeV2Meta | null })),
     );

@@ -9,7 +9,9 @@
     "backfill:sumsq": "tsx backfill-sum-squares.ts",
     "backfill:sumsq:dry": "tsx backfill-sum-squares.ts --dry-run",
     "backfill:probev2": "tsx backfill-probe-v2.ts",
-    "backfill:probev2:dry": "tsx backfill-probe-v2.ts --dry-run"
+    "backfill:probev2:dry": "tsx backfill-probe-v2.ts --dry-run",
+    "migrate:probev2": "tsx migrate-add-probe-v2-columns.ts",
+    "migrate:probev2:dry": "tsx migrate-add-probe-v2-columns.ts --dry-run"
   },
   "dependencies": {
     "@workspace/db": "workspace:*",
