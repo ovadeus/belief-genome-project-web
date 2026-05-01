@@ -1,0 +1,13 @@
+{
+  "version": "placeholder-v1",
+  "computed_at": null,
+  "calibration_n": 0,
+  "method": "equal_bins",
+  "method_description": "Equal-width bins on [0, π]. Placeholder until empirical calibration data is collected.",
+  "pooled": {
+    "labels":  ["A", "B", "C", "D", "E"],
+    "cutoffs": [0.6283185307179586, 1.2566370614359172, 1.8849555921538759, 2.5132741228718345, 3.141592653589793],
+    "cutoffs_description": "Upper bound (exclusive) of |phi| for each grade."
+  },
+  "per_dim": null
+}

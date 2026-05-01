@@ -1,6 +1,10 @@
 // Calculates the V2 Belief DNA string from user responses
 // Pure domain logic — no framework dependencies
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
 import { DIMENSIONS } from './beliefDNA';
+import type { ProbeV2Meta } from './probeBankV2';
 
 // ── DNA String format ────────────────────────────────────────
 // 16-char demographic prefix (identical between V1 and V2):
@@ -14,8 +18,14 @@ import { DIMENSIONS } from './beliefDNA';
 //
 // V2 belief segment (248 chars): for each of 124 dimensions, two chars:
 //   amplitude `[0-9·]` (0-9 belief score, · if unresolved) followed by
-//   coherence `[A-E·]` (A=most internally conflicted, E=most settled,
-//   · when there isn't enough evidence to estimate variance).
+//   coherence `[A-E·]`.
+//
+// Coherence (canonical V2 definition — phase-residual within framing pairs):
+//   A = lowest |φ| bucket (most coherent — answers to a probe and its
+//       opposite-framed twin are mirror images)
+//   E = highest |φ| bucket (least coherent — answers contradict their twin)
+//   · = no fully-observed framing pair on this dim yet
+//
 // Full V2 DNA string: 16-prefix + `-` + 248-segment = 265 chars.
 //
 // V1 (140 chars, no separator, amplitudes only) is still emitted by
@@ -47,6 +57,10 @@ export interface BeliefHistoryEntry {
   value: number;
   dimensionWeights: Record<string, { direction: number; weight: number }>;
   quality?: { weight?: number };
+  // V2 framing-pair metadata. Present when the response was elicited by a
+  // probe from probeBankV2.json. Required for phase-residual coherence
+  // recovery; absent rows contribute amplitude only (correct per spec).
+  probeV2?: ProbeV2Meta | null;
 }
 
 export interface DNAResult {
@@ -255,33 +269,22 @@ export function calcConfidence(accumulator: Accumulator | null): number {
 }
 
 /**
- * Per-dimension coherence letter for V2 DNA. Measures **how internally
- * consistent** the user's answers within this dimension have been —
- * NOT the same as confidence (which measures evidence amount).
+ * INTERNAL QC ONLY — "answer scatter" / response variance per dimension.
  *
- *   E = std < 0.10 (very settled, near-identical answers)
- *   D = std < 0.20
- *   C = std < 0.32
- *   B = std < 0.45
- *   A = std ≥ 0.45 (most internally conflicted)
- *   null = insufficient evidence OR stale/unmigrated row
+ * **NOT used for the published V2 coherence character.** The canonical V2
+ * coherence is phase-residual within framing pairs (see `calcPhaseEstimates`
+ * + `gradeCoherence`); this function measures something different: how
+ * tightly clustered the user's directed-and-weighted answer values are
+ * within a dimension. Useful for admin/QC pages that want to surface
+ * "settled near one value vs. scattered across the spectrum," but it is
+ * orthogonal to the phase-residual signal.
  *
- * Std is on the directed-and-weighted answer space (range −1..+1, so
- * a std of ~0.50 already means answers cover most of the spectrum).
+ * Bucket boundaries (DEPRECATED for serial emission):
+ *   E = std < 0.10  D = std < 0.20  C = std < 0.32  B = std < 0.45  A ≥ 0.45
+ *   null = count < 3 OR totalWeight === 0 OR stale (sumSquares=0, sum≠0)
  *
- * Stale-row detection: any genuine accumulation with non-zero `sum`
- * must produce non-zero `sumSquares` (since both come from the same
- * directed values). The `sumSquares===0 && sum!==0` shape can ONLY
- * occur on pre-V2 rows that were never back-filled — those return
- * null. Rows with `sum===0 && sumSquares===0` are either fully
- * mid-slider answers (perfectly settled at neutral, 'E' is correct)
- * or genuinely empty — distinguishing those is impossible without
- * out-of-band metadata, but the count<3 floor catches the empty
- * case in practice.
- *
- * Floating-point cancellation can make variance go slightly negative
- * for near-identical answers — `Math.max(0, …)` clamps that so
- * std=0 → 'E' rather than NaN.
+ * Floating-point cancellation can make variance go slightly negative for
+ * near-identical answers — `Math.max(0, …)` clamps that.
  */
 export function calcCoherence(accumulator: Accumulator | null): string | null {
   if (!accumulator || accumulator.count < 3 || accumulator.totalWeight === 0) return null;
@@ -300,6 +303,164 @@ export function calcCoherence(accumulator: Accumulator | null): string | null {
   return 'A';
 }
 
+// ── Phase-residual coherence (canonical V2 definition) ─────────────
+//
+// Mirrored verbatim from the desktop's src/agents/dnaCalculator.js. For each
+// dimension d, group the user's responses by framing pair, keep only pairs
+// where BOTH the canonical and inverted probe were answered, and compute:
+//
+//   φ_d  =  atan2( Σ (r_C - r_I_flipped) * w ,  Σ (r_C + r_I_flipped) * w )
+//
+// where r_C and r_I are responses normalised to [-1, +1], r_I_flipped = -r_I,
+// and w is the average expected_loading of the two probes in the pair. The
+// magnitude is the relative vector length on [0, 1], used as a confidence
+// proxy. Pairs with only one half answered are skipped.
+
+export interface PhaseEstimate {
+  phase: number | null;     // radians ∈ (-π, π], or null if no completed pair
+  magnitude: number;        // [0, 1], confidence proxy
+  pairs_observed: number;   // count of pairs with BOTH halves answered
+}
+
+export function calcPhaseEstimates(
+  responses: ReadonlyArray<Pick<BeliefHistoryEntry, 'value' | 'probeV2'>>,
+): Record<number, PhaseEstimate> {
+  // dim → pair_id → orientation → { value, loading }
+  const byDim: Record<number, Record<string, Record<string, { value: number; loading: number }>>> = {};
+  for (const r of responses) {
+    const meta = r.probeV2;
+    if (!meta || meta.primary_dim == null || !meta.pair_id) continue;
+    const dim = meta.primary_dim;
+    if (!byDim[dim])               byDim[dim]               = {};
+    if (!byDim[dim][meta.pair_id]) byDim[dim][meta.pair_id] = {};
+    byDim[dim][meta.pair_id][meta.orientation] = {
+      value:   r.value,
+      loading: meta.expected_loading || 1.0,
+    };
+  }
+
+  const out: Record<number, PhaseEstimate> = {};
+  for (const [dimStr, pairs] of Object.entries(byDim)) {
+    const dim = parseInt(dimStr);
+    let sumDiff = 0;
+    let sumSum  = 0;
+    let pairsObserved = 0;
+    let maxPossible   = 0;
+
+    for (const pair of Object.values(pairs)) {
+      const c = pair.canonical;
+      const i = pair.inverted;
+      if (!c || !i) continue;
+
+      const rC        = (c.value * 2) - 1;     // [0,1] → [-1,+1]
+      const rI        = (i.value * 2) - 1;
+      const rIflipped = -rI;
+      const loading   = (c.loading + i.loading) / 2;
+
+      sumDiff     += (rC - rIflipped) * loading;
+      sumSum      += (rC + rIflipped) * loading;
+      maxPossible += 2 * loading;
+      pairsObserved++;
+    }
+
+    if (pairsObserved < 1) {
+      out[dim] = { phase: null, magnitude: 0, pairs_observed: 0 };
+      continue;
+    }
+
+    const phase     = Math.atan2(sumDiff, sumSum || 1e-9);
+    const magnitude = Math.min(
+      Math.sqrt(sumDiff * sumDiff + sumSum * sumSum) / Math.max(maxPossible, 1e-9),
+      1,
+    );
+
+    out[dim] = { phase, magnitude, pairs_observed: pairsObserved };
+  }
+  return out;
+}
+
+// ── Cutoffs + A-E grade ─────────────────────────────────────────────
+
+interface CutoffsBin { grade: string; max: number; }
+interface CutoffsConfig {
+  pooled: CutoffsBin[];
+  per_dim: Record<string, CutoffsBin[]> | null;
+}
+
+let _cutoffsCache: CutoffsConfig | null = null;
+
+function reshapeBins(labels: string[], cutoffs: number[]): CutoffsBin[] {
+  return labels.map((g, i) => ({ grade: g, max: cutoffs[i] }));
+}
+
+export function loadCoherenceCutoffs(): CutoffsConfig {
+  if (_cutoffsCache) return _cutoffsCache;
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = dirname(__filename);
+  const path = join(__dirname, 'coherenceCutoffs.json');
+  const raw = JSON.parse(readFileSync(path, 'utf8')) as {
+    pooled:  { labels: string[]; cutoffs: number[] };
+    per_dim: Record<string, { labels: string[]; cutoffs: number[] }> | null;
+  };
+  const cfg: CutoffsConfig = {
+    pooled:  reshapeBins(raw.pooled.labels, raw.pooled.cutoffs),
+    per_dim: raw.per_dim
+      ? Object.fromEntries(
+          Object.entries(raw.per_dim).map(([k, v]) => [k, reshapeBins(v.labels, v.cutoffs)]),
+        )
+      : null,
+  };
+  _cutoffsCache = cfg;
+  return cfg;
+}
+
+/**
+ * Map a phase value (radians, possibly negative) to an A–E grade.
+ *
+ *   A = lowest |φ| bucket (most coherent — answers mirror their twin)
+ *   E = highest |φ| bucket (least coherent)
+ *   '·' when phase is null/NaN (no completed framing pair on this dim).
+ *
+ * A–E direction matches the desktop / Brief / Frontiers paper canonically.
+ * Cutoffs come from coherenceCutoffs.json so they can be replaced after
+ * empirical calibration without a code change.
+ */
+export function gradeCoherence(
+  phaseValue: number | null | undefined,
+  opts: { dimId?: number } = {},
+): string {
+  if (phaseValue == null || Number.isNaN(phaseValue)) return '\u00B7';
+  const mag = Math.abs(phaseValue);
+
+  const cfg = loadCoherenceCutoffs();
+  const dimId = opts.dimId != null ? String(opts.dimId) : null;
+  const bins  = (dimId && cfg.per_dim && cfg.per_dim[dimId])
+    ? cfg.per_dim[dimId]
+    : cfg.pooled;
+
+  for (const b of bins) {
+    if (mag < b.max) return b.grade;
+  }
+  return bins[bins.length - 1].grade;
+}
+
+/**
+ * Build the per-dimension coherence map (dim id → 'A'..'E' or null) from a
+ * response history. Convenience wrapper around `calcPhaseEstimates` +
+ * `gradeCoherence` used by both `rebuildDNA` and the genome-data mint paths.
+ */
+export function buildCoherenceMap(
+  responses: ReadonlyArray<Pick<BeliefHistoryEntry, 'value' | 'probeV2'>>,
+): Record<number, string | null> {
+  const phases = calcPhaseEstimates(responses);
+  const out: Record<number, string | null> = {};
+  for (const [dimStr, est] of Object.entries(phases)) {
+    const dimId = parseInt(dimStr);
+    out[dimId] = est.phase == null ? null : gradeCoherence(est.phase, { dimId });
+  }
+  return out;
+}
+
 export function rebuildDNA(beliefHistory: BeliefHistoryEntry[], userMeta?: UserMeta): DNAResult {
   let accumScores: Record<number, Accumulator> = {};
 
@@ -311,16 +472,19 @@ export function rebuildDNA(beliefHistory: BeliefHistoryEntry[], userMeta?: UserM
 
   const dimensionScores: Record<number, number> = {};
   const confidence: Record<number, number> = {};
-  const coherence: Record<number, string | null> = {};
   for (const [dimId, accum] of Object.entries(accumScores)) {
     const val = calcDimensionValue(accum);
     if (val !== null) {
       const id = parseInt(dimId);
       dimensionScores[id] = val;
       confidence[id] = calcConfidence(accum);
-      coherence[id] = calcCoherence(accum);
     }
   }
+
+  // Coherence comes from phase residual over framing pairs — independent of
+  // the amplitude accumulator. Dims with no fully-observed pair get null
+  // (rendered as '·' in the serial).
+  const coherence = buildCoherenceMap(beliefHistory);
 
   const dnaString = buildDNAString(dimensionScores, userMeta, coherence);
   const confValues = Object.values(confidence);

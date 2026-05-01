@@ -7,8 +7,17 @@ import { db } from '@workspace/db';
 import { users, beliefResponses, dimensionScores, dnaSnapshots, genomeSubmissions, genomeAnalyses, beliefLineage } from '@workspace/db/schema';
 import { eq, and, gte, desc, sql } from 'drizzle-orm';
 import { DIMENSIONS, CATEGORIES } from '@belief-genome/engine';
-import { buildDNAString, calcDimensionValue, calcConfidence, calcCoherence, applyResponseToScores } from '@belief-genome/engine';
-import type { Accumulator } from '@belief-genome/engine';
+import {
+  buildDNAString, calcDimensionValue, calcConfidence,
+  applyResponseToScores,
+  // calcCoherence (std-based) is intentionally NOT imported here — it is
+  // retained in the engine as an internal QC metric ("answer scatter") but
+  // is no longer published as the user-facing coherence letter. The web app
+  // mints A–E coherence the same way the desktop / Frontiers paper does:
+  // phase residual within framing pairs (V2 probe metadata).
+  buildCoherenceMap, calcPhaseEstimates, gradeCoherence,
+} from '@belief-genome/engine';
+import type { Accumulator, ProbeV2Meta } from '@belief-genome/engine';
 
 const router = Router();
 
@@ -23,9 +32,21 @@ router.get('/dna', async (req: Request, res: Response) => {
   // Get all dimension scores
   const scores = await db.select().from(dimensionScores).where(eq(dimensionScores.userId, userId));
 
+  // Pull every response (with V2 metadata) so we can compute phase-residual
+  // coherence per dimension. Coherence is no longer derived from `sumSquares`
+  // (that is internal answer-scatter QC); the user-facing A–E letters come
+  // from atan2 over framing-pair residuals. Dimensions that have no completed
+  // pair yet are reported as '·' by buildCoherenceMap.
+  const allResponses = await db
+    .select({ value: beliefResponses.value, probeV2: beliefResponses.probeV2 })
+    .from(beliefResponses)
+    .where(eq(beliefResponses.userId, userId));
+  const coherence = buildCoherenceMap(
+    allResponses.map(r => ({ value: r.value, probeV2: r.probeV2 as ProbeV2Meta | null })),
+  );
+
   const dimScores: Record<number, number> = {};
   const confidence: Record<number, number> = {};
-  const coherence: Record<number, string | null> = {};
 
   for (const s of scores) {
     const accum: Accumulator = {
@@ -38,7 +59,9 @@ router.get('/dna', async (req: Request, res: Response) => {
     if (val !== null) {
       dimScores[s.dimensionId] = val;
       confidence[s.dimensionId] = calcConfidence(accum);
-      coherence[s.dimensionId] = calcCoherence(accum);
+      // Ensure every scored dim has at least a '·' placeholder so the DNA
+      // serial has a coherence char in every cell that has a value.
+      if (!(s.dimensionId in coherence)) coherence[s.dimensionId] = null;
     }
   }
 
@@ -571,6 +594,7 @@ router.post('/analyze', async (req: Request, res: Response) => {
       value: beliefResponses.value,
       dimensionWeights: beliefResponses.dimensionWeights,
       quality: beliefResponses.quality,
+      probeV2: beliefResponses.probeV2,
     })
     .from(beliefResponses)
     .where(eq(beliefResponses.userId, userId))
@@ -621,7 +645,11 @@ router.post('/analyze', async (req: Request, res: Response) => {
   const [user] = await db.select().from(users).where(eq(users.id, userId));
   const dimScores: Record<number, number> = {};
   const confidence: Record<number, number> = {};
-  const coherence: Record<number, string | null> = {};
+
+  // Phase-residual coherence over the full reply history (V2 metadata).
+  const coherence = buildCoherenceMap(
+    responses.map(r => ({ value: r.value, probeV2: r.probeV2 as ProbeV2Meta | null })),
+  );
 
   for (const [dimIdStr, accum] of Object.entries(accumulators)) {
     const dimId = parseInt(dimIdStr);
@@ -629,7 +657,7 @@ router.post('/analyze', async (req: Request, res: Response) => {
     if (val !== null) {
       dimScores[dimId] = val;
       confidence[dimId] = calcConfidence(accum);
-      coherence[dimId] = calcCoherence(accum);
+      if (!(dimId in coherence)) coherence[dimId] = null;
     }
   }
 
@@ -1111,6 +1139,7 @@ router.get('/timeline', async (req: Request, res: Response) => {
       dimensionWeights: beliefResponses.dimensionWeights,
       quality: beliefResponses.quality,
       value: beliefResponses.value,
+      probeV2: beliefResponses.probeV2,
       createdAt: beliefResponses.createdAt,
     })
     .from(beliefResponses)
@@ -1176,6 +1205,11 @@ router.get('/timeline', async (req: Request, res: Response) => {
   let lastBucketCumulative = 0;
   const buckets: any[] = [];
 
+  // Running list of (value, probeV2) for phase-residual coherence — grows as
+  // we consume responses, so each bucket snapshot reflects coherence as of
+  // that boundary in time.
+  const historyForCoherence: Array<{ value: number; probeV2: ProbeV2Meta | null }> = [];
+
   for (const boundary of boundaries) {
     let newInBucket = 0;
     while (respIdx < responses.length && (responses[respIdx].createdAt as Date).getTime() <= boundary) {
@@ -1195,6 +1229,10 @@ router.get('/timeline', async (req: Request, res: Response) => {
         accum[dimId].totalWeight += effectiveW;
         accum[dimId].count += 1;
       }
+      historyForCoherence.push({
+        value: r.value,
+        probeV2: (r.probeV2 as ProbeV2Meta | null) ?? null,
+      });
       respIdx++;
       cumulative++;
       newInBucket++;
@@ -1206,17 +1244,21 @@ router.get('/timeline', async (req: Request, res: Response) => {
       continue;
     }
 
+    // Phase-residual coherence as of this boundary.
+    const phaseCoherence = buildCoherenceMap(historyForCoherence);
+
     const dimensionScores: Record<number, number | null> = {};
     const confidenceMap: Record<number, number> = {};
     const coherenceMap: Record<number, string | null> = {};
     let confSum = 0, confCount = 0;
     for (const [dimIdStr, a] of Object.entries(accum)) {
+      const dimIdNum = parseInt(dimIdStr, 10);
       const v = calcDimensionValue(a as any);
       const c = calcConfidence(a as any);
-      dimensionScores[parseInt(dimIdStr, 10)] = v;
+      dimensionScores[dimIdNum] = v;
       if (v !== null) {
-        confidenceMap[parseInt(dimIdStr, 10)] = c;
-        coherenceMap[parseInt(dimIdStr, 10)] = calcCoherence(a as any);
+        confidenceMap[dimIdNum] = c;
+        coherenceMap[dimIdNum] = phaseCoherence[dimIdNum] ?? null;
         confSum += c;
         confCount++;
       }
@@ -1418,8 +1460,18 @@ router.post('/submit-public', async (req: Request, res: Response) => {
 
     const scores = await db.select().from(dimensionScores).where(eq(dimensionScores.userId, userId));
 
+    // Phase-residual coherence — fetch the V2-aware history and let
+    // buildCoherenceMap derive the A–E letters that get baked into the
+    // public signature.
+    const allResponses = await db
+      .select({ value: beliefResponses.value, probeV2: beliefResponses.probeV2 })
+      .from(beliefResponses)
+      .where(eq(beliefResponses.userId, userId));
+    const coherence = buildCoherenceMap(
+      allResponses.map(r => ({ value: r.value, probeV2: r.probeV2 as ProbeV2Meta | null })),
+    );
+
     const dimScores: Record<number, number> = {};
-    const coherence: Record<number, string | null> = {};
     for (const s of scores) {
       const accum: Accumulator = {
         sum: s.weightedSum,
@@ -1430,7 +1482,7 @@ router.post('/submit-public', async (req: Request, res: Response) => {
       const val = calcDimensionValue(accum);
       if (val !== null) {
         dimScores[s.dimensionId] = val;
-        coherence[s.dimensionId] = calcCoherence(accum);
+        if (!(s.dimensionId in coherence)) coherence[s.dimensionId] = null;
       }
     }
 

@@ -7,7 +7,9 @@
     "migrate:checksums": "tsx migrate-checksums-to-sha256.ts",
     "migrate:checksums:dry": "tsx migrate-checksums-to-sha256.ts --dry-run",
     "backfill:sumsq": "tsx backfill-sum-squares.ts",
-    "backfill:sumsq:dry": "tsx backfill-sum-squares.ts --dry-run"
+    "backfill:sumsq:dry": "tsx backfill-sum-squares.ts --dry-run",
+    "backfill:probev2": "tsx backfill-probe-v2.ts",
+    "backfill:probev2:dry": "tsx backfill-probe-v2.ts --dry-run"
   },
   "dependencies": {
     "@workspace/db": "workspace:*",

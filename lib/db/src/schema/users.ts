@@ -1,7 +1,21 @@
 // Belief Genome users — separate from admin auth
 // Add to lib/db/src/schema/ alongside blog.ts, subscribers.ts, etc.
 
-import { pgTable, text, serial, integer, real, boolean, timestamp, json, uniqueIndex, index } from 'drizzle-orm/pg-core';
+import { pgTable, text, serial, integer, real, boolean, timestamp, json, jsonb, uniqueIndex, index } from 'drizzle-orm/pg-core';
+
+// Narrow V2 framing-pair metadata persisted on probes (queue) + belief_responses.
+// Mirrors the desktop's `probeV2` shape — see lib/belief-engine/src/probeBankV2.ts
+// for the canonical definition. Nullable: rows that pre-date V2 or originated
+// from a non-V2 source (legacy bank, news feed) carry null and contribute to
+// amplitude only — phase recovery skips them, which is correct per spec.
+type ProbeV2Persisted = {
+  id: string;
+  primary_dim: number;
+  pair_id: string;
+  orientation: 'canonical' | 'inverted';
+  expected_loading: number;
+  pair_partner_id: string;
+};
 
 export const users = pgTable('users', {
   id:           serial('id').primaryKey(),
@@ -30,6 +44,10 @@ export const beliefResponses = pgTable('belief_responses', {
   value:            real('value').notNull(),
   confidence:       integer('confidence').default(50),
   note:             text('note'),
+  // V2 framing-pair metadata. Populated when this response was elicited by
+  // a probe from probeBankV2.json. Required for phase-residual coherence
+  // recovery; rows with null contribute to amplitude only (correct per spec).
+  probeV2:          jsonb('probe_v2').$type<ProbeV2Persisted | null>(),
   createdAt:        timestamp('created_at').defaultNow().notNull(),
 }, (table) => [
   uniqueIndex('belief_responses_user_client_idx').on(table.userId, table.clientId),
@@ -45,6 +63,10 @@ export const probes = pgTable('probes', {
   quality:          json('quality').notNull(),
   delivered:        boolean('delivered').default(false),
   deliveredAt:      timestamp('delivered_at'),
+  // V2 framing-pair metadata captured at queue time so it can be propagated
+  // to the matching belief_responses row when the user answers. Null for
+  // probes from the legacy bank or news feed.
+  probeV2:          jsonb('probe_v2').$type<ProbeV2Persisted | null>(),
   createdAt:        timestamp('created_at').defaultNow().notNull(),
 });
 

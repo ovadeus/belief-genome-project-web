@@ -13,6 +13,11 @@ import {
   getProbeFromBank, pickCategory, getProbeForDimension,
 } from '@belief-genome/engine';
 import { fetchNewsProbes } from '@belief-genome/engine';
+import {
+  PROBE_BANK_V2, pickV2ProbeExcluding, extractProbeV2Meta,
+  buildDimensionWeightsV2, getProbeV2ByText,
+} from '@belief-genome/engine';
+import type { ProbeV2Meta } from '@belief-genome/engine';
 
 const router = Router();
 
@@ -37,6 +42,10 @@ async function queueStats(userId: number) {
   };
 }
 
+// Refill the bank-queue from probeBankV2.json. Each queued row carries the
+// V2 framing-pair metadata so phase-residual coherence can be recovered when
+// the user answers. The legacy PROBE_BANK is no longer used for refill —
+// only V2 probes give us the pair_id / orientation that coherence needs.
 async function refillBank(userId: number) {
   const stats = await queueStats(userId);
   const count = QUEUE_TARGETS.bank - stats.bank;
@@ -50,27 +59,36 @@ async function refillBank(userId: number) {
     .select({ text: probes.statement })
     .from(probes)
     .where(eq(probes.userId, userId));
-  const existingTexts = [...usedResponses.map(r => r.text), ...queuedProbes.map(p => p.text)];
+  const excludeTexts = new Set<string>([
+    ...usedResponses.map(r => r.text),
+    ...queuedProbes.map(p => p.text),
+  ]);
 
-  const cats = Object.keys(PROBE_BANK);
-  let catIdx = 0;
   let added = 0;
-
   for (let i = 0; i < count; i++) {
-    const cat = cats[catIdx % cats.length];
-    catIdx++;
-    const probe = getProbeFromBank(cat, existingTexts);
-    if (!probe?.text || existingTexts.includes(probe.text)) continue;
+    const probe = pickV2ProbeExcluding(excludeTexts);
+    if (!probe) break;  // user has burned through all 1488 V2 probes
 
-    existingTexts.push(probe.text);
-    const dimWeights = buildDimensionWeights(probe);
-    const quality = probe.quality && QUALITY_PRESETS[probe.quality]
-      ? { ...QUALITY_PRESETS[probe.quality], source: 'bank', assignedAt: new Date().toISOString() }
-      : assignProbeQuality('bank');
+    excludeTexts.add(probe.text);
+    const dimWeights = buildDimensionWeightsV2(probe);
+    const probeV2Meta = extractProbeV2Meta(probe);
+    // V2 probes are rich-quality by construction; map their expected_loading
+    // through a DIRECT-equivalent quality preset (they're hand-authored
+    // single-claim statements, akin to QUALITY_PRESETS.DIRECT).
+    const quality = {
+      ...QUALITY_PRESETS.DIRECT,
+      source: 'bank',
+      assignedAt: new Date().toISOString(),
+    };
 
     await db.insert(probes).values({
-      userId, statement: probe.text, category: cat,
-      source: 'bank', dimensionWeights: dimWeights, quality,
+      userId,
+      statement: probe.text,
+      category: probe.category,
+      source: 'bank',
+      dimensionWeights: dimWeights,
+      quality,
+      probeV2: probeV2Meta,
     });
     added++;
   }
@@ -197,6 +215,9 @@ router.get('/next', async (req: Request, res: Response) => {
         source: probe.source,
         dimensionWeights: probe.dimensionWeights,
         quality: probe.quality,
+        // Pass V2 metadata to the client so it can echo it back on /respond
+        // (the server also looks it up from the queue row as a fallback).
+        probeV2: probe.probeV2 ?? null,
       });
     }
   }
@@ -221,27 +242,48 @@ router.get('/next', async (req: Request, res: Response) => {
 // ── POST /respond — submit probe response ───────────────────
 router.post('/respond', async (req: Request, res: Response) => {
   const { userId } = (req as any).genomeUser;
-  const { probeText, probeCategory, probeSource, value, confidence, note, dimensionWeights, quality } = req.body;
+  const {
+    probeText, probeCategory, probeSource, value, confidence, note,
+    dimensionWeights, quality,
+    probeV2: clientProbeV2,
+  } = req.body;
 
   if (!probeText || value === undefined) {
     return res.status(400).json({ error: 'probeText and value are required' });
   }
 
-  // Resolve dimensionWeights — never use the broad category fallback (it touches
-  // every dim in a category and inflates the user's DNA). If the client did not
-  // send weights, look the probe up in the queued probes table for this user.
+  // Resolve dimensionWeights AND probeV2 in one queue lookup.
   let dimWeights = dimensionWeights;
-  if (!dimWeights || (typeof dimWeights === 'object' && Object.keys(dimWeights).length === 0)) {
+  let resolvedProbeV2: ProbeV2Meta | null = clientProbeV2 ?? null;
+  if (
+    !dimWeights || (typeof dimWeights === 'object' && Object.keys(dimWeights).length === 0)
+    || resolvedProbeV2 == null
+  ) {
     const [queued] = await db
-      .select({ dimensionWeights: probes.dimensionWeights })
+      .select({ dimensionWeights: probes.dimensionWeights, probeV2: probes.probeV2 })
       .from(probes)
       .where(and(eq(probes.userId, userId), eq(probes.statement, probeText)))
       .limit(1);
-    if (queued?.dimensionWeights && Object.keys(queued.dimensionWeights as object).length > 0) {
-      dimWeights = queued.dimensionWeights;
-    } else {
+    if (queued) {
+      if (!dimWeights || (typeof dimWeights === 'object' && Object.keys(dimWeights).length === 0)) {
+        if (queued.dimensionWeights && Object.keys(queued.dimensionWeights as object).length > 0) {
+          dimWeights = queued.dimensionWeights;
+        } else {
+          return res.status(400).json({ error: 'dimensionWeights missing — refusing to save (would corrupt DNA scoring).' });
+        }
+      }
+      if (resolvedProbeV2 == null && queued.probeV2) {
+        resolvedProbeV2 = queued.probeV2 as ProbeV2Meta;
+      }
+    } else if (!dimWeights || (typeof dimWeights === 'object' && Object.keys(dimWeights).length === 0)) {
       return res.status(400).json({ error: 'dimensionWeights missing — refusing to save (would corrupt DNA scoring).' });
     }
+  }
+  // Last-resort: if we still don't have probeV2 but the text matches a V2
+  // probe in the bank file, pull metadata from there. Covers ad-hoc clients.
+  if (resolvedProbeV2 == null) {
+    const v2 = getProbeV2ByText(probeText);
+    if (v2) resolvedProbeV2 = extractProbeV2Meta(v2);
   }
   // Explore mode: if the client asked us to anchor this answer to a specific
   // dimension (the gray cell the user clicked), boost that dim's weight to 1.0
@@ -330,6 +372,7 @@ router.post('/respond', async (req: Request, res: Response) => {
         confidence: normConfidence,
         note: note || null,
         quality: qualityObj,
+        probeV2: resolvedProbeV2,
       }).returning({ id: beliefResponses.id, createdAt: beliefResponses.createdAt });
 
       // Engine is the single source of truth — both ingest and the backfill
