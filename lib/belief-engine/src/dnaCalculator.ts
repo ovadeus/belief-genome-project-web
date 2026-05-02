@@ -1,10 +1,8 @@
 // Calculates the V2 Belief DNA string from user responses
 // Pure domain logic — no framework dependencies
-import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
 import { DIMENSIONS } from './beliefDNA';
 import type { ProbeV2Meta } from './probeBankV2';
+import coherenceCutoffsRaw from './coherenceCutoffs.json';
 
 // ── DNA String format ────────────────────────────────────────
 // 16-char demographic prefix (identical between V1 and V2):
@@ -395,10 +393,7 @@ function reshapeBins(labels: string[], cutoffs: number[]): CutoffsBin[] {
 
 export function loadCoherenceCutoffs(): CutoffsConfig {
   if (_cutoffsCache) return _cutoffsCache;
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = dirname(__filename);
-  const path = join(__dirname, 'coherenceCutoffs.json');
-  const raw = JSON.parse(readFileSync(path, 'utf8')) as {
+  const raw = coherenceCutoffsRaw as unknown as {
     pooled:  { labels: string[]; cutoffs: number[] };
     per_dim: Record<string, { labels: string[]; cutoffs: number[] }> | null;
   };

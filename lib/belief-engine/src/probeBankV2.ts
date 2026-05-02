@@ -11,16 +11,11 @@
 //   - pair_partner_id is reciprocal between the two probes in a pair
 //   - probe ids are globally unique; pair ids are unique within a dim
 //
-// Loaded via fs.readFileSync rather than `import x from './foo.json'` so we
-// don't need `resolveJsonModule` in the shared tsconfig.base. The file is
-// ~727KB; reading it once at startup is fine.
+// Loaded as a static JSON import so the same module works in Node (API
+// server, tsx) and in a Vite browser bundle (genome-app). The file is
+// ~727KB; bundlers tree-shake it into the consuming graph once.
 
-import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+import probeBankFile from './probeBankV2.json';
 
 export type ProbeOrientation = 'canonical' | 'inverted';
 export type ProbeFrameType =
@@ -70,14 +65,7 @@ interface ProbeBankFile {
   probes: ProbeV2[];
 }
 
-function loadProbeBankFile(): ProbeBankFile {
-  // Resolve relative to this source file so it works under tsx (dev) and
-  // tsc-emitted dist (prod) — both keep src/ → dist/ co-located JSON.
-  const path = join(__dirname, 'probeBankV2.json');
-  return JSON.parse(readFileSync(path, 'utf8')) as ProbeBankFile;
-}
-
-const FILE = loadProbeBankFile();
+const FILE = probeBankFile as unknown as ProbeBankFile;
 
 export const PROBE_BANK_V2: readonly ProbeV2[] = Object.freeze(FILE.probes);
 export const PROBE_BANK_V2_META = Object.freeze({
