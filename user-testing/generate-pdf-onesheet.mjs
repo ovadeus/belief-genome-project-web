@@ -93,12 +93,22 @@ y = para(
   M, y, CW, { size: 9, gap: 1.5, after: 4 }
 );
 
-// Prominent start link
-doc.font('Helvetica-Bold').fontSize(10).fillColor(C.text)
-  .text('Start here: ', M, y, { width: CW, continued: true, align: 'center' });
-doc.font('Helvetica').fontSize(10).fillColor(C.accent)
-  .text('https://beliefgenomeproject.org/consent', { align: 'center' });
-y = doc.y + 8;
+// Prominent start link (manual centering so bold + URL don't overlap)
+{
+  const prefix = 'Start here:  ';
+  const url = 'https://beliefgenomeproject.org/consent';
+  doc.font('Helvetica-Bold').fontSize(10);
+  const pw = doc.widthOfString(prefix);
+  doc.font('Helvetica').fontSize(10);
+  const uw = doc.widthOfString(url);
+  const totalW = pw + uw;
+  const startX = M + (CW - totalW) / 2;
+  doc.font('Helvetica-Bold').fontSize(10).fillColor(C.text)
+    .text(prefix, startX, y, { lineBreak: false });
+  doc.font('Helvetica').fontSize(10).fillColor(C.accent)
+    .text(url, startX + pw, y, { lineBreak: false });
+  y = y + 14;
+}
 
 // ---------- FULL-WIDTH: WHAT YOU WILL DO ----------
 y = header('What you will do today', M, y, CW);
