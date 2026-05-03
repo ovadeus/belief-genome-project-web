@@ -97,17 +97,18 @@ y = para(
 {
   const prefix = 'Start here:  ';
   const url = 'https://beliefgenomeproject.org/consent';
-  doc.font('Helvetica-Bold').fontSize(10);
+  const sz = 14;
+  doc.font('Helvetica-Bold').fontSize(sz);
   const pw = doc.widthOfString(prefix);
-  doc.font('Helvetica').fontSize(10);
+  doc.font('Helvetica').fontSize(sz);
   const uw = doc.widthOfString(url);
   const totalW = pw + uw;
   const startX = M + (CW - totalW) / 2;
-  doc.font('Helvetica-Bold').fontSize(10).fillColor(C.text)
+  doc.font('Helvetica-Bold').fontSize(sz).fillColor(C.text)
     .text(prefix, startX, y, { lineBreak: false });
-  doc.font('Helvetica').fontSize(10).fillColor(C.accent)
+  doc.font('Helvetica').fontSize(sz).fillColor(C.accent)
     .text(url, startX + pw, y, { lineBreak: false });
-  y = y + 28;
+  y = y + sz + 18;
 }
 
 // ---------- FULL-WIDTH: WHAT YOU WILL DO ----------
