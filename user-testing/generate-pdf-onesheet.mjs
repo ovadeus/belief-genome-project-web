@@ -36,7 +36,7 @@ function header(text, x, y, w) {
   const ny = doc.y;
   doc.moveTo(x, ny + 1).lineTo(x + w, ny + 1)
     .lineWidth(0.5).strokeColor(C.rule).stroke();
-  return ny + 8;
+  return ny + 12;
 }
 
 function numItem(num, lead, rest, x, y, w) {
@@ -47,14 +47,14 @@ function numItem(num, lead, rest, x, y, w) {
     .text(String(num) + '.', x, y, { width: numW });
   if (lead) {
     doc.font('Helvetica-Bold').fontSize(8.5).fillColor(C.text)
-      .text(lead + ' ', tx, y, { width: tw, continued: true, lineGap: 1.2 });
+      .text(lead + ' ', tx, y, { width: tw, continued: true, lineGap: 1.6 });
     doc.font('Helvetica').fontSize(8.5).fillColor(C.text)
-      .text(rest, { width: tw, lineGap: 1.2 });
+      .text(rest, { width: tw, lineGap: 1.6 });
   } else {
     doc.font('Helvetica').fontSize(8.5).fillColor(C.text)
-      .text(rest, tx, y, { width: tw, lineGap: 1.2 });
+      .text(rest, tx, y, { width: tw, lineGap: 1.6 });
   }
-  return doc.y + 3;
+  return doc.y + 6;
 }
 
 function para(text, x, y, w, opts = {}) {
@@ -107,7 +107,7 @@ y = para(
     .text(prefix, startX, y, { lineBreak: false });
   doc.font('Helvetica').fontSize(10).fillColor(C.accent)
     .text(url, startX + pw, y, { lineBreak: false });
-  y = y + 22;
+  y = y + 28;
 }
 
 // ---------- FULL-WIDTH: WHAT YOU WILL DO ----------
@@ -123,7 +123,7 @@ const steps = [
 for (let i = 0; i < steps.length; i++) {
   y = numItem(i + 1, steps[i][0], steps[i][1], M, y, CW);
 }
-y += 14;
+y += 20;
 
 // ---------- TWO COLUMNS: things to know | tips ----------
 const colGap = 16;
@@ -156,13 +156,13 @@ for (let i = 0; i < tips.length; i++) {
   rY = numItem(i + 1, null, tips[i], colRx, rY, colW);
 }
 
-y = Math.max(lY, rY) + 16;
+y = Math.max(lY, rY) + 22;
 
 // ---------- FULL-WIDTH: privacy ----------
 y = header('Your privacy', M, y, CW);
 y = para(
   'Your individual answers are tied to your account and can be seen only by you and the research team. We will not share your individual data outside this study. You can ask us to delete your account and all answers at any time by emailing the researcher.',
-  M, y, CW, { size: 9, gap: 1.5, after: 14 }
+  M, y, CW, { size: 9, gap: 1.8, after: 20 }
 );
 
 // ---------- TWO COLUMNS: troubleshooting | contact ----------
@@ -183,7 +183,7 @@ r2 = contactLine('Researcher name', colRx, r2, colW);
 r2 = contactLine('Email or phone', colRx, r2, colW);
 r2 = contactLine('Session date', colRx, r2, colW);
 
-y = Math.max(l2, r2) + 14;
+y = Math.max(l2, r2) + 20;
 
 // ---------- footer thanks ----------
 para(
