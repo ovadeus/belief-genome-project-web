@@ -36,7 +36,7 @@ function header(text, x, y, w) {
   const ny = doc.y;
   doc.moveTo(x, ny + 1).lineTo(x + w, ny + 1)
     .lineWidth(0.5).strokeColor(C.rule).stroke();
-  return ny + 5;
+  return ny + 8;
 }
 
 function numItem(num, lead, rest, x, y, w) {
@@ -90,7 +90,7 @@ y = para(
 );
 y = para(
   'Time needed: about 45 to 60 minutes. You can pause at any time.',
-  M, y, CW, { size: 9, gap: 1.5, after: 4 }
+  M, y, CW, { size: 9, gap: 1.5, after: 8 }
 );
 
 // Prominent start link (manual centering so bold + URL don't overlap)
@@ -107,7 +107,7 @@ y = para(
     .text(prefix, startX, y, { lineBreak: false });
   doc.font('Helvetica').fontSize(10).fillColor(C.accent)
     .text(url, startX + pw, y, { lineBreak: false });
-  y = y + 14;
+  y = y + 22;
 }
 
 // ---------- FULL-WIDTH: WHAT YOU WILL DO ----------
@@ -123,7 +123,7 @@ const steps = [
 for (let i = 0; i < steps.length; i++) {
   y = numItem(i + 1, steps[i][0], steps[i][1], M, y, CW);
 }
-y += 4;
+y += 14;
 
 // ---------- TWO COLUMNS: things to know | tips ----------
 const colGap = 16;
@@ -156,13 +156,13 @@ for (let i = 0; i < tips.length; i++) {
   rY = numItem(i + 1, null, tips[i], colRx, rY, colW);
 }
 
-y = Math.max(lY, rY) + 6;
+y = Math.max(lY, rY) + 16;
 
 // ---------- FULL-WIDTH: privacy ----------
 y = header('Your privacy', M, y, CW);
 y = para(
   'Your individual answers are tied to your account and can be seen only by you and the research team. We will not share your individual data outside this study. You can ask us to delete your account and all answers at any time by emailing the researcher.',
-  M, y, CW, { size: 9, gap: 1.5, after: 8 }
+  M, y, CW, { size: 9, gap: 1.5, after: 14 }
 );
 
 // ---------- TWO COLUMNS: troubleshooting | contact ----------
@@ -183,7 +183,7 @@ r2 = contactLine('Researcher name', colRx, r2, colW);
 r2 = contactLine('Email or phone', colRx, r2, colW);
 r2 = contactLine('Session date', colRx, r2, colW);
 
-y = Math.max(l2, r2) + 8;
+y = Math.max(l2, r2) + 14;
 
 // ---------- footer thanks ----------
 para(
