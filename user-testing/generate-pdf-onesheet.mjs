@@ -89,7 +89,7 @@ y = para(
   M, y, CW, { size: 9, gap: 1.5, after: 2 }
 );
 y = para(
-  'Time needed: about 45 to 60 minutes. You can pause at any time.',
+  'Time needed: about 15 to 20 minutes. You can pause at any time.',
   M, y, CW, { size: 9, gap: 1.5, after: 8 }
 );
 
@@ -116,7 +116,7 @@ const steps = [
   ['Read and sign the consent form.', 'Open beliefgenomeproject.org/consent. Read it, ask your researcher any questions, then sign.'],
   ['Create your account.', 'Open the link your researcher gives you. Click "Create one" at the bottom of the sign-in screen. Fill in your email, a password, and your birth date and country.'],
   ['Sign in.', 'You will be signed in automatically after you register. If you get signed out, just go back to the same link and sign in again.'],
-  ['Answer 100 to 200 questions.', 'The main part of the session, about 20 to 35 minutes. One question at a time. Choose how true it feels, from "Absolute False" to "Absolute True." "Uncertain" is also a real answer.'],
+  ['Answer 50 to 100 questions.', 'The main part of the session, about 15 to 20 minutes. One question at a time. Choose how true it feels, from "Absolute False" to "Absolute True." "Uncertain" is also a real answer.'],
   ['Look at your results.', 'Once you have answered enough questions, explore the visual pictures the tool draws of your beliefs. Hover, click, and see what you notice.'],
   ['Fill out the feedback form.', 'Your researcher will hand you a short form. Please complete it while the experience is still fresh.'],
 ];
