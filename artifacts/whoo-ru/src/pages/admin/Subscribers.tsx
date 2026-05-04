@@ -1,16 +1,103 @@
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { useAdminSubscribers, useAdminDeleteSubscriber, useAdminToggleMember } from "@/hooks/use-admin";
-import { useState } from "react";
-import { Search, Trash2, Download, Shield, ShieldOff } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Search, Trash2, Download, Shield, ShieldOff, ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
 import { format } from "date-fns";
+
+type SortKey = "name" | "email" | "source" | "isMember" | "createdAt";
+type SortDir = "asc" | "desc";
+
+function SortHeader({
+  label, sortKey, current, dir, onSort, align = "left",
+}: {
+  label: string;
+  sortKey: SortKey;
+  current: SortKey;
+  dir: SortDir;
+  onSort: (k: SortKey) => void;
+  align?: "left" | "right";
+}) {
+  const active = current === sortKey;
+  const Icon = !active ? ChevronsUpDown : dir === "asc" ? ChevronUp : ChevronDown;
+  return (
+    <th className={`${align === "right" ? "text-right" : "text-left"} text-xs font-medium uppercase tracking-wider px-6 py-3`}>
+      <button
+        type="button"
+        onClick={() => onSort(sortKey)}
+        className={`inline-flex items-center gap-1.5 ${align === "right" ? "flex-row-reverse" : ""} ${active ? "text-foreground" : "text-muted-foreground"} hover:text-foreground transition`}
+      >
+        <span>{label}</span>
+        <Icon className={`w-3.5 h-3.5 ${active ? "opacity-100" : "opacity-50"}`} />
+      </button>
+    </th>
+  );
+}
+
+interface SubscriberLike {
+  id: number | string;
+  name?: string | null;
+  email: string;
+  source?: string | null;
+  isMember?: boolean | null;
+  createdAt: string;
+}
+
+function compareSubs(a: SubscriberLike, b: SubscriberLike, key: SortKey, dir: SortDir): number {
+  const mult = dir === "asc" ? 1 : -1;
+  let av: string | number = "";
+  let bv: string | number = "";
+  switch (key) {
+    case "name":
+      av = (a.name || "").toLowerCase();
+      bv = (b.name || "").toLowerCase();
+      break;
+    case "email":
+      av = (a.email || "").toLowerCase();
+      bv = (b.email || "").toLowerCase();
+      break;
+    case "source":
+      av = (a.source || "").toLowerCase();
+      bv = (b.source || "").toLowerCase();
+      break;
+    case "isMember":
+      av = a.isMember ? 1 : 0;
+      bv = b.isMember ? 1 : 0;
+      break;
+    case "createdAt":
+      av = new Date(a.createdAt).getTime();
+      bv = new Date(b.createdAt).getTime();
+      break;
+  }
+  if (av < bv) return -1 * mult;
+  if (av > bv) return 1 * mult;
+  return 0;
+}
 
 export default function AdminSubscribers() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [source, setSource] = useState("");
+  const [sortKey, setSortKey] = useState<SortKey>("createdAt");
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
   const { data, isLoading } = useAdminSubscribers({ page, limit: 25, search: search || undefined, source: source || undefined });
   const deleteSub = useAdminDeleteSubscriber();
   const toggleMember = useAdminToggleMember();
+
+  const onSort = (k: SortKey) => {
+    if (k === sortKey) {
+      setSortDir(d => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(k);
+      setSortDir(k === "name" || k === "email" || k === "source" ? "asc" : "desc");
+    }
+  };
+
+  const sortedSubs = useMemo(() => {
+    if (!data?.subscribers) return [];
+    return [...data.subscribers].sort((a, b) =>
+      compareSubs(a as SubscriberLike, b as SubscriberLike, sortKey, sortDir)
+    );
+  }, [data, sortKey, sortDir]);
 
   return (
     <AdminLayout>
@@ -53,21 +140,21 @@ export default function AdminSubscribers() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-6 py-3">Name</th>
-                  <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-6 py-3">Email</th>
-                  <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-6 py-3">Source</th>
-                  <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-6 py-3">Member</th>
-                  <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-6 py-3">Date</th>
+                  <SortHeader label="Name" sortKey="name" current={sortKey} dir={sortDir} onSort={onSort} />
+                  <SortHeader label="Email" sortKey="email" current={sortKey} dir={sortDir} onSort={onSort} />
+                  <SortHeader label="Source" sortKey="source" current={sortKey} dir={sortDir} onSort={onSort} />
+                  <SortHeader label="Member" sortKey="isMember" current={sortKey} dir={sortDir} onSort={onSort} />
+                  <SortHeader label="Date" sortKey="createdAt" current={sortKey} dir={sortDir} onSort={onSort} />
                   <th className="text-right text-xs font-medium text-muted-foreground uppercase tracking-wider px-6 py-3">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {isLoading ? (
                   <tr><td colSpan={6} className="px-6 py-10 text-center text-muted-foreground">Loading...</td></tr>
-                ) : data?.subscribers?.length === 0 ? (
+                ) : sortedSubs.length === 0 ? (
                   <tr><td colSpan={6} className="px-6 py-10 text-center text-muted-foreground">No subscribers found</td></tr>
                 ) : (
-                  data?.subscribers?.map((sub) => (
+                  sortedSubs.map((sub) => (
                     <tr key={sub.id} className="border-b border-border/50 hover:bg-foreground/5">
                       <td className="px-6 py-4 text-sm text-foreground">{sub.name || "—"}</td>
                       <td className="px-6 py-4 text-sm text-foreground">{sub.email}</td>
