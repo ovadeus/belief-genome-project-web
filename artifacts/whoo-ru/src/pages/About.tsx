@@ -22,6 +22,7 @@ export default function About() {
     <PublicLayout>
       <section className="py-20 px-6 max-w-4xl mx-auto">
         <motion.div {...fadeUp}>
+          <span className="academic-eyebrow">About</span>
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
             About the <span className="text-primary">Belief Genome Project</span>
           </h1>
@@ -37,6 +38,7 @@ export default function About() {
                 <img src={`${import.meta.env.BASE_URL}images/founder.jpeg`} alt="David Edwin Meyers" className="w-full h-full object-cover" />
               </div>
               <div>
+                <span className="academic-eyebrow">§ I · Founder</span>
                 <h2 className="text-2xl font-bold text-foreground mb-4">The Founder</h2>
                 <p className="text-muted-foreground leading-relaxed mb-4">
                   The Belief Genome Project is spearheaded by <span className="font-bold text-primary">David Edwin Meyers</span>, a creative polymath, researcher, developer, and writer who has spent over four decades exploring the intersection of art, technology, psychology, and human self-understanding.
@@ -51,6 +53,7 @@ export default function About() {
 
 
         <motion.div {...fadeUp} transition={{ delay: 0.3 }} className="mb-16">
+          <span className="academic-eyebrow">§ II · Origin</span>
           <h2 className="text-3xl font-bold text-foreground mb-6">The Origin Story</h2>
           <div className="prose prose-invert max-w-none">
             <p className="text-muted-foreground leading-relaxed mb-4">
@@ -69,6 +72,7 @@ export default function About() {
         </motion.div>
 
         <motion.div {...fadeUp} transition={{ delay: 0.4 }} className="mb-16">
+          <span className="academic-eyebrow">§ III · Mission</span>
           <h2 className="text-3xl font-bold text-foreground mb-6">The Research Mission</h2>
           <div className="grid md:grid-cols-3 gap-6">
             {[
@@ -86,6 +90,7 @@ export default function About() {
         </motion.div>
 
         <motion.div {...fadeUp} transition={{ delay: 0.5 }}>
+          <span className="academic-eyebrow">§ IV · Timeline</span>
           <h2 className="text-3xl font-bold text-foreground mb-8">Development Timeline</h2>
           <div className="relative">
             <div className="absolute left-8 top-0 bottom-0 w-px bg-border" />

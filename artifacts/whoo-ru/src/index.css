@@ -200,13 +200,13 @@
   margin-top: 0.5rem;
 }
 
-/* Reversed-out, all-caps sans-serif subhead in a solid ink box.
+/* Reversed-out, all-caps sans-serif subhead in a solid box.
    Use as: <span class="academic-eyebrow">Section Title</span>
-   Always reads white text on near-black box, regardless of theme. */
+   Light mode: ink box / paper text. Dark mode: paper box / ink text. */
 .academic-eyebrow {
   display: inline-block;
-  background-color: #1a1d24;
-  color: #ffffff;
+  background-color: hsl(var(--foreground));
+  color: hsl(var(--background));
   font-family: 'Inter', 'DM Sans', system-ui, sans-serif;
   font-size: 0.6875rem;
   font-weight: 600;
@@ -215,6 +215,7 @@
   padding: 0.35rem 0.6rem 0.3rem;
   line-height: 1;
   border-radius: 0;
+  margin-bottom: 1rem;
 }
 
 /* ──────────────────────────────────────────────────────────────────────────
