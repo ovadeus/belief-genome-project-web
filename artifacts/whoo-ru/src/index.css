@@ -200,11 +200,9 @@
   margin-top: 0.5rem;
 }
 
-/* Section eyebrow label.
+/* Reversed-out, all-caps sans-serif subhead in a solid box.
    Use as: <span class="academic-eyebrow">Section Title</span>
-   Dark mode (default): reversed-out, paper-on-ink box.
-   Light mode: thin tracked small-caps line, no box, muted color
-   (matches the beliefmetrics editorial pattern). */
+   Light mode: ink box / paper text. Dark mode: paper box / ink text. */
 .academic-eyebrow {
   display: inline-block;
   background-color: hsl(var(--foreground));
@@ -218,20 +216,6 @@
   line-height: 1;
   border-radius: 0;
   margin-bottom: 1rem;
-}
-
-[data-theme="light"] .academic-eyebrow {
-  display: inline-block;
-  background-color: transparent;
-  color: hsl(var(--muted-foreground));
-  font-family: 'Inter', 'DM Sans', system-ui, sans-serif;
-  font-size: 0.75rem;
-  font-weight: 500;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  padding: 0;
-  line-height: 1.4;
-  margin-bottom: 1.25rem;
 }
 
 /* ──────────────────────────────────────────────────────────────────────────
