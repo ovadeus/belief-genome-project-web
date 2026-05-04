@@ -19,6 +19,13 @@
       // server on mount, so an admin's change propagates within one full load.
       (function () {
         try {
+          var url = new URLSearchParams(window.location.search);
+          var override = url.get("theme");
+          if (override === "light" || override === "dark") {
+            document.documentElement.dataset.theme = override;
+            localStorage.setItem("bgpTheme", override);
+            return;
+          }
           var t = localStorage.getItem("bgpTheme");
           document.documentElement.dataset.theme = (t === "light" || t === "dark") ? t : "dark";
         } catch (_) {

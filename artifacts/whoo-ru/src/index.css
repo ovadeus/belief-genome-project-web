@@ -200,6 +200,97 @@
   margin-top: 0.5rem;
 }
 
+/* Reversed-out, all-caps sans-serif subhead in a solid ink box.
+   Use as: <span class="academic-eyebrow">Section Title</span>
+   Always reads white text on near-black box, regardless of theme. */
+.academic-eyebrow {
+  display: inline-block;
+  background-color: #1a1d24;
+  color: #ffffff;
+  font-family: 'Inter', 'DM Sans', system-ui, sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 0.35rem 0.6rem 0.3rem;
+  line-height: 1;
+  border-radius: 0;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   LIGHT MODE — global "academic" overrides
+   Strip color gradients, grayscale decorative canvases, keep teal accent.
+   ──────────────────────────────────────────────────────────────────────── */
+
+/* Strong serif for headings in light mode (Cardo via --font-display) */
+[data-theme="light"] h1,
+[data-theme="light"] h2,
+[data-theme="light"] h3 {
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+/* Convert tailwind "bg-clip-text" gradient phrases into solid ink in light mode.
+   Academic publications don't use rainbow gradient type. */
+[data-theme="light"] .bg-clip-text.text-transparent {
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Belief identity gradient text becomes solid ink in light mode */
+[data-theme="light"] .belief-gradient-text {
+  background: none;
+  -webkit-background-clip: initial;
+  background-clip: initial;
+  color: hsl(var(--foreground));
+}
+
+/* Decorative canvases (3D helix, wave interference, etc.) shift to
+   grayscale in light mode so the page reads black-and-white with the
+   teal CTA standing out. Opt-out by adding .no-grayscale to the element. */
+[data-theme="light"] canvas:not(.no-grayscale) {
+  filter: grayscale(1) contrast(1.05);
+}
+
+/* Decorative SVGs/images marked with .theme-decorative also desaturate */
+[data-theme="light"] .theme-decorative,
+[data-theme="light"] .theme-decorative img,
+[data-theme="light"] .theme-decorative svg {
+  filter: grayscale(1) contrast(1.02);
+}
+
+/* Hero / background images carrying opacity also desaturate in light mode */
+[data-theme="light"] img[src*="hero-bg"],
+[data-theme="light"] img[alt=""] {
+  filter: grayscale(1) contrast(1.05);
+}
+
+/* Primary CTA in light mode: solid ink box, paper text, hairline border.
+   Matches the dark teal "Start harvesting" button on beliefmetrics. */
+[data-theme="light"] .bg-primary {
+  background-color: hsl(var(--primary)) !important;
+}
+[data-theme="light"] .bg-primary:hover {
+  background-color: hsl(var(--primary) / 0.9) !important;
+}
+
+/* Soft section dividers: a single hairline rule, no shadow */
+[data-theme="light"] .border-t,
+[data-theme="light"] .border-b,
+[data-theme="light"] .border {
+  border-color: hsl(var(--border));
+}
+
+/* Drop heavy shadows in light mode — academic pages are flat */
+[data-theme="light"] .shadow-lg,
+[data-theme="light"] .shadow-xl,
+[data-theme="light"] .shadow-2xl,
+[data-theme="light"] .shadow-md {
+  box-shadow: 0 1px 0 hsl(var(--border)) !important;
+}
+
 @layer base {
   * {
     @apply border-border;
