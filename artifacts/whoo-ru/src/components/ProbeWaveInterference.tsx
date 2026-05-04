@@ -18,12 +18,12 @@ const COMBINED_SCALE = 10;
 const PROBE_SCALE = 28;
 
 const DEFAULT_PROBES: Probe[] = [
-  { pos: 1.0, phase: 0 },
-  { pos: 2.5, phase: 0 },
-  { pos: 4.0, phase: 0 },
-  { pos: 5.5, phase: 0 },
+  { pos: 2.2, phase: 0 },
+  { pos: 2.2, phase: 0 },
+  { pos: 4.1, phase: 0 },
   { pos: 7.0, phase: 0 },
-  { pos: 8.5, phase: 0 },
+  { pos: 7.0, phase: 0 },
+  { pos: 7.0, phase: 0 },
 ];
 
 const PRESETS: Record<"aligned" | "conflicted" | "reset", Probe[]> = {
@@ -197,7 +197,7 @@ export function ProbeWaveInterference() {
         <path d={paths.combined} fill="none" stroke="hsl(var(--foreground))" strokeWidth="2" />
 
         {/* Probability density */}
-        <path d={paths.prob} fill="var(--probe-wave-fill)" stroke="var(--probe-wave)" strokeWidth="1.5" />
+        <path d={paths.prob} fill="var(--probe-wave-fill)" stroke="none" />
 
         {/* Collapse marker */}
         {collapse && (
