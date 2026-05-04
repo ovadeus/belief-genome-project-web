@@ -118,7 +118,7 @@ export default function Home() {
       {/* WHAT IS BGP */}
       <section className="py-24 bg-background relative border-t border-border">
         <div className="max-w-4xl mx-auto px-4 text-center">
-          <span className="academic-eyebrow">§ I · Overview</span>
+          <span className="academic-eyebrow">I · Overview</span>
           <h2 className="text-3xl md:text-4xl font-display font-bold mb-8">
             What is the <span className="text-primary">Belief Genome Project</span>?
           </h2>
@@ -225,7 +225,7 @@ export default function Home() {
             {/* Top half — Forecaster intro + sample dimensions */}
             <div className="flex flex-col lg:flex-row items-center gap-16 relative z-10">
               <div className="flex-1">
-                <span className="academic-eyebrow">§ II · Capability</span>
+                <span className="academic-eyebrow">II · Capability</span>
                 <h2 className="text-4xl md:text-5xl font-display font-bold mb-6">The Forecaster</h2>
                 <p className="text-xl text-muted-foreground mb-8">
                   What if you could predict your own reactions? The Forecaster uses your Belief Genome DNA to model how you'll respond to new information, news, and complex situations before they even happen.
@@ -293,7 +293,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-end mb-12">
             <div>
-              <span className="academic-eyebrow">§ III · Field Notes</span>
+              <span className="academic-eyebrow">III · Field Notes</span>
               <h2 className="text-3xl md:text-4xl font-display font-bold">Research & Insights</h2>
               <p className="text-muted-foreground mt-2">The latest dispatches from the framework.</p>
             </div>
@@ -357,7 +357,7 @@ export default function Home() {
       <section className="py-32 relative overflow-hidden border-t border-border">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-primary/5" />
         <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
-          <span className="academic-eyebrow">§ IV · Invitation</span>
+          <span className="academic-eyebrow">IV · Invitation</span>
           <h2 className="text-5xl md:text-6xl font-display font-bold text-foreground mb-6">
             The Curtain Is Already Pulled Back.
           </h2>
