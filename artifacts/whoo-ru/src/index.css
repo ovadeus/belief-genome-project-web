@@ -113,7 +113,7 @@
    ──────────────────────────────────────────────────────────────────────── */
 [data-theme="light"] {
   --theme-font-sans:    'Roboto Serif', Georgia, serif;
-  --theme-font-display: 'Cardo', Georgia, serif;
+  --theme-font-display: 'Source Serif 4', Georgia, 'Times New Roman', serif;
   --theme-font-mono:    'JetBrains Mono', 'Space Mono', monospace;
 
   /* HSL approximations of the spec's OKLCH paper/ink/primary tokens */
