@@ -113,10 +113,11 @@ function compareUsers(a: AdminGenomeUser, b: AdminGenomeUser, key: SortKey, dir:
 
 export default function AdminUsers() {
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("createdAt");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
-  const { data, isLoading, error } = useAdminGenomeUsers({ page, limit: 25, search });
+  const { data, isLoading, error } = useAdminGenomeUsers({ page, limit: pageSize, search });
 
   const onSort = (k: SortKey) => {
     if (k === sortKey) {
@@ -165,6 +166,17 @@ export default function AdminUsers() {
               placeholder="Search by name or email..."
             />
           </div>
+          <select
+            value={pageSize}
+            onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
+            className="bg-background border border-input rounded-xl px-4 py-2.5 text-sm text-foreground focus:ring-2 focus:ring-primary outline-none"
+            title="Rows per page"
+          >
+            <option value={20}>20 per page</option>
+            <option value={50}>50 per page</option>
+            <option value={100}>100 per page</option>
+            <option value={250}>250 per page</option>
+          </select>
         </div>
 
         <div className="bg-card border border-border rounded-2xl overflow-hidden">
