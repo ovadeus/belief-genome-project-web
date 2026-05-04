@@ -136,7 +136,7 @@
   --border: 230 8% 84%;            /* rule — 1px dividers */
   --input: 230 8% 88%;
   --ring: 198 35% 35%;
-  --radius: 0.125rem;              /* 2px — rectangular, not pill */
+  --radius: 0.3125rem;             /* 5px — softly squared, not pill */
 
   /* Inline-style convenience tokens (light variants) */
   --text-primary:    #2a2d38;      /* ink */
@@ -173,7 +173,7 @@
 [data-theme="light"] .rounded-xl,
 [data-theme="light"] .rounded-2xl,
 [data-theme="light"] .rounded-3xl {
-  border-radius: 2px;
+  border-radius: 5px;
 }
 
 /* Reusable small-caps section label with hairline rule above. Used like:
