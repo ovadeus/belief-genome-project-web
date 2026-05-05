@@ -27,9 +27,13 @@
             return;
           }
           var t = localStorage.getItem("bgpTheme");
-          document.documentElement.dataset.theme = (t === "light" || t === "dark") ? t : "dark";
+          // Default must match the current admin-set activeTheme in the DB
+          // (see api-server/src/routes/settings.ts) so first-time visitors
+          // (no localStorage yet) don't see a dark→light flash when
+          // useThemeBootstrap later fetches /api/theme on mount.
+          document.documentElement.dataset.theme = (t === "light" || t === "dark") ? t : "light";
         } catch (_) {
-          document.documentElement.dataset.theme = "dark";
+          document.documentElement.dataset.theme = "light";
         }
       })();
     </script>
