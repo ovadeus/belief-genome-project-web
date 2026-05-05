@@ -193,8 +193,8 @@ export function ProbeWaveInterference() {
           <path key={`probe-${i}`} d={d} fill="none" stroke={PROBE_COLORS[i]} strokeWidth="1.2" opacity="0.65" />
         ))}
 
-        {/* Combined wavefunction (real part) — anchored at baseline */}
-        <path d={paths.combined} fill="none" stroke="hsl(var(--foreground))" strokeWidth="2" />
+        {/* Combined wavefunction (real part) — anchored at baseline; dotted teal so it reads as the underlying signal, not a hard answer */}
+        <path d={paths.combined} fill="none" stroke="hsl(var(--accent))" strokeWidth="1.5" strokeDasharray="2 3" />
 
         {/* Collapse marker */}
         {collapse && (

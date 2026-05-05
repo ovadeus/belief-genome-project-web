@@ -3,8 +3,8 @@
  * ─────────────────────────────────────────────────────────────────────────
  * Interactive six-probe wave-interference visualization on a single belief
  * dimension. Each probe is a Gaussian wavelet with a position (where on the
- * dimension it points) and a phase (its contextual framing). The bold curve
- * is the combined wavefunction (real part); the shaded area below is the
+ * dimension it points) and a phase (its contextual framing). The dotted teal
+ * curve is the combined wavefunction (real part); the shaded fill behind it is the
  * probability density |psi|^2 of where it would land if forced to commit.
  *
  * No external dependencies beyond React + ReactDOM.
@@ -19,8 +19,8 @@
  *
  * Optional theming:
  *   <ProbeWaveInterference
- *     accentColor="#3a637a"     // teal — combined wave + probability fill
- *     foregroundColor="#1a1d24" // ink — text + bold combined wave
+ *     accentColor="#3a637a"     // teal — dotted combined wave + probability fill
+ *     foregroundColor="#1a1d24" // ink — body text only
  *     mutedColor="#6c7280"      // captions, axis labels
  *     borderColor="#d6d4cc"     // hairline rules + button borders
  *     backgroundColor="#faf9f5" // chart canvas background
@@ -37,9 +37,9 @@ import { useMemo, useState } from "react";
 type Probe = { pos: number; phase: number };
 
 interface ProbeWaveInterferenceProps {
-  /** Teal accent — combined wave fill + probability density fill */
+  /** Teal accent — dotted combined wave stroke + probability density fill */
   accentColor?: string;
-  /** Ink — body text, bold combined wavefunction stroke */
+  /** Ink — body text only (combined wavefunction stroke now uses accentColor) */
   foregroundColor?: string;
   /** Muted gray — captions, axis tick labels, slider readouts */
   mutedColor?: string;
@@ -339,8 +339,8 @@ export function ProbeWaveInterference({
           <path key={`probe-${i}`} d={d} fill="none" stroke={probeColors[i]} strokeWidth="1.2" opacity="0.65" />
         ))}
 
-        {/* Combined wavefunction (real part) — anchored at baseline */}
-        <path d={paths.combined} fill="none" stroke={foregroundColor} strokeWidth="2" />
+        {/* Combined wavefunction (real part) — anchored at baseline; dotted teal so it reads as the underlying signal, not a hard answer */}
+        <path d={paths.combined} fill="none" stroke={accentColor} strokeWidth="1.5" strokeDasharray="2 3" />
 
         {/* Collapse marker */}
         {collapse && (
