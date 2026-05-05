@@ -66,10 +66,13 @@ const SIGMA = 0.85;
 const X_MIN = 60;
 const X_MAX = 640;
 const N = 240;
-const WAVE_MID = 115;
-const PROB_BASE = 320;
-const PROB_HEIGHT = 100;
-const COMBINED_SCALE = 10;
+// Single-panel layout: probability density is drawn as faint background fill
+// rising upward from PROB_BASE; probe wavelets and the combined wavefunction
+// oscillate around WAVE_MID in the same vertical space.
+const WAVE_MID = 130;
+const PROB_BASE = 180;
+const PROB_HEIGHT = 110;
+const COMBINED_SCALE = 12;
 const PROBE_SCALE = 28;
 
 const DEFAULT_PROBES: Probe[] = [
@@ -299,22 +302,19 @@ export function ProbeWaveInterference({
     <div style={containerStyle}>
       <svg
         width="100%"
-        viewBox="0 0 680 360"
+        viewBox="0 0 680 240"
         role="img"
-        aria-label="Six probe waves on a single belief dimension, with their combined wavefunction and probability density"
+        aria-label="Six probe waves on a single belief dimension overlaid on the probability density of the combined wavefunction"
         style={{ display: "block" }}
       >
         <text x="60" y="22" style={captionStyle}>
-          Probe waves (faint) and combined wavefunction (bold)
-        </text>
-        <text x="60" y="210" style={captionStyle}>
-          Probability density of collapse outcome
+          Probe waves (foreground) over probability density (faint fill)
         </text>
 
-        <line
-          x1="60" y1={WAVE_MID} x2="640" y2={WAVE_MID}
-          stroke={borderColor} strokeWidth="0.5" strokeDasharray="2 4"
-        />
+        {/* Probability density (background — drawn first so other elements paint over it) */}
+        <path d={paths.prob} fill={accentFill} stroke="none" />
+
+        {/* x-axis baseline */}
         <line
           x1="60" y1={PROB_BASE} x2="640" y2={PROB_BASE}
           stroke={borderColor} strokeWidth="0.5"
@@ -326,30 +326,27 @@ export function ProbeWaveInterference({
           return (
             <g key={`mark-${i}`}>
               <line
-                x1={cx} y1="32" x2={cx} y2="180"
+                x1={cx} y1="42" x2={cx} y2={PROB_BASE}
                 stroke={probeColors[i]} strokeWidth="0.75" strokeDasharray="3 3" opacity="0.7"
               />
-              <circle cx={cx} cy="32" r="3" fill={probeColors[i]} />
+              <circle cx={cx} cy="42" r="3" fill={probeColors[i]} />
             </g>
           );
         })}
 
         {/* Per-probe wavelets */}
         {paths.probeCurves.map((d, i) => (
-          <path key={`probe-${i}`} d={d} fill="none" stroke={probeColors[i]} strokeWidth="1.2" opacity="0.5" />
+          <path key={`probe-${i}`} d={d} fill="none" stroke={probeColors[i]} strokeWidth="1.2" opacity="0.65" />
         ))}
 
         {/* Combined wavefunction (real part) */}
         <path d={paths.combined} fill="none" stroke={foregroundColor} strokeWidth="2" />
 
-        {/* Probability density (no outline) */}
-        <path d={paths.prob} fill={accentFill} stroke="none" />
-
         {/* Collapse marker */}
         {collapse && (
           <>
             <line
-              x1={collapse.x} y1="220" x2={collapse.x} y2={PROB_BASE}
+              x1={collapse.x} y1={PROB_BASE - PROB_HEIGHT} x2={collapse.x} y2={PROB_BASE}
               stroke={accentColor} strokeWidth="2" opacity="0.85"
             />
             <circle cx={collapse.x} cy={PROB_BASE} r="5" fill={accentColor} />
@@ -369,12 +366,12 @@ export function ProbeWaveInterference({
         })}
 
         {/* Axis labels */}
-        <text x="60"  y="340" textAnchor="middle" style={captionStyle}>0</text>
-        <text x="60"  y="354" textAnchor="middle" style={captionStyle}>false</text>
-        <text x="350" y="340" textAnchor="middle" style={captionStyle}>5</text>
-        <text x="350" y="354" textAnchor="middle" style={captionStyle}>superposition</text>
-        <text x="640" y="340" textAnchor="middle" style={captionStyle}>9</text>
-        <text x="640" y="354" textAnchor="middle" style={captionStyle}>true</text>
+        <text x="60"  y="204" textAnchor="middle" style={captionStyle}>0</text>
+        <text x="60"  y="220" textAnchor="middle" style={captionStyle}>false</text>
+        <text x="350" y="204" textAnchor="middle" style={captionStyle}>5</text>
+        <text x="350" y="220" textAnchor="middle" style={captionStyle}>superposition</text>
+        <text x="640" y="204" textAnchor="middle" style={captionStyle}>9</text>
+        <text x="640" y="220" textAnchor="middle" style={captionStyle}>true</text>
       </svg>
 
       {/* Controls */}

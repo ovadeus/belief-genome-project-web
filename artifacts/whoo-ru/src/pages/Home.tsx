@@ -277,7 +277,7 @@ export default function Home() {
                 A Belief in Superposition
               </h3>
               <p className="text-xl text-muted-foreground">
-                Each probe is a small wave on a belief dimension. Drag the sliders to move where a probe points (position) and how its question is framed (phase). The bold curve is your combined belief; the shaded area below is the probability of where it would land if you had to commit right now. Hit <em>Force collapse</em> to make it choose.
+                Each probe is a small wave on a belief dimension. Drag the sliders to move where a probe points (position) and how its question is framed (phase). The bold curve is your combined belief; the faint shaded fill behind it is the probability of where it would land if you had to commit right now. Hit <em>Force collapse</em> to make it choose.
               </p>
             </div>
 
