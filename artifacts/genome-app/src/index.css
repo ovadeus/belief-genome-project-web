@@ -424,3 +424,32 @@
     100% { transform: scaleY(1);   box-shadow: 0 0 0 0 transparent; }
   }
 }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Editorial weight overrides for LIGHT MODE — see whoo-ru/index.css
+   for the rationale. Source Serif 4 at 400 reads as the editorial weight
+   shown in the user's reference; bolder weights look heavy/blocky.
+   ──────────────────────────────────────────────────────────────────────── */
+[data-theme="light"] h1,
+[data-theme="light"] h2,
+[data-theme="light"] h3,
+[data-theme="light"] h4,
+[data-theme="light"] .font-display,
+[data-theme="light"] .font-display.font-bold,
+[data-theme="light"] .font-display.font-semibold,
+[data-theme="light"] .font-display.font-extrabold,
+[data-theme="light"] .font-display.font-black {
+  font-weight: 400;
+}
+[data-theme="light"] .font-display.font-light,
+[data-theme="light"] h1.font-light,
+[data-theme="light"] h2.font-light,
+[data-theme="light"] h3.font-light {
+  font-weight: 300;
+}
+[data-theme="light"] .font-display.font-medium,
+[data-theme="light"] h1.font-medium,
+[data-theme="light"] h2.font-medium,
+[data-theme="light"] h3.font-medium {
+  font-weight: 500;
+}

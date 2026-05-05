@@ -488,3 +488,36 @@
     font-size: 16px;
   }
 }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Editorial weight overrides for LIGHT MODE
+   ──────────────────────────────────────────────────────────────────────── */
+/* Source Serif 4 at the bold weights Tailwind defaults to (font-bold = 700,
+   font-semibold = 600) reads as heavy/blocky for an editorial light theme.
+   In dark mode (Outfit display) the bolder weights look right. So we scope
+   these overrides to [data-theme="light"] only. Sized hierarchy (text-3xl
+   vs text-6xl etc) carries the visual weight instead of font-weight. */
+[data-theme="light"] h1,
+[data-theme="light"] h2,
+[data-theme="light"] h3,
+[data-theme="light"] h4,
+[data-theme="light"] .font-display,
+[data-theme="light"] .font-display.font-bold,
+[data-theme="light"] .font-display.font-semibold,
+[data-theme="light"] .font-display.font-extrabold,
+[data-theme="light"] .font-display.font-black {
+  font-weight: 400;
+}
+/* Preserve explicit light/medium choices (e.g. footer, eyebrows). */
+[data-theme="light"] .font-display.font-light,
+[data-theme="light"] h1.font-light,
+[data-theme="light"] h2.font-light,
+[data-theme="light"] h3.font-light {
+  font-weight: 300;
+}
+[data-theme="light"] .font-display.font-medium,
+[data-theme="light"] h1.font-medium,
+[data-theme="light"] h2.font-medium,
+[data-theme="light"] h3.font-medium {
+  font-weight: 500;
+}
