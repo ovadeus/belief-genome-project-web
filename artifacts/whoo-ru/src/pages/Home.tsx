@@ -97,7 +97,11 @@ export default function Home() {
                 Human Belief
               </span>.
             </h1>
-            
+
+            <p className="font-display text-xl sm:text-2xl text-foreground/80 italic tracking-tight mb-8 max-w-3xl mx-auto">
+              Simply a better research survey instrument <span className="not-italic text-muted-foreground mx-2">|</span> Entropy Harvester
+            </p>
+
             <p className="text-lg sm:text-xl text-muted-foreground font-light leading-relaxed mb-12 max-w-3xl mx-auto">
               The Belief Genome Project is a new paradigm in behavioral science — a Quantum-Cognitive Measurement Architecture built to map the interior tensions of belief. It honors the foundational lineage of decision science and quantum cognition, and it extends that lineage into territory the field has not yet occupied: an operational instrument for measuring human belief in superposition.
             </p>
