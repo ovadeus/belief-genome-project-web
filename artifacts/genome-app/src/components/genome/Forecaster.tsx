@@ -58,7 +58,7 @@ export default function Forecaster({ history }: Props) {
   const pct = result ? Math.max(2, Math.min(98, result.value)) : 50;
 
   return (
-    <div>
+    <div data-theme="dark" className="viz-dark-island">
       <div style={{
         display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16,
       }}>

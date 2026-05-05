@@ -25,14 +25,18 @@ export default function BreakdownBars({ history }: Props) {
 
   if (history.length === 0) {
     return (
-      <div style={{ textAlign: 'center', color: 'var(--text-faint)', padding: 40 }}>
+      <div
+        data-theme="dark"
+        className="viz-dark-island"
+        style={{ textAlign: 'center', color: 'var(--text-faint)', padding: 40 }}
+      >
         No responses yet — answer some probes first.
       </div>
     );
   }
 
   return (
-    <div>
+    <div data-theme="dark" className="viz-dark-island">
       <div style={{
         fontSize: 11, fontFamily: "'Space Mono', monospace", textTransform: 'uppercase',
         letterSpacing: 1.5, color: 'var(--text-muted)', marginBottom: 16,

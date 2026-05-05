@@ -123,16 +123,20 @@ function drawLEDMeter(
 }
 
 export default function RadarChart({ history, fullscreen = false }: Props) {
+  // RadarChart is always rendered inside a `.viz-dark-island` wrapper (see
+  // the JSX below), so its canvas always uses the dark palette regardless of
+  // the page-level theme. We deliberately do NOT read theme from the document
+  // root here — `useThemeColors` reads `document.documentElement` which would
+  // pick up the page's light-mode values and ignore the local dark island.
   const themeColors = useThemeColors(THEME_VARS);
-  const isLight = (typeof document !== 'undefined'
-    ? document.documentElement.dataset.theme
-    : 'dark') === 'light';
+  void themeColors; // kept for future re-introduction of theme-aware coloring
+  const isLight = false;
 
-  const labelStrong = themeColors['--text-primary'] || (isLight ? '#2a2d38' : '#ffffff');
-  const labelSoft = themeColors['--text-secondary'] || (isLight ? '#4f5462' : 'rgba(255,255,255,0.7)');
-  const tickColor = themeColors['--text-faint'] || (isLight ? '#9097a3' : 'rgba(255,255,255,0.35)');
-  const gridColor = themeColors['--border-subtle'] || (isLight ? '#e3e1d9' : 'rgba(255,255,255,0.06)');
-  const angleColor = themeColors['--border-soft'] || (isLight ? '#d6d4cc' : 'rgba(255,255,255,0.1)');
+  const labelStrong = isLight ? '#2a2d38' : '#ffffff';
+  const labelSoft = isLight ? '#4f5462' : 'rgba(255,255,255,0.7)';
+  const tickColor = isLight ? '#9097a3' : 'rgba(255,255,255,0.35)';
+  const gridColor = isLight ? '#e3e1d9' : 'rgba(255,255,255,0.06)';
+  const angleColor = isLight ? '#d6d4cc' : 'rgba(255,255,255,0.1)';
   const inactiveTint = isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.06)';
   const inactiveAlpha = isLight ? 0.28 : 0.14;
 
@@ -308,7 +312,7 @@ export default function RadarChart({ history, fullscreen = false }: Props) {
   };
 
   return (
-    <div>
+    <div data-theme="dark" className="viz-dark-island">
       <div style={{
         display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12,
       }}>

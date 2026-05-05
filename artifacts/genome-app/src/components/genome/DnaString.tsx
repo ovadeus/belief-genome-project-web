@@ -68,7 +68,7 @@ export default function DnaString({ dnaString, dimensionsCovered, totalResponses
   const beliefRange = v2 ? '17-264' : '16-139';
 
   return (
-    <div>
+    <div data-theme="dark" className="viz-dark-island">
       <div style={{
         display: 'flex', gap: 24, marginBottom: 20, justifyContent: 'center', flexWrap: 'wrap',
       }}>

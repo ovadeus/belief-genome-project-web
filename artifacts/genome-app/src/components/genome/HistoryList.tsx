@@ -57,7 +57,11 @@ export default function HistoryList({ history }: Props) {
 
   if (history.length === 0) {
     return (
-      <div style={{ textAlign: 'center', color: 'var(--text-faint)', padding: 40 }}>
+      <div
+        data-theme="dark"
+        className="viz-dark-island"
+        style={{ textAlign: 'center', color: 'var(--text-faint)', padding: 40 }}
+      >
         No belief responses yet. Answer probes to start building your Belief Genome.
       </div>
     );
@@ -66,7 +70,7 @@ export default function HistoryList({ history }: Props) {
   const allCats = [...new Set(history.map(h => h.probeCategory).filter(Boolean))].sort();
 
   return (
-    <div>
+    <div data-theme="dark" className="viz-dark-island">
       {/* Filters */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
         <input

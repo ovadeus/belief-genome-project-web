@@ -60,6 +60,8 @@ export function ReflectionsModalProvider({ children }: { children: ReactNode }) 
           }}
         >
           <div
+            data-theme="dark"
+            className="viz-dark-island viz-dark-island--no-pad"
             onClick={e => e.stopPropagation()}
             style={{
               position: 'relative',

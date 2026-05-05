@@ -172,7 +172,7 @@ export default function DnaStrip({
   }
 
   return (
-    <div ref={containerRef}>
+    <div ref={containerRef} data-theme="dark" className="viz-dark-island">
       {!miniMode && (
         <div style={{
           display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16,

@@ -81,7 +81,7 @@ export default function Timeline({ history }: Props) {
 
   if (windowed.length < 2) {
     return (
-      <div>
+      <div data-theme="dark" className="viz-dark-island">
         <TimelineToolbar period={period} onPeriod={handlePeriod}
           label={win.label} count={windowed.length} offset={offset}
           onBack={shiftBack} onForward={shiftForward} />
@@ -172,7 +172,7 @@ export default function Timeline({ history }: Props) {
   };
 
   return (
-    <div>
+    <div data-theme="dark" className="viz-dark-island">
       <TimelineToolbar period={period} onPeriod={handlePeriod}
         label={win.label} count={windowed.length} offset={offset}
         onBack={shiftBack} onForward={shiftForward} />

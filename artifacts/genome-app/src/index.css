@@ -160,6 +160,105 @@
   --strip-cell-hover-shadow: 0 0 6px rgba(0,0,0,0.12), inset 0 0 0 1px rgba(0,0,0,0.05);
 }
 
+/* ──────────────────────────────────────────────────────────────────────────
+   VIZ DARK ISLAND
+   Forces the dark-mode color palette + fonts inside any element with this
+   class, regardless of the page-level data-theme. Used to keep specific
+   Belief Genome visualizations (Belief DNA, Radar, Breakdown, Timeline,
+   History, Forecaster, Reflections modal) visually consistent even when
+   the surrounding page is in light mode.
+   ──────────────────────────────────────────────────────────────────────── */
+.viz-dark-island {
+  --theme-font-sans:    'DM Sans', system-ui, sans-serif;
+  --theme-font-display: 'Outfit', system-ui, sans-serif;
+  --theme-font-mono:    'Space Mono', 'JetBrains Mono', monospace;
+
+  --background: 240 20% 5%;
+  --foreground: 240 20% 95%;
+  --card: 240 18% 9%;
+  --card-foreground: 240 20% 95%;
+  --popover: 240 18% 9%;
+  --popover-foreground: 240 20% 95%;
+  --primary: 226 100% 71%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 255 92% 76%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 240 10% 15%;
+  --muted-foreground: 215 16% 47%;
+  --accent: 188 86% 53%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 240 10% 15%;
+  --input: 240 10% 15%;
+  --ring: 226 100% 71%;
+
+  --text-primary:    #ffffff;
+  --text-secondary:  rgba(255, 255, 255, 0.7);
+  --text-muted:      rgba(255, 255, 255, 0.5);
+  --text-faint:      rgba(255, 255, 255, 0.35);
+  --text-ghost:      rgba(255, 255, 255, 0.2);
+  --surface-1:       rgba(255, 255, 255, 0.02);
+  --surface-2:       rgba(255, 255, 255, 0.04);
+  --surface-3:       rgba(255, 255, 255, 0.06);
+  --surface-overlay: rgba(0, 0, 0, 0.3);
+  --border-subtle:   rgba(255, 255, 255, 0.06);
+  --border-soft:     rgba(255, 255, 255, 0.1);
+  --border-strong:   rgba(255, 255, 255, 0.2);
+  --accent-soft:     rgba(108, 143, 255, 0.15);
+  --accent-mid:      rgba(108, 143, 255, 0.3);
+  --accent-strong:   rgba(108, 143, 255, 0.6);
+  --accent-text:     #a8c0ff;
+  --accent-bright:   #6c8fff;
+  --panel-glass-bg:  rgba(12, 12, 22, 0.65);
+  --panel-glass-bd:  rgba(30, 30, 53, 0.6);
+  --panel-glass-bd-hover: rgba(108, 143, 255, 0.4);
+  --strip-unexplored-stripe: rgba(255, 255, 255, 0.04);
+  --strip-unexplored-border: rgba(255, 255, 255, 0.06);
+  --strip-cell-hover-shadow: 0 0 8px rgba(255,255,255,0.25), inset 0 0 0 1px rgba(255,255,255,0.08);
+
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  border-radius: 12px;
+  padding: 16px;
+}
+
+/* No-padding modifier — for callers (like the Reflections modal) that already
+   provide their own inline padding and don't want the default 16px from the base class. */
+.viz-dark-island.viz-dark-island--no-pad {
+  padding: 0;
+}
+
+/* Headings inside the island use the dark-mode display font, not the light-mode serif */
+.viz-dark-island h1,
+.viz-dark-island h2,
+.viz-dark-island h3,
+.viz-dark-island h4,
+.viz-dark-island h5,
+.viz-dark-island h6 {
+  font-family: var(--theme-font-display) !important;
+  color: var(--text-primary);
+}
+
+/* Selected / active button — dark teal background with white text */
+.viz-dark-island button[aria-selected="true"],
+.viz-dark-island button[aria-pressed="true"],
+.viz-dark-island button[data-active="true"],
+.viz-dark-island [role="tab"][aria-selected="true"],
+.viz-dark-island .is-active,
+.viz-dark-island .is-selected {
+  background: #3a637a !important;
+  color: #ffffff !important;
+  border-color: #3a637a !important;
+}
+
+/* Any explicitly dark-teal-styled button inside the island gets white text for contrast */
+.viz-dark-island button[style*="#3a637a"],
+.viz-dark-island button[style*="rgb(58, 99, 122)"],
+.viz-dark-island button[style*="rgb(58,99,122)"] {
+  color: #ffffff !important;
+}
+
 @layer base {
   * {
     @apply border-border;
