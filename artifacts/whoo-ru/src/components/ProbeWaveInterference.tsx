@@ -11,14 +11,14 @@ const SIGMA = 0.85;
 const X_MIN = 60;
 const X_MAX = 640;
 const N = 240;
-// Single-panel layout: probability density is drawn as faint background fill
-// rising upward from PROB_BASE; probe wavelets and the combined wavefunction
-// oscillate around WAVE_MID in the same vertical space.
-const WAVE_MID = 130;
-const PROB_BASE = 180;
-const PROB_HEIGHT = 110;
-const COMBINED_SCALE = 12;
-const PROBE_SCALE = 28;
+// Single-panel layout: probability density, probe wavelets, and the combined
+// wavefunction all share the same baseline at PROB_BASE; positive amplitudes
+// rise upward, inverted-phase amplitudes dip below into NEGATIVE_ROOM.
+const PROB_BASE = 200;
+const PROB_HEIGHT = 130;
+const NEGATIVE_ROOM = 32;
+const COMBINED_SCALE = 14;
+const PROBE_SCALE = 26;
 
 const DEFAULT_PROBES: Probe[] = [
   { pos: 2.2, phase: 0 },
@@ -83,9 +83,9 @@ export function ProbeWaveInterference() {
   // the work for unrelated probes more than necessary.
   const paths = useMemo(() => {
     const probeCurves = probes.map((p) =>
-      buildPath((b) => WAVE_MID - PROBE_SCALE * probeReal(p, b)),
+      buildPath((b) => PROB_BASE - PROBE_SCALE * probeReal(p, b)),
     );
-    const combined = buildPath((b) => WAVE_MID - COMBINED_SCALE * psiAt(probes, b).re);
+    const combined = buildPath((b) => PROB_BASE - COMBINED_SCALE * psiAt(probes, b).re);
 
     const cache: number[] = [];
     let maxMag2 = 0;
@@ -156,7 +156,7 @@ export function ProbeWaveInterference() {
     >
       <svg
         width="100%"
-        viewBox="0 0 680 240"
+        viewBox="0 0 680 280"
         role="img"
         aria-label="Six probe waves on a single belief dimension overlaid on the probability density of the combined wavefunction"
         style={{ display: "block" }}
@@ -180,20 +180,20 @@ export function ProbeWaveInterference() {
           return (
             <g key={`mark-${i}`}>
               <line
-                x1={cx} y1="42" x2={cx} y2={PROB_BASE}
+                x1={cx} y1="44" x2={cx} y2={PROB_BASE}
                 stroke={PROBE_COLORS[i]} strokeWidth="0.75" strokeDasharray="3 3" opacity="0.7"
               />
-              <circle cx={cx} cy="42" r="3" fill={PROBE_COLORS[i]} />
+              <circle cx={cx} cy="44" r="3" fill={PROBE_COLORS[i]} />
             </g>
           );
         })}
 
-        {/* Per-probe wavelets */}
+        {/* Per-probe wavelets — anchored at baseline; positive amplitudes rise, inverted dip */}
         {paths.probeCurves.map((d, i) => (
           <path key={`probe-${i}`} d={d} fill="none" stroke={PROBE_COLORS[i]} strokeWidth="1.2" opacity="0.65" />
         ))}
 
-        {/* Combined wavefunction (real part) */}
+        {/* Combined wavefunction (real part) — anchored at baseline */}
         <path d={paths.combined} fill="none" stroke="hsl(var(--foreground))" strokeWidth="2" />
 
         {/* Collapse marker */}
@@ -207,25 +207,25 @@ export function ProbeWaveInterference() {
           </>
         )}
 
-        {/* Tick marks */}
+        {/* Tick marks — placed below the negative-wave excursion zone */}
         {[1, 2, 3, 4, 6, 7, 8].map((i) => {
           const x = bToX(i);
           return (
             <line
               key={`tick-${i}`}
-              x1={x} y1={PROB_BASE} x2={x} y2={PROB_BASE + 4}
+              x1={x} y1={PROB_BASE + NEGATIVE_ROOM} x2={x} y2={PROB_BASE + NEGATIVE_ROOM + 4}
               stroke="hsl(var(--border))" strokeWidth="0.5"
             />
           );
         })}
 
-        {/* Axis labels */}
-        <text x="60"  y="204" textAnchor="middle" style={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}>0</text>
-        <text x="60"  y="220" textAnchor="middle" style={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}>false</text>
-        <text x="350" y="204" textAnchor="middle" style={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}>5</text>
-        <text x="350" y="220" textAnchor="middle" style={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}>superposition</text>
-        <text x="640" y="204" textAnchor="middle" style={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}>9</text>
-        <text x="640" y="220" textAnchor="middle" style={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}>true</text>
+        {/* Axis labels — placed below the negative-wave excursion zone */}
+        <text x="60"  y="252" textAnchor="middle" style={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}>0</text>
+        <text x="60"  y="268" textAnchor="middle" style={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}>false</text>
+        <text x="350" y="252" textAnchor="middle" style={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}>5</text>
+        <text x="350" y="268" textAnchor="middle" style={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}>superposition</text>
+        <text x="640" y="252" textAnchor="middle" style={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}>9</text>
+        <text x="640" y="268" textAnchor="middle" style={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}>true</text>
       </svg>
 
       {/* Controls */}
