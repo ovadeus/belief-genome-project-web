@@ -48,7 +48,7 @@ describe('cross-platform .bgp parity (desktop fixtures)', () => {
   it('manifest schemaVersion is the version this test was written against', () => {
     assert.equal(
       manifest.schemaVersion,
-      1,
+      2,
       'desktop bumped manifest.schemaVersion — review WEB_SYNC_REPLY_*.md and update this test',
     );
     assert.equal(manifest.generatedBy, 'desktop');
