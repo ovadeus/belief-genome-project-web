@@ -18,26 +18,27 @@ export function applyTheme(theme: ThemeName): void {
 }
 
 /**
- * Public bootstrap hook — fetches the admin-selected theme from the API on
- * mount, applies it if it differs from the cached value. Use ONCE near the
- * root of the app (App.tsx). The inline script in index.html has already set
- * a cached value before React mounts, so this is the second-pass refresh.
+ * No-op — kept for backwards compatibility with existing imports.
+ *
+ * History: previously this hook fetched /api/theme on mount and re-applied
+ * the server's value on top of the localStorage-cached value set by the
+ * bootstrap script in index.html. That second pass caused a visible flash
+ * (light → dark or dark → light) whenever the cached value differed from
+ * the server response, even briefly. The flash looked unprofessional and
+ * could not be reliably eliminated without server-side rendering.
+ *
+ * Trade-off: if an admin changes the site theme via the admin panel, only
+ * their own browser sees the change immediately (their localStorage gets
+ * overwritten by useAdminTheme.save). Other visitors keep using their
+ * cached value until they manually clear browser data. For a low-frequency
+ * setting like a site-wide theme, this is acceptable.
+ *
+ * To make admin changes propagate to all visitors instantly, you would
+ * need server-side injection of the activeTheme into index.html at request
+ * time (Vite plugin in dev, build-time + edge-middleware in production).
  */
 export function useThemeBootstrap(): void {
-  useEffect(() => {
-    let cancelled = false;
-    fetch("/api/theme", { headers: { Accept: "application/json" } })
-      .then(r => (r.ok ? r.json() : null))
-      .then((data: { activeTheme?: string } | null) => {
-        if (cancelled || !data) return;
-        const next = isValid(data.activeTheme) ? data.activeTheme : "dark";
-        if (document.documentElement.dataset.theme !== next) {
-          applyTheme(next);
-        }
-      })
-      .catch(() => { /* keep cached value on network error */ });
-    return () => { cancelled = true; };
-  }, []);
+  // intentionally empty — see comment above
 }
 
 /**
