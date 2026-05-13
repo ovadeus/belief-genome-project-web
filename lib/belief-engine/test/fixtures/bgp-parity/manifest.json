@@ -1,5 +1,7 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
+  "schemaChangeNote": "Frontiers paper alignment: substantive belief range is now 1–9 with midpoint 5 (superposition). Value 0 is reserved for non-substantive non-response (skipped/invalid). Pair-position metadata persisted on each response. Tier label 'Balanced' renamed 'Superposition'; 'Coherence' legend renamed 'Phase coherence'. Expected payloads below pre-date the math change and will be regenerated in lockstep with the desktop generator before parity tests are re-enabled.",
+  "regenerationPending": true,
   "generatedAt": "2026-05-02T03:16:00.237Z",
   "generatedBy": "desktop",
   "inputs": {

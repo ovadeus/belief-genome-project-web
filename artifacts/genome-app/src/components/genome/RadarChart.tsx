@@ -175,7 +175,7 @@ export default function RadarChart({ history, fullscreen = false }: Props) {
     labels,
     datasets: [
       {
-        label: 'Neutral',
+        label: 'Superposition',
         data: CAT_ORDER.map(() => 50),
         backgroundColor: 'rgba(34,197,94,0.04)',
         borderColor: 'rgba(34,197,94,0.35)',
@@ -223,7 +223,7 @@ export default function RadarChart({ history, fullscreen = false }: Props) {
             const n = typeof v === 'number' ? v : Number(v);
             if (n === 0) return '\u2190 pole';
             if (n === 25) return 'lean';
-            if (n === 50) return 'neutral';
+            if (n === 50) return 'superposition';
             if (n === 75) return 'lean';
             if (n === 100) return 'pole \u2192';
             return '';
@@ -341,7 +341,7 @@ export default function RadarChart({ history, fullscreen = false }: Props) {
         textAlign: 'center',
       }}>
         Each spoke plots your <strong style={{ color: 'var(--text-primary)' }}>ideological position</strong> between two poles.
-        The dashed ring is <span style={{ color: '#22c55e' }}>neutral</span>;
+        The dashed ring is <span style={{ color: '#22c55e' }}>superposition</span>;
         points pulled toward the center lean <span style={{ color: '#ef4444' }}>left-pole</span>,
         points pushed toward the edge lean <span style={{ color: '#3b82f6' }}>right-pole</span>.
       </p>

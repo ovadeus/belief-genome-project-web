@@ -143,7 +143,7 @@ export default function Timeline({ history }: Props) {
         ticks: {
           color: 'var(--text-faint)',
           font: { size: 10, family: "'Space Mono', monospace" },
-          callback: (v: number) => v === 50 ? 'Neutral' : v === 0 ? 'Disagree' : v === 100 ? 'Agree' : v,
+          callback: (v: number) => v === 50 ? 'Superposition' : v === 0 ? 'Disagree' : v === 100 ? 'Agree' : v,
         },
         grid: { color: 'var(--surface-3)' },
       },
@@ -163,7 +163,7 @@ export default function Timeline({ history }: Props) {
           },
           label: (ctx: any) => {
             const v = ctx.parsed.y;
-            const lbl = v >= 65 ? 'Leaning True' : v <= 35 ? 'Leaning False' : 'Balanced';
+            const lbl = v >= 65 ? 'Leaning True' : v <= 35 ? 'Leaning False' : 'Superposition';
             return ` ${ctx.dataset.label}: ${v}% — ${lbl}`;
           },
         },

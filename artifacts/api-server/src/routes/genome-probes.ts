@@ -7,6 +7,7 @@ import { probes, beliefResponses, dimensionScores, beliefLineage } from '@worksp
 import { applyResponseToScores } from '@belief-genome/engine';
 import type { Accumulator } from '@belief-genome/engine';
 import { eq, and, sql, inArray } from 'drizzle-orm';
+import { computePairPosition } from '../lib/pair-position';
 import {
   PROBE_BANK, QUALITY_PRESETS, DIMENSIONS,
   buildDimensionWeights, assignProbeQuality,
@@ -246,10 +247,18 @@ router.post('/respond', async (req: Request, res: Response) => {
     probeText, probeCategory, probeSource, value, confidence, note,
     dimensionWeights, quality,
     probeV2: clientProbeV2,
+    skipped: clientSkipped,
   } = req.body;
 
-  if (!probeText || value === undefined) {
-    return res.status(400).json({ error: 'probeText and value are required' });
+  // Frontiers schemaVersion 2: skipped (non-substantive non-response) rows
+  // persist with value=null and bypass engine accumulation entirely. Probe
+  // text is still required so the row is meaningful for QQ analyses.
+  const isSkipped = clientSkipped === true;
+  if (!probeText) {
+    return res.status(400).json({ error: 'probeText is required' });
+  }
+  if (!isSkipped && value === undefined) {
+    return res.status(400).json({ error: 'value is required for substantive responses' });
   }
 
   // Resolve dimensionWeights AND probeV2 in one queue lookup.
@@ -309,13 +318,20 @@ router.post('/respond', async (req: Request, res: Response) => {
   const qualityObj = quality || assignProbeQuality(probeSource || 'bank');
 
   // Normalize value (real column, accepts 0-1; if client sent 0-9 Likert, scale).
-  const rawVal = typeof value === 'number' ? value : parseFloat(value);
-  if (!Number.isFinite(rawVal)) {
-    return res.status(400).json({ error: 'value must be a finite number' });
-  }
-  const normValue = rawVal > 1 ? rawVal / 9 : rawVal;
-  if (normValue < 0 || normValue > 1) {
-    return res.status(400).json({ error: 'value out of range (expected 0-1 or 0-9)' });
+  // For skipped rows the column is NULL — the engine excludes them from
+  // qubit reconstruction and lineage.
+  let normValue: number | null;
+  if (isSkipped) {
+    normValue = null;
+  } else {
+    const rawVal = typeof value === 'number' ? value : parseFloat(value);
+    if (!Number.isFinite(rawVal)) {
+      return res.status(400).json({ error: 'value must be a finite number' });
+    }
+    normValue = rawVal > 1 ? rawVal / 9 : rawVal;
+    if (normValue < 0 || normValue > 1) {
+      return res.status(400).json({ error: 'value out of range (expected 0-1 or 0-9)' });
+    }
   }
 
   // Normalize confidence — schema column is INTEGER 0-100.
@@ -361,6 +377,11 @@ router.post('/respond', async (req: Request, res: Response) => {
         };
       }
 
+      // Compute pair_position INSIDE the transaction so concurrent /respond
+      // calls for the same pair don't race to "1 + 1".
+      const pairId = resolvedProbeV2?.pair_id ?? null;
+      const pairPosition = await computePairPosition(userId, pairId, tx);
+
       // Insert the response first so we have its id for lineage rows.
       const [inserted] = await tx.insert(beliefResponses).values({
         userId,
@@ -373,14 +394,19 @@ router.post('/respond', async (req: Request, res: Response) => {
         note: note || null,
         quality: qualityObj,
         probeV2: resolvedProbeV2,
+        pairPosition,
+        skipped: isSkipped,
       }).returning({ id: beliefResponses.id, createdAt: beliefResponses.createdAt });
 
       // Engine is the single source of truth — both ingest and the backfill
       // script call this same function so lineage and scores cannot drift.
+      // Skipped rows short-circuit inside applyResponseToScores; impacts will
+      // be empty and accumulators will pass through unchanged.
       const { next, impacts } = applyResponseToScores(prevAcc, {
         value: normValue,
         dimensionWeights: dimWeights as Record<string, { direction: number; weight: number }>,
         quality: qualityObj,
+        skipped: isSkipped,
       });
 
       // Write back updated dim_scores from the engine's `next` accumulators.

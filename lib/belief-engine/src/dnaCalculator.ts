@@ -15,10 +15,16 @@ import coherenceCutoffsRaw from './coherenceCutoffs.json';
 //   Pos 11-15:  Zip/postal code (5 chars, "00000" if unavailable)
 //
 // V2 belief segment (248 chars): for each of 124 dimensions, two chars:
-//   amplitude `[0-9·]` (0-9 belief score, · if unresolved) followed by
+//   amplitude `[1-9·]` (1-9 substantive belief score, · if unresolved or
+//                       non-substantive non-response) followed by
 //   coherence `[A-E·]`.
 //
-// Coherence (canonical V2 definition — phase-residual within framing pairs):
+// Substantive belief range: 1–9 (midpoint 5 = superposition / equal-amplitude
+// state |α|² ≈ |β|² ≈ 0.5 per Frontiers paper, schemaVersion 2). Value 0 is
+// reserved for non-substantive non-response (skipped/invalid) and is excluded
+// from quantum-cognitive analyses.
+//
+// Phase coherence (canonical V2 definition — phase-residual within framing pairs):
 //   A = lowest |φ| bucket (most coherent — answers to a probe and its
 //       opposite-framed twin are mirror images)
 //   E = highest |φ| bucket (least coherent — answers contradict their twin)
@@ -52,13 +58,20 @@ export interface UserMeta {
 }
 
 export interface BeliefHistoryEntry {
-  value: number;
+  value: number | null;  // null when skipped (non-substantive non-response)
   dimensionWeights: Record<string, { direction: number; weight: number }>;
   quality?: { weight?: number };
   // V2 framing-pair metadata. Present when the response was elicited by a
   // probe from probeBankV2.json. Required for phase-residual coherence
   // recovery; absent rows contribute amplitude only (correct per spec).
   probeV2?: ProbeV2Meta | null;
+  // Frontiers schemaVersion 2: which member of a framing pair was administered
+  // first to this respondent (1 = first-administered, 2 = second-administered,
+  // null = probe has no V2 metadata). Required for QQ-equality stratification.
+  pair_position?: 1 | 2 | null;
+  // Frontiers schemaVersion 2: non-substantive non-response flag. When true,
+  // the row is preserved but excluded from qubit reconstruction and lineage.
+  skipped?: boolean;
 }
 
 export interface DNAResult {
@@ -149,6 +162,10 @@ export function updateDimensionScores(
   response: BeliefHistoryEntry
 ): Record<number, Accumulator> {
   const scores = JSON.parse(JSON.stringify(existingScores || {})) as Record<number, Accumulator>;
+  // Frontiers schemaVersion 2: non-substantive non-responses (skipped/invalid)
+  // are preserved as rows but excluded from qubit reconstruction. The row is
+  // returned unchanged so caller-facing accumulators don't drift from skips.
+  if (response.skipped === true || response.value == null) return scores;
   const weights = response.dimensionWeights || {};
 
   for (const [dimIdStr, wt] of Object.entries(weights)) {
@@ -174,31 +191,36 @@ export function updateDimensionScores(
   return scores;
 }
 
+// Substantive belief range 1–9 (Frontiers schemaVersion 2). Midpoint 5 is the
+// superposition / equal-amplitude state. Value 0 is reserved for
+// non-substantive non-response and is excluded upstream by the
+// updateDimensionScores skip-short-circuit.
 export function calcDimensionValue(accumulator: Accumulator | null): number | null {
   if (!accumulator || accumulator.totalWeight === 0) return null;
   const avg = accumulator.sum / accumulator.totalWeight;
-  return Math.round(((avg + 1) / 2) * 9);
+  return Math.round(1 + ((avg + 1) / 2) * 8);  // 1–9, midpoint exactly 5
 }
 
-// Same as calcDimensionValue but returns the raw 0-9 float (no rounding).
+// Same as calcDimensionValue but returns the raw 1-9 float (no rounding).
 // Used by lineage so deltas reflect the actual underlying movement, not just
 // integer-step jumps (most responses only nudge the underlying average).
 export function calcDimensionValueRaw(accumulator: Accumulator | null): number | null {
   if (!accumulator || accumulator.totalWeight === 0) return null;
   const avg = accumulator.sum / accumulator.totalWeight;
-  return ((avg + 1) / 2) * 9;
+  return 1 + ((avg + 1) / 2) * 8;
 }
 
 // ── Lineage / impact contract ──────────────────────────────────
 // One impact per (response, dimension) pair. scoreBefore is null when this
 // is the first response touching the dimension; in that case delta is taken
-// relative to the 4.5 neutral midpoint of the 0-9 range so first responses
-// still register a meaningful magnitude.
+// relative to the 5 superposition midpoint of the 1-9 substantive range
+// (Frontiers schemaVersion 2) so first responses still register a meaningful
+// magnitude.
 export interface DimensionImpact {
   dimensionId: number;
-  scoreBefore: number | null;   // raw 0-9 average pre-write, or null
-  scoreAfter: number;           // raw 0-9 average post-write
-  delta: number;                // scoreAfter - (scoreBefore ?? 4.5)
+  scoreBefore: number | null;   // raw 1-9 average pre-write, or null
+  scoreAfter: number;           // raw 1-9 average post-write
+  delta: number;                // scoreAfter - (scoreBefore ?? 5)
   confidenceBefore: number;     // 0-100
   confidenceAfter: number;      // 0-100
 }
@@ -213,6 +235,12 @@ export function applyResponseToScores(
 ): { next: Record<number, Accumulator>; impacts: DimensionImpact[] } {
   const next = JSON.parse(JSON.stringify(prev || {})) as Record<number, Accumulator>;
   const impacts: DimensionImpact[] = [];
+  // Skip-short-circuit (Frontiers schemaVersion 2): non-substantive non-
+  // responses are preserved as rows but excluded from qubit reconstruction
+  // and lineage. Mirrors updateDimensionScores so both ingest paths agree.
+  if (response.skipped === true || response.value == null) {
+    return { next, impacts };
+  }
   const weights = response.dimensionWeights || {};
 
   for (const [dimIdStr, wt] of Object.entries(weights)) {
@@ -242,8 +270,8 @@ export function applyResponseToScores(
     const confidenceAfter = calcConfidence(next[dimId]);
 
     // scoreAfter cannot be null here — we just inserted weight > 0.
-    const after = scoreAfter ?? 4.5;
-    const delta = after - (scoreBefore ?? 4.5);
+    const after = scoreAfter ?? 5;
+    const delta = after - (scoreBefore ?? 5);
 
     impacts.push({
       dimensionId: dimId,
@@ -328,6 +356,10 @@ export function calcPhaseEstimates(
   for (const r of responses) {
     const meta = r.probeV2;
     if (!meta || meta.primary_dim == null || !meta.pair_id) continue;
+    // Frontiers schemaVersion 2: skipped responses (value == null) are
+    // preserved as rows but excluded from phase recovery; an unanswered
+    // half cannot contribute to the phase residual of a framing pair.
+    if (r.value == null) continue;
     const dim = meta.primary_dim;
     if (!byDim[dim])               byDim[dim]               = {};
     if (!byDim[dim][meta.pair_id]) byDim[dim][meta.pair_id] = {};

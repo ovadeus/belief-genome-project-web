@@ -41,13 +41,27 @@ export const beliefResponses = pgTable('belief_responses', {
   dimensionWeights: json('dimension_weights').notNull(),
   primaryDim:       integer('primary_dim'),
   quality:          json('quality'),
-  value:            real('value').notNull(),
+  // Frontiers schemaVersion 2: substantive belief value on 1–9 (midpoint 5
+  // = superposition). NULL when the row is a non-substantive non-response
+  // (skipped == true). Persisted as the original 0–1 normalized form here;
+  // the 1–9 mapping is applied by the engine.
+  value:            real('value'),
   confidence:       integer('confidence').default(50),
   note:             text('note'),
   // V2 framing-pair metadata. Populated when this response was elicited by
   // a probe from probeBankV2.json. Required for phase-residual coherence
   // recovery; rows with null contribute to amplitude only (correct per spec).
   probeV2:          jsonb('probe_v2').$type<ProbeV2Persisted | null>(),
+  // Frontiers schemaVersion 2: which member of a framing pair was administered
+  // first to this respondent. 1 = first-administered (canonical or inverted),
+  // 2 = second-administered (the partner). NULL when the probe has no V2
+  // metadata. Required for QQ-equality stratification.
+  pairPosition:     integer('pair_position'),
+  // Frontiers schemaVersion 2: non-substantive non-response flag. When true,
+  // the row is preserved (so we know the probe was shown) but excluded from
+  // qubit reconstruction, lineage, and QQ-equality analyses. value is NULL
+  // for skipped rows.
+  skipped:          boolean('skipped').default(false).notNull(),
   createdAt:        timestamp('created_at').defaultNow().notNull(),
 }, (table) => [
   uniqueIndex('belief_responses_user_client_idx').on(table.userId, table.clientId),

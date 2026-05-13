@@ -18,6 +18,7 @@ import {
   buildCoherenceMap, calcPhaseEstimates, gradeCoherence,
 } from '@belief-genome/engine';
 import type { Accumulator, ProbeV2Meta } from '@belief-genome/engine';
+import { loadPairCounts, nextPairPosition } from '../lib/pair-position';
 
 const router = Router();
 
@@ -196,6 +197,12 @@ router.get('/responses', async (req: Request, res: Response) => {
       dimensionWeights: beliefResponses.dimensionWeights,
       primaryDim:       beliefResponses.primaryDim,
       quality:          beliefResponses.quality,
+      // Frontiers schemaVersion 2: pair_position + skipped + probeV2 are part
+      // of the cross-device contract. Desktop sync round-trips them so
+      // QQ-equality stratification stays consistent across clients.
+      probeV2:          beliefResponses.probeV2,
+      pairPosition:     beliefResponses.pairPosition,
+      skipped:          beliefResponses.skipped,
       createdAt:        beliefResponses.createdAt,
     })
     .from(beliefResponses)
@@ -226,6 +233,9 @@ router.get('/responses', async (req: Request, res: Response) => {
     dimensionWeights: r.dimensionWeights,
     primaryDim:       r.primaryDim,
     quality:          r.quality,
+    probeV2:          r.probeV2,
+    pair_position:    r.pairPosition,
+    skipped:          r.skipped,
     createdAt:        toIso(r.createdAt),
   }));
 
@@ -769,22 +779,37 @@ router.post('/sync', async (req: Request, res: Response) => {
   let deduped = 0;
   const rejected: SyncReject[] = [];
 
+  // Frontiers schemaVersion 2: pre-fetch the user's existing pair-id counts
+  // ONCE so we can stamp pair_position per row without an N-query loop.
+  const pairCounts = await loadPairCounts(userId);
+
   for (let idx = 0; idx < incoming.length; idx++) {
     const r = incoming[idx] as any;
     const probeText = r.probeText ?? r.probe_text;
     const probeCategory = r.probeCategory ?? r.probe_category ?? 'life';
     const probeSource = r.probeSource ?? r.probe_source ?? 'extension';
-    const value = typeof r.value === 'number' ? r.value : Number(r.value);
     const dimensionWeights = r.dimensionWeights ?? r.dimension_weights;
     const createdAt = r.createdAt ?? r.created_at;
+    const probeV2 = r.probeV2 ?? r.probe_v2 ?? null;
+    const isSkipped = r.skipped === true;
+
+    // Frontiers schemaVersion 2: skipped rows carry value=null. Substantive
+    // rows still require a finite value.
+    let value: number | null;
+    if (isSkipped) {
+      value = null;
+    } else {
+      const v = typeof r.value === 'number' ? r.value : Number(r.value);
+      if (!Number.isFinite(v)) {
+        rejected.push({ idx, reason: 'invalid_value', probeText });
+        continue;
+      }
+      value = v;
+    }
 
     // Validate
     if (!probeText || typeof probeText !== 'string') {
       rejected.push({ idx, reason: 'missing_probeText' });
-      continue;
-    }
-    if (!Number.isFinite(value)) {
-      rejected.push({ idx, reason: 'invalid_value', probeText });
       continue;
     }
     if (!dimensionWeights || typeof dimensionWeights !== 'object') {
@@ -799,6 +824,8 @@ router.post('/sync', async (req: Request, res: Response) => {
       continue;
     }
 
+    const pairPosition = nextPairPosition(pairCounts, probeV2?.pair_id, { userId });
+
     // Insert (per-row try/catch so one bad row never kills the batch)
     try {
       await db.insert(beliefResponses).values({
@@ -809,6 +836,9 @@ router.post('/sync', async (req: Request, res: Response) => {
         value,
         confidence: r.confidence ?? 50,
         dimensionWeights,
+        probeV2,
+        pairPosition,
+        skipped: isSkipped,
       });
       existingKeys.add(key);
       merged++;
@@ -895,14 +925,20 @@ router.post('/responses/bulk-import', async (req: Request, res: Response) => {
     probeText: string;
     probeCategory: string;
     probeSource: string;
-    value: number;        // normalized 0-1
-    confidence: number;   // 0-100
+    value: number | null;       // normalized 0-1, or null for skipped rows
+    confidence: number;          // 0-100
     dimensionWeights: Record<string, { weight: number; direction?: number }>;
+    probeV2: ProbeV2Meta | null; // V2 framing-pair metadata
+    pairPosition: 1 | 2 | null;  // which member of the pair landed first
+    skipped: boolean;            // non-substantive non-response flag
   };
 
   const valid: ValidRow[] = [];
   const errors: Array<{ index: number; reason: string }> = [];
   let skipped = 0;
+
+  // Frontiers schemaVersion 2: pre-load pair-id counts once for this user.
+  const pairCounts = await loadPairCounts(userId);
 
   // Validate + dedup in-memory.
   for (let i = 0; i < incoming.length; i++) {
@@ -929,16 +965,25 @@ router.post('/responses/bulk-import', async (req: Request, res: Response) => {
       continue;
     }
 
-    const rawValue = r.value;
-    if (typeof rawValue !== 'number' || !Number.isFinite(rawValue)) {
-      errors.push({ index: i, reason: 'invalid_value' });
-      continue;
-    }
-    // Accept either 0-1 normalized or 0-9 Likert; store as 0-1.
-    const value = rawValue > 1 ? rawValue / 9 : rawValue;
-    if (value < 0 || value > 1) {
-      errors.push({ index: i, reason: 'value_out_of_range' });
-      continue;
+    // Frontiers schemaVersion 2: skipped rows carry value=null and bypass
+    // engine accumulation. Substantive rows still require a finite value.
+    const isSkippedRow = r.skipped === true;
+    let value: number | null;
+    if (isSkippedRow) {
+      value = null;
+    } else {
+      const rawValue = r.value;
+      if (typeof rawValue !== 'number' || !Number.isFinite(rawValue)) {
+        errors.push({ index: i, reason: 'invalid_value' });
+        continue;
+      }
+      // Accept either 0-1 normalized or 0-9 Likert; store as 0-1.
+      const v = rawValue > 1 ? rawValue / 9 : rawValue;
+      if (v < 0 || v > 1) {
+        errors.push({ index: i, reason: 'value_out_of_range' });
+        continue;
+      }
+      value = v;
     }
 
     const dimensionWeights = r.dimensionWeights ?? r.dimension_weights;
@@ -957,6 +1002,8 @@ router.post('/responses/bulk-import', async (req: Request, res: Response) => {
     const probeText = r.probe_text ?? r.probeText ?? r.dimension_key ?? r.dimensionKey ?? `bulk:${clientId}`;
     const probeCategory = r.probe_category ?? r.probeCategory ?? 'life';
     const probeSource = r.source ?? r.probe_source ?? r.probeSource ?? 'desktop';
+    const probeV2 = (r.probeV2 ?? r.probe_v2 ?? null) as ProbeV2Meta | null;
+    const pairPosition = nextPairPosition(pairCounts, probeV2?.pair_id, { userId });
 
     valid.push({
       index: i,
@@ -968,6 +1015,9 @@ router.post('/responses/bulk-import', async (req: Request, res: Response) => {
       value,
       confidence,
       dimensionWeights,
+      probeV2,
+      pairPosition,
+      skipped: isSkippedRow,
     });
     seenClientIds.add(clientId);
   }
@@ -1028,14 +1078,21 @@ router.post('/responses/bulk-import', async (req: Request, res: Response) => {
           value: v.value,
           confidence: v.confidence,
           quality,
+          probeV2: v.probeV2,
+          pairPosition: v.pairPosition,
+          skipped: v.skipped,
           createdAt: v.createdAt, // preserve original answer time
         }).returning({ id: beliefResponses.id });
         imported++;
 
+        // Skipped rows short-circuit inside applyResponseToScores: impacts
+        // will be empty and accMap pass through unchanged. The row is still
+        // persisted above so QQ analyses know the probe was administered.
         const { next, impacts } = applyResponseToScores(accMap, {
           value: v.value,
           dimensionWeights: v.dimensionWeights,
           quality,
+          skipped: v.skipped,
         });
         // Mutate the running accumulator map for the next iteration.
         for (const dimIdStr of Object.keys(next)) {
@@ -1219,6 +1276,15 @@ router.get('/timeline', async (req: Request, res: Response) => {
     let newInBucket = 0;
     while (respIdx < responses.length && (responses[respIdx].createdAt as Date).getTime() <= boundary) {
       const r = responses[respIdx];
+      // Frontiers schemaVersion 2: skipped responses (value == null) are
+      // preserved in storage but excluded from the timeline replay's
+      // accumulator updates and from coherence history.
+      if (r.value == null) {
+        respIdx++;
+        cumulative++;
+        newInBucket++;
+        continue;
+      }
       const weights = (r.dimensionWeights as any) || {};
       const quality = (r.quality as any) || null;
       const qualityMult = quality?.weight ?? 0.7;
@@ -1235,7 +1301,7 @@ router.get('/timeline', async (req: Request, res: Response) => {
         accum[dimId].count += 1;
       }
       historyForCoherence.push({
-        value: r.value,
+        value: r.value as number,  // null filtered above (skipped rows)
         probeV2: (r.probeV2 as ProbeV2Meta | null) ?? null,
       });
       respIdx++;

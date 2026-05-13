@@ -37,7 +37,7 @@ function fmtScore(s: number | null): string {
 function ImpactRow({ row }: { row: LineageRow }) {
   const color = deltaColor(row.delta);
   // The user's raw answer, restated as a Likert-flavored short string.
-  const rawAnswer = row.value > 0.5 ? 'Agreed' : row.value < 0.5 ? 'Disagreed' : 'Neutral';
+  const rawAnswer = row.value > 0.5 ? 'Agreed' : row.value < 0.5 ? 'Disagreed' : 'Superposition';
   return (
     <div style={{
       padding: '12px 14px', borderRadius: 10,

@@ -118,7 +118,7 @@ export default function DnaString({ dnaString, dimensionsCovered, totalResponses
         fontSize: 10, color: 'var(--text-muted)', flexWrap: 'wrap',
       }}>
         <span><span style={{ color: '#dc2626' }}>0</span> Absolute False</span>
-        <span><span style={{ color: '#22c55e' }}>5</span> Uncertain</span>
+        <span><span style={{ color: '#22c55e' }}>5</span> Superposition</span>
         <span><span style={{ color: '#2563eb' }}>9</span> Absolute True</span>
         <span><span style={{ color: 'var(--border-strong)' }}>{'\u00B7'}</span> Unexplored</span>
       </div>
@@ -129,7 +129,7 @@ export default function DnaString({ dnaString, dimensionsCovered, totalResponses
           fontSize: 10, color: 'var(--text-muted)', flexWrap: 'wrap',
           alignItems: 'center',
         }}>
-          <span style={{ color: 'var(--text-muted)', marginRight: 4 }}>Coherence:</span>
+          <span style={{ color: 'var(--text-muted)', marginRight: 4 }}>Phase coherence:</span>
           <span><span style={{ color: COHERENCE_COLORS.A, fontWeight: 600 }}>A</span> Mirror</span>
           <span><span style={{ color: COHERENCE_COLORS.B, fontWeight: 600 }}>B</span> Near-mirror</span>
           <span><span style={{ color: COHERENCE_COLORS.C, fontWeight: 600 }}>C</span> Mixed</span>

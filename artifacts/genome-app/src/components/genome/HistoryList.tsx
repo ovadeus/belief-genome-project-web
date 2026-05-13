@@ -88,7 +88,7 @@ export default function HistoryList({ history }: Props) {
           <option value="">All Sentiments</option>
           <option value="true">True</option>
           <option value="false">False</option>
-          <option value="uncertain">Balanced</option>
+          <option value="uncertain">Superposition</option>
         </select>
         <select value={sourceFilter} onChange={e => { setSourceFilter(e.target.value); setPage(1); }} style={selectStyle}>
           <option value="">All Sources</option>

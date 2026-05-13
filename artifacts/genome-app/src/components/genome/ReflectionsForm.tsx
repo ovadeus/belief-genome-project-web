@@ -258,7 +258,7 @@ export default function ReflectionsForm({ showHeading = true }: ReflectionsFormP
             fontSize: 10, color: 'var(--text-faint)', marginTop: 4,
           }}>
             <span>Absolute False</span>
-            <span>Uncertain</span>
+            <span>Superposition</span>
             <span>Absolute True</span>
           </div>
         </div>

@@ -25,7 +25,9 @@ export interface Category {
 // Position 11-15: Zip/postal code (5 chars)
 
 // ── Belief Dimensions (positions 16-139) ─────────────────────
-// Scale: 0=Strongly False/Disagree, 5=Neutral/Superposition, 9=Strongly True/Agree
+// Substantive scale (Frontiers schemaVersion 2): 1=Strongly False/Disagree,
+// 5=Superposition (equal-amplitude midpoint), 9=Strongly True/Agree.
+// Value 0 is reserved for non-substantive non-response (skipped/invalid).
 
 export const DIMENSIONS: Dimension[] = [
   // ── A: EPISTEMOLOGY & REALITY (4-13)

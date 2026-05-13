@@ -40,8 +40,8 @@ export const SHEX: string[] = [
 ];
 
 export const BELIEF_LABELS_10 = [
-  'Absolute False', 'Deeply False', 'False', 'Leaning False', 'Balanced',
-  'Balanced', 'Leaning True', 'True', 'Deeply True', 'Absolute True',
+  'Absolute False', 'Deeply False', 'False', 'Leaning False', 'Superposition',
+  'Superposition', 'Leaning True', 'True', 'Deeply True', 'Absolute True',
 ];
 
 export const BELIEF_GRADIENT = 'linear-gradient(90deg, #dc2626, #fca5a5 25%, #22c55e 50%, #93c5fd 75%, #2563eb)';
@@ -51,7 +51,7 @@ export function beliefLabel(v: number): string {
   if (v <= 22)  return 'Deeply False';
   if (v <= 33)  return 'False';
   if (v <= 44)  return 'Leaning False';
-  if (v <= 55)  return 'Uncertain';
+  if (v <= 55)  return 'Superposition';
   if (v <= 66)  return 'Leaning True';
   if (v <= 77)  return 'True';
   if (v <= 88)  return 'Deeply True';

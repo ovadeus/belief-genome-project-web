@@ -63,8 +63,8 @@ function scoreLabel(score: number | null): string {
   if (score <= 1) return 'Deeply False';
   if (score <= 2) return 'False';
   if (score <= 3) return 'Leaning False';
-  if (score <= 4) return 'Balanced';
-  if (score === 5) return 'Balanced';
+  if (score <= 4) return 'Superposition';
+  if (score === 5) return 'Superposition';
   if (score <= 6) return 'Leaning True';
   if (score <= 7) return 'True';
   if (score <= 8) return 'Deeply True';
@@ -377,7 +377,7 @@ export default function TripleHelix({ dimensions, dimensionScores, confidence }:
       }}>
         <span><span style={{ color: '#dc2626' }}>&#8226;</span> False (0–2)</span>
         <span><span style={{ color: '#fca5a5' }}>&#8226;</span> Leaning False (3–4)</span>
-        <span><span style={{ color: '#22c55e' }}>&#8226;</span> Balanced (5)</span>
+        <span><span style={{ color: '#22c55e' }}>&#8226;</span> Superposition (5)</span>
         <span><span style={{ color: '#93c5fd' }}>&#8226;</span> Leaning True (6–7)</span>
         <span><span style={{ color: '#2563eb' }}>&#8226;</span> True (8–9)</span>
         <span style={{ marginLeft: 16 }}>
