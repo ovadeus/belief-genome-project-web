@@ -14,14 +14,28 @@ import { applyResponseToScores } from '@belief-genome/engine';
 import type { Accumulator } from '@belief-genome/engine';
 import { sql } from 'drizzle-orm';
 
-async function main() {
+// Exported so tests can drive the same code path the CLI does without
+// triggering process.exit. The CLI wrapper at the bottom of the file
+// preserves the original `pnpm tsx ...` entry point.
+export interface BackfillResult {
+  inserted: number;
+  skippedUsers: number;
+  skippedResponses: number;
+  elapsedMs: number;
+}
+
+export async function runBackfillLineage(opts: { userId?: number } = {}): Promise<BackfillResult> {
   const start = Date.now();
   console.log('[backfill-lineage] starting');
 
-  // Distinct user ids with at least one response.
-  const userRows = await db
-    .selectDistinct({ userId: beliefResponses.userId })
-    .from(beliefResponses);
+  // Distinct user ids with at least one response. When opts.userId is set
+  // (test driver) we narrow to that single user so the backfill doesn't
+  // touch unrelated production data.
+  const userRows = opts.userId != null
+    ? [{ userId: opts.userId }]
+    : await db
+        .selectDistinct({ userId: beliefResponses.userId })
+        .from(beliefResponses);
   console.log(`[backfill-lineage] found ${userRows.length} users with responses`);
 
   let totalInserted = 0;
@@ -131,10 +145,29 @@ async function main() {
     `skipped_users=${totalSkippedUsers} skipped_responses=${totalSkippedResponses} ` +
     `elapsed_ms=${elapsed}`,
   );
-  process.exit(0);
+  return {
+    inserted: totalInserted,
+    skippedUsers: totalSkippedUsers,
+    skippedResponses: totalSkippedResponses,
+    elapsedMs: elapsed,
+  };
 }
 
-main().catch(err => {
-  console.error('[backfill-lineage] FAILED', err);
-  process.exit(1);
-});
+// CLI entry point — preserve the original behaviour: run the full backfill
+// then exit. Tests should import runBackfillLineage directly instead.
+const isMain = (() => {
+  try {
+    return import.meta.url === `file://${process.argv[1]}`;
+  } catch {
+    return false;
+  }
+})();
+
+if (isMain) {
+  runBackfillLineage()
+    .then(() => process.exit(0))
+    .catch(err => {
+      console.error('[backfill-lineage] FAILED', err);
+      process.exit(1);
+    });
+}
