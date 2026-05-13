@@ -12,6 +12,7 @@ import Forecaster from '../../components/genome/Forecaster';
 import Neuromap from '../../components/genome/Neuromap';
 import DnaString from '../../components/genome/DnaString';
 import DnaStrip from '../../components/genome/DnaStrip';
+import PopulationContextDim4 from '../../components/genome/PopulationContextDim4';
 import LineageDrawer from '../../components/genome/LineageDrawer';
 import { useBgpEasterEgg } from '../../hooks/use-bgp-easter-egg';
 import {
@@ -470,15 +471,20 @@ export default function DashboardPage() {
     return (
       <>
         {tab === 'dnastrip' && dna && (
-          <DnaStrip
-            dimensions={dimensions}
-            dimensionScores={dna?.dimensionScores || {}}
-            confidence={dna?.confidence || {}}
-            totalResponses={dna?.totalResponses || 0}
-            dimensionsCovered={dna?.dimensionsCovered || 0}
-            overallConfidence={dna?.overallConfidence || 0}
-            onExploredClick={(dimId) => setLineageDimId(dimId)}
-          />
+          <>
+            <DnaStrip
+              dimensions={dimensions}
+              dimensionScores={dna?.dimensionScores || {}}
+              confidence={dna?.confidence || {}}
+              totalResponses={dna?.totalResponses || 0}
+              dimensionsCovered={dna?.dimensionsCovered || 0}
+              overallConfidence={dna?.overallConfidence || 0}
+              onExploredClick={(dimId) => setLineageDimId(dimId)}
+            />
+            {/* Frontiers paper Section 6.5 worked example. Mirrors the
+                desktop's Population Context card on the DNA tab. */}
+            <PopulationContextDim4 />
+          </>
         )}
         {tab === 'helix' && (
           <TripleHelix

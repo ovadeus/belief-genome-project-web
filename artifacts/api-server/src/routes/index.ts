@@ -16,6 +16,7 @@ import genomeSubmitRouter from "./genome-submit";
 import genomeAdminRouter from "./genome-admin";
 import genomeKnownDnasRouter from "./genome-known-dnas";
 import genomeCompareRouter from "./genome-compare";
+import beliefRouter from "./belief";
 import analyticsRouter from "./analytics";
 import podcastsRouter, { podcastAdminRouter } from "./podcasts";
 import consentsRouter from "./consents";
@@ -48,5 +49,9 @@ router.use("/genome", genomeAuth, genomeDataRouter);
 router.use("/genome", genomeAuth, genomeCompareRouter);
 router.use("/genome/probes", genomeAuth, genomeProbesRouter);
 router.use("/genome/known-dnas", genomeAuth, genomeKnownDnasRouter);
+
+// Frontiers-paper analytical surfaces (population-level QQ equality).
+// Aggregated, no per-user identifiers — intentionally unauthenticated.
+router.use("/belief", beliefRouter);
 
 export default router;

@@ -5,3 +5,4 @@ export * from './probeBank';
 export * from './probeBankV2';
 export * from './probeFeeds';
 export * from './dnaSignature';
+export * from './qqEquality';
