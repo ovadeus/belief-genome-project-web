@@ -162,6 +162,212 @@ describe('POST /probes/respond writes lineage that matches the engine', () => {
   });
 });
 
+describe('POST /probes/respond skipped path persists row with no lineage', () => {
+  it('skipped=true stores value=null, zero lineage rows, no dim_score change', async () => {
+    const { userId, token } = await registerUser();
+
+    const dimensionWeights = {
+      4: { direction: 1, weight: 1.0 },
+      5: { direction: -1, weight: 0.6 },
+    };
+
+    // Snapshot dim_scores before — for a fresh user this should be empty,
+    // and a skipped response must NOT create any.
+    const beforeDims = await db
+      .select()
+      .from(dimensionScores)
+      .where(eq(dimensionScores.userId, userId));
+    assert.equal(beforeDims.length, 0, 'fresh user should have no dim_scores');
+
+    const probeText = `lineage-skipped-${Date.now()}-${Math.random()}`;
+    const res = await fetch(`${baseUrl}/api/genome/probes/respond`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', cookie: `genome_token=${token}` },
+      body: JSON.stringify({
+        probeText,
+        probeCategory: 'life',
+        probeSource: 'bank',
+        skipped: true,
+        // value omitted on purpose — skipped rows must be accepted without it.
+        confidence: 50,
+        dimensionWeights,
+        quality: { weight: 0.7, source: 'bank' },
+      }),
+    });
+    assert.equal(res.status, 200, `/respond skipped failed: ${res.status} ${await res.text()}`);
+
+    // belief_responses row exists with value=null and skipped=true.
+    const respRows = await db
+      .select()
+      .from(beliefResponses)
+      .where(and(eq(beliefResponses.userId, userId), eq(beliefResponses.probeText, probeText)));
+    assert.equal(respRows.length, 1, 'expected exactly one persisted skipped row');
+    assert.equal(respRows[0].value, null, 'skipped row must have value=null');
+    assert.equal(respRows[0].skipped, true, 'skipped flag must be true');
+
+    // Zero lineage rows.
+    const lineageRows = await db
+      .select()
+      .from(beliefLineage)
+      .where(eq(beliefLineage.userId, userId));
+    assert.equal(lineageRows.length, 0, `skipped response must produce zero lineage rows, got ${lineageRows.length}`);
+
+    // dim_scores unchanged (still empty for this fresh user).
+    const afterDims = await db
+      .select()
+      .from(dimensionScores)
+      .where(eq(dimensionScores.userId, userId));
+    assert.equal(afterDims.length, 0, 'skipped response must not create any dim_scores');
+  });
+});
+
+describe('POST /responses/bulk-import lineage matches a sequential engine replay', () => {
+  it('bulk batch produces exactly the lineage a per-row engine walk would', async () => {
+    const { userId, token } = await registerUser();
+
+    // Multi-response batch with deliberately interleaved dims so the
+    // before/after for each impact depends on prior rows in the batch.
+    const baseTime = Date.now() - 60_000;
+    // Single typed shape for both substantive and skipped rows. `value` is
+    // optional + nullable, `skipped` is an explicit boolean — no `any` casts
+    // needed when we replay this batch through the engine below.
+    type IncomingResponse = {
+      client_id: string;
+      created_at: string;
+      probe_text: string;
+      confidence: number;
+      dimensionWeights: Record<string, { direction: number; weight: number }>;
+      value?: number | null;
+      skipped?: boolean;
+    };
+    const incoming: IncomingResponse[] = [
+      {
+        client_id: `bulk-${userId}-a`,
+        created_at: new Date(baseTime + 1_000).toISOString(),
+        probe_text: `bulk-probe-a-${userId}`,
+        value: 0.9,
+        confidence: 60,
+        dimensionWeights: { 4: { direction: 1, weight: 1.0 } },
+      },
+      {
+        client_id: `bulk-${userId}-b`,
+        created_at: new Date(baseTime + 2_000).toISOString(),
+        probe_text: `bulk-probe-b-${userId}`,
+        value: 0.2,
+        confidence: 40,
+        dimensionWeights: { 4: { direction: 1, weight: 0.8 }, 5: { direction: 1, weight: 0.5 } },
+      },
+      {
+        client_id: `bulk-${userId}-c`,
+        created_at: new Date(baseTime + 3_000).toISOString(),
+        probe_text: `bulk-probe-c-${userId}`,
+        // Skipped row in the middle of the batch — must persist with value=null
+        // and contribute zero lineage rows / zero accumulator drift.
+        skipped: true,
+        confidence: 50,
+        dimensionWeights: { 4: { direction: 1, weight: 1.0 } },
+      },
+      {
+        client_id: `bulk-${userId}-d`,
+        created_at: new Date(baseTime + 4_000).toISOString(),
+        probe_text: `bulk-probe-d-${userId}`,
+        value: 0.7,
+        confidence: 80,
+        dimensionWeights: { 5: { direction: -1, weight: 1.0 } },
+      },
+    ];
+
+    const res = await fetch(`${baseUrl}/api/genome/responses/bulk-import`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', cookie: `genome_token=${token}` },
+      body: JSON.stringify({ responses: incoming }),
+    });
+    const body = (await res.json()) as { ok: boolean; imported: number; skipped: number; errors: unknown[] };
+    assert.equal(res.status, 200, `bulk-import failed: ${res.status}`);
+    assert.equal(body.ok, true);
+    assert.equal(body.imported, incoming.length, `expected ${incoming.length} imported, got ${body.imported}`);
+    assert.deepEqual(body.errors, [], 'bulk-import should produce no errors');
+
+    // Replay the same batch through the engine ourselves, in createdAt order
+    // (which is exactly what the route sorts by). Bulk-import always uses
+    // quality={weight: 0.7} on the wire, so mirror that here.
+    let acc: Record<number, Accumulator> = {};
+    type ExpImpact = {
+      probeText: string;
+      dimensionId: number;
+      scoreBefore: number | null;
+      scoreAfter: number;
+      delta: number;
+      confidenceBefore: number;
+      confidenceAfter: number;
+    };
+    const expectedImpacts: ExpImpact[] = [];
+    for (const r of incoming) {
+      const isSkipped = r.skipped === true;
+      const out = applyResponseToScores(acc, {
+        value: isSkipped ? null : (r.value ?? null),
+        dimensionWeights: r.dimensionWeights,
+        quality: { weight: 0.7 },
+        skipped: isSkipped,
+      });
+      acc = out.next;
+      for (const i of out.impacts) {
+        expectedImpacts.push({ probeText: r.probe_text, ...i });
+      }
+    }
+    assert.ok(expectedImpacts.length > 0, 'sanity: engine should produce some impacts');
+
+    // Pull the actual lineage rows joined to their response so we can match
+    // by probeText + dimensionId (response ids aren't predictable across runs).
+    const actualRows = await db
+      .select({
+        probeText: beliefResponses.probeText,
+        dimensionId: beliefLineage.dimensionId,
+        scoreBefore: beliefLineage.scoreBefore,
+        scoreAfter: beliefLineage.scoreAfter,
+        delta: beliefLineage.delta,
+        confidenceBefore: beliefLineage.confidenceBefore,
+        confidenceAfter: beliefLineage.confidenceAfter,
+      })
+      .from(beliefLineage)
+      .innerJoin(beliefResponses, eq(beliefLineage.responseId, beliefResponses.id))
+      .where(eq(beliefLineage.userId, userId));
+    assert.equal(actualRows.length, expectedImpacts.length,
+      `lineage row count mismatch: expected ${expectedImpacts.length}, got ${actualRows.length}`);
+
+    const actualByKey = new Map(actualRows.map(r => [`${r.probeText}|${r.dimensionId}`, r]));
+    for (const exp of expectedImpacts) {
+      const key = `${exp.probeText}|${exp.dimensionId}`;
+      const row = actualByKey.get(key);
+      assert.ok(row, `missing lineage row for ${key}`);
+      assert.equal(row.scoreBefore, exp.scoreBefore,
+        `${key} scoreBefore mismatch: row=${row.scoreBefore} engine=${exp.scoreBefore}`);
+      assert.ok(Math.abs(row.scoreAfter - exp.scoreAfter) < 1e-5,
+        `${key} scoreAfter drift: row=${row.scoreAfter} engine=${exp.scoreAfter}`);
+      assert.ok(Math.abs(row.delta - exp.delta) < 1e-5,
+        `${key} delta drift: row=${row.delta} engine=${exp.delta}`);
+      assert.equal(row.confidenceBefore, exp.confidenceBefore);
+      assert.equal(row.confidenceAfter, exp.confidenceAfter);
+    }
+
+    // The skipped row in the batch must be persisted (value=null) with zero
+    // lineage of its own — covers the in-batch skipped path explicitly.
+    const skippedRow = await db
+      .select()
+      .from(beliefResponses)
+      .where(and(eq(beliefResponses.userId, userId), eq(beliefResponses.probeText, `bulk-probe-c-${userId}`)));
+    assert.equal(skippedRow.length, 1);
+    assert.equal(skippedRow[0].value, null);
+    assert.equal(skippedRow[0].skipped, true);
+    const skippedLineage = await db
+      .select()
+      .from(beliefLineage)
+      .innerJoin(beliefResponses, eq(beliefLineage.responseId, beliefResponses.id))
+      .where(and(eq(beliefLineage.userId, userId), eq(beliefResponses.probeText, `bulk-probe-c-${userId}`)));
+    assert.equal(skippedLineage.length, 0, 'in-batch skipped row must produce zero lineage rows');
+  });
+});
+
 describe('runBackfillLineage is correct + idempotent', () => {
   it('inserts one lineage row per impact, then is a no-op on second run', async () => {
     const { userId, token } = await registerUser();
